@@ -4,7 +4,8 @@
  */
 import { supersetsHost } from '../supersetsApi';
 import { provide, trackerReady } from '../trackerRt';
+import { SupersetBlock } from './SupersetBlock';
 import { SupersetSheet } from './SupersetSheet';
 
-provide(supersetsHost, { Sheet: SupersetSheet });
+provide(supersetsHost, { Sheet: SupersetSheet, Block: SupersetBlock });
 trackerReady('supersets');

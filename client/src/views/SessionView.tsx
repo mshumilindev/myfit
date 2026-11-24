@@ -295,6 +295,7 @@ import { homeTotals, isHomeWorkout, isStopwatchExercise, lastSetsOf } from '../h
 import { setTypeHidden, setTypeOffered, shownSetType } from '../setTypesApi';
 import { useSetTypesHost } from '../setTypesRt';
 import { useEffortHost } from '../effortRt';
+import type { SupersetBlockProps } from '../supersetsApi';
 
 const PICKER_TARGET_MUSCLES = new Set<string>(MUSCLE_IDS);
 
@@ -568,6 +569,7 @@ export function SessionView(props: {
   const supersetsH = useSupersetsHost(); // groups are modules: Supersets pairs exercises, Circuit runs rounds
   const supersetsOn = supersetsH !== null;
   const SupersetSheet = supersetsH?.Sheet ?? NOTHING;
+  const SupersetBlock = supersetsH?.Block ?? NOTHING;
   const circuitH = useCircuitHost();
   const circuitOn = circuitH !== null;
   const CircuitBlock = circuitH?.Block ?? NOTHING;
@@ -2286,9 +2288,30 @@ export function SessionView(props: {
 
   /** DS-2 · “Add a drop”: append a lighter part to the last logged set. */
 
-  function equipmentLabelOf(id: string): string {
-    const names = t.equipmentNames as Record<string, string>;
-    return names[id] ?? id.charAt(0).toUpperCase() + id.slice(1);
+  /** What a superset block needs from the session to draw itself (the block lives in the Supersets chunk). */
+  function groupProps(
+    group: SupersetGroup,
+    queued: boolean,
+    header: ReactNode,
+  ): SupersetBlockProps {
+    return {
+      group,
+      workout: workout!,
+      past: !!props.past,
+      live,
+      desktop: isDesktop,
+      queued,
+      header,
+      equipmentOn,
+      focusedId,
+      activeExerciseId,
+      expandedPast,
+      summary: pastSummary,
+      onExpand: setExpandedId,
+      onExpandPast: (ids: string[]) => setExpandedPast((x) => [...x, ...ids]),
+      onMenu: (groupId: string) => setSheet({ kind: 'group-menu', groupId }),
+      renderCard,
+    };
   }
 
   /** One-line reading of a finished exercise (SS-3): «3 × 8 · 75 kg». */
@@ -5109,22 +5132,11 @@ export function SessionView(props: {
                           <div className="section-label queued-label">{t.queuedLabel}</div>
                         ) : null;
                       if (block.kind === 'group') {
-                        const g = block.group;
                         return (
-                          <Fragment key={g.groupId}>
-                            {header}
-                            <Card
-                              as="button"
-                              pad="none"
-                              className="past-ex-card queued-ex-card queued-group"
-                              onClick={() => setExpandedId(g.exercises[0]?.id ?? null)}
-                            >
-                              <span className="n">
-                                {g.exercises.map((e) => e.name).join(' · ')}
-                              </span>
-                              <span className="count">{t.supersetTag(g.letter)}</span>
-                            </Card>
-                          </Fragment>
+                          <SupersetBlock
+                            key={block.group.groupId}
+                            {...groupProps(block.group, true, header)}
+                          />
                         );
                       }
                       const qsingle = block.exercise;
@@ -5148,193 +5160,11 @@ export function SessionView(props: {
                       );
                     }
                     if (block.kind === 'group') {
-                      const g = block.group;
-                      const rounds = groupRounds(g);
-                      const round = groupCurrentRound(g);
-                      const minSets = Math.min(...g.exercises.map((e) => e.sets.length));
-                      const activeMemberId =
-                        g.exercises.find((e) => e.sets.length === minSets)?.id ?? null;
-                      void minSets;
-                      const groupActive = g.exercises.some((e) => e.id === focusedId);
-                      const groupIsCurrent = g.exercises.some((e) => e.id === activeExerciseId);
-                      const collapsed = props.past
-                        ? g.exercises.some((e) => e.sets.length > 0) &&
-                          !g.exercises.some((e) => expandedPast.includes(e.id))
-                        : live &&
-                          !groupActive &&
-                          (g.exercises.some((e) => e.sets.length > 0) || groupIsCurrent);
-                      if (collapsed) {
-                        const kg = g.exercises.reduce((v, e) => v + exerciseVolumeKg(e), 0);
-                        return (
-                          <div
-                            key={g.groupId}
-                            className={`ss-block past${
-                              groupIsCurrent && !props.past ? ' is-current' : ''
-                            }`}
-                          >
-                            <div className="ss-bar" />
-                            <div className="ss-body">
-                              <div className="ss-head">
-                                <Tag tone="neutral">{t.supersetTag(g.letter)}</Tag>
-                                {groupIsCurrent && !props.past && (
-                                  <Tag tone="accent" icon={<Icon name="barbell" />}>
-                                    {t.currentKicker}
-                                  </Tag>
-                                )}
-                                <span className="ss-rounds-meta">
-                                  {t.roundsMeta(rounds, fmtKg(kg))}
-                                </span>
-                              </div>
-                              <Card
-                                as="button"
-                                pad="none"
-                                className="past-ex-card"
-                                onClick={() =>
-                                  props.past
-                                    ? setExpandedPast((x) => [
-                                        ...x,
-                                        ...g.exercises.map((e) => e.id),
-                                      ])
-                                    : setExpandedId(g.exercises[0]?.id ?? null)
-                                }
-                              >
-                                {g.exercises.map((e, i) => (
-                                  <span key={e.id} className="past-ex-row">
-                                    <span className="ss-index">
-                                      {g.letter}
-                                      {i + 1}
-                                    </span>
-                                    <span className="n">{exName(e.name)}</span>
-                                    <span className="v">{pastSummary(e)}</span>
-                                  </span>
-                                ))}
-                              </Card>
-                            </div>
-                          </div>
-                        );
-                      }
-                      if (isDesktop && live) {
-                        // DS-4 · desktop: the group is one table — bracket outside,
-                        // Muscles and Equipment columns added to grouped tables only.
-                        return (
-                          <div key={g.groupId} className="ss-block ss-desktop">
-                            <div className="ss-bar" />
-                            <div className="ss-desktop-card">
-                              <div className="ss-head">
-                                <Tag tone="accent">{t.supersetTag(g.letter)}</Tag>
-                                <span className="ss-round">
-                                  {t.roundOf(round, rounds).split(' · ')[0]}
-                                </span>
-                                <IconButton
-                                  icon="dots-three"
-                                  size="sm"
-                                  className="dots"
-                                  onClick={() =>
-                                    setSheet({ kind: 'group-menu', groupId: g.groupId })
-                                  }
-                                  label={t.menuAction}
-                                />
-                              </div>
-                              <table className="table ss-table">
-                                <thead>
-                                  <tr>
-                                    <th style={{ width: 44 }}></th>
-                                    <th>{t.exerciseLabel}</th>
-                                    <th style={{ width: 210 }}>{t.musclesCol}</th>
-                                    {equipmentOn && (
-                                      <th style={{ width: 150 }}>{t.progEquipment}</th>
-                                    )}
-                                    <th style={{ width: 90 }}>{t.roundCol}</th>
-                                    <th style={{ width: 110 }}>{t.lastCol}</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {g.exercises.map((e, i) => {
-                                    const m = resolveMuscles(e);
-                                    const eq = equipmentFor(e);
-                                    const prevL = prevLift(
-                                      e.name,
-                                      workout.id,
-                                      liftVariant(workout, e),
-                                    );
-                                    return (
-                                      <tr key={e.id}>
-                                        <td className="ss-td-idx">
-                                          {g.letter}
-                                          {i + 1}
-                                        </td>
-                                        <td>{exName(e.name)}</td>
-                                        <td>
-                                          <span className="ul-iflex ug-6">
-                                            {m.primary && (
-                                              <span className="mchip">
-                                                {t.muscleGroups[m.primary]}
-                                              </span>
-                                            )}
-                                            {m.secondary.map((x) => (
-                                              <span key={x} className="mchip">
-                                                {t.muscleGroups[x]}
-                                              </span>
-                                            ))}
-                                          </span>
-                                        </td>
-                                        {equipmentOn && (
-                                          <td>
-                                            {eq.map((id) => (
-                                              <span key={id} className="eq">
-                                                <Icon name={equipmentIconName(id)} />{' '}
-                                                {equipmentLabelOf(id)}
-                                              </span>
-                                            ))}
-                                          </td>
-                                        )}
-                                        <td className="num">
-                                          {e.sets.length} / {rounds}
-                                        </td>
-                                        <td className="num dim">
-                                          {prevL
-                                            ? `${prevL.reps} × ${
-                                                prevL.weight === null
-                                                  ? '—'
-                                                  : fmtWeightValue(prevL.weight)
-                                              }`
-                                            : '—'}
-                                        </td>
-                                      </tr>
-                                    );
-                                  })}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                        );
-                      }
                       return (
-                        <div key={g.groupId} className={`ss-block${props.past ? ' past' : ''}`}>
-                          <div className="ss-bar" />
-                          <div className="ss-body">
-                            <div className="ss-head">
-                              <Tag tone="accent">{t.supersetTag(g.letter)}</Tag>
-                              <span className="ss-round">{t.roundOf(round, rounds)}</span>
-                              <IconButton
-                                icon="dots-three-vertical"
-                                size="sm"
-                                className="dots"
-                                onClick={() => setSheet({ kind: 'group-menu', groupId: g.groupId })}
-                                label={t.menuAction}
-                              />
-                            </div>
-                            {g.exercises.map((e, i) =>
-                              renderCard(e, {
-                                letter: g.letter,
-                                index: i,
-                                active: activeMemberId === e.id,
-                                rounds,
-                                round,
-                              }),
-                            )}
-                          </div>
-                        </div>
+                        <SupersetBlock
+                          key={block.group.groupId}
+                          {...groupProps(block.group, false, null)}
+                        />
                       );
                     }
                     const single = block.exercise;
