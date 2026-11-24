@@ -73,7 +73,7 @@ function mount(id = 'open', sh: Shell = shell(), extra: { past?: boolean } = {})
 }
 
 beforeEach(() => {
-  addonsPref.set(['effort', 'circuit', 'supersets']);
+  addonsPref.set(['effort', 'circuit', 'supersets', 'equipment']);
   localStorage.clear();
   sessionStorage.clear();
   clearSummaryReturn();

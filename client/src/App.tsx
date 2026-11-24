@@ -1,5 +1,5 @@
 import { useActivitiesOn } from './addons/activitiesGate';
-import { sleepAvailable, useGoalsOn, usePlaybookOn } from './addons/featureGates';
+import { sleepAvailable, useEquipmentOn, useGoalsOn, usePlaybookOn } from './addons/featureGates';
 import { applySleepQuiet } from './sleepQuiet';
 import { usualPlan } from './sleepRt';
 import { isProgramsEditorHash } from './views/programs/programsRoute';
@@ -793,6 +793,7 @@ function AppMain() {
   const activitiesOn = useActivitiesOn();
   const goalsOn = useGoalsOn();
   const playbookOn = usePlaybookOn();
+  const equipmentOn = useEquipmentOn();
   const homeSetsOn = useAddonOrBase('home-sets');
   const gymOn = useAddonOrBase('gym');
   const coachApp = useAddonOrBase('coach');
@@ -1740,7 +1741,7 @@ function AppMain() {
           onClose={closeOverlay}
         />
       )}
-      {activeOverlay?.screen === 'equipment' && (
+      {equipmentOn && activeOverlay?.screen === 'equipment' && (
         <EquipmentDetailView
           itemId={activeOverlay.itemId}
           gymId={activeOverlay.gymId}

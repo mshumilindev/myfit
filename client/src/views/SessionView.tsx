@@ -1,5 +1,5 @@
 /** Live session + past workout editing — design S-17…S-31 + SS/DS/MG/EQ. */
-import { usePlaybookOn } from '../addons/featureGates';
+import { useEquipmentOn, usePlaybookOn } from '../addons/featureGates';
 import { useSupersetsHost } from '../supersetsRt';
 import { useCircuitHost } from '../circuitRt';
 import { inShownGroup } from '../supersetBlocks';
@@ -575,6 +575,7 @@ export function SessionView(props: {
   const effort = useEffortHost(); // the effort entry (RPE / RIR) is a module: nothing of it shows without it
   const sleepsForCalc = useSleepsForCalc();
   const playbookOn = usePlaybookOn();
+  const equipmentOn = useEquipmentOn();
   const conditionLimits = useStoredConditionLimits(); // restriction: RPE cap / no-failure / rest scale stay on with the feature off
   // Day-aware suggestions & muscle readouts are always on (not flagged).
   const suggestOn = true;
@@ -3065,7 +3066,8 @@ export function SessionView(props: {
     };
     const loadColHead =
       loadType === 'assist' ? t.assistCol : loadType === 'band' ? t.bandCol : null;
-    const showChips = !timed && !marker && (muscles.primary !== null || equipment.length > 0);
+    const showChips =
+      !timed && !marker && (muscles.primary !== null || (equipmentOn && equipment.length > 0));
     // Progression target from this lift's own history (design PROG-1).
     const target =
       live && !timed && !marker && isStrengthExercise(ex)
@@ -3270,19 +3272,21 @@ export function SessionView(props: {
         {!marker && ex.plannedPct ? <PeriodizationTarget exercise={ex} /> : null}
         {showChips && (
           <div className="exercise-chips one-line">
-            <IconButton
-              icon="barbell"
-              size="sm"
-              shape="pill"
-              variant={
-                (ex.equipmentItems && ex.equipmentItems.length > 0) || equipment.length > 0
-                  ? 'secondary'
-                  : 'ghost'
-              }
-              onClick={() => setSheet({ kind: 'equip', exId: ex.id })}
-              label={t.eqEquipment}
-              title={t.eqEquipment}
-            />
+            {equipmentOn && (
+              <IconButton
+                icon="barbell"
+                size="sm"
+                shape="pill"
+                variant={
+                  (ex.equipmentItems && ex.equipmentItems.length > 0) || equipment.length > 0
+                    ? 'secondary'
+                    : 'ghost'
+                }
+                onClick={() => setSheet({ kind: 'equip', exId: ex.id })}
+                label={t.eqEquipment}
+                title={t.eqEquipment}
+              />
+            )}
             <SidesChip
               ex={ex}
               onClick={
@@ -4016,7 +4020,7 @@ export function SessionView(props: {
           onClick={() => setSheet({ kind: 'replace', exId: ex.id })}
         />
       )}
-      {tabs && isStrengthExercise(ex) && !isHome && (
+      {equipmentOn && tabs && isStrengthExercise(ex) && !isHome && (
         <ListRow
           icon={<IconTile icon="barbell" />}
           label={t.eqEquipment}
@@ -6001,7 +6005,8 @@ export function SessionView(props: {
           );
         })()}
 
-      {sheet?.kind === 'equip' &&
+      {equipmentOn &&
+        sheet?.kind === 'equip' &&
         (() => {
           const ex = workout.exercises.find((e) => e.id === sheet.exId);
           return ex ? (

@@ -31,6 +31,7 @@ import { Icon, ConfirmDialog } from '../ui';
 import { useGeoSearchOn } from '../legal/useGeoSearch';
 import { GymThumb } from '../components/GymThumb';
 import { RouteMap } from '../components/RouteMap';
+import { useEquipmentOn } from '../addons/featureGates';
 import { EquipmentBoard } from '../components/EquipmentBoard';
 import { GymKitCard } from '../components/GymKit';
 import { gymHasNoList } from '../gymEvidence';
@@ -70,6 +71,7 @@ export function GymDetailView({
   const { t, locale } = useT();
   const store = useStore();
   const autoMain = useMemo(() => autoMainGymIds(store.workouts), [store.workouts]);
+  const equipmentOn = useEquipmentOn();
 
   // Resolve the underlying gym: by id, or by matching a candidate's coords to a
   // saved gym (so opening a search result that's already saved shows it saved).
@@ -388,7 +390,7 @@ export function GymDetailView({
 
         {isSaved && gym && <BandLibraryCard gym={gym} />}
 
-        {isSaved && gym && <EquipmentBoard gym={gym} shell={shell} />}
+        {isSaved && gym && equipmentOn && <EquipmentBoard gym={gym} shell={shell} />}
 
         {isSaved && (
           <>
