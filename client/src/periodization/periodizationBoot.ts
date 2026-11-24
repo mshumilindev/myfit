@@ -13,6 +13,7 @@ import { cycleWeeksRule, describeCycleFinding } from './editor/checkWeeks';
 import { StartWeekField } from './editor/StartWeekField';
 import { CycleWrap, RowLoad, RowReps, WeekBar } from './editor/CycleEditor';
 import { maxFor } from './maxes';
+import { NewMaxCard } from './NewMaxCard';
 import { MaxesPage } from './MaxesPage';
 import { getTypedMaxes, startMaxesSync } from './maxesSync';
 import { STRINGS } from './strings';
@@ -28,6 +29,7 @@ provide(periodizationHost, {
   repsLabel,
   repsMin: repsMinOf,
   TargetLine,
+  NewMaxCard,
   StartWeekField,
   editorCheck: {
     checkRules: (builtIn) => [...builtIn, cycleWeeksRule],

@@ -46,3 +46,14 @@
   flex-direction: column;
   gap: var(--s-8);
 }
+.pd-newmax {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+.pd-newmax-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-12);
+}

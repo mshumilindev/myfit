@@ -3,7 +3,7 @@ import { usePlaybookOn } from '../addons/featureGates';
 import { useSleepsForCalc } from '../addons/useSleeps';
 import { getSyncMeta } from '../syncMeta';
 import { ClientTargetStripLazy } from '../coach/client/lazy';
-import { PeriodizationTarget } from '../periodizationTarget';
+import { PeriodizationNewMax, PeriodizationTarget } from '../periodizationTarget';
 import { useStoredConditionLimits } from '../healthBuild';
 import { EmptyState } from '../components/ui/EmptyState';
 import { SwitchIndicator } from '../components/ui/Switch';
@@ -4455,6 +4455,7 @@ export function SessionView(props: {
           onOpen={fromSummary(() => props.shell.openOverlay({ screen: 'coach' }))}
         />
         {nextUp && !web && <NextUpCard m={nextUp} />}
+        {!props.past && <PeriodizationNewMax workout={workout} />}
         {!props.past && !(web && nextUp) && (
           <>
             <FuelCard workout={workout} />
