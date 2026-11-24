@@ -1,5 +1,6 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { equipmentAvailable } from '../../addons/featureGates';
+import { KitChips } from './KitChips';
 import { useSleepsForCalc } from '../../addons/useSleeps';
 import {
   Widget,
@@ -38,7 +39,6 @@ import type { MuscleGroup } from '../../data/exercises';
 import { dayReadoutLabel } from '../../data/daySuggest';
 import { haversineM } from '../../data/gymProviders';
 import { startPlaySession } from '../../data/programMine';
-import { equipmentLabel } from '../../components/Muscle';
 import { useGymStep } from '../../components/useGymStep';
 import { computePlaybook, playForWeekday, type Play, type PlaySuggestion } from '../../playbook';
 import { volumeWeakPoints } from '../../weakpoints';
@@ -1476,24 +1476,7 @@ function GymWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
       </div>
       {eqOn && (
         <Row>
-          {kit.length ? (
-            <>
-              {kit.slice(0, 5).map((id) => (
-                <Chip key={id} size="xs" tone="neutral">
-                  {equipmentLabel(id)}
-                </Chip>
-              ))}
-              {kit.length > 5 && (
-                <Chip size="xs" tone="neutral">
-                  {`+${kit.length - 5}`}
-                </Chip>
-              )}
-            </>
-          ) : (
-            <Chip size="xs" tone="neutral">
-              {s.noInventory}
-            </Chip>
-          )}
+          <KitChips kit={kit} empty={s.noInventory} />
         </Row>
       )}
       {fitTxt && <ToneText tone={fit && fit.ok === fit.total ? 'ok' : 'accent'}>{fitTxt}</ToneText>}

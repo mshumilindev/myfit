@@ -14,6 +14,7 @@
  * exercise CRUD (create / edit / delete), both URL-addressable.
  */
 import { equipmentAvailable } from '../addons/featureGates';
+import { EquipmentFilterGroup, EquipmentFormField } from './ExerciseEquipmentFields';
 import { Chip } from '../components/ui/Chip';
 import { Tag } from './ui/Tag';
 import { BackButton } from './ui/BackButton';
@@ -38,7 +39,7 @@ import {
   type MuscleGroup,
 } from '../data/exercises';
 import { SPLIT_GROUPS, type FocusMuscle, type ExerciseSubRegions } from '../data/subregions';
-import { EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
+import type { EquipmentId } from '../data/equipment';
 import {
   deleteCatalogExercise,
   knownExercises,
@@ -404,21 +405,10 @@ export function ExerciseGallery({
           )}
         </div>
       </div>
-      {equipmentAvailable() && (
-        <div>
-          <div className="exl-group-label">{t.equipmentLabelField}</div>
-          <div className="exl-chips">
-            {EQUIPMENT_IDS.map((id) =>
-              chip(
-                s.equip === id,
-                t.equipmentNames[id],
-                () => set({ equip: s.equip === id ? undefined : id }),
-                `eq-${id}`,
-              ),
-            )}
-          </div>
-        </div>
-      )}
+      <EquipmentFilterGroup
+        active={s.equip}
+        onPick={(id) => set({ equip: id as EquipmentId | undefined })}
+      />
     </>
   );
 
@@ -857,26 +847,12 @@ export function CustomEditor(props: {
         </>
       )}
 
-      {equipmentAvailable() && (
-        <>
-          <div className="field-label">{t.equipmentLabelField}</div>
-          <div className="filter-chips">
-            {EQUIPMENT_IDS.map((id) => (
-              <Chip
-                size="xs"
-                selected={equipment.includes(id)}
-                key={id}
-                onClick={() =>
-                  setEquipment((xs) => (xs.includes(id) ? xs.filter((x) => x !== id) : [id]))
-                }
-              >
-                <Icon name={equipmentIconName(id)} />
-                {t.equipmentNames[id]}
-              </Chip>
-            ))}
-          </div>
-        </>
-      )}
+      <EquipmentFormField
+        selected={equipment}
+        onToggle={(id) =>
+          setEquipment((xs) => (xs.includes(id) ? xs.filter((x) => x !== id) : [id]))
+        }
+      />
 
       <Button
         variant="primary"
