@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import type { MuscleGroup } from '../data/exercises';
 import { muscleReadiness } from '../recovery';
 import { fatigueSource, readinessSource } from '../fatigueApi';
-import { useFatigueOn, useReadinessOn } from '../addons/featureGates';
+import { fatigueAvailable, readinessAvailable } from '../addons/featureGates';
 import { referenceE1rm, setTanks, type SetTank, type TankExercise } from '../setTank';
 import { stalledMuscles } from '../fatigue';
 import { isMarkerExercise, isStrengthExercise, loadTypeFor, resolveMuscles } from '../store';
@@ -44,11 +44,12 @@ export function useSetBars(
   // `workouts` changes identity on every logged set (it holds the live workout), but the
   // finished history before it does not: keep the previous subset while every element is
   // the same object, so the history-derived work below runs only when history changes.
+  // Read as plain values, not hooks: a store subscription in a hook that also updates state while rendering loops (the screen re-renders on an add-on change anyway).
+  const fatigueOn = fatigueAvailable();
+  const readinessOn = readinessAvailable();
   const [before, setBefore] = useState<Workout[]>(filtered);
   if (before.length !== filtered.length || filtered.some((w, i) => w !== before[i]))
     setBefore(filtered);
-  const fatigueOn = useFatigueOn();
-  const readinessOn = useReadinessOn();
   const base = useMemo(() => {
     const ready = new Map<string, number>();
     if (before.length === 0 || startedAt === undefined)
