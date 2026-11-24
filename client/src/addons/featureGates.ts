@@ -121,6 +121,23 @@ export function usePeriodizationOn(): boolean {
 }
 
 /**
+ * RPE / RIR (effort entry): without it a set has no effort chips, hint, estimate pill or effort column, and nothing of it is
+ * asked. The app's own effort estimate keeps working underneath (rest, failure and signals read it), and stored values stay.
+ */
+export function effortAvailable(): boolean {
+  try {
+    return addonAvailable('effort');
+  } catch {
+    return false;
+  }
+}
+
+/** The same RPE / RIR gate for components. */
+export function useEffortOn(): boolean {
+  return useAddonOrBase('effort');
+}
+
+/**
  * Set types (drop, reverse drop, weighted static hold): without it a set is a working or a warm-up set, no technique is offered
  * or continued, and nothing of it is drawn. Stored sets of these types keep their data and come back on re-install.
  */

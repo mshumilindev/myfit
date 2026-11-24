@@ -398,6 +398,7 @@ export const addonStoreEt: typeof addonStoreEn = {
       ],
     },
     mastery: { name: 'Meisterlikkus', desc: 'Oskuste tasemed ja pikaajaline areng.' },
+    effort: { name: 'RPE / RIR', desc: 'Hinda, kui raske seeria oli, ja vaata äpi hinnangut.' },
     'set-types': { name: 'Seeriatüübid', desc: 'Dropid, pöörddropid ja raskusega hoidmised.' },
     periodization: {
       name: 'Periodiseerimine',

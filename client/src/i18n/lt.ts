@@ -2692,20 +2692,6 @@ export const lt: Strings = {
   optsGroupChange: 'Keisti',
   optsGroupLookUp: 'Peržiūrėti',
   seGroupMore: 'Daugiau',
-  rpeLabel: 'Pastangos (RPE)',
-  rpeNone: 'Be',
-  rpeHint: (v) =>
-    v >= 10
-      ? 'Maksimumas — nieko nebeliko'
-      : v >= 9
-        ? 'Liko 1 pakartojimas'
-        : v >= 8
-          ? 'Liko 2 pakartojimai'
-          : v >= 7
-            ? 'Liko 3 pakartojimai'
-            : v >= 6
-              ? 'Lengva — liko 4+ pakartojimai'
-              : 'Kaip sunkus buvo priėjimas, 6–10. Neprivaloma — bakstelėk skaičių, kad sektum.',
   bandEditLink: (gym) => `Redaguoti gumas · ${gym}`,
   startTitleDay: (d) => `${d} paprastai pradedi nuo`,
   startTitleRecent: 'Paskutinės treniruotės prasidėjo nuo',
@@ -3021,8 +3007,6 @@ export const lt: Strings = {
   },
   rpeHintF: 'Iki nesėkmės — kitas pakartojimas jau nebėjo. Tinka bet kuriam priėjimo tipui.',
   rpeHintFAuto: 'Programa pažymėjo nesėkmę — pasirink kitą reikšmę, jei ne.',
-  rpeEstHint: (v) =>
-    `Įvertinta ~${v} pagal istoriją, atsigavimą ir šiandienos priėjimus — bakstelėk, kad pataisytum.`,
   partialsLabel: 'Daliniai pakartojimai po nesėkmės',
   prAttemptTitle: (n) => `Priėjimas ${n} · rekordo bandymas`,
   prAttemptWeight: (d, best) => `+${d} virš rekordo ${best}`,

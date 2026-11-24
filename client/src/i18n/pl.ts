@@ -2674,20 +2674,6 @@ export const pl: Strings = {
   optsGroupChange: 'Zmień',
   optsGroupLookUp: 'Podgląd',
   seGroupMore: 'Więcej',
-  rpeLabel: 'Wysiłek (RPE)',
-  rpeNone: 'Pomiń',
-  rpeHint: (v) =>
-    v >= 10
-      ? 'Maksimum — nic w zapasie'
-      : v >= 9
-        ? 'W zapasie 1 powtórzenie'
-        : v >= 8
-          ? 'W zapasie 2 powtórzenia'
-          : v >= 7
-            ? 'W zapasie 3 powtórzenia'
-            : v >= 6
-              ? 'Lekko — w zapasie 4+ powtórzenia'
-              : 'Jak ciężka była seria, 6–10. Opcjonalnie — stuknij liczbę, by to śledzić.',
   bandEditLink: (gym) => `Edytuj gumy · ${gym}`,
   startTitleDay: (d) => `W ${d} zwykle zaczynasz od`,
   startTitleRecent: 'Ostatnie treningi zaczynały się od',
@@ -3000,8 +2986,6 @@ export const pl: Strings = {
   },
   rpeHintF: 'Do upadku — kolejne powtórzenie już nie weszło. Działa z każdym typem serii.',
   rpeHintFAuto: 'Aplikacja oznaczyła upadek — wybierz inną wartość, jeśli nie.',
-  rpeEstHint: (v) =>
-    `Szacunek ~${v} z historii, regeneracji i dzisiejszych serii — stuknij, by poprawić.`,
   partialsLabel: 'Niepełne powtórzenia po upadku',
   prAttemptTitle: (n) => `Seria ${n} · próba rekordu`,
   prAttemptWeight: (d, best) => `+${d} ponad rekord ${best}`,

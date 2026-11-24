@@ -168,6 +168,8 @@ export interface EditorSlots {
   rowLoad?: ComponentType<RowSlotProps>;
   /** Replaces the Reps stepper of a row (one number, or a range). */
   rowReps?: ComponentType<RowSlotProps>;
+  /** The target-effort (RPE) stepper of a row; without it the row has no effort target. */
+  rowRpe?: ComponentType<RowSlotProps>;
   /** Replaces the whole week + day canvas (the "professional constructor" entry point). */
   canvas?: ComponentType<CanvasProps>;
   /** Extra inspector panels, opened with `actions.openPane('<id>')`. */

@@ -4,6 +4,7 @@ import { PLAN_WIDGETS } from './plan';
 import { widgetMatrix } from '../__fixtures__/matrix';
 import { NOW, STATES, PRESETS, renderWidget, seed, setLocale } from '../__fixtures__/widgetHarness';
 import type { WidgetSize } from '../../components/ui/Widget';
+import { addonsPref } from '../../addons/enabledSet';
 
 const byId = (id: string) => PLAN_WIDGETS.find((w) => w.id === id)!;
 const textOf = (id: string, size: WidgetSize) =>
@@ -20,6 +21,7 @@ widgetMatrix('plan widgets (other locales)', PLAN_WIDGETS, {
 });
 
 beforeEach(() => {
+  addonsPref.set(['effort']); // RPE / RIR installed: the last-session badge shows the session effort
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(NOW);
   localStorage.clear();
@@ -27,6 +29,7 @@ beforeEach(() => {
   PRESETS.none();
 });
 afterEach(() => {
+  addonsPref.reset();
   cleanup();
   vi.useRealTimers();
 });

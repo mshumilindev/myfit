@@ -72,6 +72,7 @@ import { workoutCalories } from '../../activities';
 import { defaultRestSec, fmtCountdown, restAlert } from '../../restTimer';
 import { homeSetMoves, homeTotals, lastRunOf } from '../../homeSets';
 import { dateInWeek, weekOrder, weekStartDay, weekStartOf } from '../../weekStart';
+import { effortAvailable } from '../../addons/featureGates';
 import { nicMid, nicRpeShift } from '../../nicotineApply';
 import type { WidgetCtx, WidgetDef } from '../registry';
 import { ps } from './plan.strings';
@@ -1736,7 +1737,7 @@ const lastSession: WidgetDef = {
         size="XL"
         tone="accent"
         kicker={`${s.names.last} · ${when}`}
-        badge={rpe ? `RPE ${rpe.toFixed(1)}` : undefined}
+        badge={rpe && effortAvailable() ? `RPE ${rpe.toFixed(1)}` : undefined}
         title={name}
         sub={`${dur} · ${tonnes} · ${s.setsN(sets)}`}
         bodyLast

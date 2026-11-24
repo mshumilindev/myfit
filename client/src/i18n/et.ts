@@ -2659,20 +2659,6 @@ export const et: Strings = {
   optsGroupChange: 'Muuda',
   optsGroupLookUp: 'Vaata',
   seGroupMore: 'Rohkem',
-  rpeLabel: 'Pingutus (RPE)',
-  rpeNone: 'Jäta',
-  rpeHint: (v) =>
-    v >= 10
-      ? 'Maksimum — midagi ei jäänud'
-      : v >= 9
-        ? 'Varus 1 kordus'
-        : v >= 8
-          ? 'Varus 2 kordust'
-          : v >= 7
-            ? 'Varus 3 kordust'
-            : v >= 6
-              ? 'Kerge — varus 4+ kordust'
-              : 'Kui raske seeria tundus, 6–10. Valikuline — puuduta numbrit, et jälgida.',
   bandEditLink: (gym) => `Muuda kumme · ${gym}`,
   startTitleDay: (d) => `${d} alustad tavaliselt`,
   startTitleRecent: 'Viimased treeningud algasid',
@@ -2985,8 +2971,6 @@ export const et: Strings = {
   },
   rpeHintF: 'Läbikukkumiseni — järgmine kordus enam ei läinud. Sobib iga seeriatüübiga.',
   rpeHintFAuto: 'Rakendus märkis läbikukkumise — vali muu väärtus, kui ei olnud.',
-  rpeEstHint: (v) =>
-    `Hinnang ~${v} ajaloo, taastumise ja tänaste seeriate põhjal — puuduta, et parandada.`,
   partialsLabel: 'Osalised kordused pärast läbikukkumist',
   prAttemptTitle: (n) => `Seeria ${n} · rekordikatse`,
   prAttemptWeight: (d, best) => `+${d} üle rekordi ${best}`,

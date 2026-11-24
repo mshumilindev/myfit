@@ -148,6 +148,7 @@ const OTHER_WIDGET_ADDON: Readonly<Record<string, string>> = {
   playbook: 'playbook',
   'physique-goal': 'goals',
   'planner-up-next': 'planner',
+  'effort-trend': 'effort',
 };
 /** Widgets outside the cardio group that read or log activities. */
 const ACTIVITY_WIDGET_IDS: ReadonlySet<string> = new Set(['activities-week', 'rest-day-idea']);

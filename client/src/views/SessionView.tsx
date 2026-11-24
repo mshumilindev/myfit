@@ -293,6 +293,7 @@ import { HoldDurationInput } from '../components/HoldDurationInput';
 import { homeTotals, isHomeWorkout, isStopwatchExercise, lastSetsOf } from '../homeSets';
 import { setTypeHidden, setTypeOffered, shownSetType } from '../setTypesApi';
 import { useSetTypesHost } from '../setTypesRt';
+import { useEffortHost } from '../effortRt';
 
 const PICKER_TARGET_MUSCLES = new Set<string>(MUSCLE_IDS);
 
@@ -560,6 +561,7 @@ export function SessionView(props: {
   const exName = useExerciseName();
   const store = useStore();
   useSetTypesHost(); // re-draw once the Set types chunk arrives (drop / hold sets show as plain sets until then)
+  const effort = useEffortHost(); // the effort entry (RPE / RIR) is a module: nothing of it shows without it
   const sleepsForCalc = useSleepsForCalc();
   const playbookOn = usePlaybookOn();
   const conditionLimits = useStoredConditionLimits(); // restriction: RPE cap / no-failure / rest scale stay on with the feature off
@@ -3410,7 +3412,7 @@ export function SessionView(props: {
                 <span>#</span>
                 <span>{t.durationMinCol}</span>
                 <span>{cardioCol ? cardioFieldCol(t, cardioCol) : ''}</span>
-                <span>{t.rpeShort}</span>
+                <span>{effort ? t.rpeShort : ''}</span>
               </div>
             )}
             <div style={renaming === ex.id ? { opacity: 0.6 } : undefined}>
@@ -3440,7 +3442,7 @@ export function SessionView(props: {
                       <span className="val">
                         {cardioCol ? (cardioFieldVal(s, cardioCol) ?? '—') : ''}
                       </span>
-                      <span className="kind">{s.rpe ?? t.optionalMark}</span>
+                      <span className="kind">{effort ? (s.rpe ?? t.optionalMark) : ''}</span>
                     </SetRow>
                     {extras.length > 0 && <div className="timed-extra">{extras.join(' · ')}</div>}
                   </Fragment>
@@ -3668,9 +3670,10 @@ export function SessionView(props: {
                       // Tags cell: effort, failure and record as small pills
                       // (the plain "working" word only when there's nothing else).
                       const fail = isFailure(s);
-                      const rpeV = type === 'warmup' ? null : (s.rpe ?? null);
+                      const rpeV = !effort || type === 'warmup' ? null : (s.rpe ?? null);
                       // F already says RPE 10 — no separate estimate next to it.
-                      const rpeEst = type === 'warmup' || rpeV || fail ? null : (s.rpeAuto ?? null);
+                      const rpeEst =
+                        !effort || type === 'warmup' || rpeV || fail ? null : (s.rpeAuto ?? null);
                       if (!rec && !fail && rpeV === null && rpeEst === null)
                         return holdNoLoad ? <span className="kind" /> : setKindLabel(ex, s, grp);
                       return (
@@ -3678,19 +3681,7 @@ export function SessionView(props: {
                           {!rec && type !== 'working' && !holdNoLoad
                             ? setKindLabel(ex, s, grp)
                             : null}
-                          {rpeV !== null ? (
-                            <Tag tone="neutral" className="tag-rpe">
-                              @{rpeV}
-                            </Tag>
-                          ) : rpeEst !== null ? (
-                            <Tag
-                              tone="neutral"
-                              className="tag-rpe est"
-                              title={t.rpeEstHint(String(rpeEst))}
-                            >
-                              ~{rpeEst}
-                            </Tag>
-                          ) : null}
+                          {effort?.Tag && <effort.Tag rpe={rpeV} est={rpeEst} />}
                           {fail && (
                             <Tag
                               tone="injury"
@@ -4275,7 +4266,7 @@ export function SessionView(props: {
     if (s.calories !== null && s.calories !== undefined && s.calories > 0) {
       parts.push(`${s.calories} ${t.kcalShort}`);
     }
-    if (s.rpe !== null && s.rpe !== undefined && s.rpe > 0) {
+    if (effort && s.rpe !== null && s.rpe !== undefined && s.rpe > 0) {
       parts.push(`${t.rpeShort} ${s.rpe}`);
     }
     return parts.join(' · ');
@@ -6942,6 +6933,7 @@ function SetEditorSheet(props: {
   // …and a pure bodyweight hold has no weight at all.
   const holdNoLoad = holdOnly && exerciseProfile(props.exercise.name).l === 'none';
   const setTypes = useSetTypesHost();
+  const effort = useEffortHost();
   const holdMove = isStopwatchExercise(props.exercise);
   const [type, setType] = useState<SetType>(
     holdOnly
@@ -7282,15 +7274,7 @@ function SetEditorSheet(props: {
               min={0}
               onChange={setCalories}
             />
-            <NumberStepper
-              label={t.rpe}
-              value={rpe}
-              step={0.5}
-              min={0}
-              max={10}
-              decimals={1}
-              onChange={setRpe}
-            />
+            {effort?.CardioStepper && <effort.CardioStepper value={rpe} onChange={setRpe} />}
           </div>
         </>
       ) : (
@@ -7477,24 +7461,21 @@ function SetEditorSheet(props: {
               </div>
             </>
           )}
-          <div className="se-label">{t.rpeLabel}</div>
+          {effort?.Label ? <effort.Label /> : <div className="se-label">{t.failToggle}</div>}
           <div className={`se-card se-kind-${type}`}>
             <div className="se-rpe">
-              {[0, 6, 7, 8, 9, 10].map((v) => (
-                <Chip
-                  key={v}
-                  size="md"
-                  selected={rpe === v && !failOn}
-                  onClick={() => {
+              {effort?.Chips && (
+                <effort.Chips
+                  rpe={rpe}
+                  failOn={failOn}
+                  onPick={(v) => {
                     setRpe(v);
                     // Picking an effort below 10 says "not to failure"; 10 or
                     // Skip leave it to the app (an 'auto' mark is dismissed).
                     setFail(v >= 6 && v < 10 ? 'no' : fail === 'auto' ? 'no' : null);
                   }}
-                >
-                  {v === 0 ? t.rpeNone : v}
-                </Chip>
-              ))}
+                />
+              )}
               {!isSD && (
                 <Chip
                   size="md"
@@ -7511,16 +7492,20 @@ function SetEditorSheet(props: {
                 </Chip>
               )}
             </div>
-            <div className="se-hint">
-              {failOn
-                ? fail === 'auto'
-                  ? t.rpeHintFAuto
-                  : t.rpeHintF
-                : rpe === 0 && rpeEst !== null
-                  ? t.rpeEstHint(String(rpeEst))
-                  : t.rpeHint(rpe)}
-            </div>
-            {type !== 'warmup' && <SupplementRpeNote />}
+            {(failOn || effort) && (
+              <div className="se-hint">
+                {failOn ? (
+                  fail === 'auto' ? (
+                    t.rpeHintFAuto
+                  ) : (
+                    t.rpeHintF
+                  )
+                ) : effort?.Hint ? (
+                  <effort.Hint rpe={rpe} est={rpeEst} />
+                ) : null}
+              </div>
+            )}
+            {effort && type !== 'warmup' && <SupplementRpeNote />}
             {type !== 'warmup' && <CycleSessionNote />}
             {failOn && (
               <div className="se-partials">

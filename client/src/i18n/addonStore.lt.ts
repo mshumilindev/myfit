@@ -396,6 +396,10 @@ export const addonStoreLt: typeof addonStoreEn = {
       ],
     },
     mastery: { name: 'Meistriškumas', desc: 'Įgūdžių lygiai ir ilgalaikė pažanga.' },
+    effort: {
+      name: 'RPE / RIR',
+      desc: 'Įvertink, kiek sunki buvo serija, ir matyk programos įvertį.',
+    },
     'set-types': {
       name: 'Serijų tipai',
       desc: 'Dropai, atvirkštiniai dropai ir laikymai su svoriu.',

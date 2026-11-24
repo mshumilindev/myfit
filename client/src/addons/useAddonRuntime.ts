@@ -88,6 +88,11 @@ export function useAddonRuntime() {
     if (periodizationOn)
       loadTracker('periodization', () => import('../periodization/periodizationBoot'));
   }, [periodizationOn]);
+  // RPE / RIR (a module of Advanced training): the effort entry is a lazy chunk too.
+  const effortOn = useAddonOrBase('effort');
+  useEffect(() => {
+    if (effortOn) loadTracker('effort', () => import('../effort/effortBoot'));
+  }, [effortOn]);
   // Set types (a module of Advanced training): drop / reverse-drop / weighted-hold editing is a lazy chunk too.
   const setTypesOn = useAddonOrBase('set-types');
   useEffect(() => {

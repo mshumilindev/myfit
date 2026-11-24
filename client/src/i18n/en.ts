@@ -2700,20 +2700,6 @@ export const en = {
   optsGroupChange: 'Change',
   optsGroupLookUp: 'Look up',
   seGroupMore: 'More',
-  rpeLabel: 'Effort (RPE)',
-  rpeNone: 'Skip',
-  rpeHint: (v: number): string =>
-    v >= 10
-      ? 'Max — nothing left in the tank'
-      : v >= 9
-        ? '1 more rep was possible'
-        : v >= 8
-          ? '2 more reps were possible'
-          : v >= 7
-            ? '3 more reps were possible'
-            : v >= 6
-              ? 'Easy — 4+ reps left'
-              : 'How hard the set felt, 6–10. Optional — tap a number to track it.',
   bandEditLink: (gym: string) => `Edit bands · ${gym}`,
   startTitleDay: (d: string) => `On ${d} you usually start with`,
   startTitleRecent: 'Your last sessions started with',
@@ -3026,8 +3012,6 @@ export const en = {
   },
   rpeHintF: 'To failure — the next rep wouldn’t go. Works with any set type.',
   rpeHintFAuto: 'Marked to failure by the app — tap another value if it wasn’t.',
-  rpeEstHint: (v: string) =>
-    `Estimated ~${v} from your history, recovery and today’s sets — tap to correct.`,
   partialsLabel: 'Partial reps after failure',
   prAttemptTitle: (n: number) => `Set ${n} · PR attempt`,
   prAttemptWeight: (d: string, best: string) => `+${d} over your best ${best}`,

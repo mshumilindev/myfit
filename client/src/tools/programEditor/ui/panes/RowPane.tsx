@@ -109,6 +109,7 @@ export function RowPane({ c, it }: { c: PaneCtx; it: ProgramItemDoc }) {
   const f = c.host.catalog.facts(it.name);
   const RowReps = c.host.slots?.rowReps;
   const RowLoad = c.host.slots?.rowLoad;
+  const RowRpe = c.host.slots?.rowRpe;
   const bare = isBare(it);
   const partner = it.groupId
     ? items.find((x) => x.groupId === it.groupId && x.id !== it.id)
@@ -226,23 +227,17 @@ export function RowPane({ c, it }: { c: PaneCtx; it: ProgramItemDoc }) {
                   />
                 )}
               </OptTarget>
-              <OptTarget
-                label={p.edTargetRpe}
-                hint={p.edRpeHint}
-                notSet={p.edNotSet}
-                on={!!it.targetRpe}
-                onToggle={(v) => patch({ targetRpe: v ? 8 : undefined })}
-              >
-                <NumberStepper
+              {RowRpe && (
+                <OptTarget
                   label={p.edTargetRpe}
-                  value={it.targetRpe ?? 8}
-                  min={5}
-                  max={10}
-                  step={0.5}
-                  decimals={1}
-                  onChange={(n) => patch({ targetRpe: n })}
-                />
-              </OptTarget>
+                  hint={p.edRpeHint}
+                  notSet={p.edNotSet}
+                  on={!!it.targetRpe}
+                  onToggle={(v) => patch({ targetRpe: v ? 8 : undefined })}
+                >
+                  <RowRpe item={it} patch={patch} readOnly={c.readOnly} />
+                </OptTarget>
+              )}
               <OptTarget
                 label={p.edRestBetween}
                 hint={p.edRestHint}

@@ -9,6 +9,7 @@ import { canonicalExerciseName } from '../../data/exercises';
 import { warmupUsesWeight } from '../../warmupLog';
 import { useT } from '../../i18n';
 import { usePeriodizationHost } from '../../periodizationRt';
+import { useEffortHost } from '../../effortRt';
 import { usePgT } from '../../i18n/coachProgram';
 import type { LibraryDay, ProgramEditorHost } from '../../tools/programEditor';
 import { weekOrder, useWeekStartDay } from '../../weekStart';
@@ -30,6 +31,7 @@ export function useCoachEditorHost({
   const start = useWeekStartDay();
   const order = useMemo(() => weekOrder(start), [start]);
   const periodization = usePeriodizationHost();
+  const effort = useEffortHost();
   return useMemo(
     () => ({
       mode: 'coach',
@@ -48,9 +50,9 @@ export function useCoachEditorHost({
       warmupWeighted: warmupUsesWeight,
       library,
       checkContext: { restrictions: restrictionKey ? restrictionKey.split('|') : [] },
-      slots: { muscleMap: MusclePickerMap, ...periodization?.editorSlots },
+      slots: { muscleMap: MusclePickerMap, ...periodization?.editorSlots, ...effort?.editorSlots },
       ...periodization?.editorCheck,
     }),
-    [p, t, library, restrictionKey, order, periodization],
+    [p, t, library, restrictionKey, order, periodization, effort],
   );
 }

@@ -6,6 +6,8 @@ import { COACH_DEFAULT } from '../atlas/types';
 import { emptyCycleState } from '../cycle/cycleState';
 import { __getStateForTests, __replaceStateForTests } from '../store';
 import type { Exercise, SetEntry, Workout } from '../types';
+import { addonsPref } from '../addons/enabledSet';
+import '../effort/effortBoot'; // RPE / RIR installed and loaded: the effort entry is the module's
 import { SessionView } from './SessionView';
 import { clearSummaryReturn } from './sessionSummary/NextUp';
 
@@ -69,6 +71,7 @@ function mount(id = 'open', sh: Shell = shell(), extra: { past?: boolean } = {})
 }
 
 beforeEach(() => {
+  addonsPref.set(['effort']);
   localStorage.clear();
   sessionStorage.clear();
   clearSummaryReturn();
@@ -89,6 +92,7 @@ beforeEach(() => {
   vi.setSystemTime(NOW);
 });
 afterEach(() => {
+  addonsPref.reset();
   vi.useRealTimers();
   cleanup();
 });
