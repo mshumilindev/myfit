@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { addonsPref } from '../../addons/enabledSet';
 import { buildShareSource } from './__fixtures__/fixtures';
 import {
   SORTS,
@@ -14,6 +15,10 @@ import {
   type Group,
 } from './search';
 import type { ShareKind, ShareSource, Viewer } from './types';
+
+// Equipment installed: its library kind is searchable.
+beforeAll(() => addonsPref.set(['equipment']));
+afterAll(() => addonsPref.reset());
 
 const src = buildShareSource();
 const NOW = src.now; // Wed 7 Oct 2026 09:05 UTC
@@ -108,6 +113,16 @@ describe('sorting each kind', () => {
     expect(idx).toEqual([...idx].sort((a, b) => a - b));
     const byProgram = titles(group(src, '', 'day', TR, { sort: 'program' }));
     expect(byProgram.length).toBe(byWeek.length);
+  });
+
+  it('without the Equipment module the equipment kind has nothing to share', () => {
+    addonsPref.set([]);
+    try {
+      expect(shareRefs('equipment', TR, src)).toEqual([]);
+      expect(shareRefs('gym', TR, src).length).toBeGreaterThan(0);
+    } finally {
+      addonsPref.set(['equipment']);
+    }
   });
 
   it('gyms by size, equipment by type, muscles by weekly sets, exercises by muscle family or by plan', () => {

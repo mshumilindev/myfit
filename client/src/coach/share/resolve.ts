@@ -9,6 +9,7 @@
  *   removed  the item is gone: dashed, trash
  *   loading  (the caller shows it while the source loads; see `loadingView`)
  */
+import { equipmentAvailable } from '../../addons/featureGates';
 import { effectiveConsent } from '../domain/consent';
 import type { Category } from '../domain/types';
 import {
@@ -243,7 +244,7 @@ export function resolveShare(ref: ShareRef, viewer: Viewer, src: ShareSource): S
         ? open('client', 'exercise', { id: e.id }, 'exercise')
         : open('trainer', 'library', { exercise: e.id }, 'peek', true);
       const facts: ShareFact[] = [];
-      if (e.equipment.length)
+      if (e.equipment.length && equipmentAvailable())
         facts.push({ key: 'equipment', value: e.equipment.join(','), list: 'equipmentIds' });
       const who = isClient ? me : viewer.clientId;
       const d = clientOf(src, who);

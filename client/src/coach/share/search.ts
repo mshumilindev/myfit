@@ -5,6 +5,7 @@
  * viewer may not share comes back as a `locked` group, never silently missing. Names are matched in the reader's
  * language through `labels`, supplied by the UI (the engine does not know the dictionary).
  */
+import { equipmentAvailable } from '../../addons/featureGates';
 import type { LocaleId } from '../../i18n';
 import { DAY } from '../domain/time';
 import { findProgram, kindAccess, resolveShare } from './resolve';
@@ -202,7 +203,7 @@ export function shareRefs(kind: ShareKind, viewer: Viewer, src: ShareSource): Sh
     case 'exercise':
       return src.library.exercises.map((e) => ({ kind, id: e.id }));
     case 'equipment':
-      return src.library.equipment.map((e) => ({ kind, id: e.id }));
+      return equipmentAvailable() ? src.library.equipment.map((e) => ({ kind, id: e.id })) : [];
     case 'gym':
       return src.library.gyms.map((g) => ({ kind, id: g.id }));
     case 'workout':

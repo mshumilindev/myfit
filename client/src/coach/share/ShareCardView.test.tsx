@@ -1,5 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { addonsPref } from '../../addons/enabledSet';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { shareEn as sh } from '../../i18n/coachShare.en';
 import { buildShareSource } from './__fixtures__/fixtures';
 import { resolveShare } from './resolve';
@@ -10,7 +11,11 @@ import { shareCardProps } from './ShareCardView';
 import { useWords } from './ShareCardView';
 import { renderHook } from '@testing-library/react';
 
-afterEach(cleanup);
+beforeEach(() => addonsPref.set(['equipment'])); // Equipment installed: the equipment facts show
+afterEach(() => {
+  addonsPref.reset();
+  cleanup();
+});
 const T: Viewer = { side: 'trainer', clientId: 'c1' };
 const src: ShareSource = buildShareSource();
 const off = (cat: 'totals' | 'sets'): ShareSource => ({
