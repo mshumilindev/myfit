@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { addonsPref } from '../addons/enabledSet';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { Workout } from '../types';
 import { setLocale } from '../i18n';
@@ -63,12 +64,14 @@ const wk = (
 
 beforeEach(() => {
   freezeClock();
+  addonsPref.set(['equipment']); // Equipment installed: equipment badges and gym availability show
   setLocale('en');
   m.callFn.mockReset();
   m.revalidate.mockReset();
   seed(emptyState());
 });
 afterEach(() => {
+  addonsPref.reset();
   cleanup();
   vi.useRealTimers();
 });

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { addonsPref } from '../addons/enabledSet';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { setLocale } from '../i18n';
 import { en } from '../i18n/en';
@@ -53,6 +54,7 @@ function benchFacts() {
 
 beforeEach(() => {
   freezeClock();
+  addonsPref.set(['equipment', 'activities']); // Equipment installed (badges, gym availability); Activities as before
   setLocale('en');
   localStorage.clear();
   m.role = 'member';
@@ -61,6 +63,7 @@ beforeEach(() => {
   registerCustomExercises([]);
 });
 afterEach(() => {
+  addonsPref.reset();
   cleanup();
   registerCustomExercises([]);
   vi.useRealTimers();
@@ -76,6 +79,15 @@ describe('ExerciseDetailView: a library lift', () => {
     if (rich.force) expect(badges).toContain(en.forceNames[rich.force]);
     expect(badges).toContain(en.equipmentNames[rich.equipment!]);
     expect(container.querySelector('.exd-title')?.textContent).toBe(BENCH);
+  });
+
+  it('without the Equipment module the equipment badge is not shown, the rest is', () => {
+    addonsPref.set(['activities']);
+    const { container } = open();
+    const rich = richExerciseByName(BENCH)!;
+    const badges = [...container.querySelectorAll('.exd-badges > *')].map((b) => b.textContent);
+    expect(badges).toContain(en.categoryNames[rich.category!]);
+    expect(badges).not.toContain(en.equipmentNames[rich.equipment!]);
   });
 
   it('lists primary and secondary muscles; each opens the muscle history', () => {

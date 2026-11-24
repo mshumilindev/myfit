@@ -1,4 +1,5 @@
 /** Exercise history — design S-32/S-33 + EQ-3 (muscles, equipment, gyms). */
+import { equipmentAvailable } from '../addons/featureGates';
 import { PageHead } from '../components/ui/PageHead';
 import { useEffect, useState } from 'react';
 import { Button } from '../components/ui/Button';
@@ -135,9 +136,10 @@ export function ExerciseHistoryView({
                         detail
                       />
                     ))}
-                    {needs.map((id) => (
-                      <EquipChip key={id} id={id} style={{ padding: '4px 9px' }} />
-                    ))}
+                    {equipmentAvailable() &&
+                      needs.map((id) => (
+                        <EquipChip key={id} id={id} style={{ padding: '4px 9px' }} />
+                      ))}
                   </div>
                 </>
               );
@@ -196,39 +198,42 @@ export function ExerciseHistoryView({
         </GroupedList>
       )}
 
-      {!userId && store.gyms.length > 0 && exerciseNeeds(name).length > 0 && (
-        <div>
-          <div className="section-label umb-8">{t.whereYouCanDoIt}</div>
-          <div className="wcdi-rows">
-            {store.gyms.map((g) => {
-              const needs = exerciseNeeds(name);
-              const missing = missingAtGym(g, needs);
-              const names = t.equipmentNames as Record<string, string>;
-              const label = (id: string) =>
-                (names[id] ?? id.charAt(0).toUpperCase() + id.slice(1)).toLowerCase();
-              return (
-                <div key={g.id} className={`wcdi-row${missing.length > 0 ? ' miss' : ''}`}>
-                  {missing.length === 0 ? (
-                    <Icon name="check-circle" weight="fill" className="ok" />
-                  ) : (
-                    <Icon name="warning-circle" className="bad" />
-                  )}
-                  <span className="n ut-base">{g.name}</span>
-                  {missing.length === 0 ? (
-                    <span className="v">{needs.map(label).join(' · ')}</span>
-                  ) : (
-                    <span className="v miss">{t.noItemShort(label(missing[0]))}</span>
-                  )}
-                </div>
-              );
-            })}
+      {equipmentAvailable() &&
+        !userId &&
+        store.gyms.length > 0 &&
+        exerciseNeeds(name).length > 0 && (
+          <div>
+            <div className="section-label umb-8">{t.whereYouCanDoIt}</div>
+            <div className="wcdi-rows">
+              {store.gyms.map((g) => {
+                const needs = exerciseNeeds(name);
+                const missing = missingAtGym(g, needs);
+                const names = t.equipmentNames as Record<string, string>;
+                const label = (id: string) =>
+                  (names[id] ?? id.charAt(0).toUpperCase() + id.slice(1)).toLowerCase();
+                return (
+                  <div key={g.id} className={`wcdi-row${missing.length > 0 ? ' miss' : ''}`}>
+                    {missing.length === 0 ? (
+                      <Icon name="check-circle" weight="fill" className="ok" />
+                    ) : (
+                      <Icon name="warning-circle" className="bad" />
+                    )}
+                    <span className="n ut-base">{g.name}</span>
+                    {missing.length === 0 ? (
+                      <span className="v">{needs.map(label).join(' · ')}</span>
+                    ) : (
+                      <span className="v miss">{t.noItemShort(label(missing[0]))}</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="sheet-note sheet-note--surface umt-8">
+              <Icon name="info" />
+              <p>{t.inventoryNote}</p>
+            </div>
           </div>
-          <div className="sheet-note sheet-note--surface umt-8">
-            <Icon name="info" />
-            <p>{t.inventoryNote}</p>
-          </div>
-        </div>
-      )}
+        )}
 
       {multi && norm.length >= 3 ? (
         <div>

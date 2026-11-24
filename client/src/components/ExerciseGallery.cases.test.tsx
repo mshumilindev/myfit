@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { addonsPref } from '../addons/enabledSet';
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { useState } from 'react';
 import { LOCALES, setLocale } from '../i18n';
@@ -88,6 +89,7 @@ const mine = (over: Partial<MyExercise> = {}): MyExercise => ({
 
 beforeEach(() => {
   setLocale('en');
+  addonsPref.set(['equipment']); // Equipment installed: equipment badges and gym availability show
   [
     myExercises,
     knownExercises,
@@ -102,7 +104,10 @@ beforeEach(() => {
   mql(false);
   stubIO();
 });
-afterEach(cleanup);
+afterEach(() => {
+  addonsPref.reset();
+  cleanup();
+});
 
 describe('ExerciseGallery · library (phone)', () => {
   it('shows the library heading, coverage line and the first page of 12 rows', () => {

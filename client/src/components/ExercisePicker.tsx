@@ -33,6 +33,7 @@ import { isMachineLift, recordWeight, useStore } from '../store';
 import { fmtSet, useT } from '../i18n';
 import type { Strings } from '../i18n/en';
 import { ExerciseName, Icon, Sheet, useExerciseName, useIsDesktop } from '../ui';
+import { equipmentAvailable, useEquipmentOn } from '../addons/featureGates';
 import { FamilyFigure, equipmentIconName } from './Muscle';
 import {
   FAMILIES,
@@ -105,7 +106,8 @@ function subLabel(t: Strings, s: SubId): string {
 }
 
 function itemMeta(t: Strings, i: PickItem, plain = false): string {
-  const eq = i.equipment ? t.equipmentNames[i.equipment] : null;
+  const eqOn = equipmentAvailable(); // no Equipment module: no equipment words anywhere
+  const eq = eqOn && i.equipment ? t.equipmentNames[i.equipment] : null;
   if (plain) {
     const others = i.secondary.filter((m) => m !== 'cardio').slice(0, 1);
     return [eq, ...others.map((m) => `+ ${t.muscleGroups[m].toLowerCase()}`)]
@@ -113,7 +115,7 @@ function itemMeta(t: Strings, i: PickItem, plain = false): string {
       .join(' · ');
   }
   if (i.doneToday) return t.pickAgain(fmtSet(i.doneToday.weight, i.doneToday.reps));
-  if (!i.available && i.equipment) return t.noItemHere(t.equipmentNames[i.equipment]);
+  if (eqOn && !i.available && i.equipment) return t.noItemHere(t.equipmentNames[i.equipment]);
   if (i.last) return [eq, fmtSet(i.last.weight, i.last.reps)].filter(Boolean).join(' · ');
   const others = i.secondary.filter((m) => m !== 'cardio').slice(0, 1);
   return [eq, ...others.map((m) => `+ ${t.muscleGroups[m].toLowerCase()}`)]
@@ -133,7 +135,8 @@ export function ExercisePicker(props: ExercisePickerProps) {
   const flagOf = (name: string) => (limits.keys.length ? exerciseFlag(name, limits).level : 'ok');
   const isDesktop = useIsDesktop();
   const [now] = useState(() => Date.now());
-  const hasInventory = !!props.gym?.inventory && props.gym.inventory.length > 0;
+  const equipmentOn = useEquipmentOn();
+  const hasInventory = equipmentOn && !!props.gym?.inventory && props.gym.inventory.length > 0;
 
   const [q, setQ] = useState('');
   const [family, setFamily] = useState<FamilyId | null>(null);
@@ -422,7 +425,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
     </div>
   );
 
-  const equipChip = (
+  const equipChip = equipmentOn && (
     <Button
       variant="secondary"
       size="sm"
@@ -644,7 +647,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
   // Equipment switcher: one choice at a time (Any, or one kind of kit). The
   // multi-select lives in the filter sheet on the start screen.
   const eqValue = equip.length === 1 ? equip[0] : equip.length === 0 ? 'any' : null;
-  const equipRow = fam && groupEquip.length > 1 && (
+  const equipRow = equipmentOn && fam && groupEquip.length > 1 && (
     <div className="xp-eqrow" role="radiogroup" aria-label={t.pickEquipAll}>
       <Chip
         className="xp-eq"
@@ -830,7 +833,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
 
   const famHeaderState = fam ? famLevel.get(fam.id)! : null;
 
-  const equipSheet = equipOpen && (
+  const equipSheet = equipmentOn && equipOpen && (
     <EquipmentFilterSheet
       t={t}
       gym={props.gym}
@@ -1102,6 +1105,7 @@ export function ExerciseDetail(props: {
   onBack?: () => void;
 }) {
   const { t } = useT();
+  const equipmentOn = useEquipmentOn();
   const { item } = props;
   const [steps, setSteps] = useState<string[]>([]);
   const [allSteps, setAllSteps] = useState(false);
@@ -1163,7 +1167,7 @@ export function ExerciseDetail(props: {
           .map((m) => (
             <span key={m}>{t.muscleGroups[m]}</span>
           ))}
-        {item.equipment && (
+        {equipmentOn && item.equipment && (
           <span className="eq">
             <Icon name={equipmentIconName(item.equipment)} />
             {t.equipmentNames[item.equipment]}
@@ -1200,7 +1204,7 @@ export function ExerciseDetail(props: {
                 dense
                 icon={<Img src={s.image} alt="" />}
                 label={<ExerciseName name={s.name} className="n" secondary={false} />}
-                sub={s.equipment ? t.equipmentNames[s.equipment] : ''}
+                sub={equipmentOn && s.equipment ? t.equipmentNames[s.equipment] : ''}
                 onClick={() => props.onSwap(s)}
               />
             ))}

@@ -10,6 +10,7 @@
  * today's session" makes the page a route into logging, not a dead end
  * (AC-DET-06).
  */
+import { equipmentAvailable } from '../addons/featureGates';
 import { BackButton } from '../components/ui/BackButton';
 import { useEffect, useMemo, useState } from 'react';
 import { Button, IconButton } from '../components/ui/Button';
@@ -181,7 +182,7 @@ export function ExerciseDetailView({
       {mechanic && <Chip size="xs">{t.mechanicNames[mechanic]}</Chip>}
       {force && <Chip size="xs">{t.forceNames[force]}</Chip>}
       {level && <Chip size="xs">{t.levelNames[level]}</Chip>}
-      {equipment && (
+      {equipmentAvailable() && equipment && (
         <Chip size="xs" icon={equipmentIconName(equipment)}>
           {t.equipmentNames[equipment]}
         </Chip>
@@ -324,7 +325,7 @@ export function ExerciseDetailView({
           })}
         </GroupedList>
       )}
-      {available && equipment && (
+      {equipmentAvailable() && available && equipment && (
         <div className="exd-avail">
           <Icon name="check-circle" weight="bold" />
           {t.availableAtGymLine(equipmentLabel(equipment))}
@@ -347,19 +348,21 @@ export function ExerciseDetailView({
           const pct = Math.round(s.match * 100);
           const avail = s.bodyweight
             ? { cls: 'any', icon: 'person-simple', text: t.fixAnywhere }
-            : !swapGym
-              ? {
-                  cls: 'neutral',
-                  icon: 'barbell',
-                  text: s.equipment.map((e) => equipmentLabel(e)).join(' · ') || t.fixAnywhere,
-                }
-              : s.available
-                ? { cls: 'ok', icon: 'check-circle', text: t.fixAtGym(swapGym.name) }
-                : {
-                    cls: 'warn',
-                    icon: 'warning-circle',
-                    text: t.fixMissing(s.missing.map((e) => equipmentLabel(e)).join(' · ')),
-                  };
+            : !equipmentAvailable()
+              ? { cls: 'neutral', icon: 'barbell', text: '' }
+              : !swapGym
+                ? {
+                    cls: 'neutral',
+                    icon: 'barbell',
+                    text: s.equipment.map((e) => equipmentLabel(e)).join(' · ') || t.fixAnywhere,
+                  }
+                : s.available
+                  ? { cls: 'ok', icon: 'check-circle', text: t.fixAtGym(swapGym.name) }
+                  : {
+                      cls: 'warn',
+                      icon: 'warning-circle',
+                      text: t.fixMissing(s.missing.map((e) => equipmentLabel(e)).join(' · ')),
+                    };
           return (
             <Card
               as="button"
@@ -383,10 +386,12 @@ export function ExerciseDetailView({
                   ))}
                 </div>
               )}
-              <div className={`swap-avail ${avail.cls}`}>
-                <Icon name={avail.icon} />
-                <span>{avail.text}</span>
-              </div>
+              {avail.text && (
+                <div className={`swap-avail ${avail.cls}`}>
+                  <Icon name={avail.icon} />
+                  <span>{avail.text}</span>
+                </div>
+              )}
             </Card>
           );
         })}

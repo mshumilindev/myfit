@@ -13,6 +13,7 @@
  * Two user additions layer on the design: Library/My-exercises tabs and custom
  * exercise CRUD (create / edit / delete), both URL-addressable.
  */
+import { equipmentAvailable } from '../addons/featureGates';
 import { Chip } from '../components/ui/Chip';
 import { Tag } from './ui/Tag';
 import { BackButton } from './ui/BackButton';
@@ -403,19 +404,21 @@ export function ExerciseGallery({
           )}
         </div>
       </div>
-      <div>
-        <div className="exl-group-label">{t.equipmentLabelField}</div>
-        <div className="exl-chips">
-          {EQUIPMENT_IDS.map((id) =>
-            chip(
-              s.equip === id,
-              t.equipmentNames[id],
-              () => set({ equip: s.equip === id ? undefined : id }),
-              `eq-${id}`,
-            ),
-          )}
+      {equipmentAvailable() && (
+        <div>
+          <div className="exl-group-label">{t.equipmentLabelField}</div>
+          <div className="exl-chips">
+            {EQUIPMENT_IDS.map((id) =>
+              chip(
+                s.equip === id,
+                t.equipmentNames[id],
+                () => set({ equip: s.equip === id ? undefined : id }),
+                `eq-${id}`,
+              ),
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 
@@ -465,7 +468,7 @@ export function ExerciseGallery({
             without badges is exactly as tall as one with them. */}
         <div className="exl-cardbadges">
           {r.mechanic && <Tag tone="neutral">{t.mechanicNames[r.mechanic]}</Tag>}
-          {r.equipment && (
+          {equipmentAvailable() && r.equipment && (
             <Tag tone="neutral" icon={<Icon name={equipmentIconName(r.equipment)} />}>
               {t.equipmentNames[r.equipment]}
             </Tag>
@@ -486,7 +489,7 @@ export function ExerciseGallery({
         <div className="exl-mbadges">
           {r.mechanic && <Tag tone="neutral">{t.mechanicNames[r.mechanic]}</Tag>}
           {r.force && <Tag tone="neutral">{t.forceNames[r.force]}</Tag>}
-          {r.equipment && (
+          {equipmentAvailable() && r.equipment && (
             <Tag tone="neutral" icon={<Icon name={equipmentIconName(r.equipment)} />}>
               {t.equipmentNames[r.equipment]}
             </Tag>
@@ -519,7 +522,7 @@ export function ExerciseGallery({
           <div className="exl-mbody">
             <div className="exl-mname">{exName(r.name)}</div>
             <div className="exl-mmus">{musclesText(r) || t.libNoClassInline}</div>
-            {r.equipment && (
+            {equipmentAvailable() && r.equipment && (
               <div className="exl-mbadges">
                 <Tag tone="neutral" icon={<Icon name={equipmentIconName(r.equipment)} />}>
                   {t.equipmentNames[r.equipment]}
@@ -854,22 +857,26 @@ export function CustomEditor(props: {
         </>
       )}
 
-      <div className="field-label">{t.equipmentLabelField}</div>
-      <div className="filter-chips">
-        {EQUIPMENT_IDS.map((id) => (
-          <Chip
-            size="xs"
-            selected={equipment.includes(id)}
-            key={id}
-            onClick={() =>
-              setEquipment((xs) => (xs.includes(id) ? xs.filter((x) => x !== id) : [id]))
-            }
-          >
-            <Icon name={equipmentIconName(id)} />
-            {t.equipmentNames[id]}
-          </Chip>
-        ))}
-      </div>
+      {equipmentAvailable() && (
+        <>
+          <div className="field-label">{t.equipmentLabelField}</div>
+          <div className="filter-chips">
+            {EQUIPMENT_IDS.map((id) => (
+              <Chip
+                size="xs"
+                selected={equipment.includes(id)}
+                key={id}
+                onClick={() =>
+                  setEquipment((xs) => (xs.includes(id) ? xs.filter((x) => x !== id) : [id]))
+                }
+              >
+                <Icon name={equipmentIconName(id)} />
+                {t.equipmentNames[id]}
+              </Chip>
+            ))}
+          </div>
+        </>
+      )}
 
       <Button
         variant="primary"

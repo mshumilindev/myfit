@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { addonsPref } from '../addons/enabledSet';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { LOCALES, fmtSet, setLocale } from '../i18n';
 import { __getStateForTests, __replaceStateForTests } from '../store';
@@ -97,6 +98,7 @@ const search = (v: string) => {
 };
 
 beforeEach(() => {
+  addonsPref.set(['equipment']); // Equipment installed: the equipment filter and labels show
   setLocale('en');
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(NOW);
@@ -104,6 +106,7 @@ beforeEach(() => {
   setWorkouts([]);
 });
 afterEach(() => {
+  addonsPref.reset();
   cleanup();
   vi.useRealTimers();
 });
@@ -297,6 +300,13 @@ describe('ExercisePicker · gym equipment', () => {
     const firstNa = cards.findIndex((c) => c.classList.contains('na'));
     expect(firstNa).toBeGreaterThan(0);
     expect(cards.slice(firstNa).every((c) => c.classList.contains('na'))).toBe(true);
+  });
+
+  it('without the Equipment module there is no equipment chip and nothing is dimmed', () => {
+    addonsPref.set([]);
+    setup({ gym: gym(['dumbbell', 'barbell']) });
+    expect(screen.queryByRole('button', { name: en().pickEquipAll })).toBeNull();
+    expect(document.querySelector('.xp-equip-sheet')).toBeNull();
   });
 
   it('the Equipment chip opens the filter; tiles toggle, Reset clears, Show N applies', () => {

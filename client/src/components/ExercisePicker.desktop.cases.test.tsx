@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { addonsPref } from '../addons/enabledSet';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { LOCALES, setLocale } from '../i18n';
 import { __getStateForTests, __replaceStateForTests } from '../store';
@@ -45,6 +46,7 @@ function setup(over: Partial<ExercisePickerProps> = {}) {
 }
 
 beforeEach(() => {
+  addonsPref.set(['equipment']); // Equipment installed: the equipment filter and labels show
   setLocale('en');
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(NOW);
@@ -52,6 +54,7 @@ beforeEach(() => {
   mql(true);
 });
 afterEach(() => {
+  addonsPref.reset();
   cleanup();
   vi.useRealTimers();
 });
