@@ -123,3 +123,18 @@ export function repsLabel(item: Pick<ProgramItem, 'reps' | 'repsMin'>): string {
   const min = item.repsMin;
   return min && min < item.reps ? `${min}–${item.reps}` : String(item.reps);
 }
+
+/** "Cycle week 3 of 4" with the week's type ("Deload") when it has one; null when the program has no cycle. */
+export function cycleNote(
+  p: WeekSource,
+  week: number,
+  words: { cycleAt: string; labels: Partial<Record<CycleLabel, string>> },
+): string | null {
+  const c = p.cycle;
+  if (!c) return null;
+  const at = words.cycleAt
+    .replace('{n}', String(activeCycleWeek(p, week)))
+    .replace('{len}', String(c.length));
+  const l = activeWeekLabel(p, week);
+  return l && words.labels[l] ? `${at} · ${words.labels[l]}` : at;
+}

@@ -8,6 +8,7 @@ export interface EditorStrings {
   weeks: string;
   week: string;
   weekN: string;
+  cycleAt: string;
   base: string;
   none: string;
   deload: string;
@@ -47,6 +48,7 @@ const en: EditorStrings = {
   weeks: 'Cycle weeks',
   week: 'Week',
   weekN: 'Week {n}',
+  cycleAt: 'Cycle week {n} of {len}',
   base: 'Base',
   none: 'Normal',
   deload: 'Deload',
@@ -85,6 +87,7 @@ const uk: EditorStrings = {
   weeks: 'Тижні циклу',
   week: 'Тиждень',
   weekN: 'Тиждень {n}',
+  cycleAt: 'Тиждень циклу {n} з {len}',
   base: 'Базовий',
   none: 'Звичайний',
   deload: 'Розвантаження',
@@ -123,6 +126,7 @@ const pl: EditorStrings = {
   weeks: 'Tygodnie cyklu',
   week: 'Tydzień',
   weekN: 'Tydzień {n}',
+  cycleAt: 'Tydzień cyklu {n} z {len}',
   base: 'Bazowy',
   none: 'Zwykły',
   deload: 'Odciążenie',
@@ -161,6 +165,7 @@ const lt: EditorStrings = {
   weeks: 'Ciklo savaitės',
   week: 'Savaitė',
   weekN: '{n} savaitė',
+  cycleAt: 'Ciklo savaitė {n} iš {len}',
   base: 'Bazinė',
   none: 'Įprasta',
   deload: 'Atsipalaidavimo',
@@ -200,6 +205,7 @@ const et: EditorStrings = {
   weeks: 'Tsükli nädalad',
   week: 'Nädal',
   weekN: 'Nädal {n}',
+  cycleAt: 'Tsükli nädal {n}/{len}',
   base: 'Põhi',
   none: 'Tavaline',
   deload: 'Kergendus',

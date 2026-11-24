@@ -61,6 +61,8 @@ export interface PeriodizationHost {
   TargetLine: ComponentType<{ exercise: Exercise }> | null;
   /** "6–8" or the plain rep count. */
   repsLabel: ((i: Pick<ProgramItem, 'reps' | 'repsMin'>) => string) | null;
+  /** Where the person is in the cycle, as a line ("Cycle week 3 of 4 · Deload"), or null. */
+  cycleNote: ((p: WeekSource, week: number, locale: LocaleId) => string | null) | null;
   /** What the program editor gets: the cycle wrapper and bar, the % of max and rep-range fields of a row. */
   editorSlots: Pick<EditorSlots, 'wrap' | 'weekBar' | 'rowLoad' | 'rowReps'> | null;
 }
@@ -78,6 +80,7 @@ export const periodizationHost: PeriodizationHost = {
   repsMin: null,
   TargetLine: null,
   repsLabel: null,
+  cycleNote: null,
   editorSlots: null,
 };
 
@@ -136,4 +139,11 @@ export function repsMinFor(i: Pick<ProgramItem, 'reps' | 'repsMin'>): number | n
 /** The person's max for an exercise, or null: always null while the module is off or its chunk has not loaded. */
 export function maxForExercise(name: string): number | null {
   return live() ? (periodizationHost.maxFor?.(name) ?? null) : null;
+}
+
+/** The person's place in the program's cycle as a line; null while the module is off, not loaded or there is no cycle. */
+export function cycleNoteFor(p: WeekSource, week: number, locale: LocaleId): string | null {
+  return live() && p.cycle && periodizationHost.cycleNote
+    ? periodizationHost.cycleNote(p, week, locale)
+    : null;
 }

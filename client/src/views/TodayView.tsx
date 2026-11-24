@@ -64,6 +64,8 @@ import {
   useProgramMine,
   type ProgramItem,
 } from '../data/programMine';
+import { cycleNoteFor, type WeekSource } from '../periodizationApi';
+import { usePeriodizationHost } from '../periodizationRt';
 import { compactProgramDaySummary, effectiveSets } from './programs/model';
 import type { MuscleGroup } from '../data/exercises';
 import {
@@ -158,6 +160,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const supplementsOn = useAddonOrBase('supplements');
   const sleeps = sleepOn ? store.sleeps : NO_SLEEPS;
   const { t, locale } = useT();
+  const periodization = usePeriodizationHost();
   const tw = useTw();
   const layout = useTodayLayout();
   const [editing, setEditing] = useState(false);
@@ -798,6 +801,11 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
   // Weekly progress from actual history (matches the calendar's done marks) —
   // the server's post-assignment count reads 0 right after activation.
+  // Re-reads when the Periodization chunk finishes loading (the hook is the dependency; the line itself comes from the seam).
+  const cycleNote =
+    assignment && periodization
+      ? cycleNoteFor(assignment.program as unknown as WeekSource, assignment.week, locale)
+      : null;
   const programWeek = (() => {
     if (!assignment) return { done: 0, total: 0, pct: 0 };
     const days = Array.from({ length: 7 }, (_, i) => i + 1).filter((day) => {
@@ -1005,6 +1013,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
               {!compact && (
                 <div className="s">
                   {a.program.weeks !== 0 ? `${t.progWeekN(a.week)} · ` : ''}
+                  {cycleNote ? `${cycleNote} · ` : ''}
                   {t.progSessions(programWeek.done, programWeek.total)}
                   {a.assignedBy
                     ? ` · ${a.assignedBy.toLowerCase() === getUsername()?.toLowerCase() ? t.progAssignedByMe : t.progAssignedBy(a.assignedBy)}`

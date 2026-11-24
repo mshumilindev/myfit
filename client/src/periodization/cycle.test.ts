@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  cycleNote,
   activeCycleWeek,
   activeWeekLabel,
   activeWeekPlan,
@@ -124,5 +125,28 @@ describe('the cycle rules', () => {
     expect(repsLabel({ reps: 8, repsMin: 6 })).toBe('6–8');
     expect(repsLabel({ reps: 8, repsMin: 8 })).toBe('8');
     expect(repsLabel({ reps: 8 })).toBe('8');
+  });
+});
+
+describe('cycleNote', () => {
+  const words = { cycleAt: 'Cycle week {n} of {len}', labels: { deload: 'Deload' } };
+  const prog = {
+    items: [],
+    cycle: {
+      length: 4,
+      weeks: [
+        { dayNames: {}, targetMuscles: {}, items: [] },
+        { dayNames: {}, targetMuscles: {}, items: [] },
+        { label: 'deload' as const, dayNames: {}, targetMuscles: {}, items: [] },
+      ],
+    },
+  };
+  it('names the place in the cycle and the week type', () => {
+    expect(cycleNote(prog, 2, words)).toBe('Cycle week 2 of 4');
+    expect(cycleNote(prog, 4, words)).toBe('Cycle week 4 of 4 · Deload');
+    expect(cycleNote(prog, 5, words)).toBe('Cycle week 1 of 4');
+  });
+  it('is null without a cycle', () => {
+    expect(cycleNote({ items: [] }, 3, words)).toBeNull();
   });
 });
