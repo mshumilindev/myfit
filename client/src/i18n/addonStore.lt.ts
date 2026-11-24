@@ -240,6 +240,20 @@ export const addonStoreLt: typeof addonStoreEn = {
         'Pratimai pagal pasirinktą kryptį',
       ],
     },
+    'advanced-training': {
+      name: 'Pažangi treniruotė',
+      tagline: 'Planuok taip, kaip tikrai treniruojasi',
+      desc: 'Savaitiniai ciklai, % nuo maksimumo ir maksimumų sąrašas — programoms kaip 5/3/1.',
+      about:
+        'Kai kurios programos keičiasi kas savaitę: sunki savaitė, lengvesnė, atsigavimo. Pažangi treniruotė leidžia kartoti savaičių bloką, kiekvieną su savo dienomis ir žyma, pavyzdžiui, Atsigavimas.\n\nNustatyk apkrovą kaip % nuo maksimumo, o Spotter treniruotės pradžioje paverčia ją kilogramais. Laikyk maksimumus viename sąraše arba leisk Spotter juos įvertinti pagal istoriją.\n\nProgramos be ciklo kiekvieną savaitę lieka tokios pačios, o tai, kas jau išsaugota, nedings, jei išjungsi priedą.',
+      highlights: [
+        'Kartok savaičių bloką ciklu',
+        'Pažymėk savaitę, pvz., Atsigavimas',
+        'Apkrova % nuo maksimumo',
+        'Pakartojimų intervalai, pvz., 6–8',
+        'Maksimumų sąrašas pagal istoriją',
+      ],
+    },
     planner: {
       name: 'Planuoklis',
       tagline: 'Savo laiką planuok paprasčiau',
@@ -382,6 +396,10 @@ export const addonStoreLt: typeof addonStoreEn = {
       ],
     },
     mastery: { name: 'Meistriškumas', desc: 'Įgūdžių lygiai ir ilgalaikė pažanga.' },
+    periodization: {
+      name: 'Periodizacija',
+      desc: 'Savaitiniai ciklai, % nuo maksimumo ir maksimumai.',
+    },
     'apex-challenges': { name: 'Iššūkiai', desc: 'Savaitiniai tikslai vieniems ar su kitais.' },
     'apex-ranks': { name: 'Reitingai', desc: 'Kur jūsų pratimai palyginti su jėgos standartais.' },
     'apex-awards': { name: 'Apdovanojimai', desc: 'Pasiekimai, atrakinami treniruojantis.' },

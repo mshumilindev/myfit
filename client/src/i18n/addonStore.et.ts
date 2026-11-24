@@ -242,6 +242,20 @@ export const addonStoreEt: typeof addonStoreEn = {
         'Harjutused vastavalt sinu fookusele',
       ],
     },
+    'advanced-training': {
+      name: 'Täiustatud treening',
+      tagline: 'Planeeri nii, nagu tõstjad päriselt treenivad',
+      desc: 'Nädalatsüklid, % maksimumist ja maksimumide loend — programmidele nagu 5/3/1.',
+      about:
+        'Mõni programm muutub nädalast nädalasse: raske nädal, kergem, tasanduse nädal. Täiustatud treening laseb korrata nädalate plokki, igaühel oma päevad ja märge, näiteks Tasandus.\n\nMäära koormus % maksimumist ja Spotter teeb selle treeningu alguses kilogrammideks. Hoia maksimumid ühes loendis või lase Spotteril need ajaloo põhjal hinnata.\n\nTsüklita programmid jäävad igal nädalal samaks ning salvestatu säilib, kui lisandmooduli välja lülitad.',
+      highlights: [
+        'Korda nädalate plokki tsükliga',
+        'Märgi nädal, nt Tasandus',
+        'Koormus % maksimumist',
+        'Kordusvahemikud, nt 6–8',
+        'Maksimumide loend ajaloo põhjal',
+      ],
+    },
     planner: {
       name: 'Planeerija',
       tagline: 'Kõik plaanid ühes kalendris',
@@ -384,6 +398,10 @@ export const addonStoreEt: typeof addonStoreEn = {
       ],
     },
     mastery: { name: 'Meisterlikkus', desc: 'Oskuste tasemed ja pikaajaline areng.' },
+    periodization: {
+      name: 'Periodiseerimine',
+      desc: 'Nädalatsüklid, % maksimumist ja maksimumid.',
+    },
     'apex-challenges': { name: 'Väljakutsed', desc: 'Iganädalased eesmärgid üksi või teistega.' },
     'apex-ranks': { name: 'Edetabelid', desc: 'Kus on su harjutused jõustandardite suhtes.' },
     'apex-awards': { name: 'Auhinnad', desc: 'Saavutused, mis avanevad treenides.' },

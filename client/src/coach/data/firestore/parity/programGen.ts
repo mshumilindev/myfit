@@ -5,6 +5,7 @@ import {
   type ProgramItem,
   type ProgramWarmupItem,
 } from '../../../../views/programs/model';
+import type { MuscleGroup } from '../../../../data/exercises';
 import { planProgramId } from '../../../program/planCodec';
 import { C, T } from './harness';
 
@@ -56,6 +57,8 @@ export function genProgram(seed: number, id = planProgramId(C)): Program {
     if (kind === 'strength' && !bare) {
       o.targetWeight = maybe(0.7, () => Math.round(r() * 2000) / 10);
       o.targetRpe = maybe(0.6, () => 5 + Math.floor(r() * 5));
+      o.targetPct = maybe(0.5, () => 40 + Math.floor(r() * 61));
+      o.repsMin = maybe(0.4, () => 1 + Math.floor(r() * Math.max(1, (it.reps as number) - 1)));
       o.restSec = maybe(0.6, () => 30 + Math.floor(r() * 24) * 15);
       o.note = maybe(0.5, () => `cue ${seed}-${n} "quotes" \\ unicode: Привіт ąčę 💪`);
     }
@@ -85,6 +88,21 @@ export function genProgram(seed: number, id = planProgramId(C)): Program {
     targetMuscles: r() < 0.6 ? { '6': ['chest', 'back'] } : {},
     items,
   };
+  if (r() < 0.6) {
+    const len = 2 + Math.floor(r() * 3);
+    p.cycle = {
+      length: len,
+      baseLabel: maybe(0.5, () => 'peak' as const) ?? undefined,
+      weeks: Array.from({ length: len - 1 }, (_, k) => ({
+        label: maybe(0.5, () => pick(['deload', 'test', 'peak'] as const)) ?? undefined,
+        dayNames: { '1': `W${k + 2} ä` },
+        targetMuscles: (r() < 0.5 ? { '2': ['back'] } : {}) as Record<string, MuscleGroup[]>,
+        items: items
+          .slice(0, 2)
+          .map((x, n) => ({ ...x, id: `cw${seed}-${k}-${n}`, groupId: null, groupOrder: null })),
+      })),
+    };
+  }
   if (r() < 0.8)
     p.activities = [
       {

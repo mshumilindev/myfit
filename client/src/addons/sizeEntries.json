@@ -144,5 +144,11 @@
   },
   "planner-availability": {
     "js": ["planner/AvailabilityPage", "planner/availability"]
+  },
+  "advanced-training": {
+    "js": ["periodizationRt"]
+  },
+  "periodization": {
+    "js": ["periodization/", "views/programs/cycle"]
   }
 }

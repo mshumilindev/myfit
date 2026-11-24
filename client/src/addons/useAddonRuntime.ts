@@ -82,6 +82,12 @@ export function useAddonRuntime() {
   useEffect(() => {
     if (plannerOn) loadTracker('planner', () => import('../planner/plannerBoot'));
   }, [plannerOn]);
+  // Periodization (a module of Advanced training) is a lazy chunk too: fetched only while it is installed.
+  const periodizationOn = useAddonOrBase('periodization');
+  useEffect(() => {
+    if (periodizationOn)
+      loadTracker('periodization', () => import('../periodization/periodizationBoot'));
+  }, [periodizationOn]);
   const healthOn = useAddonOrBase('health');
   const injuryOn = useAddonOrBase('injury-log');
   useEffect(() => migrateModules(), []);

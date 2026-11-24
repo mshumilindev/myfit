@@ -201,6 +201,23 @@ def o_dumbbell(c):
     return (0, -30, 0)
 
 
+def o_plate(c):
+    steel = pbr('#e9ebf0', metal=1.0, rough=0.16)
+    cols = ['#d93a3a', '#2f5fd0', '#f0c030', '#2fa860']
+    rads = [0.66, 0.56, 0.46, 0.36]
+    y = -0.8
+    cyl((0, y, 0), 0.075, 2.7, steel, 'X')
+    for sx in (-1, 1):
+        x = 0.2
+        for col, r in zip(cols, rads):
+            m = pbr(col, rough=0.38, coat=0.25)
+            cyl((sx * (x + 0.08), y, 0), r, 0.16, m, 'X', 0.03)
+            cyl((sx * (x + 0.08), y, 0), r * 0.3, 0.17, steel, 'X', 0.01)
+            x += 0.17
+        cyl((sx * (x + 0.06), y, 0), 0.13, 0.12, steel, 'X', 0.025)
+    return (0, -26, 10)
+
+
 def o_peak(c):
     nr, nt_ = 40, 112
     me = bpy.data.meshes.new('mt')
@@ -770,7 +787,7 @@ def o_cal_j(c):  # calendar + stopwatch together
     return (0, 0, 0)
 
 
-OBJECTS = {'dumbbell': o_dumbbell, 'peak': o_peak, 'whistle': o_whistle, 'apple': o_apple, 'note': o_note, 'heart': o_heart,
+OBJECTS = {'plate': o_plate, 'dumbbell': o_dumbbell, 'peak': o_peak, 'whistle': o_whistle, 'apple': o_apple, 'note': o_note, 'heart': o_heart,
            'moon': o_moon, 'activity': o_activity, 'house': o_house, 'target': o_target, 'book': o_book, 'sparkle': o_sparkle,
            'broadcast': o_broadcast, 'bell': o_bell, 'notes': o_notes, 'team': o_team, 'lens': o_lens, 'cyber': o_cyber, 'gift': o_gift, 'trophy': o_trophy, 'banana': o_banana, 'stopwatch': o_stopwatch, 'brain': o_brain, 'calendar': o_calendar, 'cal_b': o_cal_b, 'cal_c': o_cal_c, 'cal_d': o_cal_d, 'cal_e': o_cal_e, 'cal_f': o_cal_f, 'cal_g': o_cal_g, 'cal_h': o_cal_h, 'cal_i': o_cal_i, 'cal_j': o_cal_j}
 

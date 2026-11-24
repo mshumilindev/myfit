@@ -49,6 +49,8 @@ const ITEM_KEYS: Record<keyof ProgramItem, true> = {
   targetWeight: true,
   targetRpe: true,
   restSec: true,
+  targetPct: true,
+  repsMin: true,
   note: true,
 };
 const WARM_KEYS: Record<keyof ProgramWarmupItem, true> = {
@@ -77,6 +79,7 @@ const PROGRAM_KEYS: Record<keyof Program, true> = {
   dayNames: true,
   targetMuscles: true,
   items: true,
+  cycle: true,
   activities: true,
   activitiesEnc: true,
   updatedAt: true,

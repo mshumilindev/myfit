@@ -123,6 +123,23 @@ export const ADDONS: readonly AddonManifest[] = [
     category: 'workouts',
   },
   { id: 'playbook', kind: 'addon', requires: 'gym', tone: 7, roles: ALL, category: 'workouts' },
+  // Advanced training (SPO-558): the pro tools of Gym. First module: Periodization (SPO-609). Off until the person installs it.
+  {
+    id: 'advanced-training',
+    kind: 'addon',
+    requires: 'gym',
+    tone: 3,
+    roles: ALL,
+    category: 'workouts',
+  },
+  {
+    id: 'periodization',
+    kind: 'module',
+    parent: 'advanced-training',
+    tone: 3,
+    roles: ALL,
+    category: 'workouts',
+  },
   { id: 'atlas', kind: 'addon', requires: 'gym', tone: 6, roles: ALL, category: 'insights' },
   { id: 'apex', kind: 'app', requires: 'gym', tone: 8, roles: ALL, category: 'insights' },
   // Apex's own parts are modules of it (owner rule 07.11): switched on with Apex, each one off in Configure.

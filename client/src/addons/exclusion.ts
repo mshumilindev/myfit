@@ -55,6 +55,16 @@ export const EXCLUSION: Readonly<Record<string, Exclusion>> = {
     files: ['addons/featureGates.ts', 'planner/plannerBoot.ts'],
     names: ['plannerAvailabilityAvailable', 'usePlannerAvailabilityOn'],
   },
+  'advanced-training': {
+    via: ['gate'],
+    files: ['addons/featureGates.ts'],
+    names: ['advancedTrainingAvailable', 'useAdvancedTrainingOn'],
+  },
+  periodization: {
+    via: ['gate'],
+    files: ['addons/featureGates.ts', 'periodizationRt.ts', 'views/programs/cycle.ts'],
+    names: ['periodizationAvailable', 'usePeriodizationOn', 'usePeriodizationHost'],
+  },
   goals: {
     via: ['state-mask', 'gate'],
     files: ['addons/maskStore.ts', 'addons/featureGates.ts'],

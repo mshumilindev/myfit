@@ -244,6 +244,20 @@ export const addonStoreEn = {
         'See focus reflected in exercise suggestions',
       ],
     },
+    'advanced-training': {
+      name: 'Advanced training',
+      tagline: 'Plan the way lifters really train',
+      desc: 'Weekly cycles, % of max and a Maxes list, for programs like 5/3/1.',
+      about:
+        'Some programs change from week to week: a heavy week, a lighter one, a deload. Advanced training lets a program repeat a block of weeks, each with its own days and a hint such as Deload.\n\nSet a load as a % of your max and Spotter turns it into kilograms when you start the session. Keep your Maxes in one list, or let Spotter estimate them from your history.\n\nPrograms without a cycle stay the same every week, and anything you have already saved is kept if you turn the add-on off.',
+      highlights: [
+        'Repeat a block of weeks with a cycle',
+        'Give a week a hint such as Deload',
+        'Set loads as a % of your max',
+        'Rep ranges like 6–8',
+        'A Maxes list, estimated from your history',
+      ],
+    },
     planner: {
       name: 'Planner',
       tagline: 'Know what’s coming up next',
@@ -386,6 +400,7 @@ export const addonStoreEn = {
       ],
     },
     mastery: { name: 'Mastery', desc: 'Track skill levels and long-term progress.' },
+    periodization: { name: 'Periodization', desc: 'Weekly cycles, % of max and Maxes.' },
     'apex-challenges': {
       name: 'Challenges',
       desc: 'Weekly goals to take on, alone or with others.',

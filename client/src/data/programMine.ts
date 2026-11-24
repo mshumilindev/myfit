@@ -18,7 +18,8 @@ import type { EquipmentId } from './equipment';
 import { muscleInfoByName, type MuscleGroup } from './exercises';
 import { exerciseDay, type TrainingDay } from './daySuggest';
 import type { Play } from '../playbook';
-import type { ProgramActivity, ProgramWarmupItem } from '../views/programs/model';
+import type { ProgramActivity, ProgramCycle, ProgramWarmupItem } from '../views/programs/model';
+import { activeWeekPlan, type WeekSource } from '../views/programs/cycle';
 
 export interface ProgramItem {
   id: string;
@@ -41,6 +42,9 @@ export interface ProgramItem {
   targetRpe?: number;
   restSec?: number;
   note?: string;
+  /** Load as a percent of max and the lower end of a rep range (Advanced training › Periodization; read through views/programs/cycle). */
+  targetPct?: number;
+  repsMin?: number;
 }
 
 export interface ProgramAssignment {
@@ -58,6 +62,8 @@ export interface ProgramAssignment {
     activities?: ProgramActivity[];
     /** Sealed form of `activities`, present while the list is encrypted. */
     activitiesEnc?: unknown;
+    /** Optional weekly cycle (Periodization); every reader goes through `assignmentWeek`, which applies the add-on gate. */
+    cycle?: ProgramCycle;
   };
   assignedBy: string | null;
   week: number;
@@ -208,12 +214,22 @@ export function useProgramMine(): ProgramMineState {
 
 // --- Program-day helpers ---------------------------------------------------
 
+/**
+ * The days of the week the assignment is on. The one place that picks a cycle week (SPO-609): with Periodization off, or
+ * without a cycle, it is the program's own week, so Today, the Start sheet, the widgets and the Planner all read the same days.
+ */
+export function assignmentWeek(a: ProgramAssignment) {
+  return activeWeekPlan(a.program as unknown as WeekSource, a.week);
+}
+
 export function programDayItems(a: ProgramAssignment, day: number): ProgramItem[] {
-  return a.program.items.filter((i) => i.day === day).sort((x, y) => x.position - y.position);
+  return (assignmentWeek(a).items as unknown as ProgramItem[])
+    .filter((i) => i.day === day)
+    .sort((x, y) => x.position - y.position);
 }
 
 export function programDayMuscles(a: ProgramAssignment, day: number): MuscleGroup[] {
-  return a.program.targetMuscles?.[String(day)] ?? [];
+  return assignmentWeek(a).targetMuscles?.[String(day)] ?? [];
 }
 
 /** A real training day prescribes lifts OR names target muscles. */
@@ -226,7 +242,7 @@ export function programDayName(
   day: number,
   fallback: (day: number) => string,
 ): string {
-  return a.program.dayNames?.[String(day)] || fallback(day);
+  return assignmentWeek(a).dayNames?.[String(day)] || fallback(day);
 }
 
 /** Push / pull / legs / core / full for a program day, from its lifts' primary

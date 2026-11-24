@@ -60,6 +60,10 @@ export interface ProgramItem {
   restSec?: number;
   /** A cue shown above the set. */
   note?: string;
+  /** Load as a percent of the person's max for this exercise (Advanced training › Periodization). Wins over `targetWeight` when a max is known. */
+  targetPct?: number;
+  /** Lower end of a rep range; `reps` is the upper end (absent = one number). */
+  repsMin?: number;
 }
 
 /** A bare row asks for no sets (R-FE-051). */
@@ -108,6 +112,33 @@ export interface ProgramActivity {
   when: ProgramActivityWhen;
 }
 
+/** What kind of week a cycle week is (the hint every week shows). Absent = a base week. */
+export type CycleLabel = 'deload' | 'test' | 'peak';
+
+/** The days of one cycle week. Planned activities are the same every week, so they are not part of it. */
+export interface WeekPlan {
+  label?: CycleLabel;
+  dayNames: Record<string, string>;
+  targetMuscles: Record<string, MuscleGroup[]>;
+  items: ProgramItem[];
+}
+
+/**
+ * Optional weekly cycle (Advanced training › Periodization). Cycle week 1 is the program's own days (`items`, `dayNames`,
+ * `targetMuscles`); `weeks` holds cycle weeks 2..`length`, so `weeks.length === length - 1`. Week n of the program uses
+ * cycle week ((n - 1) mod length) + 1.
+ */
+export interface ProgramCycle {
+  length: number;
+  /** The hint of cycle week 1. */
+  baseLabel?: CycleLabel;
+  weeks: WeekPlan[];
+}
+
+export const MIN_CYCLE = 2;
+export const MAX_CYCLE = 12;
+export const CYCLE_LABELS: readonly CycleLabel[] = ['deload', 'test', 'peak'];
+
 export type ProgramStatus = 'draft' | 'active' | 'archived';
 
 export interface Program {
@@ -126,6 +157,8 @@ export interface Program {
   activities?: ProgramActivity[];
   /** The stored (sealed) form of `activities`; present when the list is encrypted. */
   activitiesEnc?: VaultEnvelope;
+  /** Optional weekly cycle; absent = every week is the same. Kept stored while the add-on is off. */
+  cycle?: ProgramCycle;
   updatedAt?: number;
 }
 
@@ -240,13 +273,25 @@ export function dayActivities(p: Program, day: number): ProgramActivity[] {
 }
 
 export function normalizeProgram<T extends Program>(p: T): T {
+  const items = normalizeItems(p.items ?? []);
+  const targetMuscles = sanitizeTargetMuscles(p.targetMuscles);
+  const dayNames = p.dayNames ?? {};
+  const cycle = sanitizeCycle(p.cycle, { items, dayNames, targetMuscles });
+  const { cycle: _drop, ...rest } = p;
+  void _drop;
   return {
-    ...p,
+    ...rest,
+    ...(cycle ? { cycle: normalizeCycle(cycle) } : {}),
     ...(p.activities ? { activities: sanitizeActivities(p.activities) } : {}),
-    dayNames: p.dayNames ?? {},
-    targetMuscles: sanitizeTargetMuscles(p.targetMuscles),
-    items: normalizeItems(p.items ?? []),
-  };
+    dayNames,
+    targetMuscles,
+    items,
+  } as T;
+}
+
+/** A cycle with each week's rows put in order (positions 0..n per day), like the base week. */
+function normalizeCycle(c: ProgramCycle): ProgramCycle {
+  return { ...c, weeks: c.weeks.map((w) => ({ ...w, items: normalizeItems(w.items) })) };
 }
 
 export function dayItems(p: Program, day: number): ProgramItem[] {
@@ -307,44 +352,121 @@ export function readiness(p: Program): Readiness {
   return { ok: true };
 }
 
+/** A percent of max kept on a row: whole numbers 1–110, anything else is dropped. */
+export function sanitizePct(n: unknown): number | undefined {
+  return typeof n === 'number' && Number.isFinite(n) && n > 0
+    ? Math.max(1, Math.min(110, Math.round(n)))
+    : undefined;
+}
+
+/** The saved form of a list of rows (names trimmed, numbers clamped, optional fields only when set). */
+function savedItems(src: ProgramItem[]): ProgramItem[] {
+  return src
+    .filter((i) => i.name.trim())
+    .map((i, idx) => {
+      const pct = sanitizePct(i.targetPct);
+      const min = Number.isFinite(i.repsMin) ? Math.round(i.repsMin as number) : 0;
+      return {
+        id: i.id || crypto.randomUUID(),
+        day: Math.max(1, Math.min(7, i.day || 1)),
+        position: i.position ?? idx,
+        name: i.name.trim().slice(0, 120),
+        kind: i.kind,
+        sets: i.sets,
+        reps: i.reps,
+        durationMin: i.durationMin,
+        equipment: i.equipment ?? [],
+        groupId: i.groupId ?? null,
+        groupOrder: i.groupOrder ?? null,
+        dropLast: !!i.dropLast,
+        ...(i.bare ? { bare: true } : {}),
+        ...(i.targetWeight ? { targetWeight: i.targetWeight } : {}),
+        ...(pct ? { targetPct: pct } : {}),
+        ...(min >= 1 && min < i.reps ? { repsMin: min } : {}),
+        ...(i.targetRpe ? { targetRpe: i.targetRpe } : {}),
+        ...(i.restSec ? { restSec: i.restSec } : {}),
+        ...(i.note?.trim() ? { note: i.note.trim().slice(0, 120) } : {}),
+        ...(i.kind === 'warmup' && sanitizeWarmupItems(i.warmupItems).length
+          ? { warmupItems: sanitizeWarmupItems(i.warmupItems) }
+          : {}),
+      };
+    });
+}
+
+/** The saved days of one week: rows, day names, and target muscles only for days without rows. */
+function savedWeekParts(
+  src: Pick<WeekPlan, 'items' | 'dayNames' | 'targetMuscles'>,
+): Pick<WeekPlan, 'items' | 'dayNames' | 'targetMuscles'> {
+  const items = savedItems(src.items ?? []);
+  const withItems = new Set(items.map((i) => String(i.day)));
+  const targetMuscles: Record<string, MuscleGroup[]> = {};
+  for (const [d, ms] of Object.entries(sanitizeTargetMuscles(src.targetMuscles))) {
+    if (!withItems.has(d)) targetMuscles[d] = ms;
+  }
+  const dayNames: Record<string, string> = {};
+  for (const [d, n] of Object.entries(src.dayNames ?? {})) {
+    const v = typeof n === 'string' ? n.trim().slice(0, 40) : '';
+    if (v) dayNames[d] = v;
+  }
+  return { items, dayNames, targetMuscles };
+}
+
+const labelOf = (v: unknown): CycleLabel | undefined =>
+  CYCLE_LABELS.includes(v as CycleLabel) ? (v as CycleLabel) : undefined;
+
+/** A copy of rows with fresh ids (and fresh group ids), used when a cycle week starts as a copy of another. */
+export function cloneItems(src: ProgramItem[]): ProgramItem[] {
+  const groups = new Map<string, string>();
+  return src.map((it) => {
+    let groupId = it.groupId ?? null;
+    if (groupId) {
+      if (!groups.has(groupId)) groups.set(groupId, crypto.randomUUID());
+      groupId = groups.get(groupId)!;
+    }
+    return { ...it, id: crypto.randomUUID(), groupId };
+  });
+}
+
+/**
+ * Coerce a stored (or absent / malformed) cycle to a clean one that matches `base` (cycle week 1): length 2–12, one week for
+ * each of the other cycle weeks (a missing one starts as a copy of the base), labels only from the known set. A cycle of
+ * fewer than 2 weeks is no cycle (undefined).
+ */
+export function sanitizeCycle(
+  raw: unknown,
+  base: Pick<WeekPlan, 'items' | 'dayNames' | 'targetMuscles'>,
+): ProgramCycle | undefined {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const r = raw as Record<string, unknown>;
+  const len = Math.round(Number(r.length));
+  if (!Number.isFinite(len) || len < MIN_CYCLE) return undefined;
+  const length = Math.min(MAX_CYCLE, len);
+  const stored = Array.isArray(r.weeks) ? (r.weeks as unknown[]) : [];
+  const weeks: WeekPlan[] = [];
+  for (let i = 0; i < length - 1; i++) {
+    const w = stored[i];
+    const o = w && typeof w === 'object' ? (w as Record<string, unknown>) : null;
+    const parts = savedWeekParts(
+      o
+        ? {
+            items: Array.isArray(o.items) ? (o.items as ProgramItem[]) : [],
+            dayNames: (o.dayNames ?? {}) as Record<string, string>,
+            targetMuscles: (o.targetMuscles ?? {}) as Record<string, MuscleGroup[]>,
+          }
+        : { ...base, items: cloneItems(base.items) },
+    );
+    const label = o ? labelOf(o.label) : undefined;
+    weeks.push({ ...(label ? { label } : {}), ...parts });
+  }
+  const baseLabel = labelOf(r.baseLabel);
+  return { length, ...(baseLabel ? { baseLabel } : {}), weeks };
+}
+
 /** The document written to Firestore: exercises days drop stale muscles. */
 export function toSaved(p: Program, uid: string, fallbackName: string): Program {
   const rawW = Number(p.weeks);
   const weeks = rawW === 0 ? 0 : Math.max(1, Math.min(52, rawW || 8));
-  const items = p.items
-    .filter((i) => i.name.trim())
-    .map((i, idx) => ({
-      id: i.id || crypto.randomUUID(),
-      day: Math.max(1, Math.min(7, i.day || 1)),
-      position: i.position ?? idx,
-      name: i.name.trim().slice(0, 120),
-      kind: i.kind,
-      sets: i.sets,
-      reps: i.reps,
-      durationMin: i.durationMin,
-      equipment: i.equipment ?? [],
-      groupId: i.groupId ?? null,
-      groupOrder: i.groupOrder ?? null,
-      dropLast: !!i.dropLast,
-      ...(i.bare ? { bare: true } : {}),
-      ...(i.targetWeight ? { targetWeight: i.targetWeight } : {}),
-      ...(i.targetRpe ? { targetRpe: i.targetRpe } : {}),
-      ...(i.restSec ? { restSec: i.restSec } : {}),
-      ...(i.note?.trim() ? { note: i.note.trim().slice(0, 120) } : {}),
-      ...(i.kind === 'warmup' && sanitizeWarmupItems(i.warmupItems).length
-        ? { warmupItems: sanitizeWarmupItems(i.warmupItems) }
-        : {}),
-    }));
-  const withItems = new Set(items.map((i) => String(i.day)));
-  const targetMuscles: Record<string, MuscleGroup[]> = {};
-  for (const [d, ms] of Object.entries(sanitizeTargetMuscles(p.targetMuscles))) {
-    if (!withItems.has(d)) targetMuscles[d] = ms;
-  }
-  const dayNames: Record<string, string> = {};
-  for (const [d, n] of Object.entries(p.dayNames ?? {})) {
-    const v = n.trim().slice(0, 40);
-    if (v) dayNames[d] = v;
-  }
+  const { items, dayNames, targetMuscles } = savedWeekParts(p);
   const next: Program = {
     id: p.id,
     authorId: uid,
@@ -355,6 +477,9 @@ export function toSaved(p: Program, uid: string, fallbackName: string): Program 
     dayNames,
     targetMuscles,
     items,
+    ...(sanitizeCycle(p.cycle, { items, dayNames, targetMuscles })
+      ? { cycle: sanitizeCycle(p.cycle, { items, dayNames, targetMuscles }) }
+      : {}),
     // Sealing happens at write time (activitiesVault.ts); a list this device can't
     // open (`activities` undefined) keeps its stored envelope.
     ...(p.activities !== undefined
@@ -403,6 +528,14 @@ export function duplicateOf(p: Program, name: string): Program {
     status: 'draft',
     ...(p.activities?.length
       ? { activities: p.activities.map((a) => ({ ...a, id: crypto.randomUUID() })) }
+      : {}),
+    ...(p.cycle
+      ? {
+          cycle: {
+            ...p.cycle,
+            weeks: p.cycle.weeks.map((w) => ({ ...w, items: cloneItems(w.items) })),
+          },
+        }
       : {}),
     items: p.items.map((it) => {
       let groupId = it.groupId ?? null;

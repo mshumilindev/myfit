@@ -239,6 +239,20 @@ export const addonStorePl: typeof addonStoreEn = {
         'Zmiany w objętości i doborze ćwiczeń',
       ],
     },
+    'advanced-training': {
+      name: 'Zaawansowany trening',
+      tagline: 'Planuj tak, jak naprawdę trenują podnoszący',
+      desc: 'Cykle tygodniowe, % maksimum i lista maksimów — do programów takich jak 5/3/1.',
+      about:
+        'Niektóre programy zmieniają się z tygodnia na tydzień: ciężki tydzień, lżejszy, odciążenie. Zaawansowany trening pozwala powtarzać blok tygodni, każdy z własnymi dniami i oznaczeniem, np. Odciążenie.\n\nUstaw obciążenie jako % maksimum, a Spotter zamieni je na kilogramy przy starcie treningu. Trzymaj maksima na jednej liście albo pozwól Spotterowi oszacować je z historii.\n\nProgramy bez cyklu są takie same co tydzień, a to, co zapisałeś, zostaje po wyłączeniu dodatku.',
+      highlights: [
+        'Powtarzaj blok tygodni cyklem',
+        'Oznacz tydzień, np. Odciążenie',
+        'Obciążenie jako % maksimum',
+        'Zakresy powtórzeń, np. 6–8',
+        'Lista maksimów oszacowana z historii',
+      ],
+    },
     planner: {
       name: 'Planer',
       tagline: 'Zaplanuj dzień po swojemu',
@@ -381,6 +395,7 @@ export const addonStorePl: typeof addonStoreEn = {
       ],
     },
     mastery: { name: 'Mistrzostwo', desc: 'Poziomy umiejętności i długofalowy postęp.' },
+    periodization: { name: 'Periodyzacja', desc: 'Cykle tygodniowe, % maksimum i maksima.' },
     'apex-challenges': { name: 'Wyzwania', desc: 'Cotygodniowe cele: samemu lub z innymi.' },
     'apex-ranks': { name: 'Rankingi', desc: 'Gdzie są Twoje ćwiczenia na tle norm siły.' },
     'apex-awards': { name: 'Nagrody', desc: 'Osiągnięcia odblokowywane w miarę treningów.' },

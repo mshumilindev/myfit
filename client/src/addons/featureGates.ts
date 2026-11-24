@@ -88,3 +88,34 @@ export function usePlannerAvailabilityOn(): boolean {
 export function usePlannerOn(): boolean {
   return useAddonOrBase('planner');
 }
+
+/** Advanced training (the pro tools of Gym): without it the base Gym shows and counts none of them. */
+export function advancedTrainingAvailable(): boolean {
+  try {
+    return addonAvailable('advanced-training');
+  } catch {
+    return false;
+  }
+}
+
+/** The same Advanced training gate for components. */
+export function useAdvancedTrainingOn(): boolean {
+  return useAddonOrBase('advanced-training');
+}
+
+/**
+ * Periodization (weekly cycles, % of max, rep ranges, Maxes): without it every week of a program is the same, loads stay in kg
+ * and nothing of it is drawn. The stored cycles and maxes stay and come back on re-install.
+ */
+export function periodizationAvailable(): boolean {
+  try {
+    return addonAvailable('periodization');
+  } catch {
+    return false;
+  }
+}
+
+/** The same Periodization gate for components. */
+export function usePeriodizationOn(): boolean {
+  return useAddonOrBase('periodization');
+}
