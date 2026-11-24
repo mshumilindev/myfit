@@ -124,6 +124,7 @@ const USER_SUBPATHS = [
   'plannerEvents/e1',
   'plannerAlerts/a1',
   'meta/planner',
+  'meta/maxes',
   'pings/p1',
   'reminderDismissals/d1',
   'push/dev1',

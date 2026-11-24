@@ -12,6 +12,8 @@ import type { LocaleId } from './i18n';
 import type { MoreMenuItem } from './components/ui/MoreMenu';
 import type { ProgramCycle, ProgramItem, WeekPlan } from './views/programs/model';
 import type { MuscleGroup } from './data/exercises';
+import type { Exercise } from './types';
+import type { ExportFile } from './legal/export/exportTypes';
 
 /** The least a program must have for a cycle to apply to it. */
 export interface WeekSource {
@@ -38,6 +40,8 @@ export interface PeriodizationHost {
   MaxesPage: ComponentType<{ onClose: () => void }> | null;
   /** The one plain row in More. */
   moreItem: ((locale: LocaleId, open: () => void) => MoreMenuItem) | null;
+  /** The typed maxes, decrypted on this device, for the data export. */
+  exportFiles: (() => ExportFile[]) | null;
   /** The person's max for an exercise in kg (typed, else the estimate from history); null when there is none. */
   maxFor: ((exerciseName: string) => number | null) | null;
   /** The days of program week `week` (the cycle week it falls on). */
@@ -50,6 +54,10 @@ export interface PeriodizationHost {
   rowExtras: ((i: ProgramItem) => RowExtras) | null;
   /** The load a row asks for, given the person's max. */
   load: ((i: Pick<ProgramItem, 'targetWeight' | 'targetPct'>, max: number | null) => Load) | null;
+  /** The lower end of a rep range, or null when the row has none. */
+  repsMin: ((i: Pick<ProgramItem, 'reps' | 'repsMin'>) => number | null) | null;
+  /** The line under an exercise in a live session: the percent, the kilograms, the rep range. */
+  TargetLine: ComponentType<{ exercise: Exercise }> | null;
   /** "6–8" or the plain rep count. */
   repsLabel: ((i: Pick<ProgramItem, 'reps' | 'repsMin'>) => string) | null;
 }
@@ -57,12 +65,15 @@ export interface PeriodizationHost {
 export const periodizationHost: PeriodizationHost = {
   MaxesPage: null,
   moreItem: null,
+  exportFiles: null,
   maxFor: null,
   weekPlan: null,
   sanitizeCycle: null,
   cloneCycle: null,
   rowExtras: null,
   load: null,
+  repsMin: null,
+  TargetLine: null,
   repsLabel: null,
 };
 
@@ -111,6 +122,11 @@ export function loadFor(
 export function repsLabelFor(i: Pick<ProgramItem, 'reps' | 'repsMin'>): string {
   if (live() && periodizationHost.repsLabel) return periodizationHost.repsLabel(i);
   return String(i.reps);
+}
+
+/** The lower end of a row's rep range; null while the module is off or the row has no range. */
+export function repsMinFor(i: Pick<ProgramItem, 'reps' | 'repsMin'>): number | null {
+  return live() && periodizationHost.repsMin ? periodizationHost.repsMin(i) : null;
 }
 
 /** The person's max for an exercise, or null: always null while the module is off or its chunk has not loaded. */

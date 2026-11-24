@@ -8,6 +8,7 @@ import { getRole } from '../../api';
 import { useThemesOn } from '../../themes/useThemeAccess';
 import { setHash } from '../../route';
 import { usePlannerHost } from '../../plannerRt';
+import { usePeriodizationHost } from '../../periodizationRt';
 import { storeHash } from '../../addonStore/storeRoute';
 import type { MoreMenuItem } from '../ui/MoreMenu';
 
@@ -15,6 +16,7 @@ export function useCommonMoreItems(onPrivacy?: () => void): MoreMenuItem[] {
   const { t, locale } = useT();
   const themesOn = useThemesOn();
   const planner = usePlannerHost();
+  const periodization = usePeriodizationHost();
   return [
     ...(getRole() === 'manager'
       ? []
@@ -39,6 +41,8 @@ export function useCommonMoreItems(onPrivacy?: () => void): MoreMenuItem[] {
       : []),
     // Planner: one plain row, only while the add-on is installed and its chunk has loaded.
     ...(planner?.moreItem ? [planner.moreItem(locale, () => setHash('#/planner'))] : []),
+    // Maxes (Advanced training › Periodization): one plain row, only while the module is installed and its chunk has loaded.
+    ...(periodization?.moreItem ? [periodization.moreItem(locale, () => setHash('#/maxes'))] : []),
     {
       id: 'privacy',
       icon: 'lock',

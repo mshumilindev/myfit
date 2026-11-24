@@ -5,11 +5,27 @@
  */
 import { useSyncExternalStore } from 'react';
 import { usePeriodizationOn } from './addons/featureGates';
+import { registerAddonExport } from './legal/export/addonExport';
 import { isTrackerReady, onTrackerReady } from './trackerRt';
 import { periodizationHost, type PeriodizationHost } from './periodizationApi';
 
 export { periodizationHost, maxForExercise } from './periodizationApi';
 export type { PeriodizationHost } from './periodizationApi';
+
+// The data export always names Advanced training: its files when the chunk is loaded, otherwise "not included" (the data stays stored).
+registerAddonExport('advanced-training', () =>
+  periodizationHost.exportFiles
+    ? { files: periodizationHost.exportFiles(), missing: [] }
+    : {
+        files: [],
+        missing: [
+          {
+            item: 'Your typed maxes (install Advanced training to include them)',
+            reason: 'feature-off',
+          },
+        ],
+      },
+);
 
 /** The host once the chunk is loaded, and only while Periodization is installed; otherwise null (nothing shows). */
 export function usePeriodizationHost(): PeriodizationHost | null {

@@ -103,6 +103,10 @@ export interface Exercise {
   plannedSets?: number | null;
   plannedReps?: number | null;
   plannedDurationMin?: number | null;
+  /** Advanced training › Periodization: the row asked for this % of the max (kept even without a max), the kilograms it came to when a max was known at the start, and the lower end of a rep range. */
+  plannedPct?: number;
+  plannedKg?: number;
+  plannedRepsMin?: number;
   /** The coach plan row this exercise was started from (program item id): its sealed target is shown above the sets. */
   planItemId?: string;
   equipment?: string[];

@@ -19,7 +19,13 @@ import { muscleInfoByName, type MuscleGroup } from './exercises';
 import { exerciseDay, type TrainingDay } from './daySuggest';
 import type { Play } from '../playbook';
 import type { ProgramActivity, ProgramCycle, ProgramWarmupItem } from '../views/programs/model';
-import { weekPlanFor, type WeekSource } from '../periodizationApi';
+import {
+  loadFor,
+  maxForExercise,
+  repsMinFor,
+  weekPlanFor,
+  type WeekSource,
+} from '../periodizationApi';
 
 export interface ProgramItem {
   id: string;
@@ -283,7 +289,13 @@ export function startProgramDaySession(
   const w = startWorkout(gymId, { dayName, targetMuscles: programDayMuscles(a, day) });
   if (!w) return null;
   for (const item of items) {
+    // Periodization: a % of max turns into kilograms here, once, against the max known now (neutral when the module is off).
+    const load = item.kind === 'strength' ? loadFor(item, maxForExercise(item.name)) : null;
+    const repsMin = item.kind === 'strength' ? repsMinFor(item) : null;
     addExercise(w.id, item.name, item.kind, {
+      ...(load?.pct ? { plannedPct: load.pct } : {}),
+      ...(load?.pct && load.kg ? { plannedKg: load.kg } : {}),
+      ...(repsMin ? { plannedRepsMin: repsMin } : {}),
       plannedSets: item.kind === 'strength' ? item.sets : 1,
       plannedReps: item.kind === 'strength' ? item.reps : null,
       plannedDurationMin:

@@ -1279,6 +1279,10 @@ interface ExercisePlan {
   plannedSets?: number | null;
   plannedReps?: number | null;
   plannedDurationMin?: number | null;
+  /** Periodization: % of max, the kilograms it came to at the start, the lower end of a rep range. */
+  plannedPct?: number;
+  plannedKg?: number;
+  plannedRepsMin?: number;
   /** Program item id the exercise was started from (the trainer's target is looked up by it). */
   planItemId?: string;
   equipment?: string[];
@@ -2108,6 +2112,9 @@ export function addExercise(
     plannedSets: plan.plannedSets ?? null,
     plannedReps: plan.plannedReps ?? null,
     plannedDurationMin: plan.plannedDurationMin ?? null,
+    ...(plan.plannedPct ? { plannedPct: plan.plannedPct } : {}),
+    ...(plan.plannedKg ? { plannedKg: plan.plannedKg } : {}),
+    ...(plan.plannedRepsMin ? { plannedRepsMin: plan.plannedRepsMin } : {}),
     ...(plan.planItemId ? { planItemId: plan.planItemId } : {}),
     equipment: plan.equipment ?? (info?.equipment ? [info.equipment] : []),
     groupId: plan.groupId ?? null,
@@ -6187,6 +6194,9 @@ export function duplicateExercise(workoutId: string, exerciseId: string): void {
     plannedSets: ex.plannedSets ?? null,
     plannedReps: ex.plannedReps ?? null,
     plannedDurationMin: ex.plannedDurationMin ?? null,
+    ...(ex.plannedPct ? { plannedPct: ex.plannedPct } : {}),
+    ...(ex.plannedKg ? { plannedKg: ex.plannedKg } : {}),
+    ...(ex.plannedRepsMin ? { plannedRepsMin: ex.plannedRepsMin } : {}),
     ...(ex.planItemId ? { planItemId: ex.planItemId } : {}),
     equipment: ex.equipment ?? [],
     primaryMuscle: ex.primaryMuscle ?? null,

@@ -107,6 +107,7 @@ import { AtlasOutboxLazy } from './atlas/AtlasOutboxLazy';
 import { useAtlasOutboxClear } from './atlas/useAtlasOutboxClear';
 import { useAddonRuntime } from './addons/useAddonRuntime';
 import { usePlannerHost } from './plannerRt';
+import { usePeriodizationHost } from './periodizationRt';
 import { apexMastery } from './views/apexMastery';
 import { isStoreHash, StoreScreen, useRoleWithStore } from './addonStore/StoreEntry';
 import { legalRoute, useJoinLinkSync, useLegalRoute } from './legal/route';
@@ -291,6 +292,7 @@ export type Overlay =
   | { screen: 'themes' }
   | { screen: 'privacy'; page?: 'sharing' }
   | { screen: 'planner' }
+  | { screen: 'maxes' }
   | { screen: 'theme-settings' }
   | { screen: 'notifications' }
   | { screen: 'recap'; period: string }
@@ -438,6 +440,7 @@ export function toHash(
   if (overlay?.screen === 'privacy')
     return overlay.page === 'sharing' ? '#/more/privacy/sharing' : '#/more/privacy';
   if (overlay?.screen === 'planner') return '#/planner';
+  if (overlay?.screen === 'maxes') return '#/maxes';
   if (overlay?.screen === 'theme-settings') return '#/theme-settings';
   if (overlay?.screen === 'builder') return '#/builder';
   if (overlay?.screen === 'injury') return '#/injury';
@@ -587,6 +590,7 @@ export function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   if (head === 'history') return { tab: 'today', overlay: { screen: 'history' } };
   if (head === 'themes') return { tab: 'today', overlay: { screen: 'themes' } };
   if (head === 'planner') return { tab: 'today', overlay: { screen: 'planner' } };
+  if (head === 'maxes') return { tab: 'today', overlay: { screen: 'maxes' } };
   if (head === 'theme-settings') return { tab: 'today', overlay: { screen: 'theme-settings' } };
   if (head === 'builder') return { tab: 'today', overlay: { screen: 'builder' } };
   if (head === 'notifications') return { tab: 'today', overlay: { screen: 'notifications' } };
@@ -805,6 +809,7 @@ function AppMain() {
     injuryOn,
   } = useAddonRuntime();
   const plannerHost = usePlannerHost();
+  const periodizationHost = usePeriodizationHost();
   // Rank-up moment: once per crossing, compared against the last surfaced rating.
   useEffect(() => {
     if (!apexOn || !masteryOn) return;
@@ -1131,6 +1136,7 @@ function AppMain() {
     (overlay?.screen === 'sleep' && !sleepOn && !nightLive) ||
     (overlay?.screen === 'themes' && !themesOn) ||
     (overlay?.screen === 'planner' && !plannerHost?.Page) ||
+    (overlay?.screen === 'maxes' && !periodizationHost?.MaxesPage) ||
     (overlay?.screen === 'mastery' && (!apexOn || !masteryOn)) ||
     ((overlay?.screen === 'log-activity' || overlay?.screen === 'activity') && !activitiesOn) ||
     (overlay?.screen === 'home-set' && !homeSetsOn) ||
@@ -1679,6 +1685,9 @@ function AppMain() {
       )}
       {activeOverlay?.screen === 'theme-settings' && <ThemeSettingsView onClose={closeOverlay} />}
       {plannerHost?.Layer && <plannerHost.Layer />}
+      {activeOverlay?.screen === 'maxes' && periodizationHost?.MaxesPage && (
+        <periodizationHost.MaxesPage onClose={closeOverlay} />
+      )}
       {activeOverlay?.screen === 'planner' && plannerHost?.Page && (
         <plannerHost.Page onClose={closeOverlay} />
       )}

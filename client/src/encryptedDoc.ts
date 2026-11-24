@@ -26,6 +26,8 @@ export const OPEN_FIELDS = {
   plannerEvents: ['id', 'mode', 'nextFireAt', 'fireAts', 'enabled', 'v', 'updatedAt'],
   // users/{uid}/meta/planner — weekly availability, defaults, what is shared with the trainer: all inside, only the stamp open.
   planner: ['updatedAt'],
+  // users/{uid}/meta/maxes — the person's typed maxes per exercise (Advanced training › Periodization, SPO-609): all inside, only the stamp open.
+  maxes: ['updatedAt'],
   // No server reads: everything inside.
   gyms: ['id', 'updatedAt'],
   restPeriods: ['id', 'updatedAt'],

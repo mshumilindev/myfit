@@ -41,6 +41,7 @@ export const MIGRATION_ORDER: SealedCollection[] = [
   'atlasChatState',
   'plannerEvents',
   'planner',
+  'maxes',
 ];
 
 export interface MigratePorts {

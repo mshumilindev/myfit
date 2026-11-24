@@ -113,6 +113,11 @@ export function loadKg(
   return { kg: item.targetWeight ?? null, pct: null, needsMax: false };
 }
 
+/** The lower end of a range, when the row has one (below the upper end), else null. */
+export function repsMinOf(item: Pick<ProgramItem, 'reps' | 'repsMin'>): number | null {
+  return item.repsMin && item.repsMin < item.reps ? item.repsMin : null;
+}
+
 /** "6–8" for a range, else the plain rep count. */
 export function repsLabel(item: Pick<ProgramItem, 'reps' | 'repsMin'>): string {
   const min = item.repsMin;

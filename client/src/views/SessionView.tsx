@@ -3,6 +3,7 @@ import { usePlaybookOn } from '../addons/featureGates';
 import { useSleepsForCalc } from '../addons/useSleeps';
 import { getSyncMeta } from '../syncMeta';
 import { ClientTargetStripLazy } from '../coach/client/lazy';
+import { PeriodizationTarget } from '../periodizationTarget';
 import { useStoredConditionLimits } from '../healthBuild';
 import { EmptyState } from '../components/ui/EmptyState';
 import { SwitchIndicator } from '../components/ui/Switch';
@@ -1032,6 +1033,9 @@ export function SessionView(props: {
     }
     // Fallbacks: previous session, then the last set, then the plan.
     const prev = prevLift(ex.name, workout!.id, liftVariant(workout!, ex));
+    // A prescribed % of max that came to kilograms at the start leads the first set (Periodization).
+    if (!sets.length && ex.plannedKg)
+      return { reps: ex.plannedReps ?? prev?.reps ?? 8, weight: ex.plannedKg };
     if (prev) return { reps: ex.plannedReps ?? prev.reps, weight: prev.weight };
     const last = sets[sets.length - 1];
     if (last) return { reps: last.reps, weight: last.weight ?? null };
@@ -3242,6 +3246,7 @@ export function SessionView(props: {
         </div>
         {renaming === ex.id && <div className="ut-xs ut-faint umb-8">{t.renameHint}</div>}
         {!marker && <ClientTargetStripLazy exName={ex.name} planItemId={ex.planItemId} />}
+        {!marker && ex.plannedPct ? <PeriodizationTarget exercise={ex} /> : null}
         {showChips && (
           <div className="exercise-chips one-line">
             <IconButton

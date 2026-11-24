@@ -100,6 +100,13 @@ export const LEGACY_DOCS = {
     },
   ],
   planner: ['planner', { updatedAt: 1_700_000_000_000, availability: { mon: [[18, 21]] } }],
+  maxes: [
+    'maxes',
+    {
+      updatedAt: 1_700_000_000_000,
+      maxes: { 'back squat': { name: 'Back Squat', kg: 140, at: 1_700_000_000_000 } },
+    },
+  ],
   goals: ['goals', { updatedAt: 1_700_000_000_000, physique: 'lean', focus: ['legs'] }],
   home: ['home', { updatedAt: 1_700_000_000_000, sets: [{ name: 'Home set' }] }],
   mastery: ['mastery', { updatedAt: 1_700_000_000_000, level: 'intermediate' }],

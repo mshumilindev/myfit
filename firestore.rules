@@ -326,7 +326,7 @@ service cloud.firestore {
         allow read: if isSelf(userId);
         // the sealed documents have their own shape rules below (SPO-217: goals/home/mastery/coach are sealed too)
         allow write: if isSelf(userId) && !(docId in ['chatKeys', 'signalState', 'selfCoach', 'calendarSettings',
-          'goals', 'home', 'mastery', 'coach', 'exercisePrefs', 'sleepPrefs', 'widgetData', 'challenges', 'atlasChatState', 'planner']);
+          'goals', 'home', 'mastery', 'coach', 'exercisePrefs', 'sleepPrefs', 'widgetData', 'challenges', 'atlasChatState', 'planner', 'maxes']);
       }
       // Chat key store: every conversation key of this user, sealed under their DEK (written with encryptJson).
       match /meta/chatKeys {
@@ -356,6 +356,15 @@ service cloud.firestore {
       }
       // Planner: availability, defaults and sharing, sealed under the owner's DEK (SPO-552).
       match /meta/planner {
+        allow read: if isSelf(userId);
+        allow create, update: if isSelf(userId)
+          && request.resource.data.keys().hasOnly(['updatedAt', 'enc'])
+          && request.resource.data.updatedAt is int
+          && dekEnc(request.resource.data, 60000);
+        allow delete: if isSelf(userId);
+      }
+      // Maxes: the person's typed one-rep maxes per exercise, sealed under the owner's DEK (SPO-609, Advanced training).
+      match /meta/maxes {
         allow read: if isSelf(userId);
         allow create, update: if isSelf(userId)
           && request.resource.data.keys().hasOnly(['updatedAt', 'enc'])

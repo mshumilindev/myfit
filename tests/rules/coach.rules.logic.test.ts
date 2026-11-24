@@ -127,6 +127,8 @@ describe('rules file: static checks', () => {
         'users/{userId}/meta/goals',
         'users/{userId}/meta/home',
         'users/{userId}/meta/mastery',
+        // SPO-609: Advanced training's sealed maxes
+        'users/{userId}/meta/maxes',
         // SPO-552: Planner's sealed availability and defaults
         'users/{userId}/meta/planner',
         'users/{userId}/meta/selfCoach',

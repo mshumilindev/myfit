@@ -187,6 +187,18 @@
       "availability.mon[][]": "number"
     }
   },
+  "maxes": {
+    "id": "maxes",
+    "shape": {
+      "$": "object",
+      "updatedAt": "number",
+      "maxes": "object",
+      "maxes.back squat": "object",
+      "maxes.back squat.name": "string",
+      "maxes.back squat.kg": "number",
+      "maxes.back squat.at": "number"
+    }
+  },
   "plannerEvents": {
     "id": "p-legacy-1",
     "shape": {

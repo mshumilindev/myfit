@@ -39,6 +39,7 @@ export const SEALED_META = [
   'selfCoach',
   'calendarSettings',
   'planner',
+  'maxes',
 ] as const;
 export const ALL: Op[] = ['get', 'list', 'create', 'update', 'delete'];
 const READ_DELETE: Op[] = ['get', 'list', 'delete'];
