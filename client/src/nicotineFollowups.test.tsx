@@ -13,7 +13,7 @@ import {
   NICOTINE_SURFACES,
 } from './nicotine';
 import { nicotineCoachView } from './nicotineShare';
-import { levelOfIdx } from './today/widgets/training';
+import { levelOfIdx } from './fatigue/FatigueWidget';
 import { nicotineRest } from './today/widgets/plan';
 import { startProgramDaySession } from './data/programMine';
 import { CoachNicotine, coachEffectText } from './views/CoachNicotine';

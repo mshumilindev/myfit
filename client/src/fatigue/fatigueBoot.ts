@@ -5,9 +5,17 @@
  */
 import { fatigueHost } from '../fatigueApi';
 import { provide, trackerReady } from '../trackerRt';
+import { ReadinessWidget } from './ReadinessWidget';
+import { FatigueWidget } from './FatigueWidget';
 import { MuscleStatePanel } from './MuscleStatePanel';
 import { ReadinessLens, buildReadinessNudge } from './Readiness';
 
-provide(fatigueHost, { MuscleStatePanel, ReadinessLens, buildReadinessNudge });
+provide(fatigueHost, {
+  FatigueWidget,
+  ReadinessWidget,
+  MuscleStatePanel,
+  ReadinessLens,
+  buildReadinessNudge,
+});
 
 trackerReady('fatigue');

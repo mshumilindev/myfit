@@ -2,6 +2,7 @@ import { currentHash } from '../../route';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, screen, within } from '@testing-library/react';
 import { TRAINING_WIDGETS } from './training';
+import '../../fatigue/fatigueBoot';
 import { widgetMatrix } from '../__fixtures__/matrix';
 import { NOW, STATES, PRESETS, renderWidget, seed, setLocale } from '../__fixtures__/widgetHarness';
 import type { WidgetSize } from '../../components/ui/Widget';

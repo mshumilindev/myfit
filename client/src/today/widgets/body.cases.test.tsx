@@ -1,3 +1,4 @@
+import '../../fatigue/fatigueBoot';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { BODY_WIDGETS } from './body';

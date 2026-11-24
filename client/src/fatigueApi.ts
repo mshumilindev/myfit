@@ -7,6 +7,8 @@
 import type { ComponentType } from 'react';
 import type { MuscleGroup } from './data/exercises';
 import type { Nudge } from './components/NudgeStack';
+import type { WidgetSize } from './components/ui/Widget';
+import type { WidgetCtx } from './today/registry';
 import type { useT } from './i18n';
 import type { Workout } from './types';
 import { fatigueAvailable, readinessAvailable } from './addons/featureGates';
@@ -47,7 +49,16 @@ export interface ReadinessLensProps {
   view?: 'full' | 'map' | 'list';
 }
 
+export interface FatigueWidgetProps {
+  size: WidgetSize;
+  ctx: WidgetCtx;
+}
+
 export interface FatigueHost {
+  /** The body of the Fatigue & deload widget on Today. */
+  FatigueWidget: ComponentType<FatigueWidgetProps> | null;
+  /** The body of the Readiness widget on Today. */
+  ReadinessWidget: ComponentType<FatigueWidgetProps> | null;
   /** The readiness read of the Progress volume lens. */
   ReadinessLens: ComponentType<ReadinessLensProps> | null;
   /** The readiness card for the Today stack (null on a cold start). */
@@ -58,6 +69,8 @@ export interface FatigueHost {
 }
 
 export const fatigueHost: FatigueHost = {
+  FatigueWidget: null,
+  ReadinessWidget: null,
   ReadinessLens: null,
   buildReadinessNudge: null,
   MuscleStatePanel: null,
