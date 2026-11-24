@@ -190,3 +190,36 @@ describe('copies get fresh ids', () => {
     expect(d.cycle?.length).toBe(2);
   });
 });
+
+describe('document size', () => {
+  it('a 12-week cycle of 7 days x 12 rows with the longest names and notes stays below 80% of the 1 MiB document limit (measured: about 548 KB)', () => {
+    const rows = (): ProgramItem[] =>
+      Array.from({ length: 7 * 12 }, (_, i) =>
+        row((i % 7) + 1, {
+          id: crypto.randomUUID(),
+          position: Math.floor(i / 7),
+          name: 'N'.repeat(120),
+          note: 'n'.repeat(120),
+          targetWeight: 102.5,
+          targetPct: 87,
+          repsMin: 4,
+          reps: 6,
+          targetRpe: 8,
+          restSec: 180,
+          equipment: ['barbell', 'rack'] as never,
+        }),
+      );
+    const week = () => ({
+      dayNames: Object.fromEntries([1, 2, 3, 4, 5, 6, 7].map((d) => [String(d), 'D'.repeat(40)])),
+      targetMuscles: {},
+      items: rows(),
+    });
+    const p = base({
+      items: rows(),
+      dayNames: week().dayNames,
+      cycle: { length: 12, weeks: Array.from({ length: 11 }, week) },
+    });
+    const bytes = new TextEncoder().encode(JSON.stringify(toSaved(p))).length;
+    expect(bytes).toBeLessThan(1_048_576 * 0.8);
+  });
+});
