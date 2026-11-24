@@ -5,6 +5,7 @@ import { getRole } from '../api';
 import { queueAdd, queueRemove } from '../addons/queue';
 import type { AddonStoreStrings } from '../i18n/addonStore';
 import { SkBadge, SkBtn, SkHighlight, SkIcon, SkInstalledLabel, SkRow, SkTile } from '../store-kit';
+import { useMotionTier } from '../motion';
 import { highlightParts } from './search';
 
 export interface StoreCtx {
@@ -37,21 +38,31 @@ export const itemHighlights = (st: AddonStoreStrings, id: string): readonly stri
 /** The item's rendered icon (Blender, public/store-icons/<id>.webp); an item without one falls back to its letter tile. */
 export const iconUrl = (id: string) => `${import.meta.env.BASE_URL ?? '/'}store-icons/${id}.webp`;
 
+/** Items with an animated icon (public/store-icons/<id>-anim.webp). It plays only on the item page and banners, never in lists. */
+export const ANIMATED_ICONS: ReadonlySet<string> = new Set(['fatigue-readiness']);
+export const animIconUrl = (id: string) =>
+  `${import.meta.env.BASE_URL ?? '/'}store-icons/${id}-anim.webp`;
+
 export function TileOf({
   st,
   m,
   size,
+  animated,
 }: {
   st: AddonStoreStrings;
   m: AddonManifest;
   size?: 32 | 40 | 64 | 96;
+  /** Item page and banners only: play the animated icon when the item has one and motion is allowed (otherwise the still). */
+  animated?: boolean;
 }) {
+  const motion = useMotionTier();
+  const play = animated && motion === 'full' && ANIMATED_ICONS.has(m.id);
   return (
     <SkTile
       letter={itemName(st, m.id).charAt(0).toUpperCase()}
       tone={m.tone}
       size={size}
-      image={iconUrl(m.id)}
+      image={play ? animIconUrl(m.id) : iconUrl(m.id)}
     />
   );
 }

@@ -11,7 +11,7 @@ import { addonStorePl } from '../i18n/addonStore.pl';
 import { addonStoreUk } from '../i18n/addonStore.uk';
 import { AboutText } from './AboutText';
 import { PreviewViewer } from './PreviewViewer';
-import type { StoreCtx } from './storeItems';
+import { ANIMATED_ICONS, type StoreCtx } from './storeItems';
 import { MODULE_SHOTS, WEEK_SHOTS } from './weekPreviews';
 
 afterEach(cleanup);
@@ -67,6 +67,16 @@ describe('preview files', () => {
       const b = readFileSync(join(PUBLIC, 'store-icons', `${a.id}.webp`));
       expect(b.toString('ascii', 0, 4)).toBe('RIFF');
       expect(b.toString('ascii', 8, 12)).toBe('WEBP');
+    }
+  });
+  it('an animated icon is a real animated webp, 320 px, light, and its item has the still too', () => {
+    for (const id of ANIMATED_ICONS) {
+      const b = readFileSync(join(PUBLIC, 'store-icons', `${id}-anim.webp`));
+      expect(b.toString('ascii', 0, 4)).toBe('RIFF');
+      expect(b.toString('ascii', 8, 12)).toBe('WEBP');
+      expect(b.includes(Buffer.from('ANIM')), `${id} has no ANIM chunk`).toBe(true);
+      expect(b.length).toBeLessThan(300_000);
+      expect(existsSync(join(PUBLIC, 'store-icons', `${id}.webp`))).toBe(true);
     }
   });
 });

@@ -66,7 +66,7 @@ export function ItemPage({
   return (
     <>
       <div className="sk-rowf sk-g16 sk-start as-item-head">
-        <TileOf st={st} m={m} size={96} />
+        <TileOf st={st} m={m} size={96} animated />
         <div className="sk-f1">
           <div>{kindBadge(st, m)}</div>
           <h1 className="sk-t-h1 sk-mt4">{name}</h1>

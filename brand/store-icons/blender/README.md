@@ -17,3 +17,12 @@ Files:
 - tex/ : theme backgrounds (cyberpunk and christmas cropped from client/public/backgrounds, Brass Glass lava drawn from its --lava colours).
 
 Addon tiles are a plain gradient of the tone; to change a colour edit TONES and the tone number in ITEMS.
+
+## Animated icon (Fatigue & readiness)
+
+The animated icon is the same cell charging: 16 frames with FR_LEVEL 0..4 (fractional last window), then three frames with FR_PULSE 0.5 / 1 / 0.5 at level 4. It is used only on the item page (store details) and never in lists.
+
+    # one frame: FR_LEVEL=2.5 FR_PULSE=0 SIZE=320 SAMPLES=40 python3 gen.py out s12 fatigue-readiness
+    # all frames: bash anim-frames.sh 0 18   (writes out/f00.png .. f18.png, renamed from fatigue-readiness.png)
+    # assemble: Pillow, frames 0..18 then 17, 16 (ping-pong), durations 400, 14 x 90, 300, 4 x 140, 500 ms, loop 0, lossy q82
+    # result: client/public/store-icons/fatigue-readiness-anim.webp (about 16 KB)
