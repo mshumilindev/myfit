@@ -1,5 +1,5 @@
 /** Live session + past workout editing — design S-17…S-31 + SS/DS/MG/EQ. */
-import { useEquipmentOn, usePlaybookOn } from '../addons/featureGates';
+import { equipmentAvailable, useEquipmentOn, usePlaybookOn } from '../addons/featureGates';
 import { useSupersetsHost } from '../supersetsRt';
 import { useCircuitHost } from '../circuitRt';
 import { inShownGroup } from '../supersetBlocks';
@@ -2398,7 +2398,8 @@ export function SessionView(props: {
   /** Kit this lift used that the session's gym doesn't list (medium evidence,
    *  only once a set is in — the moment of proof). */
   function kitNudge(ex: Exercise | null): KitEvidence | null {
-    if (!live || !gym || gymHasNoList(gym) || !ex || !isStrengthExercise(ex)) return null;
+    if (!equipmentOn || !live || !gym || gymHasNoList(gym) || !ex || !isStrengthExercise(ex))
+      return null;
     if (ex.sets.length === 0) return null;
     const classes = equipmentFor(ex);
     const items = ex.equipmentItems ?? [];
@@ -5239,7 +5240,9 @@ export function SessionView(props: {
                                     <th style={{ width: 44 }}></th>
                                     <th>{t.exerciseLabel}</th>
                                     <th style={{ width: 210 }}>{t.musclesCol}</th>
-                                    <th style={{ width: 150 }}>{t.progEquipment}</th>
+                                    {equipmentOn && (
+                                      <th style={{ width: 150 }}>{t.progEquipment}</th>
+                                    )}
                                     <th style={{ width: 90 }}>{t.roundCol}</th>
                                     <th style={{ width: 110 }}>{t.lastCol}</th>
                                   </tr>
@@ -5274,14 +5277,16 @@ export function SessionView(props: {
                                             ))}
                                           </span>
                                         </td>
-                                        <td>
-                                          {eq.map((id) => (
-                                            <span key={id} className="eq">
-                                              <Icon name={equipmentIconName(id)} />{' '}
-                                              {equipmentLabelOf(id)}
-                                            </span>
-                                          ))}
-                                        </td>
+                                        {equipmentOn && (
+                                          <td>
+                                            {eq.map((id) => (
+                                              <span key={id} className="eq">
+                                                <Icon name={equipmentIconName(id)} />{' '}
+                                                {equipmentLabelOf(id)}
+                                              </span>
+                                            ))}
+                                          </td>
+                                        )}
                                         <td className="num">
                                           {e.sets.length} / {rounds}
                                         </td>
@@ -5631,12 +5636,16 @@ export function SessionView(props: {
             })()}
           </div>
           <p className="side-note">{t.workedNote}</p>
-          <div className="section-label umt-6">{t.equipmentInUse}</div>
-          <div className="echip-row">
-            {workoutEquipment(workout).map((id) => (
-              <EquipChip key={id} id={id} style={{ padding: '4px 9px' }} />
-            ))}
-          </div>
+          {equipmentOn && (
+            <>
+              <div className="section-label umt-6">{t.equipmentInUse}</div>
+              <div className="echip-row">
+                {workoutEquipment(workout).map((id) => (
+                  <EquipChip key={id} id={id} style={{ padding: '4px 9px' }} />
+                ))}
+              </div>
+            </>
+          )}
         </aside>
       )}
       {showSessionSide && !live && (
@@ -6417,20 +6426,24 @@ function NewExerciseSheet(props: {
         ))}
       </div>
 
-      <div className="field-label">{t.equipmentLabelField}</div>
-      <div className="filter-chips">
-        {EQUIPMENT_IDS.map((id) => (
-          <Chip
-            size="xs"
-            selected={equipment.includes(id)}
-            key={id}
-            onClick={() => toggleEquip(id)}
-          >
-            <Icon name={equipmentIconName(id)} />
-            {t.equipmentNames[id]}
-          </Chip>
-        ))}
-      </div>
+      {equipmentAvailable() && (
+        <>
+          <div className="field-label">{t.equipmentLabelField}</div>
+          <div className="filter-chips">
+            {EQUIPMENT_IDS.map((id) => (
+              <Chip
+                size="xs"
+                selected={equipment.includes(id)}
+                key={id}
+                onClick={() => toggleEquip(id)}
+              >
+                <Icon name={equipmentIconName(id)} />
+                {t.equipmentNames[id]}
+              </Chip>
+            ))}
+          </div>
+        </>
+      )}
 
       <Button
         variant="primary"

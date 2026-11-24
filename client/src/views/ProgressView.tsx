@@ -1,4 +1,5 @@
 /** Progress — design S-34…S-36 + MG-3/MG-4 (by muscle, enriched detail). */
+import { equipmentAvailable } from '../addons/featureGates';
 import { useSleepsForCalc } from '../addons/useSleeps';
 import { weekStartOf as trainingWeekStart } from '../weekStart';
 import { Button, IconButton } from '../components/ui/Button';
@@ -873,7 +874,7 @@ export function ProgressView({
               </div>
             </div>
 
-            {store.gyms.length > 0 && (
+            {equipmentAvailable() && store.gyms.length > 0 && (
               <div>
                 <div className="section-label">{t.whereYouCanDoIt}</div>
                 <table className="table progress-detail-table">

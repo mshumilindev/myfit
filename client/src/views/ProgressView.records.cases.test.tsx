@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { addonsPref } from '../addons/enabledSet';
 import { cleanup, fireEvent, render, within } from '@testing-library/react';
 import { fmtTonnes, setLocale } from '../i18n';
 import { en } from '../i18n/en';
@@ -66,12 +67,14 @@ const rowName = (r: Element) => r.querySelector('.n')?.textContent;
 
 beforeEach(() => {
   freezeClock(NOW);
+  addonsPref.set(['equipment']); // Equipment installed: its columns, nudges and form fields show
   setLocale('en');
   setDesktop(false);
   seed(richState());
 });
 afterEach(() => {
   cleanup();
+  addonsPref.reset();
   vi.useRealTimers();
 });
 

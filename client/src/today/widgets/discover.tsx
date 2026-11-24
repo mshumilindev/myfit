@@ -3,6 +3,7 @@
  * or surface something new. "Of the day" picks are seeded by the LOCAL date, so
  * a pick stays put all day and every size shows the same one.
  */
+import { equipmentAvailable } from '../../addons/featureGates';
 import { useMemo, useState, type ReactNode } from 'react';
 import {
   Widget,
@@ -237,7 +238,7 @@ let EOD_CACHE: { key: string; ids: string[] } | null = null;
 function exercisePool(workouts: Workout[], gym: Gym | null): string[] {
   const done = new Set<string>();
   for (const w of workouts) for (const e of w.exercises) done.add(e.name.trim().toLowerCase());
-  const inv = gym?.inventory ?? [];
+  const inv = equipmentAvailable() ? (gym?.inventory ?? []) : [];
   const key = `${gym?.id ?? '-'}|${inv.join(',')}|${done.size}`;
   if (EOD_CACHE?.key === key) return EOD_CACHE.ids;
   const all: { id: string; name: string }[] = [];

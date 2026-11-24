@@ -1,4 +1,5 @@
 import { currentHash } from '../route';
+import { addonsPref } from '../addons/enabledSet';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { setLocale } from '../i18n';
@@ -51,12 +52,16 @@ function setState(patch: { gyms?: Gym[]; workouts?: Workout[] }) {
 
 beforeEach(() => {
   setLocale('en');
+  addonsPref.set(['equipment']); // Equipment installed: gym kit and availability show
   addExercise.mockReset();
   startWorkout.mockReset();
   cands = [cand({})];
   window.location.hash = '';
 });
-afterEach(cleanup);
+afterEach(() => {
+  addonsPref.reset();
+  cleanup();
+});
 
 describe('FixSheet', () => {
   it('titles the sheet with the muscle and hints to link a gym when there is none', () => {
@@ -78,6 +83,14 @@ describe('FixSheet', () => {
     setState({});
     render(<FixSheet muscle="chest" onClose={() => undefined} />);
     expect(document.querySelector('.fix-avail.neutral')).toBeTruthy();
+    expect(screen.getByText('4 × 8')).toBeTruthy();
+  });
+
+  it('without the Equipment module no availability line is shown, the exercise still is', () => {
+    addonsPref.set([]);
+    setState({});
+    render(<FixSheet muscle="chest" onClose={() => undefined} />);
+    expect(document.querySelector('.fix-avail')).toBeNull();
     expect(screen.getByText('4 × 8')).toBeTruthy();
   });
 

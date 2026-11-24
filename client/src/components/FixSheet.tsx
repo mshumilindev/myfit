@@ -3,6 +3,7 @@
  * exercises that hit it and that your gym can equip, each with a ready scheme,
  * and add one to the session in a tap. Reuses the muscle chips and the Sheet.
  */
+import { equipmentAvailable } from '../addons/featureGates';
 import { useState } from 'react';
 import { Icon, Sheet } from '../ui';
 import { Button } from './ui/Button';
@@ -89,10 +90,12 @@ export function FixSheet({ muscle, onClose }: { muscle: MuscleGroup; onClose: ()
                   ))}
                 </div>
               )}
-              <div className={`fix-avail ${avail.cls}`}>
-                <Icon name={avail.icon} />
-                <span>{avail.text}</span>
-              </div>
+              {equipmentAvailable() && (
+                <div className={`fix-avail ${avail.cls}`}>
+                  <Icon name={avail.icon} />
+                  <span>{avail.text}</span>
+                </div>
+              )}
               <Button
                 variant="secondary"
                 className="fix-add-btn"

@@ -1,4 +1,5 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
+import { addonsPref } from '../addons/enabledSet';
 import userEvent from '@testing-library/user-event';
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Shell } from '../App';
@@ -69,6 +70,7 @@ function mount(id = 'open', sh: Shell = shell(), extra: { past?: boolean } = {})
 
 beforeEach(() => {
   localStorage.clear();
+  addonsPref.set(['equipment']); // Equipment installed: its columns, nudges and form fields show
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     configurable: true,
@@ -87,6 +89,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   vi.useRealTimers();
+  addonsPref.reset();
   cleanup();
 });
 
@@ -120,6 +123,18 @@ describe('SessionView · adding exercises', () => {
       secondaryMuscles: ['forearms'],
       equipment: ['dumbbell'],
     });
+  });
+
+  it('without the Equipment module the new-exercise form has no equipment chips', async () => {
+    addonsPref.set([]);
+    seed([benchLive()]);
+    mount();
+    const dlg = await openPicker();
+    await userEvent.type(within(dlg).getByRole('searchbox'), 'Zxq pulldown');
+    await userEvent.click(within(dlg).getByRole('button', { name: 'Create “Zxq pulldown”' }));
+    const sheet = document.querySelector('.new-exercise-sheet') as HTMLElement;
+    expect(within(sheet).queryByRole('button', { name: /Dumbbell/ })).toBeNull();
+    expect(within(sheet).getAllByRole('button', { name: /Biceps/ }).length).toBeGreaterThan(0);
   });
 
   it('Back from the new-exercise form returns to the picker without adding anything', async () => {

@@ -1,4 +1,5 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
+import { addonsPref } from '../addons/enabledSet';
 import userEvent from '@testing-library/user-event';
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Shell } from '../App';
@@ -69,6 +70,7 @@ function mount(id = 'open', sh: Shell = shell(), extra: { past?: boolean } = {})
 
 beforeEach(() => {
   localStorage.clear();
+  addonsPref.set(['equipment']); // Equipment installed: its columns, nudges and form fields show
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     configurable: true,
@@ -87,6 +89,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   vi.useRealTimers();
+  addonsPref.reset();
   cleanup();
 });
 

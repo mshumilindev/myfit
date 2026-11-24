@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactNode } from 'react';
+import { equipmentAvailable } from '../../addons/featureGates';
 import { useSleepsForCalc } from '../../addons/useSleeps';
 import {
   Widget,
@@ -1451,12 +1452,14 @@ function GymWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         footer={startBtn(false)}
       />
     );
-  const kit = gym.inventory ?? [];
-  const fitTxt = fit
-    ? fit.ok === fit.total
-      ? s.fitsHere(fit.name)
-      : s.partlyFits(fit.name, fit.ok, fit.total)
-    : null;
+  const eqOn = equipmentAvailable();
+  const kit = eqOn ? (gym.inventory ?? []) : [];
+  const fitTxt =
+    eqOn && fit
+      ? fit.ok === fit.total
+        ? s.fitsHere(fit.name)
+        : s.partlyFits(fit.name, fit.ok, fit.total)
+      : null;
   return (
     <Widget
       size="XL"
@@ -1471,26 +1474,28 @@ function GymWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
       <div className="ul-grid uf-1" style={{ placeItems: 'center' }}>
         <IconTile tone="neutral" size={56} icon="map-pin" />
       </div>
-      <Row>
-        {kit.length ? (
-          <>
-            {kit.slice(0, 5).map((id) => (
-              <Chip key={id} size="xs" tone="neutral">
-                {equipmentLabel(id)}
-              </Chip>
-            ))}
-            {kit.length > 5 && (
-              <Chip size="xs" tone="neutral">
-                {`+${kit.length - 5}`}
-              </Chip>
-            )}
-          </>
-        ) : (
-          <Chip size="xs" tone="neutral">
-            {s.noInventory}
-          </Chip>
-        )}
-      </Row>
+      {eqOn && (
+        <Row>
+          {kit.length ? (
+            <>
+              {kit.slice(0, 5).map((id) => (
+                <Chip key={id} size="xs" tone="neutral">
+                  {equipmentLabel(id)}
+                </Chip>
+              ))}
+              {kit.length > 5 && (
+                <Chip size="xs" tone="neutral">
+                  {`+${kit.length - 5}`}
+                </Chip>
+              )}
+            </>
+          ) : (
+            <Chip size="xs" tone="neutral">
+              {s.noInventory}
+            </Chip>
+          )}
+        </Row>
+      )}
       {fitTxt && <ToneText tone={fit && fit.ok === fit.total ? 'ok' : 'accent'}>{fitTxt}</ToneText>}
     </Widget>
   );
