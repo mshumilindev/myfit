@@ -51,4 +51,10 @@ export const MODULE_SHOTS: Readonly<Record<string, readonly string[]>> = {
   'apex-ranks': ['apex-ranks'],
   'apex-awards': ['apex-awards'],
   mastery: ['apex-mastery'],
+  // Advanced training: the modules (real app, one module installed per shot)
+  equipment: ['equipment-1', 'equipment-2'],
+  supersets: ['supersets-1'],
+  circuit: ['circuit-1'],
+  effort: ['effort-1', 'effort-2'],
+  'set-types': ['settypes-1', 'settypes-2'],
 };
