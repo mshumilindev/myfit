@@ -296,19 +296,21 @@ export function RowPane({ c, it }: { c: PaneCtx; it: ProgramItemDoc }) {
             );
           })}
         </ChipGroup>
-        <ListRow
-          as="label"
-          dense
-          label={p.edDropLast}
-          trailing={
-            <Switch
-              checked={!!it.dropLast}
-              size="sm"
-              aria-label={p.edDropLast}
-              onChange={(v) => patch({ dropLast: v })}
-            />
-          }
-        />
+        {c.features.dropLast && (
+          <ListRow
+            as="label"
+            dense
+            label={p.edDropLast}
+            trailing={
+              <Switch
+                checked={!!it.dropLast}
+                size="sm"
+                aria-label={p.edDropLast}
+                onChange={(v) => patch({ dropLast: v })}
+              />
+            }
+          />
+        )}
         {c.features.supersets && (
           <ListRow
             dense

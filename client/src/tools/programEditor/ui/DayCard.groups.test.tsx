@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { setViewport } from '../../../coach/testViewport';
 import { pgEn } from '../../../i18n/coachProgram.en';
@@ -45,5 +45,26 @@ describe('program editor: supersets in the day card', () => {
     show('self', true);
     expect(screen.getAllByText('A1').length).toBeGreaterThan(0);
     expect(screen.queryByText(new RegExp(pgEn.edAddonMark))).toBeNull();
+  });
+});
+
+describe('program editor: the drop-last switch follows Set types', () => {
+  const open = (dropLast: boolean) => {
+    render(
+      <ProgramEditor
+        host={demoHost({ mode: 'self', features: { dropLast } })}
+        doc={demoDoc()}
+        onChange={() => {}}
+      />,
+    );
+    fireEvent.click(screen.getAllByRole('button', { name: /Barbell Bench Press/ })[0]);
+  };
+  it('on: the row has the switch', () => {
+    open(true);
+    expect(screen.getByRole('switch', { name: pgEn.edDropLast })).toBeTruthy();
+  });
+  it('off: the row has no switch', () => {
+    open(false);
+    expect(screen.queryByRole('switch', { name: pgEn.edDropLast })).toBeNull();
   });
 });

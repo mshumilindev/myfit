@@ -195,6 +195,8 @@ export interface EditorFeatures {
   markers: boolean;
   /** Supersets. */
   supersets: boolean;
+  /** The "drop set on the last set" switch of a row (Set types). */
+  dropLast: boolean;
   /** Sets/reps/weight/RPE/rest targets and "just the exercise" rows. */
   targets: boolean;
   /** A day defined by target muscles instead of exercises. */
@@ -223,6 +225,7 @@ export const DEFAULT_FEATURES: Record<EditorMode, EditorFeatures> = {
     activities: true,
     markers: true,
     supersets: true,
+    dropLast: true,
     targets: true,
     muscleDays: true,
     preview: true,
@@ -238,6 +241,7 @@ export const DEFAULT_FEATURES: Record<EditorMode, EditorFeatures> = {
     activities: true,
     markers: true,
     supersets: true,
+    dropLast: true,
     targets: true,
     muscleDays: true,
     preview: false,
