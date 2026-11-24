@@ -161,7 +161,8 @@
       "equipment/",
       "views/EquipmentDetailView",
       "components/EquipmentBoard",
-      "components/EquipmentPickerSheet"
+      "components/EquipmentPickerSheet",
+      "components/BandLibraryCard"
     ],
     "assets": ["equipment/"]
   },

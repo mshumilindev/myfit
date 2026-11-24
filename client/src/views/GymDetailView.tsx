@@ -34,7 +34,6 @@ import { RouteMap } from '../components/RouteMap';
 import { useEquipmentHost } from '../equipmentRt';
 import { GymKitCard } from '../components/GymKit';
 import { gymHasNoList } from '../gymEvidence';
-import { BandLibraryCard } from '../components/BandLibraryCard';
 import { AmenitiesCard } from '../components/AmenitiesCard';
 import { Tag } from '../components/ui/Tag';
 import { GroupedList, ListRow } from '../components/ui/GroupedList';
@@ -387,7 +386,7 @@ export function GymDetailView({
 
         {isSaved && gym && <AmenitiesCard gym={gym} />}
 
-        {isSaved && gym && <BandLibraryCard gym={gym} />}
+        {isSaved && gym && equipmentH?.BandLibrary && <equipmentH.BandLibrary gym={gym} />}
 
         {isSaved && gym && equipmentH?.Board && <equipmentH.Board gym={gym} shell={shell} />}
 

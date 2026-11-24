@@ -19,6 +19,7 @@ vi.mock('../data/gymProviders', async (orig) => ({
 }));
 vi.mock('../components/RouteMap', () => ({ RouteMap: () => null }));
 
+import '../equipment/equipmentBoot'; // loaded; whether it shows is up to the installed list
 import { SessionView } from './SessionView';
 import { ExerciseDetailView } from './ExerciseDetailView';
 import { GymDetailView } from './GymDetailView';
@@ -33,6 +34,8 @@ const KEYS = [
   'pickEquipAll',
   'pickEquipTitle',
   'fixAnywhere',
+  'bandLibTitle',
+  'bandLibHint',
 ] as const;
 
 const words = (loc: LocaleId): string[] =>
@@ -119,5 +122,11 @@ describe('no Equipment words without the module', () => {
     const text = document.body.textContent ?? '';
     expect(text.length).toBeGreaterThan(50);
     for (const w of words(loc)) expect(text, w).not.toContain(w);
+  });
+  it('shows the band library on the gym page once Equipment is installed', () => {
+    addonsPref.set(['equipment']);
+    setLocale('en');
+    render(<GymDetailView gymId="g1" shell={makeShell()} onClose={() => {}} />);
+    expect(document.body.textContent).toContain(LOCALES.en.bandLibTitle);
   });
 });

@@ -28,14 +28,23 @@ export interface EquipmentPickerSheetProps {
   onClose: () => void;
 }
 
+export interface BandLibraryProps {
+  gym: Gym;
+  /** Start from the defaults the set editor shows when the gym has no library. */
+  seedDefaults?: boolean;
+  onSaved?: () => void;
+}
+
 export interface EquipmentHost {
   /** The inventory board on the gym page. */
   Board: ComponentType<EquipmentBoardProps> | null;
   /** The sheet that picks the equipment an exercise was done on. */
   PickerSheet: ComponentType<EquipmentPickerSheetProps> | null;
+  /** The gym's resistance-band library (colour → kg), on the gym page and in the set editor. */
+  BandLibrary: ComponentType<BandLibraryProps> | null;
 }
 
-export const equipmentHost: EquipmentHost = { Board: null, PickerSheet: null };
+export const equipmentHost: EquipmentHost = { Board: null, PickerSheet: null, BandLibrary: null };
 
 /** Is the module installed AND its chunk loaded? */
 export function equipmentLive(): boolean {

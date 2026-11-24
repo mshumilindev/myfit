@@ -211,7 +211,6 @@ import { LiveHero } from '../components/LiveHero';
 import { SessionStartCoach, hasSessionStartCoach } from '../components/SessionStartCoach';
 import { EnergyPlaque, LiveEnergyCounter } from '../components/SessionEnergy';
 import { PlateSheet } from '../components/PlateSheet';
-import { BandLibraryCard } from '../components/BandLibraryCard';
 import { useEquipmentHost } from '../equipmentRt';
 import { CardioMachineList, CardioMachineSheet } from '../components/CardioMachineList';
 import { ExercisePicker, ExerciseDetail } from '../components/ExercisePicker';
@@ -1154,7 +1153,7 @@ export function SessionView(props: {
     // was actually logged (failure.ts) and tag it 'auto' — dismissable.
     let failure: FailureMark | null = vals.failure ?? null;
     let failureWhy: string | null = null;
-    if (!failure && isStrengthExercise(ex)) {
+    if (!failure && effort && isStrengthExercise(ex)) {
       const why = inferFailure(
         {
           ...vals,
@@ -2170,7 +2169,7 @@ export function SessionView(props: {
       type?: SetType;
     },
   ): { text: string; preset: boolean } | null {
-    if (!isStrengthExercise(ex) || props.past) return null;
+    if (!effort || !isStrengthExercise(ex) || props.past) return null;
     const kind = ghostKind(g, g.weight);
     const priorWorking = ex.sets.filter((x) => setTypeOf(x) !== 'warmup').length;
     const est = rpeEstimateFor(ex, g.weight, g.reps, priorWorking);
@@ -3682,7 +3681,7 @@ export function SessionView(props: {
                     {(() => {
                       // Tags cell: effort, failure and record as small pills
                       // (the plain "working" word only when there's nothing else).
-                      const fail = isFailure(s);
+                      const fail = !!effort && isFailure(s);
                       const rpeV = !effort || type === 'warmup' ? null : (s.rpe ?? null);
                       // F already says RPE 10 — no separate estimate next to it.
                       const rpeEst =
@@ -6453,7 +6452,8 @@ function GhostSetRow(props: {
   const blocked = props.weightRequired && weightKg === null;
   // Flame: "this set goes to failure". Starts on when the app suggests it;
   // switching a suggestion off is an explicit "no".
-  const canFail = props.kind !== 'warmup' && !isSd && !props.isPast;
+  const effortOn = !!useEffortHost(); // the failure flame belongs to the effort module
+  const canFail = effortOn && props.kind !== 'warmup' && !isSd && !props.isPast;
   const [fail, setFail] = useState(!!props.failSuggest?.preset && canFail);
   const failMark: FailureMark | null = fail
     ? 'manual'
@@ -6625,6 +6625,7 @@ function SetEditorSheet(props: {
   const holdNoLoad = holdOnly && exerciseProfile(props.exercise.name).l === 'none';
   const setTypes = useSetTypesHost();
   const effort = useEffortHost();
+  const equipmentB = useEquipmentHost(); // the band library is the Equipment module's
   const holdMove = isStopwatchExercise(props.exercise);
   const [type, setType] = useState<SetType>(
     holdOnly
@@ -7108,7 +7109,7 @@ function SetEditorSheet(props: {
                   ))}
                 </div>
                 <div className="load-note">{t.bandNote}</div>
-                {props.gym && (
+                {props.gym && equipmentB?.BandLibrary && (
                   <ListRow
                     icon={<IconTile icon="sliders-horizontal" />}
                     label={t.bandEditLink(props.gym.name)}
@@ -7152,66 +7153,70 @@ function SetEditorSheet(props: {
               </div>
             </>
           )}
-          {effort?.Label ? <effort.Label /> : <div className="se-label">{t.failToggle}</div>}
-          <div className={`se-card se-kind-${type}`}>
-            <div className="se-rpe">
-              {effort?.Chips && (
-                <effort.Chips
-                  rpe={rpe}
-                  failOn={failOn}
-                  onPick={(v) => {
-                    setRpe(v);
-                    // Picking an effort below 10 says "not to failure"; 10 or
-                    // Skip leave it to the app (an 'auto' mark is dismissed).
-                    setFail(v >= 6 && v < 10 ? 'no' : fail === 'auto' ? 'no' : null);
-                  }}
-                />
-              )}
-              {!isSD && (
-                <Chip
-                  size="md"
-                  tone="danger"
-                  className="rpe-f"
-                  selected={failOn}
-                  aria-label={t.failToggle}
-                  onClick={() => {
-                    setFail('manual');
-                    setRpe(10);
-                  }}
-                >
-                  F
-                </Chip>
-              )}
-            </div>
-            {(failOn || effort) && (
-              <div className="se-hint">
-                {failOn ? (
-                  fail === 'auto' ? (
-                    t.rpeHintFAuto
-                  ) : (
-                    t.rpeHintF
-                  )
-                ) : effort?.Hint ? (
-                  <effort.Hint rpe={rpe} est={rpeEst} />
-                ) : null}
+          {effort && (
+            <>
+              {effort.Label ? <effort.Label /> : <div className="se-label">{t.failToggle}</div>}
+              <div className={`se-card se-kind-${type}`}>
+                <div className="se-rpe">
+                  {effort?.Chips && (
+                    <effort.Chips
+                      rpe={rpe}
+                      failOn={failOn}
+                      onPick={(v) => {
+                        setRpe(v);
+                        // Picking an effort below 10 says "not to failure"; 10 or
+                        // Skip leave it to the app (an 'auto' mark is dismissed).
+                        setFail(v >= 6 && v < 10 ? 'no' : fail === 'auto' ? 'no' : null);
+                      }}
+                    />
+                  )}
+                  {!isSD && (
+                    <Chip
+                      size="md"
+                      tone="danger"
+                      className="rpe-f"
+                      selected={failOn}
+                      aria-label={t.failToggle}
+                      onClick={() => {
+                        setFail('manual');
+                        setRpe(10);
+                      }}
+                    >
+                      F
+                    </Chip>
+                  )}
+                </div>
+                {(failOn || effort) && (
+                  <div className="se-hint">
+                    {failOn ? (
+                      fail === 'auto' ? (
+                        t.rpeHintFAuto
+                      ) : (
+                        t.rpeHintF
+                      )
+                    ) : effort?.Hint ? (
+                      <effort.Hint rpe={rpe} est={rpeEst} />
+                    ) : null}
+                  </div>
+                )}
+                {type !== 'warmup' && <SupplementRpeNote />}
+                {failOn && (
+                  <div className="se-partials">
+                    <span className="lab">{t.partialsLabel}</span>
+                    <NumberStepper
+                      label=""
+                      value={partials}
+                      step={1}
+                      min={0}
+                      max={20}
+                      onChange={setPartials}
+                    />
+                  </div>
+                )}
               </div>
-            )}
-            {effort && type !== 'warmup' && <SupplementRpeNote />}
-            {type !== 'warmup' && <CycleSessionNote />}
-            {failOn && (
-              <div className="se-partials">
-                <span className="lab">{t.partialsLabel}</span>
-                <NumberStepper
-                  label=""
-                  value={partials}
-                  step={1}
-                  min={0}
-                  max={20}
-                  onChange={setPartials}
-                />
-              </div>
-            )}
-          </div>
+            </>
+          )}
+          {type !== 'warmup' && <CycleSessionNote />}
           {!(holdOnly && (holdNoLoad || !unitEligible)) && (
             <>
               <div className="se-label se-label-more">{t.seGroupMore}</div>
@@ -7332,9 +7337,13 @@ function SetEditorSheet(props: {
           onClose={() => setPlateOpen(false)}
         />
       )}
-      {bandsOpen && props.gym && (
+      {bandsOpen && props.gym && equipmentB?.BandLibrary && (
         <Sheet onClose={() => setBandsOpen(false)} className="band-sheet">
-          <BandLibraryCard gym={props.gym} seedDefaults onSaved={() => setBandsOpen(false)} />
+          <equipmentB.BandLibrary
+            gym={props.gym}
+            seedDefaults
+            onSaved={() => setBandsOpen(false)}
+          />
         </Sheet>
       )}
     </SetEditorFrame>

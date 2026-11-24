@@ -8,6 +8,7 @@ import { __getStateForTests, __replaceStateForTests } from '../store';
 import type { Exercise, SetEntry, Workout } from '../types';
 import { addonsPref } from '../addons/enabledSet';
 import '../setTypes/setTypesBoot'; // Set types installed and loaded: drop / reverse / hold editing is the module's
+import '../effort/effortBoot'; // RPE / RIR installed and loaded: failure marking is the module's
 import { SessionView } from './SessionView';
 
 // Wednesday 14 Oct 2026, 18:00 local — fixed wall clock, only Date is faked so timers/userEvent keep running.
@@ -71,7 +72,7 @@ function mount(id = 'open', sh: Shell = shell(), extra: { past?: boolean } = {})
 
 beforeEach(() => {
   localStorage.clear();
-  addonsPref.set(['set-types']);
+  addonsPref.set(['set-types', 'effort']);
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     configurable: true,

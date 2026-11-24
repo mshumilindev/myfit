@@ -7,6 +7,7 @@ import { emptyCycleState } from '../cycle/cycleState';
 import { __getStateForTests, __replaceStateForTests } from '../store';
 import type { Exercise, SetEntry, Workout } from '../types';
 import { addonsPref } from '../addons/enabledSet';
+import '../equipment/equipmentBoot'; // Equipment installed and loaded: the band library is the module's
 import '../effort/effortBoot'; // RPE / RIR installed and loaded: the effort entry is the module's
 import '../setTypes/setTypesBoot'; // Set types installed and loaded: drop / reverse / hold editing is the module's
 import { SessionView } from './SessionView';
@@ -75,7 +76,7 @@ function mount(id = 'open', sh: Shell = shell(), extra: { past?: boolean } = {})
 
 beforeEach(() => {
   localStorage.clear();
-  addonsPref.set(['set-types', 'effort']);
+  addonsPref.set(['set-types', 'effort', 'equipment']);
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     configurable: true,
@@ -360,17 +361,19 @@ const cardioLive = (machine = 'cardio-treadmill') =>
 describe('SessionView · set editor with RPE / RIR off (neutral contract)', () => {
   beforeEach(() => addonsPref.reset());
 
-  it('has no effort chips or hint, only the failure chip; a stored effort passes through a save', async () => {
-    seed([benchLive([set('s1', { loggedAt: NOW - 10 * MIN, rpe: 8 })])]);
+  it("has no effort chips, hint or failure chip (owner: failure is the module's); stored effort and failure pass through a save", async () => {
+    seed([benchLive([set('s1', { loggedAt: NOW - 10 * MIN, rpe: 8, failure: 'manual' })])]);
     mount();
     expect(document.querySelector('.tag-rpe')).toBeNull();
+    expect(document.querySelector('.tag-fail')).toBeNull();
     const dlg = await openEditor();
     expect(within(dlg).queryByRole('button', { name: 'Skip' })).toBeNull();
     expect(within(dlg).queryByText('Effort (RPE)')).toBeNull();
-    expect(within(dlg).getByRole('button', { name: 'To failure' })).toBeTruthy();
+    expect(within(dlg).queryByRole('button', { name: 'To failure' })).toBeNull();
+    expect(within(dlg).queryByText('To failure')).toBeNull();
     await inc(dlg, 'Reps');
     await save(dlg);
-    expect(only()).toMatchObject({ reps: 9, rpe: 8 });
+    expect(only()).toMatchObject({ reps: 9, rpe: 8, failure: 'manual' });
   });
 });
 
