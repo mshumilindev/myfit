@@ -19,8 +19,23 @@ import { useStore } from '../store';
 import { maxInfo, type MaxInfo } from './maxes';
 import { maxKey, MAX_KG } from './maxesData';
 import { clearMax, saveMax, useTypedMaxes } from './maxesSync';
-import { fill, STRINGS } from './strings';
+import { fill, STRINGS, type MaxesStrings } from './strings';
+import type { LocaleId } from '../i18n';
 import './periodization.css';
+
+const TAG: Record<LocaleId, string> = { en: 'en', uk: 'uk', pl: 'pl', lt: 'lt', et: 'et' };
+const dayMonth = (locale: LocaleId, ms: number): string =>
+  new Intl.DateTimeFormat(TAG[locale], { day: 'numeric', month: 'short' }).format(ms);
+
+/** The line under a max: where it comes from, and when. */
+function sourceText(s: MaxesStrings, locale: LocaleId, i: MaxInfo): string {
+  if (i.source === 'typed' && i.typedAt)
+    return fill(s.typedOn, { date: dayMonth(locale, i.typedAt) });
+  if (i.source === 'typed') return s.typed;
+  if (i.source === 'history' && i.best)
+    return fill(i.older ? s.historyOld : s.historyOn, { date: dayMonth(locale, i.best.at) });
+  return s.none;
+}
 
 /** Names of the exercises the person's current program prescribes as a percent. */
 function programNames(a: ReturnType<typeof useProgramMine>['assignment']): string[] {
@@ -97,7 +112,7 @@ function MaxRow({ name, info, onOpen }: { name: string; info: MaxInfo; onOpen: (
   return (
     <ListRow
       label={name}
-      sub={info.source === 'none' ? s.none : info.source === 'typed' ? s.typed : s.history}
+      sub={sourceText(s, locale, info)}
       chevron
       trailing={
         info.kg === null ? (
@@ -150,10 +165,18 @@ function MaxEdit({ name, onBack }: { name: string; onBack: () => void }) {
         <div className="pd-edit">
           {mode === 'hist' ? (
             <GroupedList>
-              {info.estimate === null ? (
+              {info.estimate === null || !info.best ? (
                 <ListRow label={s.estimated} sub={s.noEstimate} />
               ) : (
-                <ListRow label={s.estimated} value={`${info.estimate} ${s.kg}`} />
+                <ListRow
+                  label={s.estimated}
+                  value={`${info.estimate} ${s.kg}`}
+                  sub={fill(s.bestSet, {
+                    w: info.best.weight,
+                    r: info.best.reps,
+                    date: dayMonth(locale, info.best.at),
+                  })}
+                />
               )}
             </GroupedList>
           ) : (
@@ -181,6 +204,14 @@ function MaxEdit({ name, onBack }: { name: string; onBack: () => void }) {
               )}
             </>
           )}
+          {mode === 'hand' &&
+            info.source === 'typed' &&
+            info.estimate !== null &&
+            info.estimate > info.kg! && (
+              <Notice tone="accent" icon="trend-up">
+                {fill(s.higherEstimate, { kg: info.estimate })}
+              </Notice>
+            )}
           {failed && (
             <Notice tone="danger" icon="warning">
               {s.saveFailed}

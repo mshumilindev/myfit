@@ -14,6 +14,7 @@ import type { ProgramCycle, ProgramItem, WeekPlan } from './views/programs/model
 import type { MuscleGroup } from './data/exercises';
 import type { Exercise } from './types';
 import type { ExportFile } from './legal/export/exportTypes';
+import type { EditorSlots } from './tools/programEditor/host';
 
 /** The least a program must have for a cycle to apply to it. */
 export interface WeekSource {
@@ -60,6 +61,8 @@ export interface PeriodizationHost {
   TargetLine: ComponentType<{ exercise: Exercise }> | null;
   /** "6–8" or the plain rep count. */
   repsLabel: ((i: Pick<ProgramItem, 'reps' | 'repsMin'>) => string) | null;
+  /** What the program editor gets: the cycle wrapper and bar, the % of max and rep-range fields of a row. */
+  editorSlots: Pick<EditorSlots, 'wrap' | 'weekBar' | 'rowLoad' | 'rowReps'> | null;
 }
 
 export const periodizationHost: PeriodizationHost = {
@@ -75,6 +78,7 @@ export const periodizationHost: PeriodizationHost = {
   repsMin: null,
   TargetLine: null,
   repsLabel: null,
+  editorSlots: null,
 };
 
 /** True when the module is installed and its chunk has filled the host. */

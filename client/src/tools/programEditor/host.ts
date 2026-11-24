@@ -141,7 +141,33 @@ export interface ExercisePickerSlotProps {
   onClose: () => void;
 }
 
+/** A field of one exercise row a host replaces: the row, a patch function, and whether the pane is read-only. */
+export interface RowSlotProps {
+  item: ProgramItemDoc;
+  patch: (p: Partial<ProgramItemDoc>) => void;
+  readOnly: boolean;
+}
+
+/** Wraps the whole editor: the host may show another view of the document (one week of a cycle) and map edits back. */
+export interface WrapProps {
+  doc: ProgramDoc;
+  onChange: (next: ProgramDoc, meta: { kind: 'edit' | 'undo' | 'redo'; label?: string }) => void;
+  readOnly: boolean;
+  children: (
+    doc: ProgramDoc,
+    onChange: (next: ProgramDoc, meta: { kind: 'edit' | 'undo' | 'redo'; label?: string }) => void,
+  ) => ReactNode;
+}
+
 export interface EditorSlots {
+  /** Wraps the editor so a host can edit another view of the document (a week of a cycle) through the same tool. */
+  wrap?: ComponentType<WrapProps>;
+  /** A bar above the week strip (the cycle switch and its weeks). */
+  weekBar?: ComponentType<{ state: EditorState; actions: EditorActions }>;
+  /** Replaces the "Target weight" block of a row (kg, or % of max). */
+  rowLoad?: ComponentType<RowSlotProps>;
+  /** Replaces the Reps stepper of a row (one number, or a range). */
+  rowReps?: ComponentType<RowSlotProps>;
   /** Replaces the whole week + day canvas (the "professional constructor" entry point). */
   canvas?: ComponentType<CanvasProps>;
   /** Extra inspector panels, opened with `actions.openPane('<id>')`. */

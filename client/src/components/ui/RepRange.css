@@ -1,0 +1,14 @@
+/* RepRange: one number or from / to; tokens only. */
+.uirr {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+}
+.uirr-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-12);
+}
+.uirr > button {
+  align-self: flex-start;
+}

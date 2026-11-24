@@ -1,25 +1,73 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../store', () => ({ recordE1rm: (n: string) => (n === 'Back Squat' ? 133.33 : 0) }));
+const DAY = 86_400_000;
+const w = vi.hoisted(() => ({ workouts: [] as unknown[] }));
+vi.mock('../store', () => ({
+  getStoreState: () => ({ workouts: w.workouts }),
+  est1rm: (weight: number, reps: number) =>
+    weight <= 0 || reps < 1 || reps > 10 ? 0 : Math.round(weight * (1 + reps / 30)),
+}));
 vi.mock('../firebase', () => ({ auth: { currentUser: null }, db: {} }));
 
 import { maxFor, maxInfo } from './maxes';
 import { EMPTY_MAXES, withMax } from './maxesData';
 import { seedMaxes } from './maxesSync';
 
-afterEach(() => seedMaxes(EMPTY_MAXES));
+const NOW = 1_800_000_000_000;
+const lift = (daysAgo: number, name: string, weight: number, reps: number) => ({
+  id: `w${Math.random()}`,
+  startedAt: NOW - daysAgo * DAY,
+  exercises: [
+    {
+      id: 'e',
+      name,
+      kind: 'strength',
+      position: 0,
+      sets: [{ id: 's', reps, weight, isWarmup: false }],
+    },
+  ],
+});
+
+afterEach(() => {
+  seedMaxes(EMPTY_MAXES);
+  w.workouts = [];
+});
 
 describe('the max a percent is turned into kilograms against', () => {
-  it('is the estimate from history, rounded to 0.1, when nothing was typed', () => {
-    expect(maxInfo('Back Squat')).toEqual({ kg: 133.3, source: 'history', estimate: 133.3 });
+  it('is what the history implies, with the set it comes from, when nothing was typed', () => {
+    w.workouts = [lift(5, 'Back Squat', 120, 4)];
+    expect(maxInfo('Back Squat', NOW)).toMatchObject({
+      kg: 136,
+      source: 'history',
+      estimate: 136,
+      older: false,
+      typedAt: null,
+      best: { weight: 120, reps: 4 },
+    });
   });
   it('is none without history or a typed max', () => {
-    expect(maxInfo('Weighted Pullups')).toEqual({ kg: null, source: 'none', estimate: null });
+    expect(maxInfo('Weighted Pullups', NOW)).toMatchObject({
+      kg: null,
+      source: 'none',
+      estimate: null,
+    });
     expect(maxFor('Weighted Pullups')).toBeNull();
   });
+  it('follows the training: a heavier set raises the estimate with nothing to refresh', () => {
+    w.workouts = [lift(20, 'Back Squat', 100, 5)];
+    expect(maxInfo('Back Squat', NOW).kg).toBe(117);
+    w.workouts = [...w.workouts, lift(0, 'Back Squat', 110, 5)];
+    expect(maxInfo('Back Squat', NOW).kg).toBe(128);
+  });
   it('a typed max replaces the estimate, whatever the letter case, and the estimate stays known', () => {
-    seedMaxes(withMax(EMPTY_MAXES, 'back squat', 150, 1));
-    expect(maxInfo('Back Squat')).toEqual({ kg: 150, source: 'typed', estimate: 133.3 });
+    w.workouts = [lift(5, 'Back Squat', 120, 4)];
+    seedMaxes(withMax(EMPTY_MAXES, 'back squat', 150, 77));
+    expect(maxInfo('Back Squat', NOW)).toMatchObject({
+      kg: 150,
+      source: 'typed',
+      estimate: 136,
+      typedAt: 77,
+    });
     expect(maxFor('Back Squat')).toBe(150);
   });
   it('a typed max works for an exercise with no history', () => {

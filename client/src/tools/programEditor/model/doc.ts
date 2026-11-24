@@ -72,6 +72,10 @@ export interface ProgramItemDoc {
   /** "Just the exercise": no sets, reps or targets (stored as sets 0 / reps 0). */
   bare?: boolean;
   targetWeight?: number;
+  /** Load as a % of the person's max (a host add-on writes and reads it; the tool only carries it). */
+  targetPct?: number;
+  /** Lower end of a rep range (`reps` is the upper end). */
+  repsMin?: number;
   targetRpe?: number;
   /** Rest between sets, seconds. */
   restSec?: number;

@@ -17,8 +17,10 @@ export function WeekCanvas({ state, actions, note }: CanvasProps) {
     (doc.targetMuscles[String(d)] ?? []).includes('fullbody')
       ? t.muscleGroups.fullbody
       : (doc.targetMuscles[String(d)] ?? []).map((m) => t.muscleGroups[m] ?? m).join(' · ');
+  const WeekBar = host.slots?.weekBar;
   return (
     <>
+      {WeekBar && <WeekBar state={state} actions={actions} />}
       <DayStrip
         p={p}
         draft={doc}

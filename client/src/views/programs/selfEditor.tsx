@@ -43,6 +43,7 @@ import {
   type ProgramEditorLabels,
   type ProgramEditorProps,
 } from '../../tools/programEditor';
+import { usePeriodizationHost } from '../../periodizationRt';
 import { useWeekStartDay, weekOrder } from '../../weekStart';
 import type { Program } from './model';
 import { SelfExercisePicker } from './selfPicker';
@@ -135,6 +136,7 @@ export function useSelfEditorHost(o: SelfHostOptions = {}): ProgramEditorHost {
   const limits = useConditionLimits();
   const activitiesOn = useActivitiesOn();
   const { shell, readOnly } = o;
+  const periodization = usePeriodizationHost();
   const activitiesLocked = o.activitiesLocked || !activitiesOn;
   return useMemo(() => {
     // Only for the person training it: a coach building a client's plan has their own limits.
@@ -187,9 +189,10 @@ export function useSelfEditorHost(o: SelfHostOptions = {}): ProgramEditorHost {
       slots: {
         muscleMap: MusclePickerMap,
         ...(readOnly ? { dayTag: TrainerDayTag } : { exercisePicker: SelfExercisePicker }),
+        ...periodization?.editorSlots,
       },
     };
-  }, [t, locale, start, limits, shell, readOnly, activitiesLocked]);
+  }, [t, locale, start, limits, shell, readOnly, activitiesLocked, periodization]);
 }
 
 export interface SelfProgramEditorProps extends Omit<

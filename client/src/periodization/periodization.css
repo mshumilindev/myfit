@@ -26,3 +26,18 @@
   align-items: center;
   gap: var(--s-8);
 }
+.pd-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  padding: var(--s-12);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.pd-bar-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-12);
+}

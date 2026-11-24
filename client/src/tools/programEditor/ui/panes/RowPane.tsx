@@ -107,6 +107,8 @@ export function RowPane({ c, it }: { c: PaneCtx; it: ProgramItemDoc }) {
     );
   }
   const f = c.host.catalog.facts(it.name);
+  const RowReps = c.host.slots?.rowReps;
+  const RowLoad = c.host.slots?.rowLoad;
   const bare = isBare(it);
   const partner = it.groupId
     ? items.find((x) => x.groupId === it.groupId && x.id !== it.id)
@@ -183,13 +185,17 @@ export function RowPane({ c, it }: { c: PaneCtx; it: ProgramItemDoc }) {
               max={20}
               onChange={(n) => patch({ sets: n })}
             />
-            <NumberStepper
-              label={p.edReps}
-              value={it.reps}
-              min={1}
-              max={100}
-              onChange={(n) => patch({ reps: n })}
-            />
+            {RowReps ? (
+              <RowReps item={it} patch={patch} readOnly={c.readOnly} />
+            ) : (
+              <NumberStepper
+                label={p.edReps}
+                value={it.reps}
+                min={1}
+                max={100}
+                onChange={(n) => patch({ reps: n })}
+              />
+            )}
           </div>
           {c.features.targets && (
             <>
@@ -198,19 +204,27 @@ export function RowPane({ c, it }: { c: PaneCtx; it: ProgramItemDoc }) {
                 label={p.edTargetWeight}
                 hint={p.edShownAbove}
                 notSet={p.edNotSet}
-                on={!!it.targetWeight}
-                onToggle={(v) => patch({ targetWeight: v ? 40 : undefined })}
+                on={!!it.targetWeight || !!it.targetPct}
+                onToggle={(v) =>
+                  patch(
+                    v ? { targetWeight: 40 } : { targetWeight: undefined, targetPct: undefined },
+                  )
+                }
               >
-                <NumberStepper
-                  label={p.edTargetWeight}
-                  unit="kg"
-                  value={it.targetWeight ?? 40}
-                  min={0}
-                  max={500}
-                  step={2.5}
-                  decimals={1}
-                  onChange={(n) => patch({ targetWeight: n || undefined })}
-                />
+                {RowLoad ? (
+                  <RowLoad item={it} patch={patch} readOnly={c.readOnly} />
+                ) : (
+                  <NumberStepper
+                    label={p.edTargetWeight}
+                    unit="kg"
+                    value={it.targetWeight ?? 40}
+                    min={0}
+                    max={500}
+                    step={2.5}
+                    decimals={1}
+                    onChange={(n) => patch({ targetWeight: n || undefined })}
+                  />
+                )}
               </OptTarget>
               <OptTarget
                 label={p.edTargetRpe}

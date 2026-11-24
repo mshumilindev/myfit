@@ -1,0 +1,21 @@
+/* LoadField: kg or % of max, with the computed line; tokens only. */
+.uild {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+}
+.uild-hint {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-6);
+  font-size: var(--fs-13);
+  color: var(--color-neutral-600);
+}
+.uild-hint b {
+  color: var(--color-text);
+}
+.uild-hint > button {
+  align-self: flex-start;
+}

@@ -6,7 +6,6 @@ export interface MaxesStrings {
   sub: string;
   back: string;
   used: string;
-  history: string;
   typed: string;
   none: string;
   setIt: string;
@@ -26,6 +25,11 @@ export interface MaxesStrings {
   exerciseHint: string;
   next: string;
   saveFailed: string;
+  historyOn: string;
+  historyOld: string;
+  typedOn: string;
+  bestSet: string;
+  higherEstimate: string;
   targetPct: string;
   targetNoMax: string;
   noMaxHint: string;
@@ -38,7 +42,6 @@ const en: MaxesStrings = {
   sub: 'Turns “% of max” into kg at session start',
   back: 'Back',
   used: 'Used by your programs',
-  history: 'From history',
   typed: 'You set this',
   none: 'No max yet',
   setIt: 'Set',
@@ -58,6 +61,11 @@ const en: MaxesStrings = {
   exerciseHint: 'The name as in your programs, for example Barbell Squat',
   next: 'Next',
   saveFailed: "Couldn't save. Check your connection and try again.",
+  historyOn: 'From history · est. {date}',
+  historyOld: 'From history · older, {date}',
+  typedOn: 'You set this · {date}',
+  bestSet: 'Best set {w} × {r}, {date}',
+  higherEstimate: 'Your history now suggests {kg} kg. Switch to From history to follow it.',
   targetPct: '{pct}% · {kg} kg',
   targetNoMax: '{pct}% of max',
   noMaxHint: 'No max yet. Add one in More › Maxes.',
@@ -70,7 +78,6 @@ const uk: MaxesStrings = {
   sub: 'Перетворюють «% від максимуму» на кг на старті тренування',
   back: 'Назад',
   used: 'Для твоїх програм',
-  history: 'З історії',
   typed: 'Ти задав(-ла) це',
   none: 'Максимуму ще немає',
   setIt: 'Задати',
@@ -90,6 +97,11 @@ const uk: MaxesStrings = {
   exerciseHint: 'Назва, як у твоїх програмах, наприклад Barbell Squat',
   next: 'Далі',
   saveFailed: 'Не вдалося зберегти. Перевір з’єднання й спробуй ще раз.',
+  historyOn: 'З історії · оцінка {date}',
+  historyOld: 'З історії · давніше, {date}',
+  typedOn: 'Ти задав(-ла) · {date}',
+  bestSet: 'Найкращий підхід {w} × {r}, {date}',
+  higherEstimate: 'Історія тепер показує {kg} кг. Обери «З історії», щоб слідувати їй.',
   targetPct: '{pct}% · {kg} кг',
   targetNoMax: '{pct}% від максимуму',
   noMaxHint: 'Максимуму ще немає. Додай у Ще › Максимуми.',
@@ -102,7 +114,6 @@ const pl: MaxesStrings = {
   sub: 'Zamieniają „% maksimum” na kg na starcie treningu',
   back: 'Wstecz',
   used: 'Używane w Twoich programach',
-  history: 'Z historii',
   typed: 'Ustawione przez Ciebie',
   none: 'Brak maksimum',
   setIt: 'Ustaw',
@@ -122,6 +133,11 @@ const pl: MaxesStrings = {
   exerciseHint: 'Nazwa jak w Twoich programach, np. Barbell Squat',
   next: 'Dalej',
   saveFailed: 'Nie udało się zapisać. Sprawdź połączenie i spróbuj ponownie.',
+  historyOn: 'Z historii · szac. {date}',
+  historyOld: 'Z historii · starsze, {date}',
+  typedOn: 'Ustawione przez Ciebie · {date}',
+  bestSet: 'Najlepsza seria {w} × {r}, {date}',
+  higherEstimate: 'Historia sugeruje teraz {kg} kg. Wybierz „Z historii”, aby ją śledzić.',
   targetPct: '{pct}% · {kg} kg',
   targetNoMax: '{pct}% maksimum',
   noMaxHint: 'Brak maksimum. Dodaj w Więcej › Maksima.',
@@ -134,7 +150,6 @@ const lt: MaxesStrings = {
   sub: 'Paverčia „% nuo maksimumo“ kilogramais treniruotės pradžioje',
   back: 'Atgal',
   used: 'Tavo programoms',
-  history: 'Iš istorijos',
   typed: 'Nustatei pats',
   none: 'Maksimumo dar nėra',
   setIt: 'Nustatyti',
@@ -155,6 +170,11 @@ const lt: MaxesStrings = {
   exerciseHint: 'Pavadinimas kaip tavo programose, pvz., Barbell Squat',
   next: 'Toliau',
   saveFailed: 'Nepavyko išsaugoti. Patikrink ryšį ir bandyk dar kartą.',
+  historyOn: 'Iš istorijos · įvertis {date}',
+  historyOld: 'Iš istorijos · senesnis, {date}',
+  typedOn: 'Nustatei pats · {date}',
+  bestSet: 'Geriausia serija {w} × {r}, {date}',
+  higherEstimate: 'Istorija dabar rodo {kg} kg. Pasirink „Iš istorijos“, kad ją sektum.',
   targetPct: '{pct}% · {kg} kg',
   targetNoMax: '{pct}% nuo maksimumo',
   noMaxHint: 'Maksimumo dar nėra. Pridėk skiltyje Daugiau › Maksimumai.',
@@ -167,7 +187,6 @@ const et: MaxesStrings = {
   sub: 'Muudavad „% maksimumist” treeningu alguses kilogrammideks',
   back: 'Tagasi',
   used: 'Sinu programmides kasutusel',
-  history: 'Ajaloost',
   typed: 'Sinu määratud',
   none: 'Maksimumi veel pole',
   setIt: 'Määra',
@@ -187,6 +206,11 @@ const et: MaxesStrings = {
   exerciseHint: 'Nimi nagu sinu programmides, nt Barbell Squat',
   next: 'Edasi',
   saveFailed: 'Salvestamine ebaõnnestus. Kontrolli ühendust ja proovi uuesti.',
+  historyOn: 'Ajaloost · hinnang {date}',
+  historyOld: 'Ajaloost · vanem, {date}',
+  typedOn: 'Sinu määratud · {date}',
+  bestSet: 'Parim seeria {w} × {r}, {date}',
+  higherEstimate: 'Ajalugu viitab nüüd {kg} kg. Vali „Ajaloost”, et seda järgida.',
   targetPct: '{pct}% · {kg} kg',
   targetNoMax: '{pct}% maksimumist',
   noMaxHint: 'Maksimumi veel pole. Lisa menüüs Veel › Maksimumid.',

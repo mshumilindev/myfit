@@ -8,6 +8,7 @@ import { periodizationHost } from '../periodizationApi';
 import { provide, trackerReady } from '../trackerRt';
 import { activeWeekPlan, loadKg, repsLabel, repsMinOf } from './cycle';
 import { cloneCycle, rowExtras, sanitizeCycle } from './cycleData';
+import { CycleWrap, RowLoad, RowReps, WeekBar } from './editor/CycleEditor';
 import { maxFor } from './maxes';
 import { MaxesPage } from './MaxesPage';
 import { getTypedMaxes, startMaxesSync } from './maxesSync';
@@ -24,6 +25,7 @@ provide(periodizationHost, {
   repsLabel,
   repsMin: repsMinOf,
   TargetLine,
+  editorSlots: { wrap: CycleWrap, weekBar: WeekBar, rowLoad: RowLoad, rowReps: RowReps },
   MaxesPage,
   moreItem: (locale, open) => ({
     id: 'maxes',

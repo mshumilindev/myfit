@@ -2,8 +2,26 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../store', () => ({
-  recordE1rm: (n: string) => (n === 'Barbell Squat' ? 140 : 0),
   useStore: () => ({}),
+  getStoreState: () => ({
+    workouts: [
+      {
+        id: 'w',
+        startedAt: Date.now() - 86_400_000,
+        exercises: [
+          {
+            id: 'e',
+            name: 'Barbell Squat',
+            kind: 'strength',
+            position: 0,
+            sets: [{ id: 's', reps: 3, weight: 127, isWarmup: false }],
+          },
+        ],
+      },
+    ],
+  }),
+  est1rm: (weight: number, reps: number) =>
+    weight <= 0 || reps < 1 || reps > 10 ? 0 : Math.round(weight * (1 + reps / 30)),
 }));
 vi.mock('../firebase', () => ({ auth: { currentUser: null }, db: {} }));
 vi.mock('../data/programMine', () => ({
@@ -40,6 +58,7 @@ describe('Maxes page', () => {
     render(<MaxesPage onClose={() => {}} />);
     expect(screen.getByText('Barbell Squat')).toBeTruthy();
     expect(screen.getByText('140 kg')).toBeTruthy();
+    expect(screen.getByText(/From history · est\./)).toBeTruthy();
     expect(screen.getByText('Weighted Pullups')).toBeTruthy();
     expect(screen.getByText('No max yet')).toBeTruthy();
     expect(screen.queryByText('Plank')).toBeNull();
@@ -48,7 +67,7 @@ describe('Maxes page', () => {
     seedMaxes(withMax(EMPTY_MAXES, 'Barbell Squat', 150, 1));
     render(<MaxesPage onClose={() => {}} />);
     expect(screen.getByText('150 kg')).toBeTruthy();
-    expect(screen.getByText('You set this')).toBeTruthy();
+    expect(screen.getByText(/You set this/)).toBeTruthy();
   });
   it('types a max for an exercise and saves it', async () => {
     render(<MaxesPage onClose={() => {}} />);
