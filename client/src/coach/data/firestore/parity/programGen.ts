@@ -32,6 +32,10 @@ export function genProgram(seed: number, id = planProgramId(C)): Program {
   const r = rng(seed);
   const pick = <X>(xs: readonly X[]): X => xs[Math.floor(r() * xs.length)];
   const maybe = <X>(p: number, v: () => X): X | undefined => (r() < p ? v() : undefined);
+  // Cycle fields draw from their own stream, so the programs of every seed stay what they were before cycles existed.
+  const x = rng(seed ^ 0x5bd1e995);
+  const pickX = <Y>(ys: readonly Y[]): Y => ys[Math.floor(x() * ys.length)];
+  const maybeX = <Y>(p: number, v: () => Y): Y | undefined => (x() < p ? v() : undefined);
   const items: ProgramItem[] = [];
   const nItems = 4 + Math.floor(r() * 8);
   for (let n = 0; n < nItems; n++) {
@@ -57,8 +61,8 @@ export function genProgram(seed: number, id = planProgramId(C)): Program {
     if (kind === 'strength' && !bare) {
       o.targetWeight = maybe(0.7, () => Math.round(r() * 2000) / 10);
       o.targetRpe = maybe(0.6, () => 5 + Math.floor(r() * 5));
-      o.targetPct = maybe(0.5, () => 40 + Math.floor(r() * 61));
-      o.repsMin = maybe(0.4, () => 1 + Math.floor(r() * Math.max(1, (it.reps as number) - 1)));
+      o.targetPct = maybeX(0.5, () => 40 + Math.floor(x() * 61));
+      o.repsMin = maybeX(0.4, () => 1 + Math.floor(x() * Math.max(1, (it.reps as number) - 1)));
       o.restSec = maybe(0.6, () => 30 + Math.floor(r() * 24) * 15);
       o.note = maybe(0.5, () => `cue ${seed}-${n} "quotes" \\ unicode: Привіт ąčę 💪`);
     }
@@ -88,15 +92,15 @@ export function genProgram(seed: number, id = planProgramId(C)): Program {
     targetMuscles: r() < 0.6 ? { '6': ['chest', 'back'] } : {},
     items,
   };
-  if (r() < 0.6) {
-    const len = 2 + Math.floor(r() * 3);
+  if (x() < 0.6) {
+    const len = 2 + Math.floor(x() * 3);
     p.cycle = {
       length: len,
-      baseLabel: maybe(0.5, () => 'peak' as const) ?? undefined,
+      baseLabel: maybeX(0.5, () => 'peak' as const) ?? undefined,
       weeks: Array.from({ length: len - 1 }, (_, k) => ({
-        label: maybe(0.5, () => pick(['deload', 'test', 'peak'] as const)) ?? undefined,
+        label: maybeX(0.5, () => pickX(['deload', 'test', 'peak'] as const)) ?? undefined,
         dayNames: { '1': `W${k + 2} ä` },
-        targetMuscles: (r() < 0.5 ? { '2': ['back'] } : {}) as Record<string, MuscleGroup[]>,
+        targetMuscles: (x() < 0.5 ? { '2': ['back'] } : {}) as Record<string, MuscleGroup[]>,
         items: items
           .slice(0, 2)
           .map((x, n) => ({ ...x, id: `cw${seed}-${k}-${n}`, groupId: null, groupOrder: null })),

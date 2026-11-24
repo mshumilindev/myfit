@@ -10,6 +10,8 @@ export interface EditorStrings {
   weekN: string;
   cycleAt: string;
   startAt: string;
+  ckWeekTitle: string;
+  ckWeekBody: string;
   startHint: string;
   base: string;
   none: string;
@@ -52,6 +54,8 @@ const en: EditorStrings = {
   weekN: 'Week {n}',
   cycleAt: 'Cycle week {n} of {len}',
   startAt: 'Start in cycle week',
+  ckWeekTitle: 'Week {n} of the cycle needs a look',
+  ckWeekBody: '{fix} to fix, {review} to review. Open week {n} in the cycle bar to see them.',
   startHint: 'New clients start here; the rest of the plan follows.',
   base: 'Base',
   none: 'Normal',
@@ -93,6 +97,8 @@ const uk: EditorStrings = {
   weekN: 'Тиждень {n}',
   cycleAt: 'Тиждень циклу {n} з {len}',
   startAt: 'Почати з тижня циклу',
+  ckWeekTitle: 'Тиждень {n} циклу потребує уваги',
+  ckWeekBody: 'Виправити: {fix}, переглянути: {review}. Відкрий тиждень {n} у смузі циклу.',
   startHint: 'Нові клієнти починають звідси, далі за планом.',
   base: 'Базовий',
   none: 'Звичайний',
@@ -134,6 +140,8 @@ const pl: EditorStrings = {
   weekN: 'Tydzień {n}',
   cycleAt: 'Tydzień cyklu {n} z {len}',
   startAt: 'Zacznij od tygodnia cyklu',
+  ckWeekTitle: 'Tydzień {n} cyklu wymaga uwagi',
+  ckWeekBody: 'Do poprawy: {fix}, do przejrzenia: {review}. Otwórz tydzień {n} na pasku cyklu.',
   startHint: 'Nowi klienci zaczynają tutaj, reszta wg planu.',
   base: 'Bazowy',
   none: 'Zwykły',
@@ -175,6 +183,8 @@ const lt: EditorStrings = {
   weekN: '{n} savaitė',
   cycleAt: 'Ciklo savaitė {n} iš {len}',
   startAt: 'Pradėti nuo ciklo savaitės',
+  ckWeekTitle: '{n} ciklo savaitei reikia dėmesio',
+  ckWeekBody: 'Taisyti: {fix}, peržiūrėti: {review}. Atidaryk {n} savaitę ciklo juostoje.',
   startHint: 'Nauji klientai pradeda čia, toliau pagal planą.',
   base: 'Bazinė',
   none: 'Įprasta',
@@ -217,6 +227,8 @@ const et: EditorStrings = {
   weekN: 'Nädal {n}',
   cycleAt: 'Tsükli nädal {n}/{len}',
   startAt: 'Alusta tsükli nädalast',
+  ckWeekTitle: 'Tsükli nädal {n} vajab tähelepanu',
+  ckWeekBody: 'Parandada: {fix}, üle vaadata: {review}. Ava nädal {n} tsükliribal.',
   startHint: 'Uued kliendid alustavad siit, ülejäänu plaani järgi.',
   base: 'Põhi',
   none: 'Tavaline',

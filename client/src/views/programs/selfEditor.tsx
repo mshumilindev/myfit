@@ -191,6 +191,7 @@ export function useSelfEditorHost(o: SelfHostOptions = {}): ProgramEditorHost {
         ...(readOnly ? { dayTag: TrainerDayTag } : { exercisePicker: SelfExercisePicker }),
         ...periodization?.editorSlots,
       },
+      ...periodization?.editorCheck,
     };
   }, [t, locale, start, limits, shell, readOnly, activitiesLocked, periodization]);
 }

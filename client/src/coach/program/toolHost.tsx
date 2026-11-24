@@ -49,6 +49,7 @@ export function useCoachEditorHost({
       library,
       checkContext: { restrictions: restrictionKey ? restrictionKey.split('|') : [] },
       slots: { muscleMap: MusclePickerMap, ...periodization?.editorSlots },
+      ...periodization?.editorCheck,
     }),
     [p, t, library, restrictionKey, order, periodization],
   );

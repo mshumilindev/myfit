@@ -14,7 +14,7 @@ import type { ProgramCycle, ProgramItem, WeekPlan } from './views/programs/model
 import type { MuscleGroup } from './data/exercises';
 import type { Exercise } from './types';
 import type { ExportFile } from './legal/export/exportTypes';
-import type { EditorSlots } from './tools/programEditor/host';
+import type { EditorSlots, ProgramEditorHost } from './tools/programEditor/host';
 
 /** The least a program must have for a cycle to apply to it. */
 export interface WeekSource {
@@ -69,6 +69,8 @@ export interface PeriodizationHost {
     value: number;
     onChange: (n: number) => void;
   }> | null;
+  /** The pre-send check of the other cycle weeks: `checkRules` and `describeFinding` of the editor host. */
+  editorCheck: Pick<ProgramEditorHost, 'checkRules' | 'describeFinding'> | null;
   /** What the program editor gets: the cycle wrapper and bar, the % of max and rep-range fields of a row. */
   editorSlots: Pick<EditorSlots, 'wrap' | 'weekBar' | 'rowLoad' | 'rowReps'> | null;
 }
@@ -88,6 +90,7 @@ export const periodizationHost: PeriodizationHost = {
   repsLabel: null,
   cycleNote: null,
   StartWeekField: null,
+  editorCheck: null,
   editorSlots: null,
 };
 

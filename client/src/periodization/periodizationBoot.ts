@@ -9,6 +9,7 @@ import { provide, trackerReady } from '../trackerRt';
 import { activeWeekPlan, cycleNote, loadKg, repsLabel, repsMinOf } from './cycle';
 import { cloneCycle, rowExtras, sanitizeCycle } from './cycleData';
 import { EDITOR_STRINGS } from './editor/editorStrings';
+import { cycleWeeksRule, describeCycleFinding } from './editor/checkWeeks';
 import { StartWeekField } from './editor/StartWeekField';
 import { CycleWrap, RowLoad, RowReps, WeekBar } from './editor/CycleEditor';
 import { maxFor } from './maxes';
@@ -28,6 +29,10 @@ provide(periodizationHost, {
   repsMin: repsMinOf,
   TargetLine,
   StartWeekField,
+  editorCheck: {
+    checkRules: (builtIn) => [...builtIn, cycleWeeksRule],
+    describeFinding: describeCycleFinding,
+  },
   cycleNote: (p, week, locale) => {
     const w = EDITOR_STRINGS[locale];
     return cycleNote(p, week, {
