@@ -9,6 +9,8 @@ export interface EditorStrings {
   week: string;
   weekN: string;
   cycleAt: string;
+  startAt: string;
+  startHint: string;
   base: string;
   none: string;
   deload: string;
@@ -49,6 +51,8 @@ const en: EditorStrings = {
   week: 'Week',
   weekN: 'Week {n}',
   cycleAt: 'Cycle week {n} of {len}',
+  startAt: 'Start in cycle week',
+  startHint: 'New clients start here; the rest of the plan follows.',
   base: 'Base',
   none: 'Normal',
   deload: 'Deload',
@@ -88,6 +92,8 @@ const uk: EditorStrings = {
   week: 'Тиждень',
   weekN: 'Тиждень {n}',
   cycleAt: 'Тиждень циклу {n} з {len}',
+  startAt: 'Почати з тижня циклу',
+  startHint: 'Нові клієнти починають звідси, далі за планом.',
   base: 'Базовий',
   none: 'Звичайний',
   deload: 'Розвантаження',
@@ -127,6 +133,8 @@ const pl: EditorStrings = {
   week: 'Tydzień',
   weekN: 'Tydzień {n}',
   cycleAt: 'Tydzień cyklu {n} z {len}',
+  startAt: 'Zacznij od tygodnia cyklu',
+  startHint: 'Nowi klienci zaczynają tutaj, reszta wg planu.',
   base: 'Bazowy',
   none: 'Zwykły',
   deload: 'Odciążenie',
@@ -166,6 +174,8 @@ const lt: EditorStrings = {
   week: 'Savaitė',
   weekN: '{n} savaitė',
   cycleAt: 'Ciklo savaitė {n} iš {len}',
+  startAt: 'Pradėti nuo ciklo savaitės',
+  startHint: 'Nauji klientai pradeda čia, toliau pagal planą.',
   base: 'Bazinė',
   none: 'Įprasta',
   deload: 'Atsipalaidavimo',
@@ -206,6 +216,8 @@ const et: EditorStrings = {
   week: 'Nädal',
   weekN: 'Nädal {n}',
   cycleAt: 'Tsükli nädal {n}/{len}',
+  startAt: 'Alusta tsükli nädalast',
+  startHint: 'Uued kliendid alustavad siit, ülejäänu plaani järgi.',
   base: 'Põhi',
   none: 'Tavaline',
   deload: 'Kergendus',

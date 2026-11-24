@@ -241,11 +241,11 @@ export function ProgramsView({
       .map((a) => peopleById.get(a.memberId))
       .filter((p): p is Person => !!p);
 
-  async function saveMembers(program: Program, add: string[], remove: string[]) {
+  async function saveMembers(program: Program, add: string[], remove: string[], startWeek: number) {
     await trackMutation(
       (async () => {
         for (const memberId of add)
-          await callFn('assignProgram', { id: program.id, memberId, startWeek: 1 });
+          await callFn('assignProgram', { id: program.id, memberId, startWeek });
         for (const memberId of remove) await callFn('unassignProgram', { memberId });
       })(),
     );
@@ -270,7 +270,7 @@ export function ProgramsView({
       people={people}
       assignments={assignments}
       programNames={programNames}
-      onSave={(add, remove) => saveMembers(membersOf, add, remove)}
+      onSave={(add, remove, startWeek) => saveMembers(membersOf, add, remove, startWeek ?? 1)}
       onClose={() => setMembersOf(null)}
     />
   );

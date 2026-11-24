@@ -219,7 +219,7 @@ describe('document size', () => {
       dayNames: week().dayNames,
       cycle: { length: 12, weeks: Array.from({ length: 11 }, week) },
     });
-    const bytes = new TextEncoder().encode(JSON.stringify(toSaved(p))).length;
+    const bytes = new TextEncoder().encode(JSON.stringify(toSaved(p, 'u', 'x'))).length;
     expect(bytes).toBeLessThan(1_048_576 * 0.8);
   });
 });

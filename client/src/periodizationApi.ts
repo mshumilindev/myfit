@@ -63,6 +63,12 @@ export interface PeriodizationHost {
   repsLabel: ((i: Pick<ProgramItem, 'reps' | 'repsMin'>) => string) | null;
   /** Where the person is in the cycle, as a line ("Cycle week 3 of 4 · Deload"), or null. */
   cycleNote: ((p: WeekSource, week: number, locale: LocaleId) => string | null) | null;
+  /** "Start in cycle week N" for the assign sheet. */
+  StartWeekField: ComponentType<{
+    length: number;
+    value: number;
+    onChange: (n: number) => void;
+  }> | null;
   /** What the program editor gets: the cycle wrapper and bar, the % of max and rep-range fields of a row. */
   editorSlots: Pick<EditorSlots, 'wrap' | 'weekBar' | 'rowLoad' | 'rowReps'> | null;
 }
@@ -81,6 +87,7 @@ export const periodizationHost: PeriodizationHost = {
   TargetLine: null,
   repsLabel: null,
   cycleNote: null,
+  StartWeekField: null,
   editorSlots: null,
 };
 

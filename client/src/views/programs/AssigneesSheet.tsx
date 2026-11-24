@@ -11,6 +11,7 @@ import { SearchField } from '../../components/ui/SearchField';
 import { UserAvatar } from '../../components/Avatar';
 import { tokenMatch } from '../../search';
 import { useT } from '../../i18n';
+import { usePeriodizationHost } from '../../periodizationRt';
 import { Icon, Sheet } from '../../ui';
 import type { Person, Program } from './model';
 
@@ -34,7 +35,8 @@ export function AssigneesSheet({
   assignments: MemberAssignment[];
   /** Names of my other programs, for "on X · will switch". */
   programNames: Map<string, string>;
-  onSave: (add: string[], remove: string[]) => Promise<void>;
+  /** `startWeek` is given only for a program with a cycle (Periodization). */
+  onSave: (add: string[], remove: string[], startWeek?: number) => Promise<void>;
   onClose: () => void;
 }) {
   const { t } = useT();
@@ -48,6 +50,9 @@ export function AssigneesSheet({
   const [busy, setBusy] = useState(false);
   const [now] = useState(() => Date.now());
   const [failed, setFailed] = useState(false);
+  const periodization = usePeriodizationHost();
+  const cycleLength = periodization?.StartWeekField && program.cycle ? program.cycle.length : 0;
+  const [startWeek, setStartWeek] = useState(1);
 
   const add = [...checked].filter((id) => !onNow.has(id));
   const remove = [...onNow].filter((id) => !checked.has(id));
@@ -125,7 +130,7 @@ export function AssigneesSheet({
     setBusy(true);
     setFailed(false);
     try {
-      await onSave(add, remove);
+      await (cycleLength ? onSave(add, remove, startWeek) : onSave(add, remove));
       onClose();
     } catch {
       setFailed(true);
@@ -166,6 +171,13 @@ export function AssigneesSheet({
               </>
             )}
           </>
+        )}
+        {cycleLength > 0 && add.length > 0 && periodization?.StartWeekField && (
+          <periodization.StartWeekField
+            length={cycleLength}
+            value={startWeek}
+            onChange={setStartWeek}
+          />
         )}
         {failed && <p className="pg-error">{t.pgSaveFailed}</p>}
         <Button
