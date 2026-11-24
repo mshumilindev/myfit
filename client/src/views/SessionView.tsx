@@ -2521,7 +2521,7 @@ export function SessionView(props: {
                     className="fe-coach"
                     onClick={() => setSheet({ kind: 'coach' })}
                   >
-                    {t.sessionCoachButton}
+                    {readinessOn ? t.sessionCoachButton : t.sessionCoachButtonPlan}
                   </Button>
                 )}
             </div>
@@ -4186,7 +4186,7 @@ export function SessionView(props: {
           ) && (
             <ListRow
               icon={<IconTile icon="heartbeat" />}
-              label={t.sessionCoachButton}
+              label={readinessOn ? t.sessionCoachButton : t.sessionCoachButtonPlan}
               onClick={() => setSheet({ kind: 'coach' })}
             />
           )}
@@ -5022,7 +5022,7 @@ export function SessionView(props: {
                           onClick={() => setSheet({ kind: 'coach' })}
                         >
                           <Icon name="heartbeat" weight="fill" />
-                          {t.sessionCoachButton}
+                          {readinessOn ? t.sessionCoachButton : t.sessionCoachButtonPlan}
                         </Button>
                       )}
                     <Button

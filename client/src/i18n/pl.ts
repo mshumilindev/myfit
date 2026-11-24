@@ -1333,6 +1333,7 @@ export const pl: Strings = {
   muscleMapNearLimit: 'blisko limitu',
   muscleMapSettles: (d: number) => `opadnie za ~${d} dn.`,
   sessionCoachButton: 'Dzisiejsza gotowość',
+  sessionCoachButtonPlan: 'Dzisiejszy plan',
   sessionCoachTitle: 'Spojrzenie na dziś',
   moreLabel: 'więcej',
   programTargetsLabel: 'Cele programu',

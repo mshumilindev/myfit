@@ -1366,6 +1366,7 @@ export const uk: Strings = {
   muscleMapNearLimit: 'на межі тижня',
   muscleMapSettles: (d: number) => `спаде за ~${d} дн`,
   sessionCoachButton: 'Готовність на сьогодні',
+  sessionCoachButtonPlan: 'План на сьогодні',
   sessionCoachTitle: 'Погляд на сьогодні',
   moreLabel: 'ще',
   programTargetsLabel: 'Цілі програми',

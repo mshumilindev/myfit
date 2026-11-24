@@ -355,6 +355,30 @@ describe('SessionView · entry points and shortcuts', () => {
       'Some muscles are ready, some are still recovering.',
     );
   });
+
+  it('without Readiness the entry is "Today’s plan": the word readiness is not on the options sheet', async () => {
+    addonsPref.set(['effort', 'circuit', 'supersets', 'equipment']);
+    const wed = (id: string, d: number): Workout =>
+      wk(id, [ex(id + 'e', 'Bench press', [set(id + 's')])], {
+        startedAt: NOW - d * 86400000,
+        finishedAt: NOW - d * 86400000 + 3600000,
+      });
+    seed([
+      wk('open', [ex('bench', 'Bench press', [set('s1', { loggedAt: NOW - 6 * MIN })])]),
+      wed('a', 7),
+      wed('b', 1),
+    ]);
+    const { container } = mount();
+    await userEvent.click(
+      within(container.querySelector('.focus-view') as HTMLElement).getByRole('button', {
+        name: 'Set options',
+      }),
+    );
+    await userEvent.click(within(screen.getByRole('dialog')).getByRole('tab', { name: /Session/ }));
+    const dlg = within(screen.getByRole('dialog'));
+    expect(dlg.getByText('Today’s plan')).toBeTruthy();
+    expect(dlg.queryByText('Today’s readiness')).toBeNull();
+  });
 });
 
 describe('SessionView · sheets and dialogs close cleanly', () => {

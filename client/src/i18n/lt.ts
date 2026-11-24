@@ -1348,6 +1348,7 @@ export const lt: Strings = {
   muscleMapNearLimit: 'prie ribos',
   muscleMapSettles: (d: number) => `nuslūgs per ~${d} d.`,
   sessionCoachButton: 'Šiandienos pasirengimas',
+  sessionCoachButtonPlan: 'Šiandienos planas',
   sessionCoachTitle: 'Šiandienos apžvalga',
   moreLabel: 'daugiau',
   programTargetsLabel: 'Programos tikslai',
