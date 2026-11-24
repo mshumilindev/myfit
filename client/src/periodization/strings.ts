@@ -25,6 +25,10 @@ export interface MaxesStrings {
   exerciseHint: string;
   next: string;
   saveFailed: string;
+  resetTitle: string;
+  resetBody: string;
+  resetDo: string;
+  cancel: string;
   historyOn: string;
   historyOld: string;
   typedOn: string;
@@ -61,6 +65,11 @@ const en: MaxesStrings = {
   exerciseHint: 'The name as in your programs, for example Barbell Squat',
   next: 'Next',
   saveFailed: "Couldn't save. Check your connection and try again.",
+  resetTitle: 'Use history instead?',
+  resetBody:
+    'Your typed max of {kg} kg will be removed. The max will be worked out from your workouts.',
+  resetDo: 'Use history',
+  cancel: 'Cancel',
   historyOn: 'From history · est. {date}',
   historyOld: 'From history · older, {date}',
   typedOn: 'You set this · {date}',
@@ -97,6 +106,11 @@ const uk: MaxesStrings = {
   exerciseHint: 'Назва, як у твоїх програмах, наприклад Barbell Squat',
   next: 'Далі',
   saveFailed: 'Не вдалося зберегти. Перевір з’єднання й спробуй ще раз.',
+  resetTitle: 'Взяти з історії?',
+  resetBody:
+    'Введений тобою максимум {kg} кг буде видалено. Максимум рахуватиметься з твоїх тренувань.',
+  resetDo: 'Взяти з історії',
+  cancel: 'Скасувати',
   historyOn: 'З історії · оцінка {date}',
   historyOld: 'З історії · давніше, {date}',
   typedOn: 'Ти задав(-ла) · {date}',
@@ -133,6 +147,11 @@ const pl: MaxesStrings = {
   exerciseHint: 'Nazwa jak w Twoich programach, np. Barbell Squat',
   next: 'Dalej',
   saveFailed: 'Nie udało się zapisać. Sprawdź połączenie i spróbuj ponownie.',
+  resetTitle: 'Użyć historii?',
+  resetBody:
+    'Wpisane maksimum {kg} kg zostanie usunięte. Maksimum będzie liczone z Twoich treningów.',
+  resetDo: 'Użyj historii',
+  cancel: 'Anuluj',
   historyOn: 'Z historii · szac. {date}',
   historyOld: 'Z historii · starsze, {date}',
   typedOn: 'Ustawione przez Ciebie · {date}',
@@ -170,6 +189,11 @@ const lt: MaxesStrings = {
   exerciseHint: 'Pavadinimas kaip tavo programose, pvz., Barbell Squat',
   next: 'Toliau',
   saveFailed: 'Nepavyko išsaugoti. Patikrink ryšį ir bandyk dar kartą.',
+  resetTitle: 'Naudoti istoriją?',
+  resetBody:
+    'Įvestas maksimumas {kg} kg bus pašalintas. Maksimumas bus skaičiuojamas iš tavo treniruočių.',
+  resetDo: 'Naudoti istoriją',
+  cancel: 'Atšaukti',
   historyOn: 'Iš istorijos · įvertis {date}',
   historyOld: 'Iš istorijos · senesnis, {date}',
   typedOn: 'Nustatei pats · {date}',
@@ -206,6 +230,11 @@ const et: MaxesStrings = {
   exerciseHint: 'Nimi nagu sinu programmides, nt Barbell Squat',
   next: 'Edasi',
   saveFailed: 'Salvestamine ebaõnnestus. Kontrolli ühendust ja proovi uuesti.',
+  resetTitle: 'Kasutada ajalugu?',
+  resetBody:
+    'Sinu sisestatud maksimum {kg} kg eemaldatakse. Maksimum arvutatakse sinu treeningutest.',
+  resetDo: 'Kasuta ajalugu',
+  cancel: 'Tühista',
   historyOn: 'Ajaloost · hinnang {date}',
   historyOld: 'Ajaloost · vanem, {date}',
   typedOn: 'Sinu määratud · {date}',

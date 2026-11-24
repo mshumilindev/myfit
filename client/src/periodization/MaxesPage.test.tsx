@@ -82,7 +82,21 @@ describe('Maxes page', () => {
     fireEvent.click(screen.getByText('Barbell Squat'));
     fireEvent.click(screen.getByRole('button', { name: 'From history' }));
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    // removing a typed number asks first; nothing is cleared until it is confirmed
+    expect(await screen.findByText('Use history instead?')).toBeTruthy();
+    expect(clearMax).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Use history' }));
     await waitFor(() => expect(clearMax).toHaveBeenCalledWith('Barbell Squat'));
+  });
+  it('cancelling the reset keeps the typed max', async () => {
+    seedMaxes(withMax(EMPTY_MAXES, 'Barbell Squat', 150, 1));
+    render(<MaxesPage onClose={() => {}} />);
+    fireEvent.click(screen.getByText('Barbell Squat'));
+    fireEvent.click(screen.getByRole('button', { name: 'From history' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByText('Use history instead?')).toBeNull();
+    expect(clearMax).not.toHaveBeenCalled();
   });
   it('says so and stays when a save does not go through', async () => {
     vi.mocked(saveMax).mockRejectedValueOnce(new Error('offline'));

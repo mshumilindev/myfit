@@ -10,6 +10,7 @@ import { Field } from '../components/ui/Field';
 import { GroupedList, ListRow } from '../components/ui/GroupedList';
 import { NumberStepper } from '../components/ui/NumberStepper';
 import { Notice } from '../components/ui/Notice';
+import { ConfirmDialog } from '../components/ui/Overlays';
 import { PageHead } from '../components/ui/PageHead';
 import { Segmented } from '../components/ui/Segmented';
 import { Tag } from '../components/ui/Tag';
@@ -138,7 +139,9 @@ function MaxEdit({ name, onBack }: { name: string; onBack: () => void }) {
   const canSave = mode === 'hand' || info.estimate !== null;
 
   const [failed, setFailed] = useState(false);
+  const [askReset, setAskReset] = useState(false);
   const save = async () => {
+    setAskReset(false);
     setFailed(false);
     try {
       if (mode === 'hand') await saveMax(name, kg);
@@ -217,9 +220,25 @@ function MaxEdit({ name, onBack }: { name: string; onBack: () => void }) {
               {s.saveFailed}
             </Notice>
           )}
-          <Button fullWidth disabled={!canSave} onClick={() => void save()}>
+          <Button
+            fullWidth
+            disabled={!canSave}
+            onClick={() =>
+              mode === 'hist' && info.source === 'typed' ? setAskReset(true) : void save()
+            }
+          >
             {s.save}
           </Button>
+          {askReset && (
+            <ConfirmDialog
+              title={s.resetTitle}
+              body={fill(s.resetBody, { kg: info.kg ?? 0 })}
+              confirmLabel={s.resetDo}
+              cancelLabel={s.cancel}
+              onCancel={() => setAskReset(false)}
+              onConfirm={() => void save()}
+            />
+          )}
         </div>
       </div>
     </div>
