@@ -2,7 +2,10 @@
  * What a topic that only MENTIONS an add-on says while that add-on is off: the same topic, told without the add-on's part.
  * (Topics that are about the add-on by name are hidden instead: `addonTopics.ts`.)
  */
-import type { PlainAnswer } from './addonTopics';
+export interface PlainAnswer {
+  addon: string;
+  answer: [string, string];
+}
 
 export const PLAIN_ANSWERS: Readonly<Record<string, PlainAnswer>> = {
   app_gyms: {

@@ -27,12 +27,6 @@ export function topicShown(id: string): boolean {
   }
 }
 
-/** What a topic that only MENTIONS an add-on says while that add-on is off (the same topic, told without the add-on's part). */
-export interface PlainAnswer {
-  addon: string;
-  answer: [string, string];
-}
-
 /** The answer as told now: the plain form while the add-on it mentions is off. */
 export function answerNow(id: string, answer: [string, string]): [string, string] {
   const plain = PLAIN_ANSWERS[id];
