@@ -30,20 +30,37 @@ export interface DropBodyProps {
   firstPart: ReactNode;
 }
 
+/** The parts of a drop set on the "next set" card; the card owns the numbers and the unit maths. */
+export interface GhostDropsProps {
+  unit: 'kg' | 'lb';
+  reps: number;
+  weightKg: number | null;
+  bodyweight: boolean;
+  drops: DropEntry[];
+  toDisp: (kg: number) => number;
+  fromDisp: (v: number) => number;
+  onReps: (n: number) => void;
+  /** New start weight in kg (the card carries the drops along). */
+  onStartWeight: (kg: number) => void;
+  onPatch: (i: number, patch: Partial<DropEntry>) => void;
+}
+
 export interface SetTypesHost {
+  /** The drop parts on the "next set" card. */
+  GhostDrops: ComponentType<GhostDropsProps> | null;
   /** The parts editor of a drop / reverse-drop set. */
   DropBody: ComponentType<DropBodyProps> | null;
   /** The note under the set-type list. */
   TypeNote: ComponentType | null;
 }
 
-export const setTypesHost: SetTypesHost = { DropBody: null, TypeNote: null };
+export const setTypesHost: SetTypesHost = { DropBody: null, TypeNote: null, GhostDrops: null };
 
 const EXTRA: ReadonlySet<SetType> = new Set<SetType>(['drop', 'reverse-drop', 'static-dynamic']);
 
 /** Is the module installed AND its chunk loaded? */
 export function setTypesLive(): boolean {
-  return setTypesAvailable() && setTypesHost.DropBody !== null;
+  return setTypesAvailable() && setTypesHost.DropBody !== null && setTypesHost.GhostDrops !== null;
 }
 
 /** Is `type` one of the module's (not working / warm-up)? */

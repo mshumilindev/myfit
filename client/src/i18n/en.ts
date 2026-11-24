@@ -1129,7 +1129,6 @@ export const en = {
   excludedFromVolume: 'excluded from volume',
   weightFalls: 'weight falls',
   weightClimbs: 'weight climbs',
-  startLabel: 'Start',
   dropRowN: (n: number) => `Drop ${n}`,
   dropBadge: 'drop',
   reverseBadge: 'reverse drop',

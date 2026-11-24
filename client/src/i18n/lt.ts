@@ -1162,7 +1162,6 @@ export const lt: Strings = {
   excludedFromVolume: 'neįskaitoma į apimtį',
   weightFalls: 'svoris krenta',
   weightClimbs: 'svoris kyla',
-  startLabel: 'Startas',
   dropRowN: (n: number) => `Dropas ${n}`,
   dropBadge: 'dropas',
   reverseBadge: 'atvirkštinis dropas',

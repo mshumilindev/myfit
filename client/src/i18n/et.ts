@@ -1138,7 +1138,6 @@ export const et: Strings = {
   excludedFromVolume: 'mahust väljas',
   weightFalls: 'raskus langeb',
   weightClimbs: 'raskus tõuseb',
-  startLabel: 'Algus',
   dropRowN: (n: number) => `Dropp ${n}`,
   dropBadge: 'dropp',
   reverseBadge: 'pöörddropp',

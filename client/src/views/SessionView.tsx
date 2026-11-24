@@ -6424,6 +6424,7 @@ function GhostSetRow(props: {
   note?: string;
 }) {
   const { t } = useT();
+  const setTypes = useSetTypesHost();
   const unit = exerciseUnit(props.ex.name);
   const [reps, setReps] = useState(Math.max(1, props.defReps || 1));
   const [weightKg, setWeightKg] = useState<number | null>(props.defWeightKg);
@@ -6473,46 +6474,19 @@ function GhostSetRow(props: {
           {fail && <span className="gset-fail-tag"> · {t.failTitle}</span>}
         </div>
       )}
-      {isDrop ? (
-        <div className="gset-drops">
-          <div className="gset-part">
-            <div className="gset-part-lab">{t.startLabel}</div>
-            <div className="gset-steppers">
-              <SetNumberInput field="reps" label={t.reps} value={reps} onChange={setReps} />
-              <SetNumberInput
-                field="weight"
-                unit={unit}
-                label={unit === 'lb' ? t.weightLb : t.weightKg}
-                value={toDisp(weightKg ?? 0)}
-                disabled={bw}
-                placeholder={t.bodyweightShort}
-                onChange={(x) => setStartWeight(fromDisp(x))}
-              />
-            </div>
-          </div>
-          {drops.map((d, i) => (
-            <div className="gset-part" key={i}>
-              <div className="gset-part-lab">{t.dropRowN(i + 1)}</div>
-              <div className="gset-steppers">
-                <SetNumberInput
-                  field="reps"
-                  label={t.reps}
-                  value={d.reps}
-                  onChange={(n) => patchDrop(i, { reps: n })}
-                />
-                <SetNumberInput
-                  field="weight"
-                  unit={unit}
-                  label={unit === 'lb' ? t.weightLb : t.weightKg}
-                  value={toDisp(d.weight ?? 0)}
-                  disabled={d.weight === null}
-                  placeholder={t.bodyweightShort}
-                  onChange={(x) => patchDrop(i, { weight: fromDisp(x) })}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
+      {isDrop && setTypes?.GhostDrops ? (
+        <setTypes.GhostDrops
+          unit={unit}
+          reps={reps}
+          weightKg={weightKg}
+          bodyweight={bw}
+          drops={drops}
+          toDisp={toDisp}
+          fromDisp={fromDisp}
+          onReps={setReps}
+          onStartWeight={setStartWeight}
+          onPatch={patchDrop}
+        />
       ) : (
         <div className="gset-steppers">
           {!isSd && <SetNumberInput field="reps" label={t.reps} value={reps} onChange={setReps} />}

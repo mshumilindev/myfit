@@ -36,7 +36,7 @@ export function DropBody(props: DropBodyProps) {
   return (
     <div className="dropedit-rows">
       <div className="drop-part">
-        <div className="drop-part-lab">{t.startLabel}</div>
+        <div className="drop-part-lab">{s.startLabel}</div>
         {props.firstPart}
       </div>
       {drops.map((d, i) => (

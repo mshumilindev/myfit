@@ -1144,7 +1144,6 @@ export const pl: Strings = {
   excludedFromVolume: 'poza objętością',
   weightFalls: 'ciężar spada',
   weightClimbs: 'ciężar rośnie',
-  startLabel: 'Początek',
   dropRowN: (n: number) => `Drop ${n}`,
   dropBadge: 'dropset',
   reverseBadge: 'odwrotny drop',

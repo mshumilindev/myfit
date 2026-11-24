@@ -8,11 +8,13 @@ import {
   setTypesLive,
   shownSetType,
 } from './setTypesApi';
+import { GhostDrops } from './setTypes/GhostDrops';
 import { DropBody } from './setTypes/DropBody';
 
 beforeEach(() => addonsPref.reset());
 afterEach(() => {
   setTypesHost.DropBody = null;
+  setTypesHost.GhostDrops = null;
   addonsPref.reset();
 });
 
@@ -46,6 +48,7 @@ describe('Set types seam, module on', () => {
   it('offers and shows every type once installed and loaded', () => {
     addonsPref.set(['set-types']);
     setTypesHost.DropBody = DropBody;
+    setTypesHost.GhostDrops = GhostDrops;
     expect(setTypesLive()).toBe(true);
     for (const t of ['drop', 'reverse-drop', 'static-dynamic'] as const) {
       expect(setTypeOffered(t)).toBe(true);
@@ -55,6 +58,7 @@ describe('Set types seam, module on', () => {
   it('goes neutral again when removed, with nothing stored changed', () => {
     addonsPref.set(['set-types']);
     setTypesHost.DropBody = DropBody;
+    setTypesHost.GhostDrops = GhostDrops;
     addonsPref.reset();
     expect(setTypesLive()).toBe(false);
     expect(shownSetType('drop')).toBe('working');

@@ -2,6 +2,7 @@ import type { LocaleId } from '../i18n';
 
 /** Words of the drop-part editor. Set types' own words live in its chunk, not in the core i18n (add-on boundary). */
 export interface SetTypesStrings {
+  startLabel: string;
   noteA: string;
   noteStrong: string;
   noteB: string;
@@ -11,6 +12,7 @@ export interface SetTypesStrings {
 }
 
 const en: SetTypesStrings = {
+  startLabel: 'Start',
   noteA: 'A drop or reverse drop is still ',
   noteStrong: 'one set',
   noteB: '. Its parts are drops, logged one after another with no break in between.',
@@ -21,6 +23,7 @@ const en: SetTypesStrings = {
 };
 
 const uk: SetTypesStrings = {
+  startLabel: 'Старт',
   noteA: 'Дроп чи зворотний дроп — це все ще ',
   noteStrong: 'один підхід',
   noteB: '. Його частини — дропи, залоговані одна за одною без перерви.',
@@ -31,6 +34,7 @@ const uk: SetTypesStrings = {
 };
 
 const pl: SetTypesStrings = {
+  startLabel: 'Początek',
   noteA: 'Drop lub odwrotny drop to wciąż ',
   noteStrong: 'jedna seria',
   noteB: '. Jej części to dropy, logowane jedna po drugiej bez przerwy.',
@@ -41,6 +45,7 @@ const pl: SetTypesStrings = {
 };
 
 const et: SetTypesStrings = {
+  startLabel: 'Algus',
   noteA: 'Dropp või pöörddropp on ikkagi ',
   noteStrong: 'üks seeria',
   noteB: '. Selle osad on dropid, logitud üksteise järel ilma pausita.',
@@ -51,6 +56,7 @@ const et: SetTypesStrings = {
 };
 
 const lt: SetTypesStrings = {
+  startLabel: 'Startas',
   noteA: 'Dropas ar atvirkštinis dropas vis tiek yra ',
   noteStrong: 'viena serija',
   noteB: '. Jos dalys — dropai, registruojami vienas po kito be pertraukos.',

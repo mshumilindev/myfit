@@ -5,7 +5,8 @@
 import { setTypesHost } from '../setTypesApi';
 import { provide, trackerReady } from '../trackerRt';
 import { DropBody } from './DropBody';
+import { GhostDrops } from './GhostDrops';
 import { TypeNote } from './TypeNote';
 
-provide(setTypesHost, { DropBody, TypeNote });
+provide(setTypesHost, { DropBody, TypeNote, GhostDrops });
 trackerReady('set-types');

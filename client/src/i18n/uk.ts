@@ -1177,7 +1177,6 @@ export const uk: Strings = {
   excludedFromVolume: 'не входить в обсяг',
   weightFalls: 'вага падає',
   weightClimbs: 'вага росте',
-  startLabel: 'Старт',
   dropRowN: (n: number) => `Дроп ${n}`,
   dropBadge: 'дроп',
   reverseBadge: 'зворотний дроп',
