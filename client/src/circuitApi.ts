@@ -31,16 +31,30 @@ export interface CircuitRunSheetProps {
   onMuscle: (m: MuscleGroup) => void;
 }
 
+/** The small controls the session shows around circuits: the start shortcut, the "adding" banner, the setting, the "new circuit" button. */
+export interface CircuitControlsHost {
+  /** The empty-session shortcut: start a circuit. */
+  Shortcut: ComponentType<{ onStart: () => void }>;
+  /** The banner while exercises are being added to a circuit. */
+  Banner: ComponentType<{ letter: string; count: number; onDone: () => void }>;
+  /** The session-settings switch that turns circuit building on and off. */
+  Setting: ComponentType<{ on: boolean; onToggle: () => void }>;
+  /** The button under the list that starts another circuit. */
+  NewButton: ComponentType<{ letter: string; onNew: () => void }>;
+}
+
 export interface CircuitHost {
+  /** The controls around circuits (shortcut, banner, setting, new-circuit button). */
+  Controls: CircuitControlsHost | null;
   /** One circuit in the session list (rounds, progress, the exercises of the round). */
   Block: ComponentType<CircuitBlockProps> | null;
   /** The sheet that runs a circuit round by round. */
   RunSheet: ComponentType<CircuitRunSheetProps> | null;
 }
 
-export const circuitHost: CircuitHost = { Block: null, RunSheet: null };
+export const circuitHost: CircuitHost = { Block: null, RunSheet: null, Controls: null };
 
 /** Is the module installed AND its chunk loaded? */
 export function circuitLive(): boolean {
-  return circuitAvailable() && circuitHost.Block !== null;
+  return circuitAvailable() && circuitHost.Block !== null && circuitHost.Controls !== null;
 }

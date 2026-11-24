@@ -273,20 +273,12 @@ export const pl: Strings = {
   sidesOne: 'Jedna strona',
   sidesNote: 'Zapisz jedną stronę · liczy się ×2 do objętości',
   sessionSettings: 'Ustawienia sesji',
-  circuitLabel: 'Obwód',
-  circuitHint: 'Kolejne ćwiczenia trafiają do jednego obwodu z rundami — jak blok crossfit.',
-  circuitSettingDesc:
-    'Wykonuj dowolną liczbę ćwiczeń w rundach. Wyłącz, aby wrócić do zwykłych ćwiczeń — to nie superseria, więc pętlę zobaczysz wszędzie.',
-  circuitAdding: 'Dodaję do obwodu',
   circuitDone: 'Gotowe',
   circuitFinishRound: 'Zakończ rundę',
   circuitTitle: (l: string) => `Obwód ${l}`,
   circuitNExercises: (n: number) => `${n} ćwiczeń`,
   circuitNRounds: (n: number) => `${n} rund`,
-  circuitSoFar: (n: number) => `${n} · kolejne dołącza do obwodu`,
   circuitNRoundsShort: (a: number, b: number) => `${a}/${b}`,
-  circuitFinishSet: 'Zakończ zestaw',
-  circuitNewCircuit: (l: string) => `Nowy obwód (${l})`,
 
   // --- Sleep ---
   sleepAvgN: (n: number) => `Śr. · ${n} nocy`,
@@ -2696,8 +2688,6 @@ export const pl: Strings = {
   esStarterKicker: (d) => `${d} · zacznij tu`,
   esStarterSub: 'naukowy podział tygodnia',
   esThen: (n) => `Potem · ${n}`,
-  esCircuitSub: 'Ćwiczenia jedno po drugim, w rundach',
-  esCircuitStart: 'Start',
   splitNames: {
     push: 'Dzień pchania',
     pull: 'Dzień ciągnięcia',

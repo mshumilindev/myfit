@@ -2,6 +2,15 @@ import type { LocaleId } from '../i18n';
 
 /** Words of the circuit screens. Circuit's own words live in its chunk, not in the core i18n (add-on boundary). */
 export interface CircuitStrings {
+  circuitLabel: string;
+  circuitHint: string;
+  circuitSettingDesc: string;
+  circuitAdding: string;
+  circuitSoFar: (n: number) => string;
+  circuitFinishSet: string;
+  circuitNewCircuit: (l: string) => string;
+  esCircuitSub: string;
+  esCircuitStart: string;
   circuitAddAnother: string;
   circuitAddRound: string;
   circuitAllLogged: (n: number) => string;
@@ -32,6 +41,16 @@ export interface CircuitStrings {
 }
 
 const en: CircuitStrings = {
+  circuitLabel: 'Circuit',
+  esCircuitSub: 'Exercises back to back, in rounds',
+  esCircuitStart: 'Start',
+  circuitAdding: 'Adding to Circuit',
+  circuitSoFar: (n: number) => `${n} so far · next add joins the loop`,
+  circuitFinishSet: 'Finish set',
+  circuitHint: 'Exercises you add next join one round-based circuit — like a crossfit block.',
+  circuitSettingDesc:
+    "Run any number of exercises in rounds. Turn it off to go back to normal exercises — it's not a superset, so the loop mark shows wherever it appears.",
+  circuitNewCircuit: (l: string) => `New circuit (${l})`,
   circuitAddAnother: 'Add another exercise',
   circuitAddRound: 'Add a round',
   circuitAllLogged: (n: number) => `All ${n} exercises logged.`,
@@ -62,6 +81,16 @@ const en: CircuitStrings = {
 };
 
 const uk: CircuitStrings = {
+  circuitLabel: 'Кругова',
+  esCircuitSub: 'Вправи одна за одною, колами',
+  esCircuitStart: 'Почати',
+  circuitAdding: 'Додаю в Кругову',
+  circuitSoFar: (n: number) => `${n} · наступна додається в коло`,
+  circuitFinishSet: 'Завершити набір',
+  circuitHint: 'Наступні вправи додаються в одну кругову з раундами — як блок у кросфіті.',
+  circuitSettingDesc:
+    'Виконуй скільки завгодно вправ колами. Вимкни, щоб повернутися до звичайних вправ — це не суперсет, тож петлю видно всюди, де вона зʼявляється.',
+  circuitNewCircuit: (l: string) => `Нова кругова (${l})`,
   circuitAddAnother: 'Додати ще вправу',
   circuitAddRound: 'Додати коло',
   circuitAllLogged: (n: number) => `Усі ${n} вправи записано.`,
@@ -92,6 +121,16 @@ const uk: CircuitStrings = {
 };
 
 const pl: CircuitStrings = {
+  circuitLabel: 'Obwód',
+  esCircuitSub: 'Ćwiczenia jedno po drugim, w rundach',
+  esCircuitStart: 'Start',
+  circuitAdding: 'Dodaję do obwodu',
+  circuitSoFar: (n: number) => `${n} · kolejne dołącza do obwodu`,
+  circuitFinishSet: 'Zakończ zestaw',
+  circuitHint: 'Kolejne ćwiczenia trafiają do jednego obwodu z rundami — jak blok crossfit.',
+  circuitSettingDesc:
+    'Wykonuj dowolną liczbę ćwiczeń w rundach. Wyłącz, aby wrócić do zwykłych ćwiczeń — to nie superseria, więc pętlę zobaczysz wszędzie.',
+  circuitNewCircuit: (l: string) => `Nowy obwód (${l})`,
   circuitAddAnother: 'Dodaj kolejne ćwiczenie',
   circuitAddRound: 'Dodaj rundę',
   circuitAllLogged: (n: number) => `Zapisano wszystkie ćwiczenia (${n}).`,
@@ -122,6 +161,16 @@ const pl: CircuitStrings = {
 };
 
 const et: CircuitStrings = {
+  circuitLabel: 'Ringtreening',
+  esCircuitSub: 'Harjutused järjest, ringidena',
+  esCircuitStart: 'Alusta',
+  circuitAdding: 'Lisan ringi',
+  circuitSoFar: (n: number) => `${n} · järgmine liitub ringiga`,
+  circuitFinishSet: 'Lõpeta komplekt',
+  circuitHint: 'Järgmisena lisatavad harjutused liidetakse üheks ringiks — nagu crossfiti plokk.',
+  circuitSettingDesc:
+    'Tee ükskõik kui palju harjutusi ringidena. Lülita välja, et naasta tavaharjutuste juurde — see pole superseeria, seega näed silmust kõikjal.',
+  circuitNewCircuit: (l: string) => `Uus ring (${l})`,
   circuitAddAnother: 'Lisa veel harjutus',
   circuitAddRound: 'Lisa ring',
   circuitAllLogged: (n: number) => `Kõik ${n} harjutust salvestatud.`,
@@ -152,6 +201,16 @@ const et: CircuitStrings = {
 };
 
 const lt: CircuitStrings = {
+  circuitLabel: 'Ratas',
+  esCircuitSub: 'Pratimai vienas po kito, ratais',
+  esCircuitStart: 'Pradėti',
+  circuitAdding: 'Dedu į ratą',
+  circuitSoFar: (n: number) => `${n} · kitas jungiamas į ratą`,
+  circuitFinishSet: 'Baigti rinkinį',
+  circuitHint: 'Toliau pridedami pratimai jungiami į vieną ratų treniruotę — kaip crossfit blokas.',
+  circuitSettingDesc:
+    'Atlik bet kiek pratimų ratais. Išjunk, kad grįžtum prie įprastų pratimų — tai ne supersetas, tad kilpą matysi visur.',
+  circuitNewCircuit: (l: string) => `Naujas ratas (${l})`,
   circuitAddAnother: 'Pridėti dar pratimą',
   circuitAddRound: 'Pridėti ratą',
   circuitAllLogged: (n: number) => `Įrašyti visi ${n} pratimai.`,

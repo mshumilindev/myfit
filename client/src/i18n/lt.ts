@@ -280,20 +280,12 @@ export const lt: Strings = {
   sidesOne: 'Viena pusė',
   sidesNote: 'Žymėk vieną pusę · skaičiuojama ×2 apimčiai',
   sessionSettings: 'Sesijos nustatymai',
-  circuitLabel: 'Ratas',
-  circuitHint: 'Toliau pridedami pratimai jungiami į vieną ratų treniruotę — kaip crossfit blokas.',
-  circuitSettingDesc:
-    'Atlik bet kiek pratimų ratais. Išjunk, kad grįžtum prie įprastų pratimų — tai ne supersetas, tad kilpą matysi visur.',
-  circuitAdding: 'Dedu į ratą',
   circuitDone: 'Baigta',
   circuitFinishRound: 'Baigti ratą',
   circuitTitle: (l: string) => `Ratas ${l}`,
   circuitNExercises: (n: number) => `${n} pratimai`,
   circuitNRounds: (n: number) => `${n} ratų`,
-  circuitSoFar: (n: number) => `${n} · kitas jungiamas į ratą`,
   circuitNRoundsShort: (a: number, b: number) => `${a}/${b}`,
-  circuitFinishSet: 'Baigti rinkinį',
-  circuitNewCircuit: (l: string) => `Naujas ratas (${l})`,
 
   // --- Sleep ---
   sleepAvgN: (n: number) => `Vid. · ${n} naktų`,
@@ -2714,8 +2706,6 @@ export const lt: Strings = {
   esStarterKicker: (d) => `${d} · pradėk čia`,
   esStarterSub: 'moksliškai pagrįstas savaitės planas',
   esThen: (n) => `Toliau · ${n}`,
-  esCircuitSub: 'Pratimai vienas po kito, ratais',
-  esCircuitStart: 'Pradėti',
   splitNames: {
     push: 'Stūmimo diena',
     pull: 'Traukimo diena',

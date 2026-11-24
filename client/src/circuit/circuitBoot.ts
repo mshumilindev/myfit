@@ -5,7 +5,12 @@
 import { circuitHost } from '../circuitApi';
 import { provide, trackerReady } from '../trackerRt';
 import { CircuitBlock } from './CircuitBlock';
+import { CIRCUIT_CONTROLS } from './CircuitControls';
 import { CircuitRunSheet } from './CircuitRun';
 
-provide(circuitHost, { Block: CircuitBlock, RunSheet: CircuitRunSheet });
+provide(circuitHost, {
+  Block: CircuitBlock,
+  RunSheet: CircuitRunSheet,
+  Controls: CIRCUIT_CONTROLS,
+});
 trackerReady('circuit');

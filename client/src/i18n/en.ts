@@ -250,20 +250,12 @@ export const en = {
   sidesOne: 'One side',
   sidesNote: 'Log one side · counts ×2 in volume',
   sessionSettings: 'Session settings',
-  circuitLabel: 'Circuit',
-  circuitHint: 'Exercises you add next join one round-based circuit — like a crossfit block.',
-  circuitSettingDesc:
-    "Run any number of exercises in rounds. Turn it off to go back to normal exercises — it's not a superset, so the loop mark shows wherever it appears.",
-  circuitAdding: 'Adding to Circuit',
   circuitDone: 'Done',
   circuitFinishRound: 'Finish round',
   circuitTitle: (l: string) => `Circuit ${l}`,
   circuitNExercises: (n: number) => `${n} exercises`,
   circuitNRounds: (n: number) => `${n} rounds`,
-  circuitSoFar: (n: number) => `${n} so far · next add joins the loop`,
   circuitNRoundsShort: (a: number, b: number) => `${a}/${b}`,
-  circuitFinishSet: 'Finish set',
-  circuitNewCircuit: (l: string) => `New circuit (${l})`,
 
   // --- Sleep (My Fit · Sleep) ---
   sleepAvgN: (n: number) => `Avg · ${n} nights`,
@@ -2723,8 +2715,6 @@ export const en = {
   esStarterKicker: (d: string) => `${d} · start here`,
   esStarterSub: 'science-based weekly split',
   esThen: (n: number) => `Then · ${n}`,
-  esCircuitSub: 'Exercises back to back, in rounds',
-  esCircuitStart: 'Start',
   splitNames: {
     push: 'Push day',
     pull: 'Pull day',

@@ -261,20 +261,12 @@ export const et: Strings = {
   sidesOne: 'Üks pool',
   sidesNote: 'Logi üks pool · loeb mahtu ×2',
   sessionSettings: 'Sessiooni seaded',
-  circuitLabel: 'Ringtreening',
-  circuitHint: 'Järgmisena lisatavad harjutused liidetakse üheks ringiks — nagu crossfiti plokk.',
-  circuitSettingDesc:
-    'Tee ükskõik kui palju harjutusi ringidena. Lülita välja, et naasta tavaharjutuste juurde — see pole superseeria, seega näed silmust kõikjal.',
-  circuitAdding: 'Lisan ringi',
   circuitDone: 'Valmis',
   circuitFinishRound: 'Lõpeta ring',
   circuitTitle: (l: string) => `Ring ${l}`,
   circuitNExercises: (n: number) => `${n} harjutust`,
   circuitNRounds: (n: number) => `${n} ringi`,
-  circuitSoFar: (n: number) => `${n} · järgmine liitub ringiga`,
   circuitNRoundsShort: (a: number, b: number) => `${a}/${b}`,
-  circuitFinishSet: 'Lõpeta komplekt',
-  circuitNewCircuit: (l: string) => `Uus ring (${l})`,
 
   // --- Sleep ---
   sleepAvgN: (n: number) => `Keskm. · ${n} ööd`,
@@ -2681,8 +2673,6 @@ export const et: Strings = {
   esStarterKicker: (d) => `${d} · alusta siit`,
   esStarterSub: 'teaduspõhine nädalajaotus',
   esThen: (n) => `Siis · ${n}`,
-  esCircuitSub: 'Harjutused järjest, ringidena',
-  esCircuitStart: 'Alusta',
   splitNames: {
     push: 'Surumispäev',
     pull: 'Tõmbepäev',

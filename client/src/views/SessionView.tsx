@@ -9,7 +9,6 @@ import { ClientTargetStripLazy } from '../coach/client/lazy';
 import { PeriodizationTarget } from '../periodizationTarget';
 import { useStoredConditionLimits } from '../healthBuild';
 import { EmptyState } from '../components/ui/EmptyState';
-import { SwitchIndicator } from '../components/ui/Switch';
 import { BackButton } from '../components/ui/BackButton';
 import {
   type CSSProperties,
@@ -571,7 +570,7 @@ export function SessionView(props: {
   const SupersetSheet = supersetsH?.Sheet ?? NOTHING;
   const SupersetBlock = supersetsH?.Block ?? NOTHING;
   const circuitH = useCircuitHost();
-  const circuitOn = circuitH !== null;
+  const circuitCtl = circuitH?.Controls ?? null;
   const CircuitBlock = circuitH?.Block ?? NOTHING;
   const CircuitRunSheet = circuitH?.RunSheet ?? NOTHING;
   const effort = useEffortHost(); // the effort entry (RPE / RIR) is a module: nothing of it shows without it
@@ -2028,28 +2027,13 @@ export function SessionView(props: {
               </div>
             </div>
           )}
-          {circuitOn && (
-            <div className="es-circuit">
-              <span className="es-loop" aria-hidden>
-                <Icon name="arrows-clockwise" />
-              </span>
-              <span className="es-circuit-text">
-                <span className="es-circuit-title">{t.circuitLabel}</span>
-                <span className="es-circuit-sub">{t.esCircuitSub}</span>
-              </span>
-              <Button
-                variant="secondary"
-                size="sm"
-                icon="play"
-                className="es-circuit-go"
-                onClick={() => {
-                  setCircuit((c) => ({ on: true, groupId: crypto.randomUUID(), rounds: c.rounds }));
-                  setSheet({ kind: 'add' });
-                }}
-              >
-                {t.esCircuitStart}
-              </Button>
-            </div>
+          {circuitCtl && (
+            <circuitCtl.Shortcut
+              onStart={() => {
+                setCircuit((c) => ({ on: true, groupId: crypto.randomUUID(), rounds: c.rounds }));
+                setSheet({ kind: 'add' });
+              }}
+            />
           )}
         </div>
         <div className="es-dock">
@@ -2930,35 +2914,22 @@ export function SessionView(props: {
     );
   }
 
+  const circuitCount = sessionBlocks(workout).filter(
+    (b) => b.kind === 'group' && b.group.circuit,
+  ).length;
   // Building a circuit: exercises added now join it (shown in both views).
   const circuitBanner =
-    live && circuit.on && circuit.groupId ? (
-      <div className="circuit-banner">
-        <span className="loop sm">
-          <Icon name="arrows-clockwise" />
-        </span>
-        <div className="cb-text">
-          <div className="cb-title">
-            {t.circuitAdding}{' '}
-            {(() => {
-              const blk = sessionBlocks(workout).find(
-                (b) => b.kind === 'group' && b.group.groupId === circuit.groupId,
-              );
-              return blk && blk.kind === 'group' ? blk.group.letter : 'A';
-            })()}
-          </div>
-          <div className="cb-sub">
-            {t.circuitSoFar(workout.exercises.filter((e) => e.groupId === circuit.groupId).length)}
-          </div>
-        </div>
-        <Button
-          variant="secondary"
-          className="cb-done"
-          onClick={() => setCircuit((c) => ({ ...c, on: false, groupId: null }))}
-        >
-          {t.circuitFinishSet}
-        </Button>
-      </div>
+    circuitCtl && live && circuit.on && circuit.groupId ? (
+      <circuitCtl.Banner
+        letter={(() => {
+          const blk = sessionBlocks(workout).find(
+            (b) => b.kind === 'group' && b.group.groupId === circuit.groupId,
+          );
+          return blk && blk.kind === 'group' ? blk.group.letter : 'A';
+        })()}
+        count={workout.exercises.filter((e) => e.groupId === circuit.groupId).length}
+        onDone={() => setCircuit((c) => ({ ...c, on: false, groupId: null }))}
+      />
     ) : null;
 
   /** Focus step for a superset / circuit: the whole group on one slide. */
@@ -4181,32 +4152,17 @@ export function SessionView(props: {
    *  options sheet's "Session" tab (which adds add / readiness / gym rows). */
   const renderSessionOptions = (tabs: boolean) => (
     <>
-      {circuitOn && (
-        <Card
-          as="button"
-          tone="accent"
-          emphasis="hero"
-          className={`ss-circuit${circuit.on ? ' on' : ''}`}
-          onClick={() =>
+      {circuitCtl && (
+        <circuitCtl.Setting
+          on={circuit.on}
+          onToggle={() =>
             setCircuit((c) =>
               c.on
                 ? { on: false, groupId: null, rounds: c.rounds }
                 : { on: true, groupId: crypto.randomUUID(), rounds: c.rounds },
             )
           }
-        >
-          <span className="ss-top">
-            <span className="ss-loop">
-              <Icon name="arrows-clockwise" />
-            </span>
-            <span className="ss-circuit-text">
-              <span className="ss-circuit-title">{t.circuitLabel}</span>
-              <span className="ss-circuit-hint">{t.circuitHint}</span>
-            </span>
-            <SwitchIndicator on={circuit.on} size="sm" />
-          </span>
-          <span className="ss-desc">{t.circuitSettingDesc}</span>
-        </Card>
+        />
       )}
       {tabs && live && (
         <div className="opts-rows">
@@ -5234,31 +5190,14 @@ export function SessionView(props: {
                     }
                     return renderCard(single, null);
                   })}
-                  {live &&
-                    !circuit.on &&
-                    sessionBlocks(workout).some((b) => b.kind === 'group' && b.group.circuit) && (
-                      <Button
-                        variant="secondary"
-                        className="circuit-new"
-                        onClick={() =>
-                          setCircuit((c) => ({
-                            ...c,
-                            on: true,
-                            groupId: crypto.randomUUID(),
-                          }))
-                        }
-                      >
-                        <Icon name="plus-circle" />
-                        {t.circuitNewCircuit(
-                          String.fromCharCode(
-                            65 +
-                              sessionBlocks(workout).filter(
-                                (b) => b.kind === 'group' && b.group.circuit,
-                              ).length,
-                          ),
-                        )}
-                      </Button>
-                    )}
+                  {circuitCtl && live && !circuit.on && circuitCount > 0 && (
+                    <circuitCtl.NewButton
+                      letter={String.fromCharCode(65 + circuitCount)}
+                      onNew={() =>
+                        setCircuit((c) => ({ ...c, on: true, groupId: crypto.randomUUID() }))
+                      }
+                    />
+                  )}
                   {/* Energy plaque sits under the exercises, matching their width. */}
                   {props.past && sessionKcal != null && <EnergyPlaque kcal={sessionKcal} />}
                   {props.past && workout.exercises.some((e) => inShownGroup(e, workout)) && (

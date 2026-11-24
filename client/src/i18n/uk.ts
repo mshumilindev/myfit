@@ -308,20 +308,12 @@ export const uk: Strings = {
   sidesOne: 'Одна сторона',
   sidesNote: 'Логуй одну сторону · рахується ×2 в обʼємі',
   sessionSettings: 'Налаштування сесії',
-  circuitLabel: 'Кругова',
-  circuitHint: 'Наступні вправи додаються в одну кругову з раундами — як блок у кросфіті.',
-  circuitSettingDesc:
-    'Виконуй скільки завгодно вправ колами. Вимкни, щоб повернутися до звичайних вправ — це не суперсет, тож петлю видно всюди, де вона зʼявляється.',
-  circuitAdding: 'Додаю в Кругову',
   circuitDone: 'Готово',
   circuitFinishRound: 'Завершити коло',
   circuitTitle: (l: string) => `Кругова ${l}`,
   circuitNExercises: (n: number) => `${n} вправ`,
   circuitNRounds: (n: number) => `${n} кіл`,
-  circuitSoFar: (n: number) => `${n} · наступна додається в коло`,
   circuitNRoundsShort: (a: number, b: number) => `${a}/${b}`,
-  circuitFinishSet: 'Завершити набір',
-  circuitNewCircuit: (l: string) => `Нова кругова (${l})`,
 
   // --- Sleep ---
   sleepAvgN: (n: number) => `Сер. · ${n} ночей`,
@@ -2733,8 +2725,6 @@ export const uk: Strings = {
   esStarterKicker: (d) => `${d} · почни з цього`,
   esStarterSub: 'науковий розподіл на тиждень',
   esThen: (n) => `Далі · ${n}`,
-  esCircuitSub: 'Вправи одна за одною, колами',
-  esCircuitStart: 'Почати',
   splitNames: {
     push: 'День жимів',
     pull: 'День тяг',
