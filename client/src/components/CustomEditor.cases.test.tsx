@@ -1,12 +1,19 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { LOCALES, setLocale } from '../i18n';
+import { addonsPref, enableAddons } from '../addons/enabledSet';
 import { CustomEditor } from './ExerciseGallery';
 
 const en = () => LOCALES.en;
 
-beforeEach(() => setLocale('en'));
-afterEach(cleanup);
+beforeEach(() => {
+  setLocale('en');
+  enableAddons(['equipment']); // Equipment installed: the equipment field is the module's
+});
+afterEach(() => {
+  addonsPref.reset();
+  cleanup();
+});
 
 describe('CustomEditor', () => {
   const init = { id: null, name: '', primary: null, secondary: [], equipment: [] };

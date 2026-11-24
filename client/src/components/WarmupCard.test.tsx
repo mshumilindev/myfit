@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { enableAddons } from '../addons/enabledSet';
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { WarmupCard } from './WarmupCard';
 import {
@@ -347,6 +348,7 @@ describe('WarmupCard', () => {
     }
 
     it("highlights today's muscle groups and suggests one light station, nothing heavy", () => {
+      enableAddons(['equipment']); // Equipment installed: a gym's kit steers the suggestions
       setupBands();
       fireEvent.click(screen.getByRole('button', { name: 'Add exercise' }));
       expect(screen.getAllByText('Today').length).toBeGreaterThan(0);

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { addonsPref, enableAddons } from '../addons/enabledSet';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { LOCALES, setLocale } from '../i18n';
 import { __getStateForTests, __replaceStateForTests } from '../store';
@@ -61,11 +62,13 @@ const gym = (inventory?: string[]): Gym =>
 
 beforeEach(() => {
   setLocale('en');
+  enableAddons(['equipment']); // Equipment installed: the equipment line is the module's
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(NOW);
   setWorkouts([]);
 });
 afterEach(() => {
+  addonsPref.reset();
   cleanup();
   vi.useRealTimers();
 });

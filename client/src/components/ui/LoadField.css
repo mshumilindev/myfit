@@ -1,10 +1,10 @@
 /* LoadField: kg or % of max, with the computed line; tokens only. */
-.uild {
+.ui-loadfield {
   display: flex;
   flex-direction: column;
   gap: var(--s-12);
 }
-.uild-hint {
+.ui-loadfield-hint {
   margin: 0;
   display: flex;
   flex-wrap: wrap;
@@ -13,9 +13,9 @@
   font-size: var(--fs-13);
   color: var(--color-neutral-600);
 }
-.uild-hint b {
+.ui-loadfield-hint b {
   color: var(--color-text);
 }
-.uild-hint > button {
+.ui-loadfield-hint > button {
   align-self: flex-start;
 }

@@ -53,7 +53,7 @@ export function LoadField({
   disabled,
 }: LoadFieldProps) {
   return (
-    <div className="uild">
+    <div className="ui-loadfield">
       <Segmented
         label={labels.type}
         value={mode}
@@ -89,7 +89,7 @@ export function LoadField({
             disabled={disabled}
           />
           {hint != null && (
-            <p className="uild-hint">
+            <p className="ui-loadfield-hint">
               <Icon name={hintWarn ? 'warning-circle' : 'barbell'} />
               <span>{hint}</span>
               {hintAction && (
