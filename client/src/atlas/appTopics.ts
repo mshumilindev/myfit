@@ -1,7 +1,5 @@
-/**
- * How the app works — written from the app's own screens (labels as in the UI),
- * so Atlas never makes up a button. Understood by example; en/uk answers.
- */
+/** How the app works — from the app's own screens (labels as in the UI), so Atlas never makes up a button. By example; en/uk. */
+import { answerNow } from './addonTopics';
 import type { Intent } from './intentKit';
 
 export const APP_TOPICS: {
@@ -1492,5 +1490,5 @@ export const APP_TOPICS: {
 export const INTENTS_APP: Intent[] = APP_TOPICS.map((t) => ({
   id: t.id,
   all: [['__never__']],
-  answer: (_c, _p, L) => L(t.answer[0], t.answer[1]),
+  answer: (_c, _p, L) => L(...answerNow(t.id, t.answer)),
 }));

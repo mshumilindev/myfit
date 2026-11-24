@@ -5,6 +5,7 @@
  * the app's own tool works, or are about it by name.
  */
 import { addonAvailable } from '../addons/enabledSet';
+import { PLAIN_ANSWERS } from './plainAnswers';
 
 /** Intent id → the add-on that has to be installed for Atlas to answer it. */
 export const TOPIC_ADDON: Readonly<Record<string, string>> = {
@@ -23,5 +24,22 @@ export function topicShown(id: string): boolean {
     return addonAvailable(addon);
   } catch {
     return false;
+  }
+}
+
+/** What a topic that only MENTIONS an add-on says while that add-on is off (the same topic, told without the add-on's part). */
+export interface PlainAnswer {
+  addon: string;
+  answer: [string, string];
+}
+
+/** The answer as told now: the plain form while the add-on it mentions is off. */
+export function answerNow(id: string, answer: [string, string]): [string, string] {
+  const plain = PLAIN_ANSWERS[id];
+  if (!plain) return answer;
+  try {
+    return addonAvailable(plain.addon) ? answer : plain.answer;
+  } catch {
+    return plain.answer;
   }
 }

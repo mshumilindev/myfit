@@ -13,6 +13,7 @@
  * Phrasings live in kb/appTipsEx.ts (the understanding index only).
  */
 import { addonAvailable } from '../addons/enabledSet';
+import { answerNow } from './addonTopics';
 import type { Intent, Tr } from './intentKit';
 import { ASKS } from './asks';
 import { keyGroups } from './intentsExtra';
@@ -543,7 +544,7 @@ export const INTENTS_APP_MORE: Intent[] = [
     id: t.id,
     all: keyGroups(APP_KEYS[t.id] ?? [['__never__']]),
     answer: (_c, _p, L) =>
-      t.id === 'app_tips' ? tipBatch(0, L).text : L(t.answer[0], t.answer[1]),
+      t.id === 'app_tips' ? tipBatch(0, L).text : L(...answerNow(t.id, t.answer)),
     // "More" after tips = the next batch (picked in withAppTips).
     more: t.id === 'app_tips' ? (_c, _p, L) => tipBatch(0, L).text : undefined,
     suggest: (L) =>
