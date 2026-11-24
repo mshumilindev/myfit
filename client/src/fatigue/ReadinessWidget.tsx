@@ -6,9 +6,11 @@ import { Widget, WidgetBar, WidgetList, WidgetRing } from '../components/ui/Widg
 import { Button } from '../components/ui/Button';
 import { muscleReadiness } from '../recovery';
 import { pct } from '../today/widgets/format';
+import type { FatigueWidgetCtx } from './widgetCtx';
 import type { FatigueWidgetProps } from '../fatigueApi';
 
-export function ReadinessWidget({ size, ctx }: FatigueWidgetProps) {
+export function ReadinessWidget({ size, ctx: rawCtx }: FatigueWidgetProps) {
+  const ctx = rawCtx as FatigueWidgetCtx;
   const { store, now, t, tw, shell } = ctx;
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
   const all = [...muscleReadiness(finished, now).values()];

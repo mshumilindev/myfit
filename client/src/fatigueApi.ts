@@ -8,7 +8,6 @@ import type { ComponentType } from 'react';
 import type { MuscleGroup } from './data/exercises';
 import type { Nudge } from './components/NudgeStack';
 import type { WidgetSize } from './components/ui/Widget';
-import type { WidgetCtx } from './today/registry';
 import type { useT } from './i18n';
 import type { Workout } from './types';
 import { fatigueAvailable, readinessAvailable } from './addons/featureGates';
@@ -51,7 +50,8 @@ export interface ReadinessLensProps {
 
 export interface FatigueWidgetProps {
   size: WidgetSize;
-  ctx: WidgetCtx;
+  /** A Today `WidgetCtx`; typed loosely here so the core seam does not import the Today registry (a cycle). The widget bodies narrow it. */
+  ctx: unknown;
 }
 
 export interface FatigueHost {

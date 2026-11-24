@@ -3,14 +3,7 @@
  * through `fatigueHost.FatigueWidget`.
  */
 import { useMemo, type ReactNode } from 'react';
-import {
-  Widget,
-  WidgetBar,
-  WidgetEmpty,
-  WidgetList,
-  WidgetSpark,
-  type WidgetSize,
-} from '../components/ui/Widget';
+import { Widget, WidgetBar, WidgetEmpty, WidgetList, WidgetSpark } from '../components/ui/Widget';
 import { Button } from '../components/ui/Button';
 import { ToneText } from '../components/ui/ToneText';
 import type { Tone } from '../components/ui/tones';
@@ -23,7 +16,8 @@ import { sleepReadinessBias } from '../sleepRt';
 import { deloadMult, sleepNeedExtraMin } from '../calcMods';
 import { personalLandmarks } from '../personalize';
 import type { Workout } from '../types';
-import type { WidgetCtx } from '../today/registry';
+import type { FatigueWidgetProps } from '../fatigueApi';
+import type { FatigueWidgetCtx } from './widgetCtx';
 import { DAY, signed } from '../today/widgets/format';
 import { trs } from '../today/widgets/training.strings';
 import { setHash } from '../route';
@@ -50,7 +44,8 @@ const LEVEL_TONE: Record<FatigueLevel, Tone> = {
   fried: 'danger',
 };
 
-export function FatigueWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
+export function FatigueWidget({ size, ctx: rawCtx }: FatigueWidgetProps) {
+  const ctx = rawCtx as FatigueWidgetCtx;
   const { store, now, t, locale } = ctx;
   const sleepsForCalc = useSleepsForCalc();
   const s = trs(locale);
