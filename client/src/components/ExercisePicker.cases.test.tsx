@@ -302,6 +302,20 @@ describe('ExercisePicker · gym equipment', () => {
     expect(cards.slice(firstNa).every((c) => c.classList.contains('na'))).toBe(true);
   });
 
+  it.each(['en', 'uk', 'pl', 'et', 'lt'] as const)(
+    'without the Equipment module no equipment words show in %s',
+    (loc) => {
+      addonsPref.set([]);
+      setLocale(loc);
+      const t = LOCALES[loc];
+      setup({ gym: gym(['dumbbell', 'barbell']) });
+      const text = document.body.textContent ?? '';
+      expect(text).not.toContain(t.pickEquipAll);
+      expect(text).not.toContain(t.pickEquipTitle);
+      expect(document.querySelector('.xp-eqrow')).toBeNull();
+    },
+  );
+
   it('without the Equipment module there is no equipment chip and nothing is dimmed', () => {
     addonsPref.set([]);
     setup({ gym: gym(['dumbbell', 'barbell']) });
