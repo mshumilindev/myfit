@@ -22,6 +22,7 @@ vi.mock('../data/programMine', async (orig) => ({
 }));
 
 import { ProgressView } from './ProgressView';
+import '../fatigue/fatigueBoot'; // Fatigue & readiness installed and loaded: the readiness read is the module's
 
 type Lens = 'volume' | 'fatigue' | 'readiness';
 const open = (lens: Lens = 'volume') => {

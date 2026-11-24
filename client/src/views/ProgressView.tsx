@@ -5,7 +5,7 @@ import {
   useMuscleMapOn,
   useReadinessOn,
 } from '../addons/featureGates';
-import { fatigueSource } from '../fatigueApi';
+import { fatigueHost, fatigueSource } from '../fatigueApi';
 import { useSleepsForCalc } from '../addons/useSleeps';
 import { weekStartOf as trainingWeekStart } from '../weekStart';
 import { Button, IconButton } from '../components/ui/Button';
@@ -68,7 +68,6 @@ import { OverviewBack } from '../components/OverviewBack';
 import { AtlasNotesPanel } from '../components/AtlasNotesPanel';
 import { DateField } from '../components/PickerFields';
 import { FixSheet } from '../components/FixSheet';
-import { ReadinessLens } from '../components/Readiness';
 import {
   muscleFatigue,
   deloadSuggestion,
@@ -788,11 +787,13 @@ export function ProgressView({
               )}
             </div>
             {lens === 'readiness' ? (
-              <ReadinessLens
-                finished={mapWorkouts}
-                now={nowTs}
-                view={muscleMapOn ? 'map' : 'list'}
-              />
+              fatigueHost.ReadinessLens && (
+                <fatigueHost.ReadinessLens
+                  finished={mapWorkouts}
+                  now={nowTs}
+                  view={muscleMapOn ? 'map' : 'list'}
+                />
+              )
             ) : (
               <>
                 <MuscleHeatmap colors={lens === 'fatigue' ? fatColors : volHeat} />
@@ -1382,11 +1383,13 @@ function VolumePanel({
       {cold && <div className="vol-cold">{t.volColdStart}</div>}
 
       {lens === 'readiness' ? (
-        <ReadinessLens
-          finished={mapWorkouts}
-          now={nowTs}
-          view={!desktop && mapView && muscleMapOn ? 'map' : 'list'}
-        />
+        fatigueHost.ReadinessLens && (
+          <fatigueHost.ReadinessLens
+            finished={mapWorkouts}
+            now={nowTs}
+            view={!desktop && mapView && muscleMapOn ? 'map' : 'list'}
+          />
+        )
       ) : mapView && !desktop ? (
         <div className="vol-map">
           {lensChoices.length > 1 && (

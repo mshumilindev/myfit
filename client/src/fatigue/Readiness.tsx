@@ -8,8 +8,8 @@
 import { Button } from '../components/ui/Button';
 import { Icon } from '../ui';
 import { useT } from '../i18n';
-import { MuscleHeatmap, MuscleIcon } from './Muscle';
-import type { Nudge } from './NudgeStack';
+import { MuscleHeatmap, MuscleIcon } from '../components/Muscle';
+import type { Nudge } from '../components/NudgeStack';
 import {
   muscleReadiness,
   readinessColors,
@@ -21,6 +21,7 @@ import {
   type MuscleReadiness,
 } from '../recovery';
 import type { Workout } from '../types';
+import type { ReadinessLensProps } from '../fatigueApi';
 import type { MuscleGroup } from '../data/exercises';
 import { setHash } from '../route';
 
@@ -171,15 +172,7 @@ export function buildReadinessNudge(finished: Workout[], now: number, t: T): Nud
 /** The readiness read for the Progress volume lens. `view` mirrors the panel's
  *  List/Map switch: 'map' shows the tinted body map + legend, 'list' the
  *  per-muscle list, 'full' both. Verdict + recommendation show in every view. */
-export function ReadinessLens({
-  finished,
-  now,
-  view = 'full',
-}: {
-  finished: Workout[];
-  now: number;
-  view?: 'full' | 'map' | 'list';
-}) {
+export function ReadinessLens({ finished, now, view = 'full' }: ReadinessLensProps) {
   const { t } = useT();
   const map = muscleReadiness(finished, now);
   const rows = orderedRows(map);

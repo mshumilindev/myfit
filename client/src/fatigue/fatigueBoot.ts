@@ -3,6 +3,11 @@
  * installed. The pieces the screens draw (muscle fatigue, readiness, the muscle map) are handed over here step by step as they
  * leave the core; until a piece is moved the core still draws it.
  */
-import { trackerReady } from '../trackerRt';
+import { fatigueHost } from '../fatigueApi';
+import { provide, trackerReady } from '../trackerRt';
+import { MuscleStatePanel } from './MuscleStatePanel';
+import { ReadinessLens, buildReadinessNudge } from './Readiness';
+
+provide(fatigueHost, { MuscleStatePanel, ReadinessLens, buildReadinessNudge });
 
 trackerReady('fatigue');

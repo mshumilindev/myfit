@@ -8,9 +8,8 @@
  */
 import { useMemo, useState } from 'react';
 import { useT } from '../i18n';
+import type { MuscleStatePanelProps } from '../fatigueApi';
 import { useStore } from '../store';
-import type { Workout } from '../types';
-import type { MuscleGroup } from '../data/exercises';
 import { directReadiness } from '../picker';
 import { READINESS_COLOR } from '../recovery';
 import { marginalStimulus } from '../stimulus';
@@ -26,17 +25,7 @@ export function MuscleStatePanel({
   todaySets,
   plateau,
   carry,
-}: {
-  muscle: MuscleGroup;
-  /** The live session (its sets count toward today's read). */
-  workout: Workout;
-  /** Fractional hard sets the muscle has had in this session. */
-  todaySets: number;
-  /** Personal per-session plateau for the muscle. */
-  plateau: number;
-  /** Fatigue carried in from earlier sessions (fractional sets). */
-  carry?: number;
-}) {
+}: MuscleStatePanelProps) {
   const { t } = useT();
   const store = useStore();
   const [now] = useState(() => Date.now());

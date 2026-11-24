@@ -94,7 +94,7 @@ import { ClientTodayExtrasLazy } from '../coach/client/lazy';
 import { hasCachedClients } from '../today/clientRoster';
 import { activityWeek, workoutCalories } from '../activities';
 import { restingForDay } from '../dayEnergy';
-import { buildReadinessNudge } from '../components/Readiness';
+import { fatigueHost } from '../fatigueApi';
 import { NudgeStack, type Nudge } from '../components/NudgeStack';
 const AlcoholCheckinCard = lazy(() =>
   import('../components/AlcoholCheckinCard').then((m) => ({ default: m.AlcoholCheckinCard })),
@@ -551,7 +551,10 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   // "likely today" plaque. Each carries a `priority` (higher = more urgent) that
   // fixes its order in the deck and the expanded overlay.
   const nudges: Nudge[] = [];
-  const readinessNudge = readinessOn ? buildReadinessNudge(finished, now, t) : null;
+  const readinessNudge =
+    readinessOn && fatigueHost.buildReadinessNudge
+      ? fatigueHost.buildReadinessNudge(finished, now, t)
+      : null;
   if (readinessNudge) nudges.push(readinessNudge);
   if (energyOut.total > 0) {
     nudges.push({

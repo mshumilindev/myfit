@@ -1,5 +1,5 @@
 /** Live session + past workout editing — design S-17…S-31 + SS/DS/MG/EQ. */
-import { fatigueSource } from '../fatigueApi';
+import { fatigueHost, fatigueSource } from '../fatigueApi';
 import {
   equipmentAvailable,
   useEquipmentOn,
@@ -84,7 +84,6 @@ import { PhotoSlider } from '../components/PhotoSlider';
 import { SidesChip } from '../components/SidesChip';
 import { prCardDue, usePrMomentExpiry } from './prMoment';
 import { useSetBars } from './useSetBars';
-import { MuscleStatePanel } from '../components/MuscleStatePanel';
 import { cachedPersonalLandmarks } from '../personalize';
 import { SPLIT_GROUPS } from '../data/subregions';
 import { lastNight } from '../sleepRt';
@@ -585,6 +584,7 @@ export function SessionView(props: {
   const equipmentH = useEquipmentHost(); // Equipment: the picker sheet arrives with its chunk
   const equipmentOn = useEquipmentOn();
   const readinessOn = useReadinessOn();
+  const StatePanel = fatigueHost.MuscleStatePanel; // from the add-on's chunk; null until it arrives
   const fatigueOn = useFatigueOn();
   const conditionLimits = useStoredConditionLimits(); // restriction: RPE cap / no-failure / rest scale stay on with the feature off
   // Day-aware suggestions & muscle readouts are always on (not flagged).
@@ -3308,9 +3308,9 @@ export function SessionView(props: {
             {muscles.primary && (
               <MuscleDetailContext.Provider
                 value={
-                  focusView && live && (readinessOn || fatigueOn)
+                  focusView && live && (readinessOn || fatigueOn) && StatePanel
                     ? (m: MuscleGroup) => (
-                        <MuscleStatePanel
+                        <StatePanel
                           muscle={m}
                           workout={workout!}
                           todaySets={sessionTally().get(m) ?? 0}
