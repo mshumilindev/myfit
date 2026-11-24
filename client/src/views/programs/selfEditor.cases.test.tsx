@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { addonsPref } from '../../addons/enabledSet';
 import { cleanup, fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
 import { setLocale, type LocaleId } from '../../i18n';
 import { en } from '../../i18n/en';
@@ -27,13 +28,24 @@ const withCondition = (key: string, over: Record<string, unknown> = {}) => {
 
 beforeEach(() => {
   freezeClock();
+  addonsPref.set(['equipment', 'conditions', 'activities']); // Equipment installed (editor offers it); health and activities as before
   setLocale('en');
   m.role = 'member';
   __replaceStateForTests(emptyState());
 });
 afterEach(() => {
+  addonsPref.reset();
   cleanup();
   vi.useRealTimers();
+});
+
+describe('selfCatalog without the Equipment module', () => {
+  it('gives no equipment for an exercise but keeps muscles', () => {
+    addonsPref.set(['conditions', 'activities']);
+    const f = selfCatalog.facts('Barbell Bench Press - Medium Grip');
+    expect(f.equipment).toBeNull();
+    expect(f.primary).toBe('chest');
+  });
 });
 
 describe('selfCatalog', () => {

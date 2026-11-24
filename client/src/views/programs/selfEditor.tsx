@@ -6,6 +6,7 @@
  * `ProgramPage` (the Programs screen and the member's review of a trainer's program) is the only user of
  * `SelfProgramEditor`: there is no other program editor in the app.
  */
+import { equipmentAvailable } from '../../addons/featureGates';
 import { useActivitiesOn } from '../../addons/activitiesGate';
 import { useMemo } from 'react';
 import type { Shell } from '../../App';
@@ -63,7 +64,7 @@ export const makeSelfCatalog = (
       primary,
       secondary,
       muscles: primary ? [primary, ...secondary] : secondary,
-      equipment: info?.equipment ?? null,
+      equipment: equipmentAvailable() ? (info?.equipment ?? null) : null,
       image: exerciseImage(name, 'strength'),
       force: f === 'push' || f === 'pull' ? f : null,
       flag: flagOf(name),
@@ -78,7 +79,7 @@ export const makeSelfCatalog = (
         id: h.id,
         name: h.names[0],
         muscle: h.muscle,
-        equipment: h.equipment ?? null,
+        equipment: equipmentAvailable() ? (h.equipment ?? null) : null,
         image: exerciseImage(h.names[0], 'strength'),
         flag: flagOf(h.names[0]),
       }));
@@ -165,7 +166,7 @@ export function useSelfEditorHost(o: SelfHostOptions = {}): ProgramEditorHost {
         equipmentLabel,
       },
       activities: SELF_ACTIVITIES,
-      equipment: EQUIPMENT_IDS,
+      equipment: equipmentAvailable() ? EQUIPMENT_IDS : [],
       weekOrder: weekOrder(start),
       newRows: 'targets',
       warmupTarget: defaultWarmupValue,

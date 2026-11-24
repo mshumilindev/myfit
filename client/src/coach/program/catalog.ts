@@ -4,6 +4,7 @@
  * EZ-bar skullcrusher and its picture). An exercise the catalog does not know (a custom one) has no picture: the check
  * says so as "To review", never as an error.
  */
+import { equipmentAvailable } from '../../addons/featureGates';
 import type { EquipmentId } from '../../data/equipment';
 import {
   exerciseImage,
@@ -55,7 +56,7 @@ export function exerciseFacts(name: string): ExerciseFacts {
     primary: primary === 'cardio' ? null : primary,
     secondary,
     muscles: primary && primary !== 'cardio' ? [primary, ...secondary] : secondary,
-    equipment: info?.equipment ?? custom?.equipment ?? null,
+    equipment: equipmentAvailable() ? (info?.equipment ?? custom?.equipment ?? null) : null,
     image: exerciseImage(canon, 'strength'),
     force: ((f) => (f === 'push' || f === 'pull' ? f : null))(richExerciseByName(canon)?.force),
   };
@@ -90,7 +91,7 @@ export function findExercises(opts: {
     .map((h) => ({
       name: h.names[0],
       muscle: h.muscle,
-      equipment: h.equipment ?? null,
+      equipment: equipmentAvailable() ? (h.equipment ?? null) : null,
       image: exerciseImage(h.names[0], 'strength'),
     }));
 }

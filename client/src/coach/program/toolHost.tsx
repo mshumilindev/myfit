@@ -2,6 +2,7 @@
  * The Coach side of the program editor tool (`tools/programEditor`): the labels from the Coach dictionary and the
  * anatomy figure, handed to the tool as one `ProgramEditorHost`. The screens (editor, check) are thin hosts of it.
  */
+import { equipmentAvailable } from '../../addons/featureGates';
 import { useMemo } from 'react';
 import { equipmentLabel, MusclePickerMap } from '../../components/Muscle';
 import { EQUIPMENT_IDS } from '../../data/equipment';
@@ -44,7 +45,7 @@ export function useCoachEditorHost({
         equipmentLabel,
       },
       activities: COACH_ACTIVITIES,
-      equipment: EQUIPMENT_IDS,
+      equipment: equipmentAvailable() ? EQUIPMENT_IDS : [],
       weekOrder: order,
       canonicalName: canonicalExerciseName,
       warmupWeighted: warmupUsesWeight,

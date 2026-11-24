@@ -274,7 +274,7 @@ export function RowPane({ c, it }: { c: PaneCtx; it: ProgramItemDoc }) {
       )}
       <SectionLabel>{p.edMore}</SectionLabel>
       <div className="pe-more">
-        <span className="pe-more-l">{p.edEquipment}</span>
+        {c.host.equipment.length > 0 && <span className="pe-more-l">{p.edEquipment}</span>}
         <ChipGroup>
           {c.host.equipment.slice(0, 12).map((e) => {
             const on = equip.includes(e);
