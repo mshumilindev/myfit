@@ -17,6 +17,7 @@
  * the day's muscles are unknown or no station can give MIN_ITEMS, the result is
  * null and the warm-up stays a plain, generic block (no exercises).
  */
+import { equipmentAvailable } from './addons/featureGates';
 import { exerciseFlag, NO_LIMITS } from './conditionsRt';
 import type { Limits } from './conditions';
 import {
@@ -95,7 +96,7 @@ const SKIP =
 
 /** The kit the gym is known to have (coarse class), or false when unknown. */
 function gymHas(gym: Gym | null | undefined, cls: 'bands' | 'dumbbell'): boolean {
-  if (!gym) return false;
+  if (!gym || !equipmentAvailable()) return false; // no Equipment module: the kit is not known
   if (gym.inventory?.includes(cls)) return true;
   if (cls === 'bands' && (gym.bandLibrary?.length ?? 0) > 0) return true;
   return (gym.equipmentItems ?? []).some((id) => equipmentById(id)?.cls === cls);

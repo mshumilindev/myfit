@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { afterAll, beforeAll, describe, it, expect } from 'vitest';
+import { addonsPref } from './addons/enabledSet';
 import {
   intentSpec,
   warmupRamp,
@@ -12,6 +13,10 @@ import {
 import { LANDMARKS } from './volume';
 import { richExerciseById } from './data/exercises';
 import type { BodyMetrics, Workout } from './types';
+
+// Equipment installed: the gym inventory filters exercises (without it every exercise is available).
+beforeAll(() => addonsPref.set(['equipment']));
+afterAll(() => addonsPref.reset());
 
 const DAY = 24 * 3600 * 1000;
 const now = new Date(2025, 5, 15, 12, 0, 0).getTime();

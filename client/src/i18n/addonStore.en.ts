@@ -400,6 +400,7 @@ export const addonStoreEn = {
       ],
     },
     mastery: { name: 'Mastery', desc: 'Track skill levels and long-term progress.' },
+    equipment: { name: 'Equipment', desc: 'Gym inventory, equipment cards and filters.' },
     supersets: { name: 'Supersets', desc: 'Do two or more exercises back to back.' },
     circuit: { name: 'Circuit', desc: 'Rounds over a group of exercises, with a round counter.' },
     effort: { name: 'RPE / RIR', desc: 'Rate how hard a set felt; see the app’s estimate.' },

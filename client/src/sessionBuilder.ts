@@ -26,6 +26,7 @@ import { exerciseDay, type TrainingDay } from './data/daySuggest';
 import { nextTarget, topHistory } from './progression';
 import { muscleGapDays, muscleReadiness, type ReadyState } from './recovery';
 import { LANDMARKS, VOLUME_MUSCLES } from './volume';
+import { equipmentAvailable } from './addons/featureGates';
 import { recentLoadSets } from './loadWindow';
 import { personalLandmarks } from './personalize';
 import { focusAdjustLandmarks, groupEmphasis, type Emphasis, type FitGoals } from './goals';
@@ -151,7 +152,7 @@ export interface Candidate {
 
 function equipAvailable(equip: string | null, gym: Gym | null): boolean {
   if (!equip) return true;
-  const inv = gym?.inventory;
+  const inv = equipmentAvailable() ? gym?.inventory : undefined; // no Equipment module: every exercise is available
   if (!inv || inv.length === 0) return true;
   return inv.includes(equip);
 }

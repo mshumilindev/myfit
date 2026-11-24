@@ -395,6 +395,7 @@ export const addonStorePl: typeof addonStoreEn = {
       ],
     },
     mastery: { name: 'Mistrzostwo', desc: 'Poziomy umiejętności i długofalowy postęp.' },
+    equipment: { name: 'Sprzęt', desc: 'Wyposażenie siłowni, karty sprzętu i filtry.' },
     supersets: { name: 'Superserie', desc: 'Rób dwa lub więcej ćwiczeń jedno po drugim.' },
     circuit: { name: 'Obwód', desc: 'Rundy po grupie ćwiczeń z licznikiem rund.' },
     effort: {

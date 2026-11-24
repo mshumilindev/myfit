@@ -141,6 +141,14 @@ export const ADDONS: readonly AddonManifest[] = [
     category: 'workouts',
   },
   {
+    id: 'equipment',
+    kind: 'module',
+    parent: 'advanced-training',
+    tone: 3,
+    roles: ALL,
+    category: 'workouts',
+  },
+  {
     id: 'supersets',
     kind: 'module',
     parent: 'advanced-training',

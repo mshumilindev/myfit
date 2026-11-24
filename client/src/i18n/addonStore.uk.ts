@@ -395,6 +395,7 @@ export const addonStoreUk: typeof addonStoreEn = {
       ],
     },
     mastery: { name: 'Майстерність', desc: 'Рівні навичок і довгостроковий прогрес.' },
+    equipment: { name: 'Обладнання', desc: 'Інвентар залу, картки обладнання й фільтри.' },
     supersets: { name: 'Суперсети', desc: 'Роби дві чи більше вправ поспіль.' },
     circuit: { name: 'Коло', desc: 'Раунди по групі вправ із лічильником раундів.' },
     effort: {

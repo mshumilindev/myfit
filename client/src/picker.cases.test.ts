@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { addonsPref } from './addons/enabledSet';
 import { BUILT_IN_CATALOG, type MuscleGroup } from './data/exercises';
 import type { Limits } from './conditions';
 import type { FatigueLevel, MuscleFatigue } from './fatigue';
@@ -34,6 +35,10 @@ import {
 import { describeDay } from './data/daySuggest';
 import { LANDMARKS } from './volume';
 import type { Exercise, Gym, SetEntry, Workout } from './types';
+
+// Equipment installed: the gym inventory filters exercises (without it every exercise is available).
+beforeAll(() => addonsPref.set(['equipment']));
+afterAll(() => addonsPref.reset());
 
 const DAY = 86_400_000;
 // Local noon on a Wednesday: whole-day offsets stay on the same weekday/clock in any timezone.

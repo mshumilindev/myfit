@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { addonsPref } from './addons/enabledSet';
 import {
   MAX_ITEMS,
   MIN_ITEMS,
@@ -10,6 +11,10 @@ import { richExerciseById } from './data/exercises';
 import { NO_LIMITS, type Limits } from './conditions';
 import type { Gym } from './types';
 import type { MuscleGroup } from './data/exercises';
+
+// Equipment installed: the gym inventory filters exercises (without it every exercise is available).
+beforeAll(() => addonsPref.set(['equipment']));
+afterAll(() => addonsPref.reset());
 
 const gym = (over: Partial<Gym>): Gym => ({ id: 'g', name: 'Gym', ...over }) as Gym;
 const BANDS = gym({ inventory: ['bands', 'dumbbell', 'barbell', 'machine'] });

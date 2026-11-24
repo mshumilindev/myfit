@@ -155,6 +155,9 @@
       "effortApi"
     ]
   },
+  "equipment": {
+    "js": ["views/EquipmentDetailView", "components/EquipmentBoard", "components/EquipmentPickerSheet"]
+  },
   "circuit": {
     "js": ["circuitRt", "circuitApi", "circuit/"]
   },

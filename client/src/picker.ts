@@ -6,6 +6,7 @@
  * weak point, good fit) with a progression target. Pure over its inputs (the
  * workouts, the gym, "now"), so it unit-tests without React.
  */
+import { equipmentAvailable } from './addons/featureGates';
 import { isAutoExcluded } from './conditionsRt';
 import type { Limits } from './conditions';
 import { landmarkFor, personalLandmarks } from './personalize';
@@ -358,7 +359,7 @@ function quality(catalogId: string | null, equipment: string | null): number {
 }
 
 export function gymHas(gym: Gym | null | undefined, equipment: EquipmentId | null): boolean {
-  const inv = gym?.inventory;
+  const inv = equipmentAvailable() ? gym?.inventory : undefined; // no Equipment module: every exercise is available
   if (!inv || inv.length === 0 || !equipment) return true;
   return inv.includes(equipment);
 }

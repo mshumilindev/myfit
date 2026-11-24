@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { addonsPref } from './addons/enabledSet';
 import {
   FAMILIES,
   applyFilter,
@@ -14,6 +15,10 @@ import {
 import { FATIGUE_COLOR, muscleFatigue } from './fatigue';
 import { personalLandmarks } from './personalize';
 import type { Exercise, SetEntry, Workout } from './types';
+
+// Equipment installed: the gym inventory filters exercises (without it every exercise is available).
+beforeAll(() => addonsPref.set(['equipment']));
+afterAll(() => addonsPref.reset());
 
 const DAY = 86400000;
 const NOW = Date.UTC(2026, 8, 23, 12);

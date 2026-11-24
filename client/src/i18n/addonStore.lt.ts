@@ -396,6 +396,7 @@ export const addonStoreLt: typeof addonStoreEn = {
       ],
     },
     mastery: { name: 'Meistriškumas', desc: 'Įgūdžių lygiai ir ilgalaikė pažanga.' },
+    equipment: { name: 'Įranga', desc: 'Salės inventorius, įrangos kortelės ir filtrai.' },
     supersets: { name: 'Supersetai', desc: 'Atlik dvi ar daugiau pratimų iš eilės.' },
     circuit: { name: 'Ratas', desc: 'Ratai per pratimų grupę su ratų skaitikliu.' },
     effort: {

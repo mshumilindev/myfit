@@ -121,6 +121,23 @@ export function usePeriodizationOn(): boolean {
 }
 
 /**
+ * Equipment (gym inventory, equipment cards, picker and filter chips, badges): without it nothing about equipment is asked or
+ * shown, and every exercise counts as available in every gym. Stored inventories and exercise equipment stay and come back.
+ */
+export function equipmentAvailable(): boolean {
+  try {
+    return addonAvailable('equipment');
+  } catch {
+    return false;
+  }
+}
+
+/** The same Equipment gate for components. */
+export function useEquipmentOn(): boolean {
+  return useAddonOrBase('equipment');
+}
+
+/**
  * Supersets (two or more exercises done back to back): without it every stored group reads as separate exercises in order, no
  * pairing is offered and the rest timer treats each exercise on its own. Groups stay stored and come back on re-install.
  */
