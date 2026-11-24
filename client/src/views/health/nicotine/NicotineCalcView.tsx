@@ -9,6 +9,7 @@ import { useT } from '../../../i18n';
 import { EVIDENCE_SURFACES, EXPERIMENTAL_SURFACES } from '../../../nicotine';
 import { setNicotineSurface, setNicotineUseInCalculations, useNicotine } from '../../../store';
 import type { NicotineSurface } from '../../../types';
+import { useFatigueOn, useReadinessOn } from '../../../addons/featureGates';
 
 const SURFACE_ICON: Record<NicotineSurface, string> = {
   readiness: 'heartbeat',
@@ -29,6 +30,11 @@ export interface NicotineCalcViewProps {
 export function NicotineCalcView({ onBack }: NicotineCalcViewProps) {
   const { t } = useT();
   const { settings } = useNicotine();
+  const readinessOn = useReadinessOn();
+  const fatigueOn = useFatigueOn();
+  // A switch for a number that is not on screen (Readiness / Fatigue not installed) has nothing to switch: it is not offered.
+  const offered = (x: string) =>
+    x === 'readiness' ? readinessOn : x === 'fatigue' ? fatigueOn : true;
   const labels: Record<NicotineSurface, { label: string; sub: string }> = {
     readiness: { label: t.nicSfReadiness, sub: t.nicSfReadinessSub },
     fatigue: { label: t.nicSfFatigue, sub: t.nicSfFatigueSub },
@@ -49,8 +55,8 @@ export function NicotineCalcView({ onBack }: NicotineCalcViewProps) {
       masterSub={t.nicCalcMasterSub}
       surfaces={settings.surfaces}
       onSurface={setNicotineSurface}
-      research={EVIDENCE_SURFACES}
-      experimental={EXPERIMENTAL_SURFACES}
+      research={EVIDENCE_SURFACES.filter(offered)}
+      experimental={EXPERIMENTAL_SURFACES.filter(offered)}
       icons={SURFACE_ICON}
       labels={labels}
       disclaimer={t.nicFxDisclaimer}

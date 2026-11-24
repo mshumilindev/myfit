@@ -17,6 +17,8 @@
  */
 import { LANDMARKS, VOLUME_MUSCLES, type Landmark } from './volume';
 import { stalledMuscles } from './fatigue';
+import { fatigueSource } from './fatigueApi';
+import { fatigueAvailable } from './addons/featureGates';
 import { muscleSetsInWorkout } from './store';
 import type { Workout } from './types';
 import type { MuscleGroup } from './data/exercises';
@@ -134,7 +136,8 @@ export function personalLandmarks(
   now: number,
 ): Map<MuscleGroup, PersonalLandmark> {
   const series = weeklyMuscleSeries(finished, now);
-  const stalled = stalledMuscles(finished, now);
+  // Stalled lifts are a Fatigue reading: without the add-on the history reads empty and no muscle is stalled.
+  const stalled = stalledMuscles(fatigueSource(finished), now);
   const out = new Map<MuscleGroup, PersonalLandmark>();
   for (const m of VOLUME_MUSCLES) {
     const base = LANDMARKS[m];
@@ -157,7 +160,7 @@ export function cachedPersonalLandmarks(
 ): Map<MuscleGroup, PersonalLandmark> {
   const finished = workouts.filter((w) => w.finishedAt !== null);
   const last = finished.reduce((m, w) => Math.max(m, w.finishedAt ?? 0), 0);
-  const key = `${finished.length}:${last}:${Math.floor(now / DAY)}`;
+  const key = `${finished.length}:${last}:${Math.floor(now / DAY)}:${fatigueAvailable() ? 1 : 0}`; // the add-on changes what 'stalled' reads
   if (plCache?.key === key) return plCache.map;
   const map = personalLandmarks(finished, now);
   plCache = { key, map };

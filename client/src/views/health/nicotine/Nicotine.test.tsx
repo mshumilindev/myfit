@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { addonsPref } from '../../../addons/enabledSet';
 import { NicotineCalcView } from './NicotineCalcView';
 import { setLocale } from '../../../i18n';
 import { en } from '../../../i18n/en';
@@ -45,6 +46,20 @@ describe('NicotineCalcView', () => {
       'RPE targets',
     ])
       expect(sw(name).checked).toBe(false);
+  });
+
+  it('without Readiness and Fatigue their two switches are not offered; the others stay', () => {
+    const before = [...addonsPref.get()];
+    addonsPref.set(['equipment']);
+    try {
+      render(<NicotineCalcView onBack={() => undefined} />);
+      expect(screen.queryByLabelText('Recovery and readiness')).toBeNull();
+      expect(screen.queryByLabelText('Fatigue and deload')).toBeNull();
+      expect(screen.getAllByRole('switch')).toHaveLength(NICOTINE_SURFACES.length - 2 + 1);
+      expect(sw('Sleep')).toBeTruthy();
+    } finally {
+      addonsPref.set(before);
+    }
   });
 
   it('switches apply immediately, in both groups', () => {

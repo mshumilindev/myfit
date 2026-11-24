@@ -10,6 +10,7 @@ import { useT } from '../../../i18n';
 import { ALCOHOL_SURFACES, isExperimentalSurface } from '../../../alcohol';
 import { setAlcoholSurface, setAlcoholUseInCalculations, useAlcohol } from '../../../store';
 import type { AlcoholSurface } from '../../../types';
+import { useFatigueOn, useReadinessOn } from '../../../addons/featureGates';
 
 const SURFACE_ICON: Record<AlcoholSurface, string> = {
   readiness: 'heartbeat',
@@ -23,6 +24,13 @@ const SURFACE_ICON: Record<AlcoholSurface, string> = {
 const RESEARCH = ALCOHOL_SURFACES.filter((s) => !isExperimentalSurface(s));
 const EXPERIMENTAL = ALCOHOL_SURFACES.filter(isExperimentalSurface);
 
+/** A switch for a number that is not on screen (Readiness / Fatigue not installed) has nothing to switch: it is not offered. */
+function useGoneSurfaces(): ReadonlySet<string> {
+  const readiness = useReadinessOn();
+  const fatigue = useFatigueOn();
+  return new Set([...(readiness ? [] : ['readiness']), ...(fatigue ? [] : ['fatigue'])]);
+}
+
 export interface AlcoholCalcViewProps {
   onBack: () => void;
 }
@@ -30,6 +38,7 @@ export interface AlcoholCalcViewProps {
 export function AlcoholCalcView({ onBack }: AlcoholCalcViewProps) {
   const { t } = useT();
   const { settings } = useAlcohol();
+  const gone = useGoneSurfaces();
   const labels: Record<AlcoholSurface, { label: string; sub: string }> = {
     readiness: { label: t.nicSfReadiness, sub: t.nicSfReadinessSub },
     sleep: { label: t.nicSfSleep, sub: t.nicSfSleepSub },
@@ -47,8 +56,8 @@ export function AlcoholCalcView({ onBack }: AlcoholCalcViewProps) {
       masterSub={t.alcCalcMasterSub}
       surfaces={settings.surfaces}
       onSurface={setAlcoholSurface}
-      research={RESEARCH}
-      experimental={EXPERIMENTAL}
+      research={RESEARCH.filter((x) => !gone.has(x))}
+      experimental={EXPERIMENTAL.filter((x) => !gone.has(x))}
       icons={SURFACE_ICON}
       labels={labels}
       disclaimer={t.alcoholDisclaimer}

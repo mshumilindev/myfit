@@ -7,7 +7,7 @@ import { addonsPref } from '../addons/enabledSet';
 import { fatigueSource, readinessSource } from '../fatigueApi';
 import { muscleFatigue } from '../fatigue';
 import { directReadiness, fatigueByGroup, readinessByGroup } from '../picker';
-import { personalLandmarks } from '../personalize';
+import { cachedPersonalLandmarks, personalLandmarks } from '../personalize';
 import type { Exercise, Workout } from '../types';
 
 afterEach(() => addonsPref.reset());
@@ -61,6 +61,14 @@ describe('neutral values without the add-on', () => {
     expect(readyWith()).toEqual(directReadiness(['chest'], 'chest', [], NOW));
     expect(readyWith().days).toBeNull();
     for (const r of readinessByGroup(HISTORY, NOW).values()) expect(r.days).toBeNull();
+  });
+
+  it('personal landmarks are read again when the add-on comes or goes (what is stalled changes)', () => {
+    addonsPref.set(['fatigue-readiness', 'fatigue']);
+    const on = cachedPersonalLandmarks(HISTORY, NOW);
+    expect(cachedPersonalLandmarks(HISTORY, NOW)).toBe(on);
+    addonsPref.set([]);
+    expect(cachedPersonalLandmarks(HISTORY, NOW)).not.toBe(on);
   });
 
   it('never changes the stored history', () => {
