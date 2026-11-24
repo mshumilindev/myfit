@@ -18,7 +18,6 @@
     ],
     "assets": [
       "exercise-img/",
-      "equipment/",
       "anatomy/",
       "markers/",
       "gyms/",
@@ -156,7 +155,15 @@
     ]
   },
   "equipment": {
-    "js": ["views/EquipmentDetailView", "components/EquipmentBoard", "components/EquipmentPickerSheet"]
+    "js": [
+      "equipmentRt",
+      "equipmentApi",
+      "equipment/",
+      "views/EquipmentDetailView",
+      "components/EquipmentBoard",
+      "components/EquipmentPickerSheet"
+    ],
+    "assets": ["equipment/"]
   },
   "circuit": {
     "js": ["circuitRt", "circuitApi", "circuit/"]

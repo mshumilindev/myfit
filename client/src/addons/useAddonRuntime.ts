@@ -93,6 +93,11 @@ export function useAddonRuntime() {
   useEffect(() => {
     if (supersetsOn) loadTracker('supersets', () => import('../supersets/supersetsBoot'));
   }, [supersetsOn]);
+  // Equipment (a module of Advanced training): the inventory board and the equipment picker are a lazy chunk too.
+  const equipmentOn = useAddonOrBase('equipment');
+  useEffect(() => {
+    if (equipmentOn) loadTracker('equipment', () => import('../equipment/equipmentBoot'));
+  }, [equipmentOn]);
   // Circuit (a module of Advanced training): the round screens are a lazy chunk too.
   const circuitOn = useAddonOrBase('circuit');
   useEffect(() => {

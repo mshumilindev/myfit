@@ -12,6 +12,7 @@ import { SessionView } from './SessionView';
 import { clearSummaryReturn } from './sessionSummary/NextUp';
 import '../circuit/circuitBoot'; // Circuit installed and loaded: its screens are the module's
 import '../supersets/supersetsBoot'; // Supersets too
+import '../equipment/equipmentBoot'; // Equipment installed and loaded: its picker sheet is the module's
 
 // Wednesday 14 Oct 2026, 18:00 local — fixed wall clock, only Date is faked so timers/userEvent keep running.
 const NOW = new Date(2026, 9, 14, 18, 0).getTime();

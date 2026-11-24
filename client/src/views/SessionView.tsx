@@ -213,7 +213,7 @@ import { SessionStartCoach, hasSessionStartCoach } from '../components/SessionSt
 import { EnergyPlaque, LiveEnergyCounter } from '../components/SessionEnergy';
 import { PlateSheet } from '../components/PlateSheet';
 import { BandLibraryCard } from '../components/BandLibraryCard';
-import { EquipmentPickerSheet } from '../components/EquipmentPickerSheet';
+import { useEquipmentHost } from '../equipmentRt';
 import { CardioMachineList, CardioMachineSheet } from '../components/CardioMachineList';
 import { ExercisePicker, ExerciseDetail } from '../components/ExercisePicker';
 import { buildPickItems } from '../picker';
@@ -575,6 +575,7 @@ export function SessionView(props: {
   const effort = useEffortHost(); // the effort entry (RPE / RIR) is a module: nothing of it shows without it
   const sleepsForCalc = useSleepsForCalc();
   const playbookOn = usePlaybookOn();
+  const equipmentH = useEquipmentHost(); // Equipment: the picker sheet arrives with its chunk
   const equipmentOn = useEquipmentOn();
   const conditionLimits = useStoredConditionLimits(); // restriction: RPE cap / no-failure / rest scale stay on with the feature off
   // Day-aware suggestions & muscle readouts are always on (not flagged).
@@ -6014,12 +6015,12 @@ export function SessionView(props: {
           );
         })()}
 
-      {equipmentOn &&
+      {equipmentH?.PickerSheet &&
         sheet?.kind === 'equip' &&
         (() => {
           const ex = workout.exercises.find((e) => e.id === sheet.exId);
           return ex ? (
-            <EquipmentPickerSheet
+            <equipmentH.PickerSheet
               workoutId={workout.id}
               exercise={ex}
               gym={gym}

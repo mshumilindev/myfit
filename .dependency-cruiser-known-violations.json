@@ -1884,31 +1884,6 @@
   },
   {
     "type": "cycle",
-    "from": "client/src/components/EquipmentBoard.tsx",
-    "to": "client/src/App.tsx",
-    "unresolvedTo": "../App",
-    "dependencyTypes": ["local", "type-only", "import"],
-    "rule": {
-      "severity": "error",
-      "name": "no-circular"
-    },
-    "cycle": [
-      {
-        "name": "client/src/App.tsx",
-        "dependencyTypes": ["local", "type-only", "import"]
-      },
-      {
-        "name": "client/src/views/GymDetailView.tsx",
-        "dependencyTypes": ["local", "dynamic-import"]
-      },
-      {
-        "name": "client/src/components/EquipmentBoard.tsx",
-        "dependencyTypes": ["local", "import"]
-      }
-    ]
-  },
-  {
-    "type": "cycle",
     "from": "client/src/components/ExerciseGallery.tsx",
     "to": "client/src/App.tsx",
     "unresolvedTo": "../App",

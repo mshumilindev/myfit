@@ -25,7 +25,7 @@ import { MuscleChip } from './Muscle';
 import type { MuscleGroup } from '../data/exercises';
 import { focusLists } from '../goals';
 import { focusToGroup } from '../data/subregions';
-import type { Shell } from '../App';
+import type { EquipmentShell } from '../equipmentApi';
 import { Tag } from './ui/Tag';
 
 const CATEGORY_ORDER: EquipCategory[] = [
@@ -68,7 +68,7 @@ const FILTER_MUSCLES: MuscleGroup[] = [
   'core',
 ];
 
-export function EquipmentBoard({ gym, shell }: { gym: Gym; shell: Shell }) {
+export function EquipmentBoard({ gym, shell }: { gym: Gym; shell: EquipmentShell }) {
   const { t, locale } = useT();
   const store = useStore();
   const [query, setQuery] = useState('');

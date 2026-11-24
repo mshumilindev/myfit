@@ -67,8 +67,8 @@ export const EXCLUSION: Readonly<Record<string, Exclusion>> = {
   },
   equipment: {
     via: ['gate'],
-    files: ['addons/featureGates.ts', 'picker.ts', 'sessionBuilder.ts'],
-    names: ['equipmentAvailable', 'useEquipmentOn'],
+    files: ['addons/featureGates.ts', 'equipmentApi.ts', 'picker.ts', 'sessionBuilder.ts'],
+    names: ['equipmentAvailable', 'useEquipmentOn', 'useEquipmentHost'],
   },
   supersets: {
     via: ['gate'],
