@@ -10,7 +10,7 @@ import type { ComponentType } from 'react';
 import { periodizationAvailable } from './addons/featureGates';
 import type { LocaleId } from './i18n';
 import type { MoreMenuItem } from './components/ui/MoreMenu';
-import type { ProgramCycle, ProgramItem, WeekPlan } from './views/programs/model';
+import type { ProgramCycle, ProgramItem, WeekPlan } from './views/programs/modelTypes';
 import type { MuscleGroup } from './data/exercises';
 import type { Exercise } from './types';
 import type { ExportFile } from './legal/export/exportTypes';

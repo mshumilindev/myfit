@@ -5,12 +5,12 @@
 import { effortHost } from '../effortApi';
 import { provide, trackerReady } from '../trackerRt';
 import { RowRpe } from './RowRpe';
-import { CardioStepper, Chips, EffortTag, Hint, Label } from './pieces';
+import { CardioStepper, Chips, EffortHint, EffortTag, Label } from './pieces';
 
 provide(effortHost, {
   Chips,
   Label,
-  Hint,
+  Hint: EffortHint,
   Tag: EffortTag,
   CardioStepper,
   editorSlots: { rowRpe: RowRpe },

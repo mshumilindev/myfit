@@ -1620,15 +1620,12 @@ const restTimer: WidgetDef = {
 /* ------------------------------------------------------------ last session */
 
 function sessionRpe(w: Workout): number | null {
-  const xs: number[] = [];
-  for (const e of w.exercises) {
-    if (!isStrengthExercise(e)) continue;
-    for (const st of e.sets) {
-      if (setTypeOf(st) === 'warmup') continue;
-      const r = st.rpe ?? st.rpeAuto;
-      if (r != null && r > 0) xs.push(r);
-    }
-  }
+  const xs = w.exercises
+    .filter(isStrengthExercise)
+    .flatMap((e) =>
+      e.sets.filter((st) => setTypeOf(st) !== 'warmup').map((st) => st.rpe ?? st.rpeAuto),
+    )
+    .filter((r): r is number => r != null && r > 0);
   return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null;
 }
 

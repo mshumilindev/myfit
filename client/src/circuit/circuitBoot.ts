@@ -4,7 +4,8 @@
  */
 import { circuitHost } from '../circuitApi';
 import { provide, trackerReady } from '../trackerRt';
-import { CircuitBlock, CircuitRunSheet } from './CircuitParts';
+import { CircuitBlock } from './CircuitBlock';
+import { CircuitRunSheet } from './CircuitRun';
 
 provide(circuitHost, { Block: CircuitBlock, RunSheet: CircuitRunSheet });
 trackerReady('circuit');

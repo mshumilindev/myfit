@@ -18,15 +18,8 @@ export function inShownGroup(ex: Pick<Exercise, 'groupId' | 'groupKind'>, w: Wor
   return groupKindShown(circuit ? 'circuit' : 'superset');
 }
 
-export interface SupersetGroup {
-  groupId: string;
-  letter: string;
-  exercises: Exercise[];
-  /** A round-based circuit (F3) vs a plain back-to-back superset. */
-  circuit: boolean;
-}
-export type SessionBlock =
-  { kind: 'single'; exercise: Exercise } | { kind: 'group'; group: SupersetGroup };
+export type { SupersetGroup, SessionBlock } from './supersetTypes';
+import type { SessionBlock, SupersetGroup } from './supersetTypes';
 
 export function sessionBlocks(w: Workout): SessionBlock[] {
   const sorted = [...w.exercises].sort((a, b) => a.position - b.position);

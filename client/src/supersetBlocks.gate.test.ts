@@ -4,7 +4,8 @@ import { circuitHost } from './circuitApi';
 import { supersetsHost } from './supersetsApi';
 import { SupersetSheet } from './supersets/SupersetSheet';
 import { inShownGroup, sessionBlocks } from './supersetBlocks';
-import { CircuitBlock, CircuitRunSheet } from './circuit/CircuitParts';
+import { CircuitBlock } from './circuit/CircuitBlock';
+import { CircuitRunSheet } from './circuit/CircuitRun';
 import type { Exercise, Workout } from './types';
 
 const ex = (id: string, position: number, o: Partial<Exercise> = {}): Exercise => ({

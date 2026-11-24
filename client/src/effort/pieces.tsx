@@ -31,7 +31,7 @@ export function Label() {
   return <div className="se-label">{STRINGS[locale].label}</div>;
 }
 
-export function Hint(props: { rpe: number; est: number | null }) {
+export function EffortHint(props: { rpe: number; est: number | null }) {
   const { locale } = useT();
   const s = STRINGS[locale];
   return (

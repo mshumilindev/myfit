@@ -7,7 +7,7 @@
 import type { ComponentType } from 'react';
 import { circuitAvailable } from './addons/featureGates';
 import type { MuscleGroup } from './data/exercises';
-import type { SupersetGroup } from './supersetBlocks';
+import type { SupersetGroup } from './supersetTypes';
 import type { Exercise, SetEntry } from './types';
 
 export interface CircuitBlockProps {

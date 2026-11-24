@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { Chips, EffortTag, Hint } from './pieces';
+import { Chips, EffortHint, EffortTag } from './pieces';
 import { STRINGS } from './strings';
 
 describe('effort pieces', () => {
@@ -16,9 +16,9 @@ describe('effort pieces', () => {
     expect(screen.getByText('8').closest('button')!.className).not.toContain('is-selected');
   });
   it('hint explains the value, or shows the estimate when nothing is rated', () => {
-    const { rerender } = render(<Hint rpe={9} est={null} />);
+    const { rerender } = render(<EffortHint rpe={9} est={null} />);
     expect(screen.getByText('1 more rep was possible')).toBeTruthy();
-    rerender(<Hint rpe={0} est={8} />);
+    rerender(<EffortHint rpe={0} est={8} />);
     expect(screen.getByText(STRINGS.en.estHint('8'))).toBeTruthy();
   });
   it('tag shows the rated value, else the dashed estimate, else nothing', () => {
