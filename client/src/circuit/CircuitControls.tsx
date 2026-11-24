@@ -15,7 +15,7 @@ function useWords() {
   return STRINGS[locale];
 }
 
-function Shortcut(props: { onStart: () => void }) {
+function CircuitShortcut(props: { onStart: () => void }) {
   const w = useWords();
   return (
     <div className="es-circuit">
@@ -39,7 +39,7 @@ function Shortcut(props: { onStart: () => void }) {
   );
 }
 
-function Banner(props: { letter: string; count: number; onDone: () => void }) {
+function CircuitBanner(props: { letter: string; count: number; onDone: () => void }) {
   const w = useWords();
   return (
     <div className="circuit-banner">
@@ -59,7 +59,7 @@ function Banner(props: { letter: string; count: number; onDone: () => void }) {
   );
 }
 
-function Setting(props: { on: boolean; onToggle: () => void }) {
+function CircuitSetting(props: { on: boolean; onToggle: () => void }) {
   const w = useWords();
   return (
     <Card
@@ -84,7 +84,7 @@ function Setting(props: { on: boolean; onToggle: () => void }) {
   );
 }
 
-function NewButton(props: { letter: string; onNew: () => void }) {
+function CircuitNewButton(props: { letter: string; onNew: () => void }) {
   const w = useWords();
   return (
     <Button variant="secondary" className="circuit-new" onClick={props.onNew}>
@@ -94,4 +94,9 @@ function NewButton(props: { letter: string; onNew: () => void }) {
   );
 }
 
-export const CIRCUIT_CONTROLS: CircuitControlsHost = { Shortcut, Banner, Setting, NewButton };
+export const CIRCUIT_CONTROLS: CircuitControlsHost = {
+  Shortcut: CircuitShortcut,
+  Banner: CircuitBanner,
+  Setting: CircuitSetting,
+  NewButton: CircuitNewButton,
+};
