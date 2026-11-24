@@ -185,12 +185,12 @@
     "js": ["fatigue/"]
   },
   "fatigue": {
-    "js": ["fatigue/"]
+    "js": ["fatigue/FatigueWidget"]
   },
   "readiness": {
-    "js": ["fatigue/"]
+    "js": ["fatigue/Readiness"]
   },
   "muscle-map": {
-    "js": ["fatigue/"]
+    "js": ["fatigue/MuscleStatePanel"]
   }
 }
