@@ -43,16 +43,33 @@ export interface SupersetBlockProps {
   ) => ReactNode;
 }
 
+/** The menu of one superset: what the session passes in (it owns the sheet state and the store actions). */
+export interface SupersetGroupMenuProps {
+  letter: string;
+  members: Exercise[];
+  onClose: () => void;
+  onUngroup: () => void;
+  onAdd: () => void;
+  onOpenMember: (exId: string) => void;
+}
+
 export interface SupersetsHost {
+  /** The menu of one superset (ungroup, add an exercise, open a member). */
+  GroupMenu: ComponentType<SupersetGroupMenuProps> | null;
   /** A superset drawn in the session list (strip, collapsed card, desktop table, queued card). */
   Block: ComponentType<SupersetBlockProps> | null;
   /** The sheet that picks the exercises to pair with one. */
   Sheet: ComponentType<SupersetSheetProps> | null;
 }
 
-export const supersetsHost: SupersetsHost = { Sheet: null, Block: null };
+export const supersetsHost: SupersetsHost = { Sheet: null, Block: null, GroupMenu: null };
 
 /** Is the module installed AND its chunk loaded? */
 export function supersetsLive(): boolean {
-  return supersetsAvailable() && supersetsHost.Sheet !== null && supersetsHost.Block !== null;
+  return (
+    supersetsAvailable() &&
+    supersetsHost.Sheet !== null &&
+    supersetsHost.Block !== null &&
+    supersetsHost.GroupMenu !== null
+  );
 }

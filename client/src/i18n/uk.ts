@@ -1151,7 +1151,6 @@ export const uk: Strings = {
   // --- Типи підходів та мускулатура (додаток SS/DS/MG/EQ) ------------------
   supersetTag: (l: string) => `Суперсет ${l}`,
   roundOf: (n: number, m: number) => `Раунд ${n} з ${m} · без відпочинку`,
-  roundsMeta: (n: number, kg: string) => `${n} раундів · ${kg}`,
   setDone: 'готово',
   justNow: 'щойно',
   nowLabel: 'зараз',
@@ -2370,9 +2369,6 @@ export const uk: Strings = {
   clearLabel: 'Скинути',
   allGyms: 'Всі зали',
   notAtThisGym: (item: string) => `${item} — немає в цьому залі`,
-  musclesCol: 'М’язи',
-  roundCol: 'Раунд',
-  lastCol: 'Минулого разу',
   weightCol: 'Вага',
   typeCol: 'Тип',
   startDay: (name: string) => `Почати ${name}`,
@@ -3730,7 +3726,6 @@ export const uk: Strings = {
   progNoWeightNote:
     'Колонки ваги тут немає навмисно. Програма описує роботу; сесія підставляє навантаження з історії кожного учасника, тому одна програма підходить різним людям.',
   csvExportProgram: 'Експорт програми',
-  exerciseLabel: 'Вправа',
   progMemberEmpty: 'Склади власний тиждень або дочекайся програми від тренера.',
   progNoItems: 'На цей день ще немає вправ.',
   progEmptyDayBody: (day: string) =>

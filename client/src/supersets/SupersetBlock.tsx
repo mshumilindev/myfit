@@ -21,9 +21,11 @@ import {
 } from '../store';
 import type { SupersetBlockProps } from '../supersetsApi';
 import { Icon, useExerciseName } from '../ui';
+import { STRINGS } from './strings';
 
 export function SupersetBlock(p: SupersetBlockProps) {
-  const { t } = useT();
+  const { t, locale } = useT();
+  const cs = STRINGS[locale];
   const exName = useExerciseName();
   const g = p.group;
   const rounds = groupRounds(g);
@@ -72,7 +74,7 @@ export function SupersetBlock(p: SupersetBlockProps) {
                 {t.currentKicker}
               </Tag>
             )}
-            <span className="ss-rounds-meta">{t.roundsMeta(rounds, fmtKg(kg))}</span>
+            <span className="ss-rounds-meta">{cs.roundsMeta(rounds, fmtKg(kg))}</span>
           </div>
           <Card
             as="button"
@@ -121,11 +123,11 @@ export function SupersetBlock(p: SupersetBlockProps) {
             <thead>
               <tr>
                 <th className="ss-col-idx"></th>
-                <th>{t.exerciseLabel}</th>
-                <th className="ss-col-muscles">{t.musclesCol}</th>
+                <th>{cs.exerciseLabel}</th>
+                <th className="ss-col-muscles">{cs.musclesCol}</th>
                 {p.equipmentOn && <th className="ss-col-equip">{t.progEquipment}</th>}
-                <th className="ss-col-round">{t.roundCol}</th>
-                <th className="ss-col-last">{t.lastCol}</th>
+                <th className="ss-col-round">{cs.roundCol}</th>
+                <th className="ss-col-last">{cs.lastCol}</th>
               </tr>
             </thead>
             <tbody>

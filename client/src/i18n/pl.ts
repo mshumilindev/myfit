@@ -1118,7 +1118,6 @@ export const pl: Strings = {
   // --- Typy serii, mięśnie, sprzęt (dodatek SS/DS/MG/EQ) -------------------
   supersetTag: (l: string) => `Superseria ${l}`,
   roundOf: (n: number, m: number) => `Runda ${n} z ${m} · bez przerwy`,
-  roundsMeta: (n: number, kg: string) => `${n} rund · ${kg}`,
   setDone: 'zrobione',
   justNow: 'przed chwilą',
   nowLabel: 'teraz',
@@ -2336,9 +2335,6 @@ export const pl: Strings = {
   clearLabel: 'Wyczyść',
   allGyms: 'Wszystkie siłownie',
   notAtThisGym: (item: string) => `${item} — nie na tej siłowni`,
-  musclesCol: 'Mięśnie',
-  roundCol: 'Runda',
-  lastCol: 'Ostatnio',
   weightCol: 'Ciężar',
   typeCol: 'Typ',
   startDay: (name: string) => `Zacznij ${name}`,
@@ -3698,7 +3694,6 @@ export const pl: Strings = {
   progNoWeightNote:
     'Kolumny ciężaru nie ma celowo. Program opisuje pracę; sesja bierze obciążenie z historii każdej osoby, więc jeden program pasuje do różnych klientów.',
   csvExportProgram: 'Eksportuj program',
-  exerciseLabel: 'Ćwiczenie',
   progMemberEmpty: 'Ułóż własny tydzień albo poczekaj na program od trenera.',
   progNoItems: 'Ten dzień nie ma jeszcze ćwiczeń.',
   progEmptyDayBody: (day: string) =>

@@ -2,9 +2,12 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { addonsPref } from './addons/enabledSet';
 import { circuitHost } from './circuitApi';
 import { supersetsHost } from './supersetsApi';
+import { SupersetBlock } from './supersets/SupersetBlock';
+import { SupersetGroupMenu } from './supersets/GroupMenu';
 import { SupersetSheet } from './supersets/SupersetSheet';
 import { inShownGroup, sessionBlocks } from './supersetBlocks';
 import { CircuitBlock } from './circuit/CircuitBlock';
+import { CIRCUIT_CONTROLS } from './circuit/CircuitControls';
 import { CircuitRunSheet } from './circuit/CircuitRun';
 import type { Exercise, Workout } from './types';
 
@@ -23,6 +26,12 @@ const w = (exercises: Exercise[]): Workout => ({
   autoFinished: false,
   exercises,
 });
+function installSupersets() {
+  supersetsHost.Sheet = SupersetSheet;
+  supersetsHost.Block = SupersetBlock;
+  supersetsHost.GroupMenu = SupersetGroupMenu;
+}
+
 const mixed = w([
   ex('a', 0, { groupId: 's1', groupOrder: 0, groupKind: 'superset' }),
   ex('b', 1, { groupId: 's1', groupOrder: 1, groupKind: 'superset' }),
@@ -37,7 +46,10 @@ beforeEach(() => addonsPref.reset());
 afterEach(() => {
   circuitHost.Block = null;
   circuitHost.RunSheet = null;
+  circuitHost.Controls = null;
   supersetsHost.Sheet = null;
+  supersetsHost.Block = null;
+  supersetsHost.GroupMenu = null;
   addonsPref.reset();
 });
 
@@ -60,7 +72,7 @@ describe('Supersets and Circuit gates (neutral contract)', () => {
   });
   it('Supersets on shows supersets only; a circuit stays separate exercises', () => {
     addonsPref.set(['supersets']);
-    supersetsHost.Sheet = SupersetSheet;
+    installSupersets();
     expect(kinds(mixed)).toEqual(['G', 's', 's', 's']);
     expect(inShownGroup(mixed.exercises[3], mixed)).toBe(false);
   });
@@ -70,9 +82,10 @@ describe('Supersets and Circuit gates (neutral contract)', () => {
   });
   it('Circuit installed and loaded shows the circuit; letters count only the shown groups', () => {
     addonsPref.set(['supersets', 'circuit']);
-    supersetsHost.Sheet = SupersetSheet;
+    installSupersets();
     circuitHost.Block = CircuitBlock;
     circuitHost.RunSheet = CircuitRunSheet;
+    circuitHost.Controls = CIRCUIT_CONTROLS;
     expect(kinds(mixed)).toEqual(['G', 's', 'C']);
     const letters = sessionBlocks(mixed).flatMap((b) =>
       b.kind === 'group' ? [b.group.letter] : [],

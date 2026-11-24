@@ -6,9 +6,19 @@ export interface SupersetsStrings {
   thisOne: string;
   supersetKeepNote: string;
   groupAs: (l: string) => string;
+  roundsMeta: (n: number, kg: string) => string;
+  exerciseLabel: string;
+  musclesCol: string;
+  roundCol: string;
+  lastCol: string;
 }
 
 const en: SupersetsStrings = {
+  roundsMeta: (n: number, kg: string) => `${n} rounds · ${kg}`,
+  exerciseLabel: 'Exercise',
+  musclesCol: 'Muscles',
+  roundCol: 'Round',
+  lastCol: 'Last',
   supersetWithBody: (name: string) =>
     `Pick the exercises to alternate with ${name}. They move together and are logged in rounds.`,
   thisOne: 'this one',
@@ -18,6 +28,11 @@ const en: SupersetsStrings = {
 };
 
 const uk: SupersetsStrings = {
+  roundsMeta: (n: number, kg: string) => `${n} раундів · ${kg}`,
+  exerciseLabel: 'Вправа',
+  musclesCol: 'М’язи',
+  roundCol: 'Раунд',
+  lastCol: 'Минулого разу',
   supersetWithBody: (name: string) =>
     `Обери вправи, що чергуються з «${name}». Вони рухаються разом і логуються раундами.`,
   thisOne: 'ця вправа',
@@ -27,6 +42,11 @@ const uk: SupersetsStrings = {
 };
 
 const pl: SupersetsStrings = {
+  roundsMeta: (n: number, kg: string) => `${n} rund · ${kg}`,
+  exerciseLabel: 'Ćwiczenie',
+  musclesCol: 'Mięśnie',
+  roundCol: 'Runda',
+  lastCol: 'Ostatnio',
   supersetWithBody: (name: string) =>
     `Wybierz ćwiczenia wykonywane na przemian z „${name}”. Poruszają się razem i są logowane w rundach.`,
   thisOne: 'to ćwiczenie',
@@ -36,6 +56,11 @@ const pl: SupersetsStrings = {
 };
 
 const et: SupersetsStrings = {
+  roundsMeta: (n: number, kg: string) => `${n} ringi · ${kg}`,
+  exerciseLabel: 'Harjutus',
+  musclesCol: 'Lihased',
+  roundCol: 'Ring',
+  lastCol: 'Viimati',
   supersetWithBody: (name: string) =>
     `Vali harjutused, mida vaheldada harjutusega „${name}“. Need liiguvad koos ja logitakse ringidena.`,
   thisOne: 'see harjutus',
@@ -45,6 +70,11 @@ const et: SupersetsStrings = {
 };
 
 const lt: SupersetsStrings = {
+  roundsMeta: (n: number, kg: string) => `${n} ratai · ${kg}`,
+  exerciseLabel: 'Pratimas',
+  musclesCol: 'Raumenys',
+  roundCol: 'Ratas',
+  lastCol: 'Praeitą kartą',
   supersetWithBody: (name: string) =>
     `Pasirink pratimus, kaitaliojamus su „${name}“. Jie juda kartu ir registruojami ratais.`,
   thisOne: 'šis pratimas',

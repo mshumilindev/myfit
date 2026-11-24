@@ -5741,46 +5741,26 @@ export function SessionView(props: {
           );
         })()}
 
-      {sheet?.kind === 'group-menu' &&
+      {supersetsH?.GroupMenu &&
+        sheet?.kind === 'group-menu' &&
         (() => {
           const members = sortedExercises.filter((e) => e.groupId === sheet.groupId);
           if (members.length === 0) return null;
-          const letter =
-            sessionBlocks(workout).find(
-              (b) => b.kind === 'group' && b.group.groupId === sheet.groupId,
-            )?.kind === 'group'
-              ? (
-                  sessionBlocks(workout).find(
-                    (b) => b.kind === 'group' && b.group.groupId === sheet.groupId,
-                  ) as { kind: 'group'; group: SupersetGroup }
-                ).group.letter
-              : 'A';
+          const block = sessionBlocks(workout).find(
+            (b) => b.kind === 'group' && b.group.groupId === sheet.groupId,
+          );
           return (
-            <Sheet padded={false} onClose={() => setSheet(null)}>
-              <div className="sheet-label">{t.supersetTag(letter)}</div>
-              <ListRow
-                icon={<IconTile icon="x" />}
-                label={t.ungroup}
-                onClick={() => {
-                  ungroupSuperset(workout.id, sheet.groupId);
-                  setSheet(null);
-                }}
-              />
-              <ListRow
-                icon={<IconTile icon="plus" />}
-                label={t.addExercise}
-                onClick={() => setSheet({ kind: 'add', intoGroupId: sheet.groupId })}
-              />
-              <div className="sheet-rule" />
-              {members.map((e) => (
-                <ListRow
-                  key={e.id}
-                  icon={<IconTile icon="dots-three-vertical" />}
-                  label={exName(e.name)}
-                  onClick={() => setSheet({ kind: 'menu', exId: e.id })}
-                />
-              ))}
-            </Sheet>
+            <supersetsH.GroupMenu
+              letter={block?.kind === 'group' ? block.group.letter : 'A'}
+              members={members}
+              onClose={() => setSheet(null)}
+              onUngroup={() => {
+                ungroupSuperset(workout.id, sheet.groupId);
+                setSheet(null);
+              }}
+              onAdd={() => setSheet({ kind: 'add', intoGroupId: sheet.groupId })}
+              onOpenMember={(exId) => setSheet({ kind: 'menu', exId })}
+            />
           );
         })()}
 

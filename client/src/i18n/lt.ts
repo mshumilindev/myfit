@@ -1136,7 +1136,6 @@ export const lt: Strings = {
   // --- Serijų tipai, raumenys, įranga (priedas SS/DS/MG/EQ) ----------------
   supersetTag: (l: string) => `Supersetas ${l}`,
   roundOf: (n: number, m: number) => `Ratas ${n} iš ${m} · be poilsio`,
-  roundsMeta: (n: number, kg: string) => `${n} ratai · ${kg}`,
   setDone: 'atlikta',
   justNow: 'ką tik',
   nowLabel: 'dabar',
@@ -2351,9 +2350,6 @@ export const lt: Strings = {
   clearLabel: 'Išvalyti',
   allGyms: 'Visos salės',
   notAtThisGym: (item: string) => `${item} — ne šioje salėje`,
-  musclesCol: 'Raumenys',
-  roundCol: 'Ratas',
-  lastCol: 'Praeitą kartą',
   weightCol: 'Svoris',
   typeCol: 'Tipas',
   startDay: (name: string) => `Pradėti ${name}`,
@@ -3716,7 +3712,6 @@ export const lt: Strings = {
   progNoWeightNote:
     'Svorio stulpelio nėra tyčia. Programa aprašo darbą; sesija paima apkrovą iš kiekvieno nario istorijos, todėl viena programa tinka skirtingiems nariams.',
   csvExportProgram: 'Eksportuoti programą',
-  exerciseLabel: 'Pratimas',
   progMemberEmpty: 'Susidėliok savo savaitę arba palauk trenerio programos.',
   progNoItems: 'Šią dieną pratimų dar nėra.',
   progEmptyDayBody: (day: string) =>

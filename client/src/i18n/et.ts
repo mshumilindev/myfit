@@ -1112,7 +1112,6 @@ export const et: Strings = {
   // --- Seeriatüübid, lihased, varustus (lisa SS/DS/MG/EQ) ------------------
   supersetTag: (l: string) => `Superseeria ${l}`,
   roundOf: (n: number, m: number) => `Ring ${n} / ${m} · ilma puhkuseta`,
-  roundsMeta: (n: number, kg: string) => `${n} ringi · ${kg}`,
   setDone: 'tehtud',
   justNow: 'äsja',
   nowLabel: 'nüüd',
@@ -2317,9 +2316,6 @@ export const et: Strings = {
   clearLabel: 'Puhasta',
   allGyms: 'Kõik saalid',
   notAtThisGym: (item: string) => `${item} — mitte selles saalis`,
-  musclesCol: 'Lihased',
-  roundCol: 'Ring',
-  lastCol: 'Viimati',
   weightCol: 'Raskus',
   typeCol: 'Tüüp',
   startDay: (name: string) => `Alusta: ${name}`,
@@ -3679,7 +3675,6 @@ export const et: Strings = {
   progNoWeightNote:
     'Raskuse veergu ei ole meelega. Programm kirjeldab tööd; seanss võtab koormuse iga liikme ajaloost, nii sobib üks programm eri liikmetele.',
   csvExportProgram: 'Ekspordi programm',
-  exerciseLabel: 'Harjutus',
   progMemberEmpty: 'Pane oma nädal kokku või oota treeneri programmi.',
   progNoItems: 'Sellel päeval pole veel harjutusi.',
   progEmptyDayBody: (day: string) =>

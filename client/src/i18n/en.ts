@@ -1103,7 +1103,6 @@ export const en = {
   // --- Set types, muscles, equipment (design addendum SS/DS/MG/EQ) ---------
   supersetTag: (l: string) => `Superset ${l}`,
   roundOf: (n: number, m: number) => `Round ${n} of ${m} · no rest between`,
-  roundsMeta: (n: number, kg: string) => `${n} rounds · ${kg}`,
   setDone: 'done',
   justNow: 'just now',
   nowLabel: 'now',
@@ -2362,9 +2361,6 @@ export const en = {
   clearLabel: 'Clear',
   allGyms: 'All gyms',
   notAtThisGym: (item: string) => `${item} — not at this gym`,
-  musclesCol: 'Muscles',
-  roundCol: 'Round',
-  lastCol: 'Last',
   weightCol: 'Weight',
   typeCol: 'Type',
   startDay: (name: string) => `Start ${name}`,
@@ -3729,7 +3725,6 @@ export const en = {
   progNoWeightNote:
     "There is no weight column, by design. A program describes work; the session supplies load from each member's own history, so one program fits every member.",
   csvExportProgram: 'Export program',
-  exerciseLabel: 'Exercise',
   progMemberEmpty: 'Build your own week, or wait for a trainer to assign one.',
   progNoItems: 'No exercises on this day yet.',
   progEmptyDayBody: (day: string) =>

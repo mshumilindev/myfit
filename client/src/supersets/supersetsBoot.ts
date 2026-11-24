@@ -4,8 +4,13 @@
  */
 import { supersetsHost } from '../supersetsApi';
 import { provide, trackerReady } from '../trackerRt';
+import { SupersetGroupMenu } from './GroupMenu';
 import { SupersetBlock } from './SupersetBlock';
 import { SupersetSheet } from './SupersetSheet';
 
-provide(supersetsHost, { Sheet: SupersetSheet, Block: SupersetBlock });
+provide(supersetsHost, {
+  Sheet: SupersetSheet,
+  Block: SupersetBlock,
+  GroupMenu: SupersetGroupMenu,
+});
 trackerReady('supersets');
