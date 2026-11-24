@@ -224,12 +224,12 @@ export const MORE_R2: Record<string, [string, string][]> = {
   ],
   my_gym: [
     [
-      'Saving your gym lets me suggest exercises and substitutes that match the equipment you actually have there, instead of generic options.',
-      'Коли зал збережено, я пропоную вправи й заміни під обладнання, яке там реально є, а не загальні варіанти.',
+      'Saving your gym ties your sessions to it, so I can tell where you train and how often.',
+      'Коли зал збережено, тренування прив’язуються до нього, і я можу сказати, де і як часто ти тренуєшся.',
     ],
     [
-      'If you train in more than one place, save each gym separately — a home setup and a full gym need very different exercise swaps.',
-      'Якщо тренуєшся в кількох місцях, збережи кожен зал окремо: домашній кут і повноцінний зал потребують зовсім різних замін.',
+      'If you train in more than one place, save each gym separately — then every session stays tied to the right place.',
+      'Якщо тренуєшся в кількох місцях, збережи кожен зал окремо — тоді кожне тренування лишається біля правильного місця.',
     ],
   ],
   my_goal: [

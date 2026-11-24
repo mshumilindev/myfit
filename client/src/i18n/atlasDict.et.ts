@@ -1650,8 +1650,8 @@ export const DICT: Record<string, string> = {
     'Kui sööd harva rasvast kala (lõhe, sardiinid, makrell, heeringas), on EPA ja DHA-ga oomega-{1} toidulisand mõistlik viis üldisi tervisevajadusi katta.',
   'If you train fasted, get {1}–{2} g of protein soon after, and don’t go fasted into a very long session.':
     'Kui treenid tühja kõhuga, söö varsti pärast {1}–{2} g valku ja ära mine tühja kõhuga väga pikale treeningule.',
-  'If you train in more than one place, save each gym separately — a home setup and a full gym need very different exercise swaps.':
-    'Kui treenid mitmes kohas, salvesta iga jõusaal eraldi — kodune varustus ja täisjõusaal vajavad väga erinevaid harjutuste asendusi.',
+  'If you train in more than one place, save each gym separately — then every session stays tied to the right place.':
+    'Kui treenid mitmes kohas, salvesta iga jõusaal eraldi — siis jääb iga treening õige koha külge.',
   'If you trained the same muscles hard today, give them {1} days — shuffle tomorrow’s session so a fresh group goes first.':
     'Kui treenisid täna samu lihaseid kõvasti, anna neile {1} päeva — tõsta homne treening ümber, et värske lihasrühm tuleks esimesena.',
   "If you want one, check the label for the actual caffeine amount and avoid 'proprietary blends' that hide doses.":
@@ -2708,8 +2708,8 @@ export const DICT: Record<string, string> = {
     'Saunal sellist mõju pole ja see võib mõõdukalt toetada südame tervist ja lõõgastumist.',
   'Sauna or ice bath after the gym?': 'Saun või jäävann pärast jõusaali?',
   'Sauna: fine any time, drink water.': 'Saun: sobib igal ajal, joo vett.',
-  'Saving your gym lets me suggest exercises and substitutes that match the equipment you actually have there, instead of generic options.':
-    'Kui salvestad oma jõusaali, saan soovitada harjutusi ja asendusi, mis sobivad sealse varustusega, mitte üldisi variante.',
+  'Saving your gym ties your sessions to it, so I can tell where you train and how often.':
+    'Kui salvestad oma jõusaali, seotakse treeningud sellega ja ma saan öelda, kus ja kui tihti treenid.',
   'Say “forget it” and confirm with a tap.': 'Ütle „unusta see“ ja kinnita puudutusega.',
   'Say “swap {1} for …”.': 'Ütle „vaheta {1} … vastu“.',
   'Seated or half-kneeling dumbbell presses are great for teaching a stacked ribcage, because leaning back is harder to cheat.':

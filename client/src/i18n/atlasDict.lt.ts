@@ -1657,8 +1657,8 @@ export const DICT: Record<string, string> = {
     'Jei retai valgai riebią žuvį (lašišą, sardines, skumbrę, silkę), omega-{1} papildas su EPR ir DHR – protingas būdas pasirūpinti bendra sveikata.',
   'If you train fasted, get {1}–{2} g of protein soon after, and don’t go fasted into a very long session.':
     'Jei treniruojiesi nevalgęs, netrukus po to suvalgyk {1}–{2} g baltymų ir neik nevalgęs į labai ilgą treniruotę.',
-  'If you train in more than one place, save each gym separately — a home setup and a full gym need very different exercise swaps.':
-    'Jei treniruojiesi keliose vietose, išsaugok kiekvieną salę atskirai – namų įrangai ir pilnai salei reikia labai skirtingų pratimų pakaitalų.',
+  'If you train in more than one place, save each gym separately — then every session stays tied to the right place.':
+    'Jei treniruojiesi keliose vietose, išsaugok kiekvieną salę atskirai – tada kiekviena treniruotė lieka prie tinkamos vietos.',
   'If you trained the same muscles hard today, give them {1} days — shuffle tomorrow’s session so a fresh group goes first.':
     'Jei šiandien sunkiai treniravai tuos pačius raumenis, duok jiems {1} dienas – perdėliok rytdienos treniruotę, kad pirma eitų pailsėjusi grupė.',
   "If you want one, check the label for the actual caffeine amount and avoid 'proprietary blends' that hide doses.":
@@ -2723,8 +2723,8 @@ export const DICT: Record<string, string> = {
     'Pirtis tokio poveikio neturi ir gali šiek tiek palaikyti širdies sveikatą bei atsipalaidavimą.',
   'Sauna or ice bath after the gym?': 'Pirtis ar ledinė vonia po sporto salės?',
   'Sauna: fine any time, drink water.': 'Pirtis: bet kada, tik gerk vandens.',
-  'Saving your gym lets me suggest exercises and substitutes that match the equipment you actually have there, instead of generic options.':
-    'Išsaugojęs savo sporto salę leidi man siūlyti pratimus ir pakaitalus, atitinkančius ten iš tikrųjų esančią įrangą, o ne bendrus variantus.',
+  'Saving your gym ties your sessions to it, so I can tell where you train and how often.':
+    'Išsaugojus sporto salę, treniruotės susiejamos su ja ir galiu pasakyti, kur ir kaip dažnai treniruojiesi.',
   'Say “forget it” and confirm with a tap.': 'Pasakyk „pamiršk“ ir patvirtink bakstelėjimu.',
   'Say “swap {1} for …”.': 'Pasakyk „pakeisk {1} į …“.',
   'Seated or half-kneeling dumbbell presses are great for teaching a stacked ribcage, because leaning back is harder to cheat.':

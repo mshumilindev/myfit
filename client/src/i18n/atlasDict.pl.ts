@@ -1658,8 +1658,8 @@ export const DICT: Record<string, string> = {
     'Jeśli rzadko jesz tłuste ryby (łosoś, sardynki, makrela, śledź), suplement omega-{1} z EPA i DHA to rozsądny sposób na pokrycie ogólnych potrzeb zdrowotnych.',
   'If you train fasted, get {1}–{2} g of protein soon after, and don’t go fasted into a very long session.':
     'Jeśli trenujesz na czczo, zjedz {1}–{2} g białka niedługo po treningu i nie idź na czczo na bardzo długi trening.',
-  'If you train in more than one place, save each gym separately — a home setup and a full gym need very different exercise swaps.':
-    'Jeśli trenujesz w więcej niż jednym miejscu, zapisz każdą siłownię osobno — domowy sprzęt i pełna siłownia wymagają zupełnie innych zamienników.',
+  'If you train in more than one place, save each gym separately — then every session stays tied to the right place.':
+    'Jeśli trenujesz w więcej niż jednym miejscu, zapisz każdą siłownię osobno — wtedy każdy trening zostaje przy właściwym miejscu.',
   'If you trained the same muscles hard today, give them {1} days — shuffle tomorrow’s session so a fresh group goes first.':
     'Jeśli dziś mocno trenowałeś te same mięśnie, daj im {1} dni — przestaw jutrzejszy trening tak, żeby najpierw szła świeża partia.',
   "If you want one, check the label for the actual caffeine amount and avoid 'proprietary blends' that hide doses.":
@@ -2727,8 +2727,8 @@ export const DICT: Record<string, string> = {
     'Sauna nie ma takiego efektu i może umiarkowanie wspierać zdrowie serca i relaks.',
   'Sauna or ice bath after the gym?': 'Sauna czy lodowa kąpiel po siłowni?',
   'Sauna: fine any time, drink water.': 'Sauna: w każdej chwili, pij wodę.',
-  'Saving your gym lets me suggest exercises and substitutes that match the equipment you actually have there, instead of generic options.':
-    'Zapisana siłownia pozwala mi proponować ćwiczenia i zamienniki pasujące do sprzętu, który faktycznie tam masz, zamiast ogólnych opcji.',
+  'Saving your gym ties your sessions to it, so I can tell where you train and how often.':
+    'Zapisana siłownia wiąże z sobą treningi, więc mogę powiedzieć, gdzie i jak często ćwiczysz.',
   'Say “forget it” and confirm with a tap.': 'Powiedz „zapomnij” i potwierdź stuknięciem.',
   'Say “swap {1} for …”.': 'Powiedz „zamień {1} na …”.',
   'Seated or half-kneeling dumbbell presses are great for teaching a stacked ribcage, because leaning back is harder to cheat.':
