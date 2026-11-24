@@ -77,8 +77,8 @@ export {
 export type { ProgramEditorLabels, ProgramEditorWords } from './labels';
 
 // UI
+export { ProgramEditor } from './ui/WrappedEditor';
 export {
-  ProgramEditor,
   type ChangeMeta,
   type EditorFocus,
   type EditorScene,

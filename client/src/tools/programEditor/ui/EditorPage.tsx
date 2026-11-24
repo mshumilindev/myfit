@@ -11,7 +11,8 @@ import { StickyActionBar } from '../../../components/ui/StickyActionBar';
 import { Tag } from '../../../components/ui/Tag';
 import { COACH_BREAKPOINT, useMinWidth } from '../../../components/ui/breakpoints';
 import type { Tone } from '../../../components/ui/tones';
-import { ProgramEditor, type ProgramEditorProps } from './ProgramEditor';
+import type { ProgramEditorProps } from './ProgramEditor';
+import { ProgramEditor } from './WrappedEditor';
 import './EditorPage.css';
 
 /**

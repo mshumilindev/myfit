@@ -179,7 +179,6 @@ import {
 } from './unsentWorkouts';
 import { resolveRestOverlap, type RestOverlapChoice } from './restOverlap';
 
-import { readProgramMemory } from './data/programMemory';
 import { CONDITIONS_KEY, CONDITIONS_SHARE_KEY, createConditionsCache } from './conditionsCache';
 import { createStoreSealed } from './storeSealed';
 import { createAccountDocs } from './storeAccountDocs';
@@ -237,7 +236,7 @@ import { listPrefFromDoc, LIST_PREFS, writeListPref, reconcileListPref } from '.
 import { resetTodayLayout } from './today/layout';
 import { pushTodayLayoutEdits, syncTodayLayoutFromDoc } from './today/layoutSync';
 import { pushThemeEdits, syncThemePrefsFromDoc } from './themes/themeSync';
-import { weekPlanFor, type WeekSource } from './periodizationApi';
+import { assignedWeek, prescribedTrainingDays, readAssignment } from './data/assignedProgram';
 // Synced Log-activity prefs (pins + "don't suggest after workouts").
 export {
   activityPins,
@@ -1123,22 +1122,6 @@ function primaryMusclesOf(w: Workout): Set<MuscleGroup> {
   return s;
 }
 
-interface CachedAssignment {
-  program: {
-    dayNames?: Record<string, string>;
-    targetMuscles?: Record<string, MuscleGroup[]>;
-    items?: { day: number }[];
-  };
-  week?: number;
-}
-function readAssignment(): CachedAssignment | null {
-  try {
-    return readProgramMemory<CachedAssignment>(); // memory only: the on-device copy is the sealed snapshot
-  } catch {
-    return null;
-  }
-}
-
 /**
  * The program day name to title a logged session with, or null.
  *
@@ -1158,36 +1141,11 @@ export function weekdayOf(ts: number): number {
   return programDay(ts);
 }
 
-/** Weekdays (1–7) the assigned program prescribes training on (items or target
- *  muscles). Empty when there is no cached program. Drives "missed" markers. */
-export function prescribedTrainingDays(): Set<number> {
-  const a = readAssignment();
-  const set = new Set<number>();
-  if (!a) return set;
-  const wk = weekPlanFor(a.program as unknown as WeekSource, a.week ?? 1);
-  for (const it of wk.items ?? []) set.add(it.day);
-  for (const [k, v] of Object.entries(wk.targetMuscles ?? {})) {
-    if (Array.isArray(v) && v.length > 0) set.add(Number(k));
-  }
-  return set;
-}
-
-/** How many days back a "missed" marker is trustworthy — roughly since the
- *  program began (bounded by its current week), matching programDayNameFor. */
-export function programLookbackDays(): number {
-  const a = readAssignment();
-  return a ? (a.week ?? 1) * 7 + 6 : 0;
-}
-
-/** The assigned program's day name for a weekday (1=Mon…7=Sun), or null. Used to
- *  name a missed gym day ("you skipped Legs 2"). */
-export function programDayNameForWeekday(weekday: number): string | null {
-  const a = readAssignment();
-  return a
-    ? (weekPlanFor(a.program as unknown as WeekSource, a.week ?? 1).dayNames?.[String(weekday)] ??
-        null)
-    : null;
-}
+export {
+  prescribedTrainingDays,
+  programDayNameForWeekday,
+  programLookbackDays,
+} from './data/assignedProgram';
 
 export function programDayNameFor(w: Workout, workouts: Workout[]): string | null {
   // A session that carries its own day name (from the program, the builder, or
@@ -1210,7 +1168,7 @@ export function programDayNameFor(w: Workout, workouts: Workout[]): string | nul
   const a = readAssignment();
   if (!a) return null;
   const day = programDay(w.startedAt);
-  const wk = weekPlanFor(a.program as unknown as WeekSource, a.week ?? 1);
+  const wk = assignedWeek(a);
   const name = wk.dayNames?.[String(day)];
   if (!name) return null;
   const targets = wk.targetMuscles?.[String(day)] ?? [];

@@ -110,7 +110,7 @@ type Dialog =
  * The program editor: a week of days, one day at a time, an inspector for the selected row, undo and redo. Controlled
  * by a plain `ProgramDoc`; knows nothing about where the program is stored. See `docs/PROGRAM-EDITOR-TOOL.md`.
  */
-function ProgramEditorInner({
+export function ProgramEditor({
   doc,
   onChange,
   host,
@@ -705,19 +705,5 @@ function ProgramEditorInner({
         toast && <Snackbar position="fixed" icon={toast.icon} text={toast.text} />
       )}
     </div>
-  );
-}
-
-/**
- * The editor. A host may wrap it (`host.slots.wrap`) to edit another view of the same document, a week of a cycle; the
- * history below then belongs to that view.
- */
-export function ProgramEditor(props: ProgramEditorProps) {
-  const Wrap = props.host.slots?.wrap;
-  if (!Wrap) return <ProgramEditorInner {...props} />;
-  return (
-    <Wrap doc={props.doc} onChange={props.onChange} readOnly={!!props.readOnly}>
-      {(doc, onChange) => <ProgramEditorInner {...props} doc={doc} onChange={onChange} />}
-    </Wrap>
   );
 }

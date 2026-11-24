@@ -633,3 +633,14 @@ has CSS, a story and a test. Source of truth for look and states: the approved d
 | `SkOfflineBar`     | Calm offline banner (warn tone, status role, never an alert)                                                                                                                    |
 | `SkBackground`     | Animated three-layer wave background, reduced-motion safe, aria-hidden                                                                                                          |
 | `SkHighlight`      | Search match mark: renders text parts, matched ones highlighted                                                                                                                 |
+
+
+## Weekly-cycle pieces: CycleStrip, LoadField, RepRange (SPO-609)
+
+Three controlled kit parts for the Periodization add-on's editor (the add-on's logic stays in its chunk; the kit holds no training maths and no words, the caller passes both).
+
+- **`CycleStrip`** (`weeks: {n, title, tag, tone?}[]`, `value`, `onPick`, `label`): one cell per week of a cycle (`role="tablist"`, each cell a `tab`), the picked week ringed, a hint `Tag` under each title. Scrolls sideways for long cycles. Not for: choosing between a few options (`Segmented`).
+- **`LoadField`** (`mode: 'kg' | 'pct'`, `kg`, `pct`, `labels`, `hint?`, `hintWarn?`, `hintAction?`): how heavy a row is, in kilograms or as a percent of the person's max, with what the percent comes to under it (or a warning when there is no max yet). The caller computes the hint.
+- **`RepRange`** (`reps`, `repsMin?`, `labels`, `onChange({reps, repsMin?})`): one rep number by default; "Use a range" swaps it for from / to, "Use one number" swaps back. Valid while from < to.
+
+All three use tokens only (`--s-*`, `--fs-*`, `--color-*`) and have stories next to them (`Kit/CycleStrip`, `Kit/LoadField`, `Kit/RepRange`).
