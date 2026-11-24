@@ -1,5 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import { addonsPref } from '../../addons/enabledSet';
+import { describe, expect, it } from 'vitest';
 import {
   activeCycleWeek,
   activeWeekLabel,
@@ -15,7 +14,7 @@ import {
   weekPlanOf,
   type WeekSource,
 } from './cycle';
-import type { ProgramItem } from './model';
+import type { ProgramItem } from '../views/programs/model';
 
 const item = (day: number, extra: Partial<ProgramItem> = {}): ProgramItem => ({
   id: `i${day}${Math.random()}`,
@@ -45,8 +44,6 @@ const cycleProgram = (): WeekSource => ({
   },
 });
 
-beforeEach(() => addonsPref.reset());
-
 describe('cycleWeekOf / cycleRepeats', () => {
   it('wraps the program week onto the cycle', () => {
     expect([1, 2, 3, 4, 5, 6, 8, 9].map((w) => cycleWeekOf(w, 4))).toEqual([
@@ -67,7 +64,7 @@ describe('cycleWeekOf / cycleRepeats', () => {
   });
 });
 
-describe('weekPlanOf (the structure, not the gate)', () => {
+describe('weekPlanOf', () => {
   it('week 1 is the program itself, with its own hint', () => {
     const p = cycleProgram();
     const w = weekPlanOf(p, 1);
@@ -82,28 +79,7 @@ describe('weekPlanOf (the structure, not the gate)', () => {
   });
 });
 
-describe('with Periodization off (the default): nothing of the cycle applies', () => {
-  it("every week is the program's own week, with no hint and no deload", () => {
-    const p = cycleProgram();
-    expect(activeCycleWeek(p, 4)).toBe(1);
-    expect(activeWeekPlan(p, 4).items).toBe(p.items);
-    expect(activeWeekLabel(p, 4)).toBeUndefined();
-    expect(isDeloadWeek(p, 4)).toBe(false);
-    expect(plannedThrough(p, 4)).toBe(8);
-  });
-  it('reads only kilograms and one rep number', () => {
-    expect(loadKg({ targetWeight: 60, targetPct: 80 }, 150)).toEqual({
-      kg: 60,
-      pct: null,
-      needsMax: false,
-    });
-    expect(repsLabel({ reps: 8, repsMin: 6 })).toBe('8');
-  });
-});
-
-describe('with Periodization on', () => {
-  beforeEach(() => addonsPref.set(['periodization']));
-
+describe('the cycle rules', () => {
   it('picks the cycle week for each program week', () => {
     const p = cycleProgram();
     expect([1, 2, 3, 4, 5].map((w) => activeCycleWeek(p, w))).toEqual([1, 2, 3, 4, 1]);

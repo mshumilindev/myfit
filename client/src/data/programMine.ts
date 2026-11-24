@@ -19,7 +19,7 @@ import { muscleInfoByName, type MuscleGroup } from './exercises';
 import { exerciseDay, type TrainingDay } from './daySuggest';
 import type { Play } from '../playbook';
 import type { ProgramActivity, ProgramCycle, ProgramWarmupItem } from '../views/programs/model';
-import { activeWeekPlan, type WeekSource } from '../views/programs/cycle';
+import { weekPlanFor, type WeekSource } from '../periodizationApi';
 
 export interface ProgramItem {
   id: string;
@@ -219,7 +219,7 @@ export function useProgramMine(): ProgramMineState {
  * without a cycle, it is the program's own week, so Today, the Start sheet, the widgets and the Planner all read the same days.
  */
 export function assignmentWeek(a: ProgramAssignment) {
-  return activeWeekPlan(a.program as unknown as WeekSource, a.week);
+  return weekPlanFor(a.program as unknown as WeekSource, a.week);
 }
 
 export function programDayItems(a: ProgramAssignment, day: number): ProgramItem[] {

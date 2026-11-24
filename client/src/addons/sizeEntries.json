@@ -146,9 +146,9 @@
     "js": ["planner/AvailabilityPage", "planner/availability"]
   },
   "advanced-training": {
-    "js": ["periodizationRt"]
+    "js": ["periodizationRt", "periodizationApi"]
   },
   "periodization": {
-    "js": ["periodization/", "views/programs/cycle"]
+    "js": ["periodization/"]
   }
 }

@@ -1,15 +1,19 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { addonsPref } from '../addons/enabledSet';
+import './periodizationBoot';
 import {
-  cloneItems,
   duplicateOf,
   freshProgram,
   normalizeProgram,
-  sanitizeCycle,
-  sanitizePct,
   toSaved,
   type Program,
   type ProgramItem,
-} from './model';
+} from '../views/programs/model';
+import { cloneItems, sanitizeCycle, sanitizePct } from './cycleData';
+
+// The module is installed and its chunk loaded (the boot import above): the core seams ask the chunk.
+beforeEach(() => addonsPref.set(['periodization']));
+afterEach(() => addonsPref.reset());
 
 const row = (day: number, extra: Partial<ProgramItem> = {}): ProgramItem => ({
   id: `r${day}`,

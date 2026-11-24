@@ -62,7 +62,7 @@ export const EXCLUSION: Readonly<Record<string, Exclusion>> = {
   },
   periodization: {
     via: ['gate'],
-    files: ['addons/featureGates.ts', 'periodizationRt.ts', 'views/programs/cycle.ts'],
+    files: ['addons/featureGates.ts', 'periodizationApi.ts'],
     names: ['periodizationAvailable', 'usePeriodizationOn', 'usePeriodizationHost'],
   },
   goals: {

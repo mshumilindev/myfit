@@ -1,28 +1,16 @@
 /**
- * Weekly cycles and % of max (SPO-609, Advanced training › Periodization): the pure rules, no UI.
- *
- * One gate at the source (addons.md, "one wrapper on the source"): with Periodization not installed, `activeWeekPlan` always
- * answers the program's own week, `loadKg` never reads a percent and `repsLabel` never shows a range, so every reader gets the
- * same neutral value and no screen needs its own `if`. The stored cycle, percents and ranges are never touched.
+ * Weekly cycles and % of max (SPO-609, Advanced training › Periodization): the pure rules, no UI. This file is part of the lazy
+ * chunk; the core reaches it only through `periodizationApi.ts`, which asks it while the module is installed and answers the
+ * neutral value otherwise. So nothing here checks the gate: if it runs, Periodization is on.
  */
-import { periodizationAvailable } from '../../addons/featureGates';
-import {
-  type CycleLabel,
-  type ProgramCycle,
-  type ProgramItem,
-  type WeekPlan,
-  MAX_CYCLE,
-  MIN_CYCLE,
-} from './model';
-import type { MuscleGroup } from '../../data/exercises';
+import type { CycleLabel, ProgramItem, WeekPlan } from '../views/programs/model';
+import type { Load, WeekSource } from '../periodizationApi';
 
-/** The least a program must have for a cycle to apply to it. */
-export interface WeekSource {
-  items: ProgramItem[];
-  dayNames?: Record<string, string>;
-  targetMuscles?: Record<string, MuscleGroup[]>;
-  cycle?: ProgramCycle;
-}
+export type { Load, WeekSource };
+
+export const MIN_CYCLE = 2;
+export const MAX_CYCLE = 12;
+export const CYCLE_LABELS: readonly CycleLabel[] = ['deload', 'test', 'peak'];
 
 /** Cycle week (1-based) of program week `week` in a cycle of `length` weeks. */
 export function cycleWeekOf(week: number, length: number): number {
@@ -50,20 +38,20 @@ export function weekPlanOf(p: WeekSource, cw: number): WeekPlan {
   return p.cycle.weeks[cw - 2] ?? base;
 }
 
-/** The cycle week program week `week` falls on; always 1 while Periodization is off or the program has no cycle. */
+/** The cycle week program week `week` falls on; 1 for a program without a cycle. */
 export function activeCycleWeek(p: Pick<WeekSource, 'cycle'>, week: number): number {
-  if (!p.cycle || !periodizationAvailable()) return 1;
+  if (!p.cycle) return 1;
   return cycleWeekOf(week, p.cycle.length);
 }
 
-/** The days to train in program week `week`: the cycle week when Periodization is on, else the program's own week. */
+/** The days to train in program week `week`: the cycle week it falls on. */
 export function activeWeekPlan(p: WeekSource, week: number): WeekPlan {
   return weekPlanOf(p, activeCycleWeek(p, week));
 }
 
-/** The hint of program week `week` (Deload, Test, Peak); undefined for a base week or while the add-on is off. */
+/** The hint of program week `week` (Deload, Test, Peak); undefined for a base week. */
 export function activeWeekLabel(p: WeekSource, week: number): CycleLabel | undefined {
-  return p.cycle && periodizationAvailable() ? activeWeekPlan(p, week).label : undefined;
+  return p.cycle ? activeWeekPlan(p, week).label : undefined;
 }
 
 /** True when program week `week` is a deload week (nothing counts as behind in it). */
@@ -109,24 +97,15 @@ export function pctToKg(pct: number, max: number, step: number = KG_STEP): numbe
   return Math.round(((pct / 100) * max) / s) * s;
 }
 
-export interface Load {
-  /** Kilograms to put on the bar, null when none is prescribed or a percent has no max yet. */
-  kg: number | null;
-  /** The prescribed percent, when the row asks for one and Periodization is on. */
-  pct: number | null;
-  /** A percent is prescribed but there is no max to turn it into kilograms ("no max yet"). */
-  needsMax: boolean;
-}
-
 /**
- * The load a row asks for. A percent wins when Periodization is on; with a max it becomes kilograms, without one it asks for
- * a max instead of inventing a weight. With the add-on off only `targetWeight` counts.
+ * The load a row asks for. A percent wins; with a max it becomes kilograms, without one it asks for a max instead of inventing
+ * a weight.
  */
 export function loadKg(
   item: Pick<ProgramItem, 'targetWeight' | 'targetPct'>,
   max: number | null | undefined,
 ): Load {
-  const pct = periodizationAvailable() && item.targetPct ? item.targetPct : null;
+  const pct = item.targetPct ? item.targetPct : null;
   if (pct) {
     const kg = max ? pctToKg(pct, max) : null;
     return { kg, pct, needsMax: kg === null };
@@ -134,8 +113,8 @@ export function loadKg(
   return { kg: item.targetWeight ?? null, pct: null, needsMax: false };
 }
 
-/** "6–8" for a range (Periodization on), else the plain rep count. */
+/** "6–8" for a range, else the plain rep count. */
 export function repsLabel(item: Pick<ProgramItem, 'reps' | 'repsMin'>): string {
-  const min = periodizationAvailable() ? item.repsMin : undefined;
+  const min = item.repsMin;
   return min && min < item.reps ? `${min}–${item.reps}` : String(item.reps);
 }
