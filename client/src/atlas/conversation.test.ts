@@ -1,4 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { addonsPref } from '../addons/enabledSet';
+import { TOPIC_ADDON } from './addonTopics';
 import type { Exercise, Workout } from '../types';
 import { ALL_INTENTS, answerLocally, INTENTS, type AskCtx } from './intents';
 import { INTENTS_MORE } from './intentsMore';
@@ -6,6 +8,10 @@ import { INTENTS_THIRD } from './intentsThird';
 import { INTENTS_FOURTH } from './intentsFourth';
 import { DEPTH } from './depth';
 import { COACH_DEFAULT } from './types';
+
+// The modules of Advanced training installed: Atlas answers their topics.
+beforeAll(() => addonsPref.set(Object.values(TOPIC_ADDON)));
+afterAll(() => addonsPref.reset());
 
 const DAY = 86_400_000;
 const NOW = new Date(2026, 9, 7, 12).getTime();

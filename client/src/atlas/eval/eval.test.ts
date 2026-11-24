@@ -23,7 +23,9 @@
  * coverage@confident 79.0% (see its header). After that round: 99.5%, none
  * wrong-confident, coverage 89.0% — no longer blind either.
  */
-import { describe as suite, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe as suite, expect, it } from 'vitest';
+import { addonsPref } from '../../addons/enabledSet';
+import { TOPIC_ADDON } from '../addonTopics';
 import { ALL_INTENTS, CONFIDENT } from '../intents';
 import { features } from '../confidence';
 import { KB } from '../kb';
@@ -51,6 +53,10 @@ import {
   BLIND2_UK,
 } from './corpusBlind2';
 import { describe, evaluate, report } from './run';
+
+// The modules of Advanced training installed: the corpus asks about their topics too.
+beforeAll(() => addonsPref.set(Object.values(TOPIC_ADDON)));
+afterAll(() => addonsPref.reset());
 
 type Env = { process?: { env: Record<string, string | undefined> } };
 const env = (globalThis as Env).process?.env ?? {};

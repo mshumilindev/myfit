@@ -27,6 +27,7 @@ import {
   translitToUk,
 } from './nlu';
 import { DEPTH, DEFAULT_NEXT } from './depth';
+import { topicShown } from './addonTopics';
 import { INTENTS_FOURTH } from './intentsFourth';
 import { CHARTS, INTENTS_FIFTH } from './intentsFifth';
 import { INTENTS_SIXTH, MORES } from './intentsSixth';
@@ -370,7 +371,8 @@ const FOLLOW_LEAD = [
   'і на',
 ];
 
-export const ALL_INTENTS = (): Intent[] => [
+export const ALL_INTENTS = (): Intent[] => ALL_PARTS().filter((it) => topicShown(it.id));
+const ALL_PARTS = (): Intent[] => [
   ...INTENTS,
   ...INTENTS_MORE,
   ...INTENTS_THIRD,
@@ -385,7 +387,7 @@ export const ALL_INTENTS = (): Intent[] => [
   ...INTENTS_HEALTH,
 ];
 // Charts and "more" layers for topics from the earlier parts.
-for (const it of ALL_INTENTS()) {
+for (const it of ALL_PARTS()) {
   if (CHARTS[it.id]) it.chart ??= CHARTS[it.id];
   if (MORES[it.id]) it.more ??= MORES[it.id];
   if (SMALL_OVERRIDES[it.id]) it.answer = SMALL_OVERRIDES[it.id].answer;
@@ -399,9 +401,9 @@ const byId = (id: string | undefined): Intent | undefined => {
   if (!intentIndex) {
     intentIndex = new Map();
     // (The first of a duplicated id wins, as a search of the list would give.)
-    for (const i of ALL_INTENTS()) if (!intentIndex.has(i.id)) intentIndex.set(i.id, i);
+    for (const i of ALL_PARTS()) if (!intentIndex.has(i.id)) intentIndex.set(i.id, i);
   }
-  return intentIndex.get(id);
+  return topicShown(id) ? intentIndex.get(id) : undefined;
 };
 
 /**
