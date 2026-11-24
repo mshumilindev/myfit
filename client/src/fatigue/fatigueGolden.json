@@ -1,0 +1,1322 @@
+{
+ "fatigue": [
+  [
+   "biceps",
+   {
+    "muscle": "biceps",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 0,
+    "mrv": 20,
+    "stalled": false
+   }
+  ],
+  [
+   "calves",
+   {
+    "muscle": "calves",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 2.5,
+    "mrv": 20,
+    "stalled": false
+   }
+  ],
+  [
+   "chest",
+   {
+    "muscle": "chest",
+    "score": 0.157143,
+    "level": "moderate",
+    "weeklyLevel": "fresh",
+    "acuteDays": 1,
+    "sets": 5,
+    "mrv": 22,
+    "stalled": false
+   }
+  ],
+  [
+   "core",
+   {
+    "muscle": "core",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 0,
+    "mrv": 16,
+    "stalled": false
+   }
+  ],
+  [
+   "forearms",
+   {
+    "muscle": "forearms",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 0,
+    "mrv": 14,
+    "stalled": false
+   }
+  ],
+  [
+   "glutes",
+   {
+    "muscle": "glutes",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 2.5,
+    "mrv": 18,
+    "stalled": false
+   }
+  ],
+  [
+   "hamstrings",
+   {
+    "muscle": "hamstrings",
+    "score": 0.016667,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 5,
+    "mrv": 18,
+    "stalled": false
+   }
+  ],
+  [
+   "lats",
+   {
+    "muscle": "lats",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 0,
+    "mrv": 24,
+    "stalled": false
+   }
+  ],
+  [
+   "lower_back",
+   {
+    "muscle": "lower_back",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 2.5,
+    "mrv": 12,
+    "stalled": false
+   }
+  ],
+  [
+   "quads",
+   {
+    "muscle": "quads",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 0,
+    "mrv": 20,
+    "stalled": false
+   }
+  ],
+  [
+   "shoulders",
+   {
+    "muscle": "shoulders",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 2.5,
+    "mrv": 26,
+    "stalled": false
+   }
+  ],
+  [
+   "traps",
+   {
+    "muscle": "traps",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 0,
+    "mrv": 18,
+    "stalled": false
+   }
+  ],
+  [
+   "triceps",
+   {
+    "muscle": "triceps",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 2.5,
+    "mrv": 18,
+    "stalled": false
+   }
+  ]
+ ],
+ "weekly": [
+  [
+   "biceps",
+   {
+    "muscle": "biceps",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 0,
+    "mrv": 20,
+    "stalled": false
+   }
+  ],
+  [
+   "calves",
+   {
+    "muscle": "calves",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 2.5,
+    "mrv": 20,
+    "stalled": false
+   }
+  ],
+  [
+   "chest",
+   {
+    "muscle": "chest",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 5,
+    "mrv": 22,
+    "stalled": false
+   }
+  ],
+  [
+   "core",
+   {
+    "muscle": "core",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 0,
+    "mrv": 16,
+    "stalled": false
+   }
+  ],
+  [
+   "forearms",
+   {
+    "muscle": "forearms",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 0,
+    "mrv": 14,
+    "stalled": false
+   }
+  ],
+  [
+   "glutes",
+   {
+    "muscle": "glutes",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 2.5,
+    "mrv": 18,
+    "stalled": false
+   }
+  ],
+  [
+   "hamstrings",
+   {
+    "muscle": "hamstrings",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 5,
+    "mrv": 18,
+    "stalled": false
+   }
+  ],
+  [
+   "lats",
+   {
+    "muscle": "lats",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 0,
+    "mrv": 24,
+    "stalled": false
+   }
+  ],
+  [
+   "lower_back",
+   {
+    "muscle": "lower_back",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 2.5,
+    "mrv": 12,
+    "stalled": false
+   }
+  ],
+  [
+   "quads",
+   {
+    "muscle": "quads",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 0,
+    "mrv": 20,
+    "stalled": false
+   }
+  ],
+  [
+   "shoulders",
+   {
+    "muscle": "shoulders",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 2.5,
+    "mrv": 26,
+    "stalled": false
+   }
+  ],
+  [
+   "traps",
+   {
+    "muscle": "traps",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 0,
+    "mrv": 18,
+    "stalled": false
+   }
+  ],
+  [
+   "triceps",
+   {
+    "muscle": "triceps",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 2.5,
+    "mrv": 18,
+    "stalled": false
+   }
+  ]
+ ],
+ "deload": {
+  "kind": "none",
+  "muscle": null,
+  "friedCount": 0,
+  "highCount": 0
+ },
+ "deloadBias": [
+  {
+   "kind": "none",
+   "muscle": null,
+   "friedCount": 0,
+   "highCount": 0
+  },
+  {
+   "kind": "none",
+   "muscle": null,
+   "friedCount": 0,
+   "highCount": 0
+  }
+ ],
+ "stalled": [],
+ "readiness": [
+  [
+   "biceps",
+   {
+    "muscle": "biceps",
+    "daysSince": 8,
+    "recoveryDays": 1.4,
+    "lastDose": 3,
+    "readiness": 1,
+    "state": "stale"
+   }
+  ],
+  [
+   "calves",
+   {
+    "muscle": "calves",
+    "daysSince": 2,
+    "recoveryDays": 1.05,
+    "lastDose": 2.5,
+    "readiness": 1,
+    "state": "ready"
+   }
+  ],
+  [
+   "chest",
+   {
+    "muscle": "chest",
+    "daysSince": 1,
+    "recoveryDays": 1.785714,
+    "lastDose": 5,
+    "readiness": 0.56,
+    "state": "nearly"
+   }
+  ],
+  [
+   "core",
+   {
+    "muscle": "core",
+    "daysSince": null,
+    "recoveryDays": 1.5,
+    "lastDose": 0,
+    "readiness": 1,
+    "state": "stale"
+   }
+  ],
+  [
+   "forearms",
+   {
+    "muscle": "forearms",
+    "daysSince": null,
+    "recoveryDays": 1.5,
+    "lastDose": 0,
+    "readiness": 1,
+    "state": "stale"
+   }
+  ],
+  [
+   "glutes",
+   {
+    "muscle": "glutes",
+    "daysSince": 2,
+    "recoveryDays": 1.75,
+    "lastDose": 2.5,
+    "readiness": 1,
+    "state": "ready"
+   }
+  ],
+  [
+   "hamstrings",
+   {
+    "muscle": "hamstrings",
+    "daysSince": 2,
+    "recoveryDays": 2.083333,
+    "lastDose": 5,
+    "readiness": 0.96,
+    "state": "ready"
+   }
+  ],
+  [
+   "lats",
+   {
+    "muscle": "lats",
+    "daysSince": 8,
+    "recoveryDays": 1.875,
+    "lastDose": 6,
+    "readiness": 1,
+    "state": "stale"
+   }
+  ],
+  [
+   "lower_back",
+   {
+    "muscle": "lower_back",
+    "daysSince": 2,
+    "recoveryDays": 2.1,
+    "lastDose": 2.5,
+    "readiness": 0.952381,
+    "state": "ready"
+   }
+  ],
+  [
+   "quads",
+   {
+    "muscle": "quads",
+    "daysSince": null,
+    "recoveryDays": 3,
+    "lastDose": 0,
+    "readiness": 1,
+    "state": "stale"
+   }
+  ],
+  [
+   "shoulders",
+   {
+    "muscle": "shoulders",
+    "daysSince": 1,
+    "recoveryDays": 1.4,
+    "lastDose": 2.5,
+    "readiness": 0.714286,
+    "state": "nearly"
+   }
+  ],
+  [
+   "traps",
+   {
+    "muscle": "traps",
+    "daysSince": 8,
+    "recoveryDays": 1.4,
+    "lastDose": 3,
+    "readiness": 1,
+    "state": "stale"
+   }
+  ],
+  [
+   "triceps",
+   {
+    "muscle": "triceps",
+    "daysSince": 1,
+    "recoveryDays": 1.4,
+    "lastDose": 2.5,
+    "readiness": 0.714286,
+    "state": "nearly"
+   }
+  ]
+ ],
+ "readinessBoost": [
+  [
+   "biceps",
+   {
+    "muscle": "biceps",
+    "daysSince": 8,
+    "recoveryDays": 1.4,
+    "lastDose": 3,
+    "readiness": 1,
+    "state": "stale"
+   }
+  ],
+  [
+   "calves",
+   {
+    "muscle": "calves",
+    "daysSince": 2,
+    "recoveryDays": 1.05,
+    "lastDose": 2.5,
+    "readiness": 1,
+    "state": "ready"
+   }
+  ],
+  [
+   "chest",
+   {
+    "muscle": "chest",
+    "daysSince": 1,
+    "recoveryDays": 1.785714,
+    "lastDose": 5,
+    "readiness": 0.62,
+    "state": "nearly"
+   }
+  ],
+  [
+   "core",
+   {
+    "muscle": "core",
+    "daysSince": null,
+    "recoveryDays": 1.5,
+    "lastDose": 0,
+    "readiness": 1,
+    "state": "stale"
+   }
+  ],
+  [
+   "forearms",
+   {
+    "muscle": "forearms",
+    "daysSince": null,
+    "recoveryDays": 1.5,
+    "lastDose": 0,
+    "readiness": 1,
+    "state": "stale"
+   }
+  ],
+  [
+   "glutes",
+   {
+    "muscle": "glutes",
+    "daysSince": 2,
+    "recoveryDays": 1.75,
+    "lastDose": 2.5,
+    "readiness": 1,
+    "state": "ready"
+   }
+  ],
+  [
+   "hamstrings",
+   {
+    "muscle": "hamstrings",
+    "daysSince": 2,
+    "recoveryDays": 2.083333,
+    "lastDose": 5,
+    "readiness": 1,
+    "state": "ready"
+   }
+  ],
+  [
+   "lats",
+   {
+    "muscle": "lats",
+    "daysSince": 8,
+    "recoveryDays": 1.875,
+    "lastDose": 6,
+    "readiness": 1,
+    "state": "stale"
+   }
+  ],
+  [
+   "lower_back",
+   {
+    "muscle": "lower_back",
+    "daysSince": 2,
+    "recoveryDays": 2.1,
+    "lastDose": 2.5,
+    "readiness": 1,
+    "state": "ready"
+   }
+  ],
+  [
+   "quads",
+   {
+    "muscle": "quads",
+    "daysSince": null,
+    "recoveryDays": 3,
+    "lastDose": 0,
+    "readiness": 1,
+    "state": "stale"
+   }
+  ],
+  [
+   "shoulders",
+   {
+    "muscle": "shoulders",
+    "daysSince": 1,
+    "recoveryDays": 1.4,
+    "lastDose": 2.5,
+    "readiness": 0.774286,
+    "state": "nearly"
+   }
+  ],
+  [
+   "traps",
+   {
+    "muscle": "traps",
+    "daysSince": 8,
+    "recoveryDays": 1.4,
+    "lastDose": 3,
+    "readiness": 1,
+    "state": "stale"
+   }
+  ],
+  [
+   "triceps",
+   {
+    "muscle": "triceps",
+    "daysSince": 1,
+    "recoveryDays": 1.4,
+    "lastDose": 2.5,
+    "readiness": 0.774286,
+    "state": "nearly"
+   }
+  ]
+ ],
+ "pure": [
+  {
+   "recoveryDays": 2,
+   "readiness": 1,
+   "state": "stale"
+  },
+  {
+   "recoveryDays": 2.666667,
+   "readiness": 0.375,
+   "state": "recovering"
+  },
+  {
+   "recoveryDays": 4.8,
+   "readiness": 0.649,
+   "state": "nearly"
+  }
+ ],
+ "pickerFatigue": [
+  [
+   "biceps",
+   {
+    "muscle": "biceps",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 0,
+    "mrv": 20,
+    "stalled": false
+   }
+  ],
+  [
+   "calves",
+   {
+    "muscle": "calves",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 2.5,
+    "mrv": 20,
+    "stalled": false
+   }
+  ],
+  [
+   "chest",
+   {
+    "muscle": "chest",
+    "score": 0.157143,
+    "level": "moderate",
+    "weeklyLevel": "fresh",
+    "acuteDays": 1,
+    "sets": 5,
+    "mrv": 22,
+    "stalled": false
+   }
+  ],
+  [
+   "core",
+   {
+    "muscle": "core",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 0,
+    "mrv": 16,
+    "stalled": false
+   }
+  ],
+  [
+   "forearms",
+   {
+    "muscle": "forearms",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 0,
+    "mrv": 14,
+    "stalled": false
+   }
+  ],
+  [
+   "glutes",
+   {
+    "muscle": "glutes",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 2.5,
+    "mrv": 18,
+    "stalled": false
+   }
+  ],
+  [
+   "hamstrings",
+   {
+    "muscle": "hamstrings",
+    "score": 0.016667,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 5,
+    "mrv": 18,
+    "stalled": false
+   }
+  ],
+  [
+   "lats",
+   {
+    "muscle": "lats",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 0,
+    "mrv": 24,
+    "stalled": false
+   }
+  ],
+  [
+   "lower_back",
+   {
+    "muscle": "lower_back",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 2.5,
+    "mrv": 12,
+    "stalled": false
+   }
+  ],
+  [
+   "quads",
+   {
+    "muscle": "quads",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 0,
+    "mrv": 20,
+    "stalled": false
+   }
+  ],
+  [
+   "shoulders",
+   {
+    "muscle": "shoulders",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 2.5,
+    "mrv": 26,
+    "stalled": false
+   }
+  ],
+  [
+   "traps",
+   {
+    "muscle": "traps",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 0,
+    "mrv": 18,
+    "stalled": false
+   }
+  ],
+  [
+   "triceps",
+   {
+    "muscle": "triceps",
+    "score": 0,
+    "level": "fresh",
+    "weeklyLevel": "fresh",
+    "sets": 2.5,
+    "mrv": 18,
+    "stalled": false
+   }
+  ]
+ ],
+ "families": [
+  {
+   "id": "chest",
+   "ready": {
+    "state": "nearly",
+    "days": 1
+   },
+   "level": "moderate"
+  },
+  {
+   "id": "back",
+   "ready": {
+    "state": "stale",
+    "days": 8
+   },
+   "level": "fresh"
+  },
+  {
+   "id": "shoulders",
+   "ready": {
+    "state": "stale",
+    "days": null
+   },
+   "level": "fresh"
+  },
+  {
+   "id": "arms",
+   "ready": {
+    "state": "stale",
+    "days": null
+   },
+   "level": "fresh"
+  },
+  {
+   "id": "legs",
+   "ready": {
+    "state": "ready",
+    "days": 2
+   },
+   "level": "fresh"
+  },
+  {
+   "id": "core",
+   "ready": {
+    "state": "stale",
+    "days": null
+   },
+   "level": "fresh"
+  }
+ ],
+ "heavy": {
+  "fatigue": [
+   [
+    "biceps",
+    {
+     "muscle": "biceps",
+     "score": 1,
+     "level": "fried",
+     "weeklyLevel": "fried",
+     "sets": 72,
+     "mrv": 20,
+     "stalled": true
+    }
+   ],
+   [
+    "calves",
+    {
+     "muscle": "calves",
+     "score": 0.5,
+     "level": "high",
+     "weeklyLevel": "high",
+     "sets": 36,
+     "mrv": 20,
+     "stalled": false
+    }
+   ],
+   [
+    "chest",
+    {
+     "muscle": "chest",
+     "score": 0,
+     "level": "fresh",
+     "weeklyLevel": "fresh",
+     "sets": 0,
+     "mrv": 22,
+     "stalled": false
+    }
+   ],
+   [
+    "core",
+    {
+     "muscle": "core",
+     "score": 0,
+     "level": "fresh",
+     "weeklyLevel": "fresh",
+     "sets": 0,
+     "mrv": 16,
+     "stalled": false
+    }
+   ],
+   [
+    "forearms",
+    {
+     "muscle": "forearms",
+     "score": 0.5,
+     "level": "high",
+     "weeklyLevel": "high",
+     "sets": 36,
+     "mrv": 14,
+     "stalled": false
+    }
+   ],
+   [
+    "glutes",
+    {
+     "muscle": "glutes",
+     "score": 0.5,
+     "level": "high",
+     "weeklyLevel": "high",
+     "sets": 36,
+     "mrv": 18,
+     "stalled": false
+    }
+   ],
+   [
+    "hamstrings",
+    {
+     "muscle": "hamstrings",
+     "score": 1,
+     "level": "fried",
+     "weeklyLevel": "fried",
+     "sets": 72,
+     "mrv": 18,
+     "stalled": true
+    }
+   ],
+   [
+    "lats",
+    {
+     "muscle": "lats",
+     "score": 0,
+     "level": "fresh",
+     "weeklyLevel": "fresh",
+     "sets": 0,
+     "mrv": 24,
+     "stalled": false
+    }
+   ],
+   [
+    "lower_back",
+    {
+     "muscle": "lower_back",
+     "score": 0.5,
+     "level": "high",
+     "weeklyLevel": "high",
+     "sets": 36,
+     "mrv": 12,
+     "stalled": false
+    }
+   ],
+   [
+    "quads",
+    {
+     "muscle": "quads",
+     "score": 0,
+     "level": "fresh",
+     "weeklyLevel": "fresh",
+     "sets": 0,
+     "mrv": 20,
+     "stalled": false
+    }
+   ],
+   [
+    "shoulders",
+    {
+     "muscle": "shoulders",
+     "score": 0,
+     "level": "fresh",
+     "weeklyLevel": "fresh",
+     "sets": 0,
+     "mrv": 26,
+     "stalled": false
+    }
+   ],
+   [
+    "traps",
+    {
+     "muscle": "traps",
+     "score": 0,
+     "level": "fresh",
+     "weeklyLevel": "fresh",
+     "sets": 0,
+     "mrv": 18,
+     "stalled": false
+    }
+   ],
+   [
+    "triceps",
+    {
+     "muscle": "triceps",
+     "score": 0,
+     "level": "fresh",
+     "weeklyLevel": "fresh",
+     "sets": 0,
+     "mrv": 18,
+     "stalled": false
+    }
+   ]
+  ],
+  "deload": {
+   "kind": "systemic",
+   "muscle": null,
+   "friedCount": 2,
+   "highCount": 6
+  },
+  "stalled": [
+   "biceps",
+   "hamstrings"
+  ]
+ },
+ "rest": {
+  "fatigue 0": 165,
+  "fatigue 0.1": 165,
+  "fatigue 0.16": 165,
+  "fatigue 0.3": 180,
+  "fatigue 0.5": 180,
+  "fatigue 0.75": 195,
+  "fatigue 1": 195,
+  "fatigue 1.4": 195
+ },
+ "rpe": {
+  "fatigue 0 prior 0": {
+   "factor": 1,
+   "parts": []
+  },
+  "fatigue 0 prior 2": {
+   "factor": 0.95,
+   "parts": [
+    {
+     "key": "session",
+     "cut": 0.05
+    }
+   ]
+  },
+  "fatigue 0 prior 5": {
+   "factor": 0.9,
+   "parts": [
+    {
+     "key": "session",
+     "cut": 0.1
+    }
+   ]
+  },
+  "fatigue 0.2 prior 0": {
+   "factor": 0.99,
+   "parts": [
+    {
+     "key": "fatigue",
+     "cut": 0.01
+    }
+   ]
+  },
+  "fatigue 0.2 prior 2": {
+   "factor": 0.94,
+   "parts": [
+    {
+     "key": "fatigue",
+     "cut": 0.01
+    },
+    {
+     "key": "session",
+     "cut": 0.05
+    }
+   ]
+  },
+  "fatigue 0.2 prior 5": {
+   "factor": 0.89,
+   "parts": [
+    {
+     "key": "fatigue",
+     "cut": 0.01
+    },
+    {
+     "key": "session",
+     "cut": 0.1
+    }
+   ]
+  },
+  "fatigue 0.5 prior 0": {
+   "factor": 0.975,
+   "parts": [
+    {
+     "key": "fatigue",
+     "cut": 0.025
+    }
+   ]
+  },
+  "fatigue 0.5 prior 2": {
+   "factor": 0.925,
+   "parts": [
+    {
+     "key": "fatigue",
+     "cut": 0.025
+    },
+    {
+     "key": "session",
+     "cut": 0.05
+    }
+   ]
+  },
+  "fatigue 0.5 prior 5": {
+   "factor": 0.875,
+   "parts": [
+    {
+     "key": "fatigue",
+     "cut": 0.025
+    },
+    {
+     "key": "session",
+     "cut": 0.1
+    }
+   ]
+  },
+  "fatigue 1 prior 0": {
+   "factor": 0.95,
+   "parts": [
+    {
+     "key": "fatigue",
+     "cut": 0.05
+    }
+   ]
+  },
+  "fatigue 1 prior 2": {
+   "factor": 0.9,
+   "parts": [
+    {
+     "key": "fatigue",
+     "cut": 0.05
+    },
+    {
+     "key": "session",
+     "cut": 0.05
+    }
+   ]
+  },
+  "fatigue 1 prior 5": {
+   "factor": 0.85,
+   "parts": [
+    {
+     "key": "fatigue",
+     "cut": 0.05
+    },
+    {
+     "key": "session",
+     "cut": 0.1
+    }
+   ]
+  },
+  "fatigue 2 prior 0": {
+   "factor": 0.95,
+   "parts": [
+    {
+     "key": "fatigue",
+     "cut": 0.05
+    }
+   ]
+  },
+  "fatigue 2 prior 2": {
+   "factor": 0.9,
+   "parts": [
+    {
+     "key": "fatigue",
+     "cut": 0.05
+    },
+    {
+     "key": "session",
+     "cut": 0.05
+    }
+   ]
+  },
+  "fatigue 2 prior 5": {
+   "factor": 0.85,
+   "parts": [
+    {
+     "key": "fatigue",
+     "cut": 0.05
+    },
+    {
+     "key": "session",
+     "cut": 0.1
+    }
+   ]
+  }
+ },
+ "day": {
+  "main": [
+   {
+    "name": "Barbell Full Squat",
+    "kind": "strength",
+    "primary": "quads",
+    "secondary": [
+     "calves",
+     "glutes",
+     "hamstrings",
+     "lower_back"
+    ],
+    "equipment": [
+     "barbell"
+    ],
+    "loadType": "weight",
+    "sets": 4,
+    "repLow": 6,
+    "repHigh": 12,
+    "targetWeight": 50,
+    "deltaKg": 0,
+    "progState": "first",
+    "warmup": [
+     {
+      "reps": 10,
+      "weight": 20,
+      "type": "warmup"
+     },
+     {
+      "reps": 5,
+      "weight": 30,
+      "type": "warmup"
+     },
+     {
+      "reps": 2,
+      "weight": 40,
+      "type": "warmup"
+     }
+    ],
+    "whyKey": "stale",
+    "priority": 13467
+   },
+   {
+    "name": "Barbell Hack Squat",
+    "kind": "strength",
+    "primary": "quads",
+    "secondary": [
+     "calves",
+     "forearms",
+     "hamstrings"
+    ],
+    "equipment": [
+     "barbell"
+    ],
+    "loadType": "weight",
+    "sets": 3,
+    "repLow": 6,
+    "repHigh": 12,
+    "targetWeight": 50,
+    "deltaKg": 0,
+    "progState": "first",
+    "warmup": [
+     {
+      "reps": 10,
+      "weight": 20,
+      "type": "warmup"
+     },
+     {
+      "reps": 5,
+      "weight": 30,
+      "type": "warmup"
+     },
+     {
+      "reps": 2,
+      "weight": 40,
+      "type": "warmup"
+     }
+    ],
+    "whyKey": "stale",
+    "priority": 13157
+   },
+   {
+    "name": "Barbell Bench Press - Medium Grip",
+    "kind": "strength",
+    "primary": "chest",
+    "secondary": [
+     "shoulders",
+     "triceps"
+    ],
+    "equipment": [
+     "barbell"
+    ],
+    "loadType": "weight",
+    "sets": 3,
+    "repLow": 6,
+    "repHigh": 12,
+    "targetWeight": 40,
+    "deltaKg": 0,
+    "progState": "first",
+    "warmup": [
+     {
+      "reps": 10,
+      "weight": 20,
+      "type": "warmup"
+     },
+     {
+      "reps": 5,
+      "weight": 25,
+      "type": "warmup"
+     },
+     {
+      "reps": 2,
+      "weight": 32.5,
+      "type": "warmup"
+     }
+    ],
+    "whyKey": "first",
+    "priority": 10446
+   }
+  ],
+  "estMinutes": 31
+ }
+}
