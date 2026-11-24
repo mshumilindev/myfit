@@ -11,9 +11,9 @@ describe('effort pieces', () => {
     expect(screen.getAllByRole('button')).toHaveLength(6);
     fireEvent.click(screen.getByText('9'));
     expect(onPick).toHaveBeenCalledWith(9);
-    expect(screen.getByText('8').className).toContain('is-selected');
+    expect(screen.getByText('8').closest('button')!.className).toContain('is-selected');
     rerender(<Chips rpe={8} failOn onPick={onPick} />);
-    expect(screen.getByText('8').className).not.toContain('is-selected');
+    expect(screen.getByText('8').closest('button')!.className).not.toContain('is-selected');
   });
   it('hint explains the value, or shows the estimate when nothing is rated', () => {
     const { rerender } = render(<Hint rpe={9} est={null} />);
