@@ -38,7 +38,7 @@ const sortedBy = <X extends { id: string }>(xs: readonly X[] | undefined): X[] =
  * its equipment, a warm-up (exercises, weights), a cardio row, a day's name, its target muscles and its planned
  * activities. A version that changed only those is no longer an empty version with an empty summary.
  */
-export function diffPrograms(live: ProgramDoc, draft: ProgramDoc): Change[] {
+function diffWeek(live: ProgramDoc, draft: ProgramDoc): Change[] {
   const out: Change[] = [];
   const liveById = new Map(live.items.map((i) => [i.id, i]));
   const draftIds = new Set(draft.items.map((i) => i.id));
@@ -60,8 +60,14 @@ export function diffPrograms(live: ProgramDoc, draft: ProgramDoc): Change[] {
     else if (!isBare(d)) {
       if (l.sets !== d.sets) out.push({ op: 'change', day: d.day, name: d.name, what: 'sets' });
       if (l.reps !== d.reps) out.push({ op: 'change', day: d.day, name: d.name, what: 'reps' });
-      if ((l.targetWeight ?? 0) !== (d.targetWeight ?? 0))
+      // a load given as a percent of the person's max is a load change; a rep range is a reps change
+      if (
+        (l.targetWeight ?? 0) !== (d.targetWeight ?? 0) ||
+        (l.targetPct ?? 0) !== (d.targetPct ?? 0)
+      )
         out.push({ op: 'change', day: d.day, name: d.name, what: 'weight' });
+      if ((l.repsMin ?? 0) !== (d.repsMin ?? 0) && l.reps === d.reps)
+        out.push({ op: 'change', day: d.day, name: d.name, what: 'reps' });
       if ((l.targetRpe ?? 0) !== (d.targetRpe ?? 0))
         out.push({ op: 'change', day: d.day, name: d.name, what: 'rpe' });
       if ((l.restSec ?? 0) !== (d.restSec ?? 0))
@@ -119,5 +125,33 @@ export function diffPrograms(live: ProgramDoc, draft: ProgramDoc): Change[] {
   for (const l of live.items)
     if (l.kind === 'strength' && !draftIds.has(l.id))
       out.push({ op: 'remove', day: l.day, name: l.name });
+  return out;
+}
+
+/** The days of cycle week `cw` (2..) of a document as a plain document; a week the document does not have is an empty one. */
+function weekDoc(doc: ProgramDoc, cw: number): ProgramDoc {
+  const w = (doc as { cycle?: { weeks?: Array<Partial<ProgramDoc>> } }).cycle?.weeks?.[cw - 2];
+  return {
+    ...doc,
+    items: w?.items ?? [],
+    dayNames: w?.dayNames ?? {},
+    targetMuscles: w?.targetMuscles ?? {},
+  };
+}
+
+/**
+ * What changed from `live` to `draft`: the program's own week, then every other week of a weekly cycle (a program without
+ * a cycle has none). Names come with the weekday; the week is not named, so a changed row reads as in the base week.
+ */
+export function diffPrograms(live: ProgramDoc, draft: ProgramDoc): Change[] {
+  const out = diffWeek(live, draft);
+  const len = (d: ProgramDoc) => (d as { cycle?: { length?: number } }).cycle?.length ?? 1;
+  for (let cw = 2; cw <= Math.max(len(live), len(draft)); cw++)
+    out.push(
+      ...diffWeek(
+        { ...weekDoc(live, cw), activities: [] },
+        { ...weekDoc(draft, cw), activities: [] },
+      ),
+    );
   return out;
 }
