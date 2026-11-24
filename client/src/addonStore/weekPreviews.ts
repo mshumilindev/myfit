@@ -4,6 +4,7 @@
  */
 export const WEEK_SHOTS: Readonly<Record<string, readonly string[]>> = {
   'advanced-training': ['advanced-editor', 'advanced-percent', 'advanced-today', 'advanced-maxes'],
+  'fatigue-readiness': ['fatigue-1', 'readiness-1', 'readiness-2', 'readiness-3'],
   gym: [
     'gym-today',
     'gym-start',
@@ -54,6 +55,10 @@ export const MODULE_SHOTS: Readonly<Record<string, readonly string[]>> = {
   // Advanced training: the modules (real app, one module installed per shot)
   equipment: ['equipment-1', 'equipment-2'],
   supersets: ['supersets-1'],
+  // Fatigue & readiness: the modules (real app, design-lab v20, add-on installed per shot)
+  fatigue: ['fatigue-1'],
+  readiness: ['readiness-1', 'readiness-2', 'readiness-3'],
+  'muscle-map': ['fatigue-1', 'readiness-1'],
   circuit: ['circuit-1'],
   effort: ['effort-1', 'effort-2'],
   'set-types': ['settypes-1', 'settypes-2'],
