@@ -121,6 +121,54 @@ export function usePeriodizationOn(): boolean {
 }
 
 /**
+ * Fatigue (per-muscle fatigue, stalled-muscle and deload hints): without it nothing about muscle fatigue is drawn or suggested; stored sets stay.
+ */
+export function fatigueAvailable(): boolean {
+  try {
+    return addonAvailable('fatigue');
+  } catch {
+    return false;
+  }
+}
+
+/** The same gate for components. */
+export function useFatigueOn(): boolean {
+  return useAddonOrBase('fatigue');
+}
+
+/**
+ * Readiness (per-muscle readiness, session readiness score and its effect on suggestions): without it nothing about readiness is drawn and its numbers take the neutral value of an empty history.
+ */
+export function readinessAvailable(): boolean {
+  try {
+    return addonAvailable('readiness');
+  } catch {
+    return false;
+  }
+}
+
+/** The same gate for components. */
+export function useReadinessOn(): boolean {
+  return useAddonOrBase('readiness');
+}
+
+/**
+ * Muscle map (the body map coloured by fatigue and readiness): without it the map is not drawn.
+ */
+export function muscleMapAvailable(): boolean {
+  try {
+    return addonAvailable('muscle-map');
+  } catch {
+    return false;
+  }
+}
+
+/** The same gate for components. */
+export function useMuscleMapOn(): boolean {
+  return useAddonOrBase('muscle-map');
+}
+
+/**
  * Equipment (gym inventory, equipment cards, picker and filter chips, badges): without it nothing about equipment is asked or
  * shown, and every exercise counts as available in every gym. Stored inventories and exercise equipment stay and come back.
  */

@@ -33,7 +33,12 @@ import { isMachineLift, recordWeight, useStore } from '../store';
 import { fmtSet, useT } from '../i18n';
 import type { Strings } from '../i18n/en';
 import { ExerciseName, Icon, Sheet, useExerciseName, useIsDesktop } from '../ui';
-import { equipmentAvailable, useEquipmentOn } from '../addons/featureGates';
+import {
+  equipmentAvailable,
+  useEquipmentOn,
+  useFatigueOn,
+  useReadinessOn,
+} from '../addons/featureGates';
 import { FamilyFigure, equipmentIconName } from './Muscle';
 import {
   FAMILIES,
@@ -163,9 +168,19 @@ export function ExercisePicker(props: ExercisePickerProps) {
   // Readiness counts TODAY's session too: 20 chest sets an hour ago means
   // chest is recovering now, not "almost ready" from last week.
   const withToday = useMemo(() => [...finished, props.workout], [finished, props.workout]);
-  const readiness = useMemo(() => readinessByGroup(withToday, now), [withToday, now]);
+  const readinessOn = useReadinessOn();
+  const fatigueOn = useFatigueOn();
+  const readiness = useMemo(
+    () => readinessByGroup(withToday, now),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the gate changes what the history means
+    [withToday, now, readinessOn],
+  );
   // Tile colours come from the Progress fatigue map (same per-muscle levels).
-  const fatigue = useMemo(() => fatigueByGroup(withToday, now), [withToday, now]);
+  const fatigue = useMemo(
+    () => fatigueByGroup(withToday, now),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the gate changes what the history means
+    [withToday, now, fatigueOn],
+  );
   // Why the level reads as it does: a rested muscle says so, a loaded one shows its week.
   const whyLine = (groups: readonly MuscleGroup[]) => {
     const w = fatigueWhy(groups, withToday, now, fatigue);

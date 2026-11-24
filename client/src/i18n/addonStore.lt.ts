@@ -254,6 +254,19 @@ export const addonStoreLt: typeof addonStoreEn = {
         'Maksimumų sąrašas pagal istoriją',
       ],
     },
+    'fatigue-readiness': {
+      name: 'Nuovargis ir pasirengimas',
+      tagline: 'Matyk, kiek esi atsigavęs',
+      desc: 'Raumenų nuovargis, pasirengimas ir raumenų žemėlapis pasufleruos, ką treniruoti toliau.',
+      about:
+        'Spotter seka, kiek apkrautas kiekvienas raumuo ir kiek jis atsigavo. Nuovargis rodo, kas pavargę ir kada gali padėti lengvesnė savaitė; pasirengimas paverčia tai įverčiu prieš treniruotę; raumenų žemėlapis nuspalvina kūną pagal abu.\n\nPatarimai ir treniruotės kūrėjas labiau renkasi pasirengusius raumenis. Išjungus priedą patarimai ir spalvos dingsta, o viskas, ką užregistravai, lieka ir grįžta vėl įjungus.',
+      highlights: [
+        'Raumenų nuovargis ir patarimai apie sąstingį',
+        'Pasirengimo įvertis prieš treniruotę',
+        'Kūno žemėlapis pagal atsigavimą',
+        'Patarimai, teikiantys pirmenybę pailsėjusiems raumenims',
+      ],
+    },
     planner: {
       name: 'Planuoklis',
       tagline: 'Savo laiką planuok paprasčiau',
@@ -406,6 +419,18 @@ export const addonStoreLt: typeof addonStoreEn = {
     'set-types': {
       name: 'Serijų tipai',
       desc: 'Dropai, atvirkštiniai dropai ir laikymai su svoriu.',
+    },
+    fatigue: {
+      name: 'Nuovargis',
+      desc: 'Raumenų nuovargis, sąstingis ir patarimai apie lengvesnę savaitę.',
+    },
+    readiness: {
+      name: 'Pasirengimas',
+      desc: 'Kiek šiandien pasirengę treniruotei raumenys ir tu.',
+    },
+    'muscle-map': {
+      name: 'Raumenų žemėlapis',
+      desc: 'Kūnas, nuspalvintas pagal nuovargį ir pasirengimą.',
     },
     periodization: {
       name: 'Periodizacija',

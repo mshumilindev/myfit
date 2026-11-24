@@ -19,7 +19,7 @@
     "score": 0,
     "level": "fresh",
     "weeklyLevel": "fresh",
-    "sets": 2.5,
+    "sets": 6.5,
     "mrv": 20,
     "stalled": false
    }
@@ -28,11 +28,10 @@
    "chest",
    {
     "muscle": "chest",
-    "score": 0.157143,
-    "level": "moderate",
-    "weeklyLevel": "fresh",
-    "acuteDays": 1,
-    "sets": 5,
+    "score": 0.424242,
+    "level": "high",
+    "weeklyLevel": "high",
+    "sets": 21,
     "mrv": 22,
     "stalled": false
    }
@@ -68,7 +67,7 @@
     "score": 0,
     "level": "fresh",
     "weeklyLevel": "fresh",
-    "sets": 2.5,
+    "sets": 6.5,
     "mrv": 18,
     "stalled": false
    }
@@ -80,7 +79,7 @@
     "score": 0.016667,
     "level": "fresh",
     "weeklyLevel": "fresh",
-    "sets": 5,
+    "sets": 9,
     "mrv": 18,
     "stalled": false
    }
@@ -104,7 +103,7 @@
     "score": 0,
     "level": "fresh",
     "weeklyLevel": "fresh",
-    "sets": 2.5,
+    "sets": 6.5,
     "mrv": 12,
     "stalled": false
    }
@@ -113,10 +112,11 @@
    "quads",
    {
     "muscle": "quads",
-    "score": 0,
-    "level": "fresh",
+    "score": 0.208333,
+    "level": "moderate",
     "weeklyLevel": "fresh",
-    "sets": 0,
+    "acuteDays": 2,
+    "sets": 8,
     "mrv": 20,
     "stalled": false
    }
@@ -128,7 +128,7 @@
     "score": 0,
     "level": "fresh",
     "weeklyLevel": "fresh",
-    "sets": 2.5,
+    "sets": 10.5,
     "mrv": 26,
     "stalled": false
    }
@@ -152,7 +152,7 @@
     "score": 0,
     "level": "fresh",
     "weeklyLevel": "fresh",
-    "sets": 2.5,
+    "sets": 10.5,
     "mrv": 18,
     "stalled": false
    }
@@ -178,7 +178,7 @@
     "score": 0,
     "level": "fresh",
     "weeklyLevel": "fresh",
-    "sets": 2.5,
+    "sets": 6.5,
     "mrv": 20,
     "stalled": false
    }
@@ -187,10 +187,10 @@
    "chest",
    {
     "muscle": "chest",
-    "score": 0,
-    "level": "fresh",
-    "weeklyLevel": "fresh",
-    "sets": 5,
+    "score": 0.424242,
+    "level": "high",
+    "weeklyLevel": "high",
+    "sets": 21,
     "mrv": 22,
     "stalled": false
    }
@@ -226,7 +226,7 @@
     "score": 0,
     "level": "fresh",
     "weeklyLevel": "fresh",
-    "sets": 2.5,
+    "sets": 6.5,
     "mrv": 18,
     "stalled": false
    }
@@ -238,7 +238,7 @@
     "score": 0,
     "level": "fresh",
     "weeklyLevel": "fresh",
-    "sets": 5,
+    "sets": 9,
     "mrv": 18,
     "stalled": false
    }
@@ -262,7 +262,7 @@
     "score": 0,
     "level": "fresh",
     "weeklyLevel": "fresh",
-    "sets": 2.5,
+    "sets": 6.5,
     "mrv": 12,
     "stalled": false
    }
@@ -274,7 +274,7 @@
     "score": 0,
     "level": "fresh",
     "weeklyLevel": "fresh",
-    "sets": 0,
+    "sets": 8,
     "mrv": 20,
     "stalled": false
    }
@@ -286,7 +286,7 @@
     "score": 0,
     "level": "fresh",
     "weeklyLevel": "fresh",
-    "sets": 2.5,
+    "sets": 10.5,
     "mrv": 26,
     "stalled": false
    }
@@ -310,7 +310,7 @@
     "score": 0,
     "level": "fresh",
     "weeklyLevel": "fresh",
-    "sets": 2.5,
+    "sets": 10.5,
     "mrv": 18,
     "stalled": false
    }
@@ -320,20 +320,20 @@
   "kind": "none",
   "muscle": null,
   "friedCount": 0,
-  "highCount": 0
+  "highCount": 1
  },
  "deloadBias": [
   {
    "kind": "none",
    "muscle": null,
    "friedCount": 0,
-   "highCount": 0
+   "highCount": 1
   },
   {
    "kind": "none",
    "muscle": null,
    "friedCount": 0,
-   "highCount": 0
+   "highCount": 1
   }
  ],
  "stalled": [],
@@ -343,8 +343,8 @@
    {
     "muscle": "biceps",
     "daysSince": 8,
-    "recoveryDays": 1.4,
-    "lastDose": 3,
+    "recoveryDays": 1.833333,
+    "lastDose": 5.5,
     "readiness": 1,
     "state": "stale"
    }
@@ -354,8 +354,8 @@
    {
     "muscle": "calves",
     "daysSince": 2,
-    "recoveryDays": 1.05,
-    "lastDose": 2.5,
+    "recoveryDays": 1.625,
+    "lastDose": 6.5,
     "readiness": 1,
     "state": "ready"
    }
@@ -365,10 +365,10 @@
    {
     "muscle": "chest",
     "daysSince": 1,
-    "recoveryDays": 1.785714,
-    "lastDose": 5,
-    "readiness": 0.56,
-    "state": "nearly"
+    "recoveryDays": 3.928571,
+    "lastDose": 11,
+    "readiness": 0.254545,
+    "state": "recovering"
    }
   ],
   [
@@ -398,10 +398,10 @@
    {
     "muscle": "glutes",
     "daysSince": 2,
-    "recoveryDays": 1.75,
-    "lastDose": 2.5,
-    "readiness": 1,
-    "state": "ready"
+    "recoveryDays": 2.708333,
+    "lastDose": 6.5,
+    "readiness": 0.738462,
+    "state": "nearly"
    }
   ],
   [
@@ -409,10 +409,10 @@
    {
     "muscle": "hamstrings",
     "daysSince": 2,
-    "recoveryDays": 2.083333,
-    "lastDose": 5,
-    "readiness": 0.96,
-    "state": "ready"
+    "recoveryDays": 3.75,
+    "lastDose": 9,
+    "readiness": 0.533333,
+    "state": "nearly"
    }
   ],
   [
@@ -420,8 +420,8 @@
    {
     "muscle": "lats",
     "daysSince": 8,
-    "recoveryDays": 1.875,
-    "lastDose": 6,
+    "recoveryDays": 3.4375,
+    "lastDose": 11,
     "readiness": 1,
     "state": "stale"
    }
@@ -431,21 +431,21 @@
    {
     "muscle": "lower_back",
     "daysSince": 2,
-    "recoveryDays": 2.1,
-    "lastDose": 2.5,
-    "readiness": 0.952381,
-    "state": "ready"
+    "recoveryDays": 4.8,
+    "lastDose": 6.5,
+    "readiness": 0.416667,
+    "state": "recovering"
    }
   ],
   [
    "quads",
    {
     "muscle": "quads",
-    "daysSince": null,
-    "recoveryDays": 3,
-    "lastDose": 0,
-    "readiness": 1,
-    "state": "stale"
+    "daysSince": 2,
+    "recoveryDays": 3.428571,
+    "lastDose": 8,
+    "readiness": 0.583333,
+    "state": "nearly"
    }
   ],
   [
@@ -454,7 +454,7 @@
     "muscle": "shoulders",
     "daysSince": 1,
     "recoveryDays": 1.4,
-    "lastDose": 2.5,
+    "lastDose": 5.5,
     "readiness": 0.714286,
     "state": "nearly"
    }
@@ -464,8 +464,8 @@
    {
     "muscle": "traps",
     "daysSince": 8,
-    "recoveryDays": 1.4,
-    "lastDose": 3,
+    "recoveryDays": 1.833333,
+    "lastDose": 5.5,
     "readiness": 1,
     "state": "stale"
    }
@@ -475,9 +475,9 @@
    {
     "muscle": "triceps",
     "daysSince": 1,
-    "recoveryDays": 1.4,
-    "lastDose": 2.5,
-    "readiness": 0.714286,
+    "recoveryDays": 1.833333,
+    "lastDose": 5.5,
+    "readiness": 0.545455,
     "state": "nearly"
    }
   ]
@@ -488,8 +488,8 @@
    {
     "muscle": "biceps",
     "daysSince": 8,
-    "recoveryDays": 1.4,
-    "lastDose": 3,
+    "recoveryDays": 1.833333,
+    "lastDose": 5.5,
     "readiness": 1,
     "state": "stale"
    }
@@ -499,8 +499,8 @@
    {
     "muscle": "calves",
     "daysSince": 2,
-    "recoveryDays": 1.05,
-    "lastDose": 2.5,
+    "recoveryDays": 1.625,
+    "lastDose": 6.5,
     "readiness": 1,
     "state": "ready"
    }
@@ -510,10 +510,10 @@
    {
     "muscle": "chest",
     "daysSince": 1,
-    "recoveryDays": 1.785714,
-    "lastDose": 5,
-    "readiness": 0.62,
-    "state": "nearly"
+    "recoveryDays": 3.928571,
+    "lastDose": 11,
+    "readiness": 0.314545,
+    "state": "recovering"
    }
   ],
   [
@@ -543,10 +543,10 @@
    {
     "muscle": "glutes",
     "daysSince": 2,
-    "recoveryDays": 1.75,
-    "lastDose": 2.5,
-    "readiness": 1,
-    "state": "ready"
+    "recoveryDays": 2.708333,
+    "lastDose": 6.5,
+    "readiness": 0.798462,
+    "state": "nearly"
    }
   ],
   [
@@ -554,10 +554,10 @@
    {
     "muscle": "hamstrings",
     "daysSince": 2,
-    "recoveryDays": 2.083333,
-    "lastDose": 5,
-    "readiness": 1,
-    "state": "ready"
+    "recoveryDays": 3.75,
+    "lastDose": 9,
+    "readiness": 0.593333,
+    "state": "nearly"
    }
   ],
   [
@@ -565,8 +565,8 @@
    {
     "muscle": "lats",
     "daysSince": 8,
-    "recoveryDays": 1.875,
-    "lastDose": 6,
+    "recoveryDays": 3.4375,
+    "lastDose": 11,
     "readiness": 1,
     "state": "stale"
    }
@@ -576,21 +576,21 @@
    {
     "muscle": "lower_back",
     "daysSince": 2,
-    "recoveryDays": 2.1,
-    "lastDose": 2.5,
-    "readiness": 1,
-    "state": "ready"
+    "recoveryDays": 4.8,
+    "lastDose": 6.5,
+    "readiness": 0.476667,
+    "state": "recovering"
    }
   ],
   [
    "quads",
    {
     "muscle": "quads",
-    "daysSince": null,
-    "recoveryDays": 3,
-    "lastDose": 0,
-    "readiness": 1,
-    "state": "stale"
+    "daysSince": 2,
+    "recoveryDays": 3.428571,
+    "lastDose": 8,
+    "readiness": 0.643333,
+    "state": "nearly"
    }
   ],
   [
@@ -599,7 +599,7 @@
     "muscle": "shoulders",
     "daysSince": 1,
     "recoveryDays": 1.4,
-    "lastDose": 2.5,
+    "lastDose": 5.5,
     "readiness": 0.774286,
     "state": "nearly"
    }
@@ -609,8 +609,8 @@
    {
     "muscle": "traps",
     "daysSince": 8,
-    "recoveryDays": 1.4,
-    "lastDose": 3,
+    "recoveryDays": 1.833333,
+    "lastDose": 5.5,
     "readiness": 1,
     "state": "stale"
    }
@@ -620,9 +620,9 @@
    {
     "muscle": "triceps",
     "daysSince": 1,
-    "recoveryDays": 1.4,
-    "lastDose": 2.5,
-    "readiness": 0.774286,
+    "recoveryDays": 1.833333,
+    "lastDose": 5.5,
+    "readiness": 0.605455,
     "state": "nearly"
    }
   ]
@@ -664,7 +664,7 @@
     "score": 0,
     "level": "fresh",
     "weeklyLevel": "fresh",
-    "sets": 2.5,
+    "sets": 6.5,
     "mrv": 20,
     "stalled": false
    }
@@ -673,11 +673,10 @@
    "chest",
    {
     "muscle": "chest",
-    "score": 0.157143,
-    "level": "moderate",
-    "weeklyLevel": "fresh",
-    "acuteDays": 1,
-    "sets": 5,
+    "score": 0.424242,
+    "level": "high",
+    "weeklyLevel": "high",
+    "sets": 21,
     "mrv": 22,
     "stalled": false
    }
@@ -713,7 +712,7 @@
     "score": 0,
     "level": "fresh",
     "weeklyLevel": "fresh",
-    "sets": 2.5,
+    "sets": 6.5,
     "mrv": 18,
     "stalled": false
    }
@@ -725,7 +724,7 @@
     "score": 0.016667,
     "level": "fresh",
     "weeklyLevel": "fresh",
-    "sets": 5,
+    "sets": 9,
     "mrv": 18,
     "stalled": false
    }
@@ -749,7 +748,7 @@
     "score": 0,
     "level": "fresh",
     "weeklyLevel": "fresh",
-    "sets": 2.5,
+    "sets": 6.5,
     "mrv": 12,
     "stalled": false
    }
@@ -758,10 +757,11 @@
    "quads",
    {
     "muscle": "quads",
-    "score": 0,
-    "level": "fresh",
+    "score": 0.208333,
+    "level": "moderate",
     "weeklyLevel": "fresh",
-    "sets": 0,
+    "acuteDays": 2,
+    "sets": 8,
     "mrv": 20,
     "stalled": false
    }
@@ -773,7 +773,7 @@
     "score": 0,
     "level": "fresh",
     "weeklyLevel": "fresh",
-    "sets": 2.5,
+    "sets": 10.5,
     "mrv": 26,
     "stalled": false
    }
@@ -797,7 +797,7 @@
     "score": 0,
     "level": "fresh",
     "weeklyLevel": "fresh",
-    "sets": 2.5,
+    "sets": 10.5,
     "mrv": 18,
     "stalled": false
    }
@@ -807,10 +807,10 @@
   {
    "id": "chest",
    "ready": {
-    "state": "nearly",
+    "state": "recovering",
     "days": 1
    },
-   "level": "moderate"
+   "level": "high"
   },
   {
    "id": "back",
@@ -839,10 +839,10 @@
   {
    "id": "legs",
    "ready": {
-    "state": "ready",
+    "state": "recovering",
     "days": 2
    },
-   "level": "fresh"
+   "level": "moderate"
   },
   {
    "id": "core",
@@ -862,7 +862,7 @@
      "score": 1,
      "level": "fried",
      "weeklyLevel": "fried",
-     "sets": 72,
+     "sets": 180,
      "mrv": 20,
      "stalled": true
     }
@@ -874,7 +874,7 @@
      "score": 0.5,
      "level": "high",
      "weeklyLevel": "high",
-     "sets": 36,
+     "sets": 72,
      "mrv": 20,
      "stalled": false
     }
@@ -883,12 +883,12 @@
     "chest",
     {
      "muscle": "chest",
-     "score": 0,
-     "level": "fresh",
-     "weeklyLevel": "fresh",
-     "sets": 0,
+     "score": 1,
+     "level": "fried",
+     "weeklyLevel": "fried",
+     "sets": 72,
      "mrv": 22,
-     "stalled": false
+     "stalled": true
     }
    ],
    [
@@ -910,7 +910,7 @@
      "score": 0.5,
      "level": "high",
      "weeklyLevel": "high",
-     "sets": 36,
+     "sets": 72,
      "mrv": 14,
      "stalled": false
     }
@@ -922,7 +922,7 @@
      "score": 0.5,
      "level": "high",
      "weeklyLevel": "high",
-     "sets": 36,
+     "sets": 72,
      "mrv": 18,
      "stalled": false
     }
@@ -934,7 +934,7 @@
      "score": 1,
      "level": "fried",
      "weeklyLevel": "fried",
-     "sets": 72,
+     "sets": 108,
      "mrv": 18,
      "stalled": true
     }
@@ -943,12 +943,12 @@
     "lats",
     {
      "muscle": "lats",
-     "score": 0,
-     "level": "fresh",
-     "weeklyLevel": "fresh",
-     "sets": 0,
+     "score": 1,
+     "level": "fried",
+     "weeklyLevel": "fried",
+     "sets": 72,
      "mrv": 24,
-     "stalled": false
+     "stalled": true
     }
    ],
    [
@@ -958,7 +958,7 @@
      "score": 0.5,
      "level": "high",
      "weeklyLevel": "high",
-     "sets": 36,
+     "sets": 72,
      "mrv": 12,
      "stalled": false
     }
@@ -967,22 +967,22 @@
     "quads",
     {
      "muscle": "quads",
-     "score": 0,
-     "level": "fresh",
-     "weeklyLevel": "fresh",
-     "sets": 0,
+     "score": 1,
+     "level": "fried",
+     "weeklyLevel": "fried",
+     "sets": 72,
      "mrv": 20,
-     "stalled": false
+     "stalled": true
     }
    ],
    [
     "shoulders",
     {
      "muscle": "shoulders",
-     "score": 0,
-     "level": "fresh",
-     "weeklyLevel": "fresh",
-     "sets": 0,
+     "score": 0.5,
+     "level": "high",
+     "weeklyLevel": "high",
+     "sets": 72,
      "mrv": 26,
      "stalled": false
     }
@@ -991,10 +991,10 @@
     "traps",
     {
      "muscle": "traps",
-     "score": 0,
-     "level": "fresh",
-     "weeklyLevel": "fresh",
-     "sets": 0,
+     "score": 0.5,
+     "level": "high",
+     "weeklyLevel": "high",
+     "sets": 36,
      "mrv": 18,
      "stalled": false
     }
@@ -1003,10 +1003,10 @@
     "triceps",
     {
      "muscle": "triceps",
-     "score": 0,
-     "level": "fresh",
-     "weeklyLevel": "fresh",
-     "sets": 0,
+     "score": 0.5,
+     "level": "high",
+     "weeklyLevel": "high",
+     "sets": 36,
      "mrv": 18,
      "stalled": false
     }
@@ -1015,12 +1015,15 @@
   "deload": {
    "kind": "systemic",
    "muscle": null,
-   "friedCount": 2,
-   "highCount": 6
+   "friedCount": 5,
+   "highCount": 12
   },
   "stalled": [
    "biceps",
-   "hamstrings"
+   "chest",
+   "hamstrings",
+   "lats",
+   "quads"
   ]
  },
  "rest": {
@@ -1213,45 +1216,6 @@
      "barbell"
     ],
     "loadType": "weight",
-    "sets": 4,
-    "repLow": 6,
-    "repHigh": 12,
-    "targetWeight": 50,
-    "deltaKg": 0,
-    "progState": "first",
-    "warmup": [
-     {
-      "reps": 10,
-      "weight": 20,
-      "type": "warmup"
-     },
-     {
-      "reps": 5,
-      "weight": 30,
-      "type": "warmup"
-     },
-     {
-      "reps": 2,
-      "weight": 40,
-      "type": "warmup"
-     }
-    ],
-    "whyKey": "stale",
-    "priority": 13467
-   },
-   {
-    "name": "Barbell Hack Squat",
-    "kind": "strength",
-    "primary": "quads",
-    "secondary": [
-     "calves",
-     "forearms",
-     "hamstrings"
-    ],
-    "equipment": [
-     "barbell"
-    ],
-    "loadType": "weight",
     "sets": 3,
     "repLow": 6,
     "repHigh": 12,
@@ -1275,8 +1239,8 @@
       "type": "warmup"
      }
     ],
-    "whyKey": "stale",
-    "priority": 13157
+    "whyKey": "first",
+    "priority": 13467
    },
    {
     "name": "Barbell Bench Press - Medium Grip",
@@ -1317,6 +1281,6 @@
     "priority": 10446
    }
   ],
-  "estMinutes": 31
+  "estMinutes": 19
  }
 }

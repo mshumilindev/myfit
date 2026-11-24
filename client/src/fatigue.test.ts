@@ -1,6 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { addonsPref } from './addons/enabledSet';
+import { FATIGUE_ADDONS } from './fatigue/testAddons';
 import { muscleFatigue, stalledMuscles } from './fatigue';
 import type { Exercise, SetEntry, Workout } from './types';
+
+beforeAll(() => addonsPref.set(FATIGUE_ADDONS));
+afterAll(() => addonsPref.reset());
 
 const DAY = 86400000;
 const NOW = Date.UTC(2026, 9, 26, 12);

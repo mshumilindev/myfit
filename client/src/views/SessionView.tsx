@@ -1,4 +1,5 @@
 /** Live session + past workout editing — design S-17…S-31 + SS/DS/MG/EQ. */
+import { fatigueSource } from '../fatigueApi';
 import { equipmentAvailable, useEquipmentOn, usePlaybookOn } from '../addons/featureGates';
 import { useSupersetsHost } from '../supersetsRt';
 import { useCircuitHost } from '../circuitRt';
@@ -1285,7 +1286,9 @@ export function SessionView(props: {
     const primary = resolveMuscles(ex).primary;
     const fat = primary
       ? (muscleFatigue(
-          store.workouts.filter((w) => w.finishedAt !== null && w.id !== workout!.id),
+          fatigueSource(
+            store.workouts.filter((w) => w.finishedAt !== null && w.id !== workout!.id),
+          ),
           at,
           cachedPersonalLandmarks(store.workouts, at),
           { acute: false }, // rpe/rest formulas scale by WEEKLY fatigue (SPO-601)

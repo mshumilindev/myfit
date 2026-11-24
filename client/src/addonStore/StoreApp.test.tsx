@@ -218,6 +218,7 @@ describe('StoreApp', () => {
         'atlas',
         'apex',
         'advanced-training',
+        'fatigue-readiness',
         'theme-cyberpunk',
         'theme-brass-glass',
         'holiday-themes',

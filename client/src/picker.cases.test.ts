@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { addonsPref } from './addons/enabledSet';
+import { FATIGUE_ADDONS } from './fatigue/testAddons';
 import { BUILT_IN_CATALOG, type MuscleGroup } from './data/exercises';
 import type { Limits } from './conditions';
 import type { FatigueLevel, MuscleFatigue } from './fatigue';
@@ -37,7 +38,7 @@ import { LANDMARKS } from './volume';
 import type { Exercise, Gym, SetEntry, Workout } from './types';
 
 // Equipment installed: the gym inventory filters exercises (without it every exercise is available).
-beforeAll(() => addonsPref.set(['equipment']));
+beforeAll(() => addonsPref.set(['equipment', ...FATIGUE_ADDONS]));
 afterAll(() => addonsPref.reset());
 
 const DAY = 86_400_000;

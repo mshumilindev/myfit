@@ -16,8 +16,10 @@ import { buildDay, type BuildContext } from '../sessionBuilder';
 import { personalLandmarks } from '../personalize';
 import type { BodyMetrics, Exercise, SetEntry, Workout } from '../types';
 
-// Equipment installed, as in the sibling tests (the gym inventory filters exercises).
-beforeAll(() => addonsPref.set(['equipment']));
+// Equipment and Fatigue & readiness installed (installed = as before).
+beforeAll(() =>
+  addonsPref.set(['equipment', 'fatigue-readiness', 'fatigue', 'readiness', 'muscle-map']),
+);
 afterAll(() => addonsPref.reset());
 
 const DAY = 86400000;
@@ -46,22 +48,22 @@ const wk = (id: string, daysAgo: number, exercises: Exercise[]): Workout => ({
 
 /** A busy chest week, legs two days back, back a week ago, and older repeats so some lifts have history. */
 const HISTORY: Workout[] = [
-  wk('a', 1, [ex('Barbell Bench Press', 6, 6, 90), ex('Incline Dumbbell Press', 5, 10, 30)]),
-  wk('b', 2, [ex('Barbell Back Squat', 8, 5, 110), ex('Romanian Deadlift', 5, 8, 100)]),
-  wk('c', 4, [ex('Barbell Bench Press', 6, 6, 90), ex('Cable Fly', 4, 12, 20)]),
-  wk('d', 8, [ex('Wide-Grip Lat Pulldown', 6, 10, 60), ex('Barbell Row', 5, 8, 70)]),
-  wk('e', 9, [ex('Barbell Bench Press', 5, 6, 87.5)]),
-  wk('f', 15, [ex('Barbell Back Squat', 5, 5, 105)]),
-  wk('g', 22, [ex('Barbell Bench Press', 5, 6, 85)]),
+  wk('a', 1, [ex('Bench Press', 6, 6, 90), ex('Incline Dumbbell Press', 5, 10, 30)]),
+  wk('b', 2, [ex('Back Squat', 8, 5, 110), ex('Romanian Deadlift', 5, 8, 100)]),
+  wk('c', 4, [ex('Bench Press', 6, 6, 90), ex('Incline Dumbbell Press', 4, 12, 20)]),
+  wk('d', 8, [ex('Wide-Grip Lat Pulldown', 6, 10, 60), ex('Wide-Grip Lat Pulldown', 5, 8, 70)]),
+  wk('e', 9, [ex('Bench Press', 5, 6, 87.5)]),
+  wk('f', 15, [ex('Back Squat', 5, 5, 105)]),
+  wk('g', 22, [ex('Bench Press', 5, 6, 85)]),
 ];
 
 /** A brutal week: every big muscle far past its volume ceiling, so the deload rule fires. */
 const HEAVY: Workout[] = [1, 2, 3, 4, 5, 6].map((d) =>
   wk(`h${d}`, d, [
-    ex('Barbell Bench Press', 12, 6, 90),
-    ex('Barbell Back Squat', 12, 5, 110),
-    ex('Barbell Row', 12, 8, 70),
-    ex('Overhead Press', 12, 6, 50),
+    ex('Bench Press', 12, 6, 90),
+    ex('Back Squat', 12, 5, 110),
+    ex('Wide-Grip Lat Pulldown', 12, 8, 70),
+    ex('Barbell Curl', 12, 6, 50),
     ex('Barbell Curl', 12, 10, 30),
     ex('Romanian Deadlift', 12, 8, 100),
   ]),
@@ -90,7 +92,7 @@ function snapshot() {
     compound: true,
     equipment: ['barbell'],
     primary: 'chest',
-    lastType: 'normal',
+    lastType: 'working',
     intensity: 0.8,
     reps: 6,
     failure: false,

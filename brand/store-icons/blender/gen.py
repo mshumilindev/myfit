@@ -38,6 +38,7 @@ TONES = {
 }
 # item -> (glyph builder name, tone) ; tones from addons/manifest.ts
 ITEMS = {
+    'fatigue-readiness': ('battery3', 4), 'fr-battery': ('battery', 4), 'fr-traffic': ('traffic', 4), 'fr-thermo': ('thermo', 4), 'fr-hourglass': ('hourglass', 4), 'fr-roller': ('roller', 4), 'fr-beaker': ('beaker', 4),
     'advanced-training': ('plate', 3),
     'gym': ('dumbbell', 10), 'apex': ('trophy', 11), 'coach': ('whistle', 13), 'nutrition': ('banana', 14), 'music': ('note', 12),
     'health': ('heart', 15), 'sleep': ('moon', 16), 'activities': ('stopwatch', 17), 'home-sets': ('house', 18),

@@ -31,6 +31,7 @@ import { volumeWeakPoints } from './weakpoints';
 import { pickTarget, type Target } from './progression';
 import { isStrengthExercise, resolveMuscles, topSet } from './store';
 import { fatigueSetCount } from './stimulus';
+import { fatigueSource, readinessSource } from './fatigueApi';
 import { FATIGUE_COLOR, muscleFatigue, type FatigueLevel, type MuscleFatigue } from './fatigue';
 
 // --- Families & sub-muscles -------------------------------------------------
@@ -124,9 +125,10 @@ const LOOKBACK_DAYS = 28;
 export function directReadiness(
   groups: MuscleGroup[],
   main: MuscleGroup,
-  finished: Workout[],
+  allFinished: Workout[],
   now: number,
 ): Readiness {
+  const finished = readinessSource(allFinished);
   const set = new Set(groups);
   const since = now - LOOKBACK_DAYS * 86400000;
   const recent = finished
@@ -173,7 +175,8 @@ const LEVEL_RANK: Record<FatigueLevel, number> = { fresh: 0, moderate: 1, high: 
 
 /** Per-muscle fatigue exactly as the Progress fatigue map computes it. */
 export function fatigueByGroup(finished: Workout[], now: number): Map<MuscleGroup, MuscleFatigue> {
-  return muscleFatigue(finished, now, personalLandmarks(finished, now));
+  const src = fatigueSource(finished);
+  return muscleFatigue(src, now, personalLandmarks(src, now));
 }
 
 /** A muscle's fatigue level; muscles with no volume read fresh. */

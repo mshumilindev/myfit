@@ -253,6 +253,19 @@ export const addonStorePl: typeof addonStoreEn = {
         'Lista maksimów oszacowana z historii',
       ],
     },
+    'fatigue-readiness': {
+      name: 'Zmęczenie i gotowość',
+      tagline: 'Zobacz, jak jesteś zregenerowany',
+      desc: 'Zmęczenie mięśni, gotowość i mapa mięśni podpowiedzą, co trenować dalej.',
+      about:
+        'Spotter śledzi, jak mocno obciążono każdy mięsień i jak się zregenerował. Zmęczenie pokazuje, co jest zmęczone i kiedy może pomóc deload; gotowość zamienia to w wynik przed treningiem; mapa mięśni koloruje ciało według obu.\n\nPodpowiedzi i kreator treningu wybierają chętniej mięśnie gotowe do pracy. Po wyłączeniu dodatku podpowiedzi i kolory znikają, a wszystko, co zapisano, zostaje i wraca po ponownym włączeniu.',
+      highlights: [
+        'Zmęczenie mięśni i podpowiedzi o stagnacji',
+        'Wynik gotowości przed treningiem',
+        'Mapa ciała według regeneracji',
+        'Podpowiedzi preferujące wypoczęte mięśnie',
+      ],
+    },
     planner: {
       name: 'Planer',
       tagline: 'Zaplanuj dzień po swojemu',
@@ -403,6 +416,9 @@ export const addonStorePl: typeof addonStoreEn = {
       desc: 'Oceniaj, jak ciężka była seria, i zobacz szacunek aplikacji.',
     },
     'set-types': { name: 'Typy serii', desc: 'Dropsety, odwrotne dropy i utrzymania z ciężarem.' },
+    fatigue: { name: 'Zmęczenie', desc: 'Zmęczenie mięśni, stagnacja i podpowiedzi o deloadzie.' },
+    readiness: { name: 'Gotowość', desc: 'Jak gotowe do treningu są dziś mięśnie i Ty.' },
+    'muscle-map': { name: 'Mapa mięśni', desc: 'Ciało pokolorowane według zmęczenia i gotowości.' },
     periodization: { name: 'Periodyzacja', desc: 'Cykle tygodniowe, % maksimum i maksima.' },
     'apex-challenges': { name: 'Wyzwania', desc: 'Cotygodniowe cele: samemu lub z innymi.' },
     'apex-ranks': { name: 'Rankingi', desc: 'Gdzie są Twoje ćwiczenia na tle norm siły.' },

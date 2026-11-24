@@ -258,6 +258,19 @@ export const addonStoreEn = {
         'A Maxes list, estimated from your history',
       ],
     },
+    'fatigue-readiness': {
+      name: 'Fatigue & readiness',
+      tagline: 'See how recovered you are',
+      desc: 'Per-muscle fatigue, readiness and a muscle map that guide what to train next.',
+      about:
+        'Spotter tracks how hard each muscle has been worked and how recovered it is. Fatigue shows what is tired and when a deload may help; readiness turns it into a score before you start; the muscle map paints your body by both.\n\nSuggestions and the session builder use it to favour muscles that are ready. Turn the add-on off and these hints and colours disappear, while everything you logged stays and comes back when you turn it on.',
+      highlights: [
+        'Fatigue per muscle and stalled-muscle hints',
+        'A readiness score before a session',
+        'A body map coloured by recovery',
+        'Suggestions that favour rested muscles',
+      ],
+    },
     planner: {
       name: 'Planner',
       tagline: 'Know what’s coming up next',
@@ -405,6 +418,9 @@ export const addonStoreEn = {
     circuit: { name: 'Circuit', desc: 'Rounds over a group of exercises, with a round counter.' },
     effort: { name: 'RPE / RIR', desc: 'Rate how hard a set felt; see the app’s estimate.' },
     'set-types': { name: 'Set types', desc: 'Drop sets, reverse drops and weighted holds.' },
+    fatigue: { name: 'Fatigue', desc: 'Per-muscle fatigue, stalled muscles and deload hints.' },
+    readiness: { name: 'Readiness', desc: 'How ready each muscle and you are to train today.' },
+    'muscle-map': { name: 'Muscle map', desc: 'The body coloured by fatigue and readiness.' },
     periodization: { name: 'Periodization', desc: 'Weekly cycles, % of max and Maxes.' },
     'apex-challenges': {
       name: 'Challenges',

@@ -1,0 +1,8 @@
+/**
+ * Boot of the Fatigue & readiness chunk (SPO-558). Imported lazily (and only) by `addons/useAddonRuntime.ts` while the add-on is
+ * installed. The pieces the screens draw (muscle fatigue, readiness, the muscle map) are handed over here step by step as they
+ * leave the core; until a piece is moved the core still draws it.
+ */
+import { trackerReady } from '../trackerRt';
+
+trackerReady('fatigue');

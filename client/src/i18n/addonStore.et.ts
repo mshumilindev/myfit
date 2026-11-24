@@ -256,6 +256,19 @@ export const addonStoreEt: typeof addonStoreEn = {
         'Maksimumide loend ajaloo põhjal',
       ],
     },
+    'fatigue-readiness': {
+      name: 'Väsimus ja valmidus',
+      tagline: 'Vaata, kui puhanud oled',
+      desc: 'Lihaste väsimus, valmidus ja lihaskaart annavad vihjeid, mida järgmisena treenida.',
+      about:
+        'Spotter jälgib, kui tugevalt iga lihast koormati ja kui hästi see taastus. Väsimus näitab, mis on väsinud ja millal võib aidata kergem nädal; valmidus muudab selle enne treeningut hindeks; lihaskaart värvib keha mõlema järgi.\n\nVihjed ja treeningukoostaja eelistavad valmis lihaseid. Kui lisandmooduli välja lülitad, vihjed ja värvid kaovad, aga kõik logitu jääb alles ja naaseb sisselülitamisel.',
+      highlights: [
+        'Lihaste väsimus ja stagneerumise vihjed',
+        'Valmiduse hinne enne treeningut',
+        'Kehakaart taastumise järgi',
+        'Vihjed, mis eelistavad puhanud lihaseid',
+      ],
+    },
     planner: {
       name: 'Planeerija',
       tagline: 'Kõik plaanid ühes kalendris',
@@ -403,6 +416,12 @@ export const addonStoreEt: typeof addonStoreEn = {
     circuit: { name: 'Ringtreening', desc: 'Ringid harjutuste grupi peale, ringide loenduriga.' },
     effort: { name: 'RPE / RIR', desc: 'Hinda, kui raske seeria oli, ja vaata äpi hinnangut.' },
     'set-types': { name: 'Seeriatüübid', desc: 'Dropid, pöörddropid ja raskusega hoidmised.' },
+    fatigue: { name: 'Väsimus', desc: 'Lihaste väsimus, stagnatsioon ja kergema nädala vihjed.' },
+    readiness: { name: 'Valmidus', desc: 'Kui valmis on lihased ja sina täna treeninguks.' },
+    'muscle-map': {
+      name: 'Lihaskaart',
+      desc: 'Keha, mis on värvitud väsimuse ja valmiduse järgi.',
+    },
     periodization: {
       name: 'Periodiseerimine',
       desc: 'Nädalatsüklid, % maksimumist ja maksimumid.',

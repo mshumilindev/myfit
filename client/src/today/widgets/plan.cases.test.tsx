@@ -5,6 +5,7 @@ import { widgetMatrix } from '../__fixtures__/matrix';
 import { NOW, STATES, PRESETS, renderWidget, seed, setLocale } from '../__fixtures__/widgetHarness';
 import type { WidgetSize } from '../../components/ui/Widget';
 import { addonsPref } from '../../addons/enabledSet';
+import { FATIGUE_ADDONS } from '../../fatigue/testAddons';
 import '../../effort/effortBoot'; // the RPE / RIR chunk: the Effort trend widget body arrives with it
 
 const byId = (id: string) => PLAN_WIDGETS.find((w) => w.id === id)!;
@@ -22,7 +23,8 @@ widgetMatrix('plan widgets (other locales)', PLAN_WIDGETS, {
 });
 
 beforeEach(() => {
-  addonsPref.set(['effort']); // RPE / RIR installed: the last-session badge shows the session effort
+  // RPE / RIR installed: the last-session badge shows the session effort; Fatigue & readiness installed: the builder reads it
+  addonsPref.set(['effort', ...FATIGUE_ADDONS]);
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(NOW);
   localStorage.clear();

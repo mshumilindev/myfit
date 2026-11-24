@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import type { MuscleGroup } from '../data/exercises';
 import { muscleReadiness } from '../recovery';
+import { fatigueSource, readinessSource } from '../fatigueApi';
+import { useFatigueOn, useReadinessOn } from '../addons/featureGates';
 import { referenceE1rm, setTanks, type SetTank, type TankExercise } from '../setTank';
 import { stalledMuscles } from '../fatigue';
 import { isMarkerExercise, isStrengthExercise, loadTypeFor, resolveMuscles } from '../store';
@@ -45,13 +47,18 @@ export function useSetBars(
   const [before, setBefore] = useState<Workout[]>(filtered);
   if (before.length !== filtered.length || filtered.some((w, i) => w !== before[i]))
     setBefore(filtered);
+  const fatigueOn = useFatigueOn();
+  const readinessOn = useReadinessOn();
   const base = useMemo(() => {
     const ready = new Map<string, number>();
     if (before.length === 0 || startedAt === undefined)
       return { ready, stalled: new Set<MuscleGroup>() };
-    for (const [m, r] of muscleReadiness(before, startedAt, 0)) ready.set(m, r.readiness);
-    return { ready, stalled: stalledMuscles(before, startedAt) };
-  }, [before, startedAt]);
+    for (const [m, r] of muscleReadiness(readinessSource(before), startedAt, 0))
+      ready.set(m, r.readiness);
+    return { ready, stalled: stalledMuscles(fatigueSource(before), startedAt) };
+    // the two gates change what the history means, so a change re-reads it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [before, startedAt, fatigueOn, readinessOn]);
 
   // Newest first, sorted once per history instead of once per exercise per logged set.
   const newestFirst = useMemo(

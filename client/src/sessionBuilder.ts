@@ -24,6 +24,7 @@ import {
 } from './data/exercises';
 import { exerciseDay, type TrainingDay } from './data/daySuggest';
 import { nextTarget, topHistory } from './progression';
+import { readinessSource } from './fatigueApi';
 import { muscleGapDays, muscleReadiness, type ReadyState } from './recovery';
 import { LANDMARKS, VOLUME_MUSCLES } from './volume';
 import { equipmentAvailable } from './addons/featureGates';
@@ -224,7 +225,7 @@ export interface BuildContext {
 
 /** Auto-pick a coherent day of recovered, volume-hungry, on-goal muscles. */
 export function pickMuscles(ctx: BuildContext): MuscleGroup[] {
-  const ready = muscleReadiness(ctx.finished, ctx.now);
+  const ready = muscleReadiness(readinessSource(ctx.finished), ctx.now);
   const lms = focusAdjustLandmarks(personalLandmarks(ctx.finished, ctx.now), ctx.goals);
   const week = recentLoadSets(ctx.finished, ctx.now);
   const emph = groupEmphasis(ctx.goals);
@@ -417,7 +418,7 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
   ).filter((m) => !protectedSet.has(m));
   const lms = focusAdjustLandmarks(personalLandmarks(ctx.finished, ctx.now), ctx.goals);
   const week = recentLoadSets(ctx.finished, ctx.now);
-  const ready = muscleReadiness(ctx.finished, ctx.now);
+  const ready = muscleReadiness(readinessSource(ctx.finished), ctx.now);
   const emph = groupEmphasis(ctx.goals);
   const play = playForMuscles(ctx.finished, ctx.now, muscles);
   const bodyKg = ctx.bodyKg ?? null;

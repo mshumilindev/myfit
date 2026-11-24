@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { LOCALES, setLocale } from '../i18n';
+import { addonsPref } from '../addons/enabledSet';
+import { FATIGUE_ADDONS } from '../fatigue/testAddons';
 import { __getStateForTests, __replaceStateForTests } from '../store';
 import { BUILT_IN_CATALOG } from '../data/exercises';
 import type { Workout } from '../types';
@@ -72,9 +74,11 @@ beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(NOW);
   setWorkouts([]);
+  addonsPref.set(FATIGUE_ADDONS);
 });
 afterEach(() => {
   cleanup();
+  addonsPref.reset();
   vi.useRealTimers();
 });
 

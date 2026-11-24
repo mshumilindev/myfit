@@ -1,8 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { renderHook } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { muscleReadiness } from '../recovery';
+import { addonsPref } from '../addons/enabledSet';
+import { FATIGUE_ADDONS } from '../fatigue/testAddons';
 import { TANK_PARAMS } from '../setTank';
 import type { Exercise, SetEntry, Workout } from '../types';
 import { useSetBars } from './useSetBars';
@@ -63,6 +65,9 @@ const history = (): Workout =>
   wk('h1', NOW - 20 * DAY, true, [
     bench([set('h11', NOW - 20 * DAY, { reps: 5, weight: 150, rpe: 6 })], 'hx'),
   ]);
+
+beforeEach(() => addonsPref.set(FATIGUE_ADDONS));
+afterEach(() => addonsPref.reset());
 
 describe('useSetBars (adapter)', () => {
   afterEach(() => vi.useRealTimers());

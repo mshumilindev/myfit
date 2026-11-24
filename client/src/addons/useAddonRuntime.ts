@@ -108,6 +108,11 @@ export function useAddonRuntime() {
   useEffect(() => {
     if (effortOn) loadTracker('effort', () => import('../effort/effortBoot'));
   }, [effortOn]);
+  // Fatigue & readiness (SPO-558): the fatigue, readiness and muscle-map pieces are a lazy chunk.
+  const fatigueOn = useAddonOrBase('fatigue-readiness');
+  useEffect(() => {
+    if (fatigueOn) loadTracker('fatigue', () => import('../fatigue/fatigueBoot'));
+  }, [fatigueOn]);
   // Set types (a module of Advanced training): drop / reverse-drop / weighted-hold editing is a lazy chunk too.
   const setTypesOn = useAddonOrBase('set-types');
   useEffect(() => {

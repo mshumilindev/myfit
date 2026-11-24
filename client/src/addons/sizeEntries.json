@@ -180,5 +180,17 @@
   },
   "periodization": {
     "js": ["periodization/"]
+  },
+  "fatigue-readiness": {
+    "js": ["fatigue/"]
+  },
+  "fatigue": {
+    "js": ["fatigue/"]
+  },
+  "readiness": {
+    "js": ["fatigue/"]
+  },
+  "muscle-map": {
+    "js": ["fatigue/"]
   }
 }

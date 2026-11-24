@@ -60,6 +60,26 @@ export const EXCLUSION: Readonly<Record<string, Exclusion>> = {
     files: ['addons/featureGates.ts'],
     names: ['advancedTrainingAvailable', 'useAdvancedTrainingOn'],
   },
+  'fatigue-readiness': {
+    via: ['gate'],
+    files: ['addons/featureGates.ts'],
+    names: ['fatigueAvailable', 'useFatigueOn'],
+  },
+  fatigue: {
+    via: ['gate'],
+    files: ['addons/featureGates.ts'],
+    names: ['fatigueAvailable', 'useFatigueOn'],
+  },
+  readiness: {
+    via: ['gate'],
+    files: ['addons/featureGates.ts'],
+    names: ['readinessAvailable', 'useReadinessOn'],
+  },
+  'muscle-map': {
+    via: ['gate'],
+    files: ['addons/featureGates.ts'],
+    names: ['muscleMapAvailable', 'useMuscleMapOn'],
+  },
   periodization: {
     via: ['gate'],
     files: ['addons/featureGates.ts', 'periodizationApi.ts'],
