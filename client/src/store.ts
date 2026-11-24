@@ -237,6 +237,7 @@ import { listPrefFromDoc, LIST_PREFS, writeListPref, reconcileListPref } from '.
 import { resetTodayLayout } from './today/layout';
 import { pushTodayLayoutEdits, syncTodayLayoutFromDoc } from './today/layoutSync';
 import { pushThemeEdits, syncThemePrefsFromDoc } from './themes/themeSync';
+import { weekPlanFor, type WeekSource } from './periodizationApi';
 // Synced Log-activity prefs (pins + "don't suggest after workouts").
 export {
   activityPins,
@@ -1163,8 +1164,9 @@ export function prescribedTrainingDays(): Set<number> {
   const a = readAssignment();
   const set = new Set<number>();
   if (!a) return set;
-  for (const it of a.program.items ?? []) set.add(it.day);
-  for (const [k, v] of Object.entries(a.program.targetMuscles ?? {})) {
+  const wk = weekPlanFor(a.program as unknown as WeekSource, a.week ?? 1);
+  for (const it of wk.items ?? []) set.add(it.day);
+  for (const [k, v] of Object.entries(wk.targetMuscles ?? {})) {
     if (Array.isArray(v) && v.length > 0) set.add(Number(k));
   }
   return set;
@@ -1181,7 +1183,10 @@ export function programLookbackDays(): number {
  *  name a missed gym day ("you skipped Legs 2"). */
 export function programDayNameForWeekday(weekday: number): string | null {
   const a = readAssignment();
-  return a?.program.dayNames?.[String(weekday)] ?? null;
+  return a
+    ? (weekPlanFor(a.program as unknown as WeekSource, a.week ?? 1).dayNames?.[String(weekday)] ??
+        null)
+    : null;
 }
 
 export function programDayNameFor(w: Workout, workouts: Workout[]): string | null {
@@ -1205,10 +1210,11 @@ export function programDayNameFor(w: Workout, workouts: Workout[]): string | nul
   const a = readAssignment();
   if (!a) return null;
   const day = programDay(w.startedAt);
-  const name = a.program.dayNames?.[String(day)];
+  const wk = weekPlanFor(a.program as unknown as WeekSource, a.week ?? 1);
+  const name = wk.dayNames?.[String(day)];
   if (!name) return null;
-  const targets = a.program.targetMuscles?.[String(day)] ?? [];
-  const hasItems = (a.program.items ?? []).some((i) => i.day === day);
+  const targets = wk.targetMuscles?.[String(day)] ?? [];
+  const hasItems = (wk.items ?? []).some((i) => i.day === day);
   if (!hasItems && targets.length === 0) return null; // a rest day, not a session
   // Only from ~when the program appeared (its current week bounds how far back).
   const now = workouts.reduce((m, x) => Math.max(m, x.startedAt), w.startedAt);

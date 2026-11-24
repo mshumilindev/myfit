@@ -54,6 +54,7 @@ import { buildProgramSeed, programSuggestionReadiness, setProgramSeed } from '..
 import { HistoryTimeline, buildHistoryDays } from '../components/HistoryTimeline';
 import { dayReadoutLabel, type TrainingDay } from '../data/daySuggest';
 import {
+  assignmentWeek,
   programDayHasPlan,
   programDayItems,
   programDayMuscles,
@@ -494,7 +495,11 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     if (!assignment) return { variant: 'new' };
     const recent = finished.slice(0, 9);
     const recentEx = new Set(recent.flatMap((w) => w.exercises.map((e) => e.name.toLowerCase())));
-    const progEx = new Set(assignment.program.items.map((i) => i.name.toLowerCase()));
+    const progEx = new Set(
+      (assignmentWeek(assignment).items as unknown as ProgramItem[]).map((i) =>
+        i.name.toLowerCase(),
+      ),
+    );
     if (progEx.size === 0 || recentEx.size === 0) return null;
     let overlap = 0;
     recentEx.forEach((e) => {
@@ -626,10 +631,10 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const programTodayPlan = (() => {
     if (!assignment || !assignedActive || trainedToday) return null;
     const day = todayWeekday;
-    const items = assignment.program.items.filter((i) => i.day === day);
-    const muscles = assignment.program.targetMuscles?.[String(day)] ?? [];
+    const items = programDayItems(assignment, day);
+    const muscles = programDayMuscles(assignment, day);
     if (items.length === 0 && muscles.length === 0) return null;
-    const dayName = assignment.program.dayNames?.[day] || t.progDay(day);
+    const dayName = programDayName(assignment, day, t.progDay);
     const labels = muscles.length > 0 ? muscles.map((m) => t.muscleGroups[m]) : [];
     // Usual start time + meal hint for this weekday, still learned from history.
     const dow = new Date(now).getDay();
@@ -658,9 +663,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     !trainedToday &&
     (() => {
       const day = todayWeekday;
-      const items = assignment.program.items.filter((i) => i.day === day);
-      const muscles = assignment.program.targetMuscles?.[String(day)] ?? [];
-      return items.length === 0 && muscles.length === 0;
+      return !programDayHasPlan(assignment, day);
     })();
 
   // Program plan for today, weigh-in, gym-visit and "likely today" all join the
@@ -798,9 +801,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const programWeek = (() => {
     if (!assignment) return { done: 0, total: 0, pct: 0 };
     const days = Array.from({ length: 7 }, (_, i) => i + 1).filter((day) => {
-      const items = assignment.program.items.filter((it) => it.day === day);
-      const muscles = assignment.program.targetMuscles?.[String(day)] ?? [];
-      return items.length > 0 || muscles.length > 0;
+      return programDayHasPlan(assignment, day);
     });
     const done = days.filter((d) => weekTrainedDays.has(d)).length;
     return {

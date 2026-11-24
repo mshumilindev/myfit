@@ -39,6 +39,7 @@ import {
 import { computePlaybook, playForWeekday } from '../playbook';
 import { dayReadoutLabel } from '../data/daySuggest';
 import {
+  assignmentWeek,
   programDayHasPlan,
   programDayItems,
   programDayName,
@@ -192,7 +193,7 @@ export function StartSheet({
     const own = !!program && program.program.authorId === currentUid();
     const programMode: 'none' | 'own' | 'other' = !program ? 'none' : own ? 'own' : 'other';
     const programDays = own
-      ? [...new Set(program!.program.items.map((i) => i.day))].sort((a, b) => a - b)
+      ? [...new Set(assignmentWeek(program!).items.map((i) => i.day))].sort((a, b) => a - b)
       : [];
     onClose();
     shell.openOverlay({ screen: 'builder', programMode, programDays });
