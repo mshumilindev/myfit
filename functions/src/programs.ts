@@ -19,6 +19,7 @@ import {
   type UserDoc,
 } from './lib';
 import { listUserWorkouts } from './aggregates';
+import { plannedThrough } from './programCycle';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -32,6 +33,13 @@ interface ProgramDoc {
   dayNames: Record<string, string>;
   targetMuscles?: Record<string, string[]>;
   items: Array<{ day: number; name?: string }>;
+  cycle?: {
+    length?: number;
+    weeks?: Array<{
+      items?: Array<{ day: number; name?: string }>;
+      targetMuscles?: Record<string, string[]>;
+    }>;
+  };
   updatedAt: number;
 }
 interface AssignmentDoc {
@@ -67,10 +75,9 @@ export async function programProgress(memberId: string) {
   const week = openEnded
     ? Math.floor(elapsedDays / 7) + 1
     : Math.min(p.weeks, Math.floor(elapsedDays / 7) + 1);
-  const total = openEnded ? 0 : p.weeks * p.daysPerWeek;
-  const expectedSoFar = openEnded
-    ? Math.max(1, week * p.daysPerWeek)
-    : Math.min(total, Math.max(1, week * p.daysPerWeek));
+  const total = openEnded ? 0 : plannedThrough(p, p.weeks);
+  const planned = plannedThrough(p, week);
+  const expectedSoFar = openEnded ? Math.max(1, planned) : Math.min(total, Math.max(1, planned));
   return {
     program: p,
     assignedBy: by?.username ?? null,
