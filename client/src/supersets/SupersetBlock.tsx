@@ -3,6 +3,7 @@
  * mobile strip with its member cards. Moved out of the session screen; the core renders it only through `supersetsHost.Block`.
  */
 import { Fragment } from 'react';
+import './SupersetBlock.css';
 import { IconButton } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Tag } from '../components/ui/Tag';
@@ -119,12 +120,12 @@ export function SupersetBlock(p: SupersetBlockProps) {
           <table className="table ss-table">
             <thead>
               <tr>
-                <th style={{ width: 44 }}></th>
+                <th className="ss-col-idx"></th>
                 <th>{t.exerciseLabel}</th>
-                <th style={{ width: 210 }}>{t.musclesCol}</th>
-                {p.equipmentOn && <th style={{ width: 150 }}>{t.progEquipment}</th>}
-                <th style={{ width: 90 }}>{t.roundCol}</th>
-                <th style={{ width: 110 }}>{t.lastCol}</th>
+                <th className="ss-col-muscles">{t.musclesCol}</th>
+                {p.equipmentOn && <th className="ss-col-equip">{t.progEquipment}</th>}
+                <th className="ss-col-round">{t.roundCol}</th>
+                <th className="ss-col-last">{t.lastCol}</th>
               </tr>
             </thead>
             <tbody>
