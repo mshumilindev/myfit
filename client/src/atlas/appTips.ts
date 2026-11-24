@@ -12,6 +12,7 @@
  *
  * Phrasings live in kb/appTipsEx.ts (the understanding index only).
  */
+import { addonAvailable } from '../addons/enabledSet';
 import type { Intent, Tr } from './intentKit';
 import { ASKS } from './asks';
 import { keyGroups } from './intentsExtra';
@@ -197,10 +198,30 @@ export const APP_CHIPS: Record<string, string[]> = {
   app_gyms: ['app_start_session', 'app_custom_exercise', 'app_tips'],
 };
 
+/** Is this add-on installed? (never throws: a storage error counts as off). */
+function addonOn(id: string): boolean {
+  try {
+    return addonAvailable(id);
+  } catch {
+    return false;
+  }
+}
+
 export interface AppTip {
   text: [string, string];
   /** The feature the tip is about (its question becomes a chip). */
   about: string;
+  /** The add-on the tip is about. While it is off the tip is told in its `plain` form, or not at all when there is none. */
+  addon?: string;
+  plain?: [string, string];
+}
+
+/** Tips as told now: a tip of an add-on that is off keeps only its plain form (or drops out). */
+export function tipsNow(): AppTip[] {
+  return APP_TIPS.flatMap((t) => {
+    if (!t.addon || addonOn(t.addon)) return [t];
+    return t.plain ? [{ ...t, text: t.plain }] : [];
+  });
 }
 
 /** Most useful first; told four at a time. */
@@ -246,6 +267,11 @@ export const APP_TIPS: AppTip[] = [
       'Тапни підхід, щоб позначити його як розминку чи дроп-сет або «До відмови», — розминка не рахується як робочий підхід.',
     ],
     about: 'app_warmup_set',
+    addon: 'set-types',
+    plain: [
+      'Tap a set to mark it as a warm-up or flag it “To failure” — warm-ups don’t count as working sets.',
+      'Тапни підхід, щоб позначити його як розминку чи «До відмови», — розминка не рахується як робочий підхід.',
+    ],
   },
   {
     text: [
@@ -323,6 +349,7 @@ export const APP_TIPS: AppTip[] = [
       'Обʼєднай дві вправи через «Суперсет із…» в меню вправи.',
     ],
     about: 'app_superset',
+    addon: 'supersets',
   },
   {
     text: [
@@ -337,6 +364,8 @@ export const APP_TIPS: AppTip[] = [
       'Додай свій зал у вкладці «Зали» і познач його обладнання, щоб я знав, що там є.',
     ],
     about: 'app_gyms',
+    addon: 'equipment',
+    plain: ['Add your gym in the Gyms tab.', 'Додай свій зал у вкладці «Зали».'],
   },
   {
     text: [
@@ -411,10 +440,11 @@ export const TIPS_PER_BATCH = 4;
 
 /** The batch after `told` tips (wraps around once everything was told). */
 export function tipBatch(told: number, L: Tr): { text: string; chips: string[]; told: number } {
-  const n = APP_TIPS.length;
+  const tips = tipsNow();
+  const n = tips.length;
   const start = told % n;
   const again = told >= n && start === 0;
-  const pick = APP_TIPS.slice(start, start + TIPS_PER_BATCH);
+  const pick = tips.slice(start, start + TIPS_PER_BATCH);
   const last = start + pick.length >= n;
   const head =
     start === 0
