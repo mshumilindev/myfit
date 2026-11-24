@@ -110,6 +110,19 @@ describe('useSetBars (adapter)', () => {
     expect(r.get('s1')!.before).toBeLessThan(1);
   });
 
+  it('without Readiness the starting tank is full (neutral), however tired yesterday left the muscle', () => {
+    addonsPref.set(FATIGUE_ADDONS.filter((id) => id !== 'readiness'));
+    const yesterday = wk('y', NOW - DAY, true, [
+      bench(
+        Array.from({ length: 12 }, (_, i) => set(`y${i + 1}`, NOW - DAY + i * 1000)),
+        'yx',
+      ),
+    ]);
+    const w = wk('w', NOW, false, [exampleA(NOW + 1000)]);
+    const r = renderHook(() => useSetBars(w, true, [yesterday, history(), w])).result.current;
+    expect(r.get('s1')!.before).toBeCloseTo(1, 9);
+  });
+
   it('a session that started later, or is unfinished, is not history', () => {
     const w = wk('w', NOW, false, [exampleA(NOW + 1000)]);
     const later = wk('l', NOW + DAY, true, [
