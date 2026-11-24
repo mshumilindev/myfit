@@ -121,6 +121,40 @@ export function usePeriodizationOn(): boolean {
 }
 
 /**
+ * Supersets (two or more exercises done back to back): without it every stored group reads as separate exercises in order, no
+ * pairing is offered and the rest timer treats each exercise on its own. Groups stay stored and come back on re-install.
+ */
+export function supersetsAvailable(): boolean {
+  try {
+    return addonAvailable('supersets');
+  } catch {
+    return false;
+  }
+}
+
+/** The same Supersets gate for components. */
+export function useSupersetsOn(): boolean {
+  return useAddonOrBase('supersets');
+}
+
+/**
+ * Circuit (rounds over a group of exercises): without it a stored circuit reads as separate exercises in order, with no rounds
+ * or round counter, and no circuit can be started. The data stays and comes back on re-install.
+ */
+export function circuitAvailable(): boolean {
+  try {
+    return addonAvailable('circuit');
+  } catch {
+    return false;
+  }
+}
+
+/** The same Circuit gate for components. */
+export function useCircuitOn(): boolean {
+  return useAddonOrBase('circuit');
+}
+
+/**
  * RPE / RIR (effort entry): without it a set has no effort chips, hint, estimate pill or effort column, and nothing of it is
  * asked. The app's own effort estimate keeps working underneath (rest, failure and signals read it), and stored values stay.
  */

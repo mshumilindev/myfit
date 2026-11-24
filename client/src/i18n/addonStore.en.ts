@@ -400,6 +400,8 @@ export const addonStoreEn = {
       ],
     },
     mastery: { name: 'Mastery', desc: 'Track skill levels and long-term progress.' },
+    supersets: { name: 'Supersets', desc: 'Do two or more exercises back to back.' },
+    circuit: { name: 'Circuit', desc: 'Rounds over a group of exercises, with a round counter.' },
     effort: { name: 'RPE / RIR', desc: 'Rate how hard a set felt; see the app’s estimate.' },
     'set-types': { name: 'Set types', desc: 'Drop sets, reverse drops and weighted holds.' },
     periodization: { name: 'Periodization', desc: 'Weekly cycles, % of max and Maxes.' },

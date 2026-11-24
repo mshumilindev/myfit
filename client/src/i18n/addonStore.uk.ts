@@ -395,6 +395,8 @@ export const addonStoreUk: typeof addonStoreEn = {
       ],
     },
     mastery: { name: 'Майстерність', desc: 'Рівні навичок і довгостроковий прогрес.' },
+    supersets: { name: 'Суперсети', desc: 'Роби дві чи більше вправ поспіль.' },
+    circuit: { name: 'Коло', desc: 'Раунди по групі вправ із лічильником раундів.' },
     effort: {
       name: 'RPE / RIR',
       desc: 'Оцінюй, наскільки важким був підхід, і бач оцінку додатку.',

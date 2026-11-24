@@ -88,6 +88,16 @@ export function useAddonRuntime() {
     if (periodizationOn)
       loadTracker('periodization', () => import('../periodization/periodizationBoot'));
   }, [periodizationOn]);
+  // Supersets (a module of Advanced training): the pairing sheet is a lazy chunk too.
+  const supersetsOn = useAddonOrBase('supersets');
+  useEffect(() => {
+    if (supersetsOn) loadTracker('supersets', () => import('../supersets/supersetsBoot'));
+  }, [supersetsOn]);
+  // Circuit (a module of Advanced training): the round screens are a lazy chunk too.
+  const circuitOn = useAddonOrBase('circuit');
+  useEffect(() => {
+    if (circuitOn) loadTracker('circuit', () => import('../circuit/circuitBoot'));
+  }, [circuitOn]);
   // RPE / RIR (a module of Advanced training): the effort entry is a lazy chunk too.
   const effortOn = useAddonOrBase('effort');
   useEffect(() => {

@@ -7,6 +7,9 @@ import { emptyCycleState } from '../cycle/cycleState';
 import { __getStateForTests, __replaceStateForTests } from '../store';
 import type { Exercise, SetEntry, Workout } from '../types';
 import { SessionView } from './SessionView';
+import { addonsPref } from '../addons/enabledSet';
+import '../circuit/circuitBoot'; // Circuit installed and loaded: its screens are the module's
+import '../supersets/supersetsBoot'; // Supersets too
 
 // Wednesday 14 Oct 2026, 18:00 local — fixed wall clock, only Date is faked so timers/userEvent keep running.
 const NOW = new Date(2026, 9, 14, 18, 0).getTime();
@@ -68,6 +71,7 @@ function mount(id = 'open', sh: Shell = shell(), extra: { past?: boolean } = {})
 }
 
 beforeEach(() => {
+  addonsPref.set(['circuit', 'supersets']);
   localStorage.clear();
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
@@ -86,6 +90,7 @@ beforeEach(() => {
   vi.setSystemTime(NOW);
 });
 afterEach(() => {
+  addonsPref.reset();
   vi.useRealTimers();
   cleanup();
 });
@@ -262,6 +267,26 @@ describe('SessionView · circuits', () => {
     const rest = () => sheet().querySelector('.crb-rest-num')!.textContent;
     const first = rest();
     await waitFor(() => expect(rest()).not.toBe(first), { timeout: 3000 });
+  });
+});
+
+describe('SessionView · circuits and supersets with their modules off (neutral contract)', () => {
+  beforeEach(() => addonsPref.reset());
+
+  it('a stored circuit reads as separate exercises: no circuit block, no rounds, data untouched', () => {
+    seed([circuitLive()]);
+    const { container } = mount();
+    expect(container.querySelector('.cb-name')).toBeNull();
+    expect(container.querySelector('.circuit-banner')).toBeNull();
+    expect(mine().exercises.every((e) => e.groupId === 'c1' && e.groupKind === 'circuit')).toBe(
+      true,
+    );
+  });
+
+  it('a blank session offers no Circuit start', () => {
+    seed([wk('open', [])]);
+    const { container } = mount();
+    expect(container.querySelector('.es-circuit')).toBeNull();
   });
 });
 

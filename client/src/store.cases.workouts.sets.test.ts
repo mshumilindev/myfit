@@ -1,4 +1,6 @@
 import { addonsPref } from './addons/enabledSet';
+import './circuit/circuitBoot';
+import './supersets/supersetsBoot';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const fs = vi.hoisted(() => ({
@@ -277,6 +279,9 @@ describe('exercises and sets', () => {
 });
 
 describe('supersets and circuits', () => {
+  // Supersets and Circuit are modules of Advanced training: installed (and the circuit chunk loaded) for these cases.
+  beforeEach(() => addonsPref.set(['activities', 'supersets', 'circuit']));
+
   it('groups, letters, rounds, ungroup', () => {
     const w = store.startWorkout()!;
     const a = store.addExercise(w.id, 'Bench Press', 'strength', { plannedSets: 3 });

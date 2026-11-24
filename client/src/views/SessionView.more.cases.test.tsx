@@ -10,6 +10,8 @@ import { addonsPref } from '../addons/enabledSet';
 import '../effort/effortBoot'; // RPE / RIR installed and loaded: the effort entry is the module's
 import { SessionView } from './SessionView';
 import { clearSummaryReturn } from './sessionSummary/NextUp';
+import '../circuit/circuitBoot'; // Circuit installed and loaded: its screens are the module's
+import '../supersets/supersetsBoot'; // Supersets too
 
 // Wednesday 14 Oct 2026, 18:00 local — fixed wall clock, only Date is faked so timers/userEvent keep running.
 const NOW = new Date(2026, 9, 14, 18, 0).getTime();
@@ -71,7 +73,7 @@ function mount(id = 'open', sh: Shell = shell(), extra: { past?: boolean } = {})
 }
 
 beforeEach(() => {
-  addonsPref.set(['effort']);
+  addonsPref.set(['effort', 'circuit', 'supersets']);
   localStorage.clear();
   sessionStorage.clear();
   clearSummaryReturn();

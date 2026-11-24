@@ -65,6 +65,16 @@ export const EXCLUSION: Readonly<Record<string, Exclusion>> = {
     files: ['addons/featureGates.ts', 'periodizationApi.ts'],
     names: ['periodizationAvailable', 'usePeriodizationOn', 'usePeriodizationHost'],
   },
+  supersets: {
+    via: ['gate'],
+    files: ['addons/featureGates.ts', 'supersetsApi.ts'],
+    names: ['supersetsAvailable', 'useSupersetsOn', 'useSupersetsHost'],
+  },
+  circuit: {
+    via: ['gate'],
+    files: ['addons/featureGates.ts', 'circuitApi.ts'],
+    names: ['circuitAvailable', 'useCircuitOn', 'useCircuitHost'],
+  },
   effort: {
     via: ['gate'],
     files: ['addons/featureGates.ts', 'effortApi.ts'],

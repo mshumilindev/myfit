@@ -31,6 +31,9 @@ vi.mock('../offline/offlineCache', () => ({
 }));
 
 import { TraineeSessionView } from './TraineeSessionView';
+import { addonsPref } from '../addons/enabledSet';
+import '../circuit/circuitBoot'; // Circuit installed and loaded: its screens are the module's
+import '../supersets/supersetsBoot'; // Supersets too
 
 const T0 = NOW - 3 * 3600_000;
 const set = (id: string, position: number, reps: number, weight: number | null, extra = {}) => ({
@@ -110,6 +113,7 @@ function workout(): Workout {
 }
 
 beforeEach(() => {
+  addonsPref.set(['circuit', 'supersets']);
   freezeClock();
   setLocale('en');
   m.callFn.mockReset();

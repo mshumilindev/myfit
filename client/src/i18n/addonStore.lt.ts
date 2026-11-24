@@ -396,6 +396,8 @@ export const addonStoreLt: typeof addonStoreEn = {
       ],
     },
     mastery: { name: 'Meistriškumas', desc: 'Įgūdžių lygiai ir ilgalaikė pažanga.' },
+    supersets: { name: 'Supersetai', desc: 'Atlik dvi ar daugiau pratimų iš eilės.' },
+    circuit: { name: 'Ratas', desc: 'Ratai per pratimų grupę su ratų skaitikliu.' },
     effort: {
       name: 'RPE / RIR',
       desc: 'Įvertink, kiek sunki buvo serija, ir matyk programos įvertį.',

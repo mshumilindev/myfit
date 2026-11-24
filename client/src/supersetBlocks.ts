@@ -1,5 +1,22 @@
 /* Superset / circuit grouping of a session's exercises (pure). Leaf module: store.ts re-exports it. */
+import { supersetsLive } from './supersetsApi';
+import { circuitLive } from './circuitApi';
 import type { Exercise, Workout } from './types';
+
+/**
+ * The groups the person can see: a superset needs Supersets, a circuit needs Circuit. A hidden group is not grouped at all, its
+ * exercises read as singles in their order, and the stored `groupId` / `groupKind` stay untouched (they come back on re-install).
+ */
+export function groupKindShown(kind: 'superset' | 'circuit'): boolean {
+  return kind === 'circuit' ? circuitLive() : supersetsLive();
+}
+
+/** Is this exercise a member of a group the person can see? */
+export function inShownGroup(ex: Pick<Exercise, 'groupId' | 'groupKind'>, w: Workout): boolean {
+  if (!ex.groupId) return false;
+  const circuit = w.exercises.some((e) => e.groupId === ex.groupId && e.groupKind === 'circuit');
+  return groupKindShown(circuit ? 'circuit' : 'superset');
+}
 
 export interface SupersetGroup {
   groupId: string;
@@ -17,7 +34,7 @@ export function sessionBlocks(w: Workout): SessionBlock[] {
   const blocks: SessionBlock[] = [];
   let letterIdx = 0;
   for (const ex of sorted) {
-    const gid = ex.groupId ?? null;
+    const gid = inShownGroup(ex, w) ? (ex.groupId ?? null) : null;
     if (!gid) {
       blocks.push({ kind: 'single', exercise: ex });
       continue;

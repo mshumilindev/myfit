@@ -398,6 +398,8 @@ export const addonStoreEt: typeof addonStoreEn = {
       ],
     },
     mastery: { name: 'Meisterlikkus', desc: 'Oskuste tasemed ja pikaajaline areng.' },
+    supersets: { name: 'Superseeriad', desc: 'Tee kaks või enam harjutust üksteise järel.' },
+    circuit: { name: 'Ringtreening', desc: 'Ringid harjutuste grupi peale, ringide loenduriga.' },
     effort: { name: 'RPE / RIR', desc: 'Hinda, kui raske seeria oli, ja vaata äpi hinnangut.' },
     'set-types': { name: 'Seeriatüübid', desc: 'Dropid, pöörddropid ja raskusega hoidmised.' },
     periodization: {

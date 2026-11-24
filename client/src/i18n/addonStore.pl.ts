@@ -395,6 +395,8 @@ export const addonStorePl: typeof addonStoreEn = {
       ],
     },
     mastery: { name: 'Mistrzostwo', desc: 'Poziomy umiejętności i długofalowy postęp.' },
+    supersets: { name: 'Superserie', desc: 'Rób dwa lub więcej ćwiczeń jedno po drugim.' },
+    circuit: { name: 'Obwód', desc: 'Rundy po grupie ćwiczeń z licznikiem rund.' },
     effort: {
       name: 'RPE / RIR',
       desc: 'Oceniaj, jak ciężka była seria, i zobacz szacunek aplikacji.',
