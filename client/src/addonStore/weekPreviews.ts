@@ -3,6 +3,7 @@
  * public/store-previews/<shot>-m.webp (phone) and <shot>-d.webp (desktop window).
  */
 export const WEEK_SHOTS: Readonly<Record<string, readonly string[]>> = {
+  'train-like-a-pro': ['tlp-list', 'tlp-detail', 'tlp-locked', 'tlp-programs', 'tlp-today'],
   'advanced-training': ['advanced-editor', 'advanced-percent', 'advanced-today', 'advanced-maxes'],
   'fatigue-readiness': ['fatigue-1', 'readiness-1', 'readiness-2', 'readiness-3'],
   gym: [
