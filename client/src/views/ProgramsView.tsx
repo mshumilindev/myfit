@@ -41,6 +41,7 @@ import {
 } from './programs/programsRoute';
 import {
   freshProgram,
+  isCatalogProgram,
   normalizeItems,
   normalizeProgram,
   sanitizeTargetMuscles,
@@ -286,7 +287,7 @@ export function ProgramsView({
     const own =
       (programs ?? []).find((p) => p.id === parsedRoute.id) ??
       (justSaved?.id === parsedRoute.id ? justSaved : undefined);
-    if (own) open = { program: own, saved: true };
+    if (own) open = { program: own, saved: true, readOnly: isCatalogProgram(own) };
     else if (mine?.program.id === parsedRoute.id)
       open = { program: mine.program, saved: true, readOnly: true };
   }
@@ -342,8 +343,10 @@ export function ProgramsView({
   }
 
   // --- home -------------------------------------------------------------------------
-  const visible = (programs ?? []).filter((p) => showArchived || p.status !== 'archived');
-  const archivedN = (programs ?? []).filter((p) => p.status === 'archived').length;
+  // Catalog programs (Train like a pro) are shown by that add-on, never among the ones the member wrote.
+  const written = (programs ?? []).filter((p) => !isCatalogProgram(p));
+  const visible = written.filter((p) => showArchived || p.status !== 'archived');
+  const archivedN = written.filter((p) => p.status === 'archived').length;
   const statusText = (p: Program) =>
     p.status === 'active'
       ? t.progStatusActive

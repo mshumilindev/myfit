@@ -7,13 +7,13 @@ import { doc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { currentUid, trackMutation } from '../api';
 import { refreshProgramMine, type ProgramAssignment } from './programMine';
-import { type ProgramActivity } from '../views/programs/model';
+import { isCatalogProgram, type ProgramActivity } from '../views/programs/model';
 import { activityFields } from '../views/programs/activitiesVault';
 
-/** Is this assigned program one the member wrote (so it can be edited here)? */
+/** Is this assigned program one the member wrote (so it can be edited here)? A catalog program is never editable. */
 export function isOwnProgram(a: ProgramAssignment | null): boolean {
   const uid = currentUid();
-  return !!a && !!uid && a.program.authorId === uid;
+  return !!a && !!uid && a.program.authorId === uid && !isCatalogProgram(a.program);
 }
 
 /** Replace the planned activities of the member's own program. */

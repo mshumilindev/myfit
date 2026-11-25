@@ -210,6 +210,12 @@ export function dayActivities(p: Program, day: number): ProgramActivity[] {
   return (p.activities ?? []).filter((a) => a.day === day);
 }
 
+/**
+ * A program made from the Train like a pro catalog (`origin` is set by that add-on at creation; rules keep it as written).
+ * Not a `Program` key on purpose: the trainer's plan model never carries it.
+ */
+export const isCatalogProgram = (p: object): boolean => !!(p as { origin?: unknown }).origin;
+
 export function normalizeProgram<T extends Program>(p: T): T {
   const items = normalizeItems(p.items ?? []);
   const targetMuscles = sanitizeTargetMuscles(p.targetMuscles);

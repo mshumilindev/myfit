@@ -57,6 +57,8 @@ export interface ProgramAssignment {
   program: {
     id: string;
     authorId?: string;
+    /** Catalog program (Train like a pro): not editable. */
+    origin?: { v: number; id: string };
     name: string;
     weeks: number;
     daysPerWeek: number;
