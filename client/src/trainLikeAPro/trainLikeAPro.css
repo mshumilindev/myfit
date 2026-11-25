@@ -1,0 +1,41 @@
+.tl-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 64rem;
+  margin: 0 auto;
+}
+.tl-detail {
+  max-width: 40rem;
+}
+.tl-tools {
+  display: flex;
+  align-items: center;
+  gap: var(--s-8);
+}
+.tl-tools > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+.tl-grid {
+  display: grid;
+  gap: var(--s-12);
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+}
+.tl-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-20);
+}
+.tl-fine {
+  color: var(--text-dim);
+  font-size: var(--fs-12);
+  line-height: 1.5;
+}
+.tl-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+}
