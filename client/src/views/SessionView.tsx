@@ -5614,7 +5614,11 @@ export function SessionView(props: {
           }}
           onDelete={
             sheet.set
-              ? () => removeSet(workout.exercises.find((e) => e.id === sheet.exId)!, sheet.set!)
+              ? () =>
+                  removeSet(
+                    workout.exercises.find((e) => e.id === sheet.exId)!,
+                    sheet.set!,
+                  )
               : undefined
           }
           onExerciseSettings={

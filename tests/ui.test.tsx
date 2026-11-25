@@ -798,7 +798,15 @@ describe('F-03 session UI', () => {
   let installedBefore: string[] = [];
   beforeEach(() => {
     installedBefore = [...addonsPref.get()];
-    addonsPref.set(['equipment', 'supersets', 'circuit', 'effort', 'set-types']);
+    addonsPref.set([
+      'equipment',
+      'supersets',
+      'circuit',
+      'effort',
+      'set-types',
+      'fatigue-readiness',
+      'muscle-map',
+    ]);
   });
   afterEach(() => {
     addonsPref.set(installedBefore);
