@@ -1,0 +1,170 @@
+/** SPO-307 (R15, R16, R25): `setProgramStatus` end to end over an in-memory Firestore (the transaction, not only `planActivation`). */
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+type Doc = Record<string, unknown>;
+const h = vi.hoisted(() => ({ store: new Map<string, Doc>() }));
+
+vi.mock('../../functions/src/aggregates', () => ({ listUserWorkouts: async () => [] }));
+vi.mock('../../functions/src/programCycle', () => ({ plannedFor: () => [] }));
+vi.mock('../../functions/src/lib', () => {
+  class HttpsError extends Error {
+    constructor(
+      public code: string,
+      message: string,
+    ) {
+      super(message);
+    }
+  }
+  const snapOf = (path: string) => {
+    const d = h.store.get(path);
+    return {
+      id: path.split('/')[1],
+      exists: d !== undefined,
+      data: () => d && structuredClone(d),
+      ref: refOf(path),
+    };
+  };
+  const refOf = (path: string) => ({
+    path,
+    get: async () => snapOf(path),
+    set: async (v: Doc) => void h.store.set(path, structuredClone(v)),
+    update: async (v: Doc) =>
+      void h.store.set(path, { ...(h.store.get(path) ?? {}), ...structuredClone(v) }),
+  });
+  const query = (c: string, conds: Array<[string, unknown]>) => ({
+    where: (f: string, _op: string, v: unknown) => query(c, [...conds, [f, v]]),
+    kind: 'query' as const,
+    get: async () => ({
+      docs: [...h.store.keys()]
+        .filter((p) => p.startsWith(`${c}/`))
+        .filter((p) => conds.every(([f, v]) => (h.store.get(p) as Doc)[f] === v))
+        .map(snapOf),
+    }),
+  });
+  const db = {
+    collection: (c: string) => ({ doc: (id: string) => refOf(`${c}/${id}`), ...query(c, []) }),
+    batch: () => {
+      const ops: Array<() => Promise<void>> = [];
+      return {
+        update: (r: ReturnType<typeof refOf>, v: Doc) => void ops.push(() => r.update(v)),
+        delete: (r: ReturnType<typeof refOf>) =>
+          void ops.push(async () => void h.store.delete(r.path)),
+        commit: async () => {
+          for (const o of ops) await o();
+        },
+      };
+    },
+    runTransaction: async (fn: (tx: unknown) => Promise<unknown>) => {
+      const before = new Map([...h.store].map(([k, v]) => [k, structuredClone(v)]));
+      const writes: Array<() => Promise<void>> = [];
+      const tx = {
+        get: (x: { get: () => Promise<unknown> }) => x.get(),
+        set: (r: ReturnType<typeof refOf>, v: Doc) => void writes.push(() => r.set(v)),
+        update: (r: ReturnType<typeof refOf>, v: Doc) => void writes.push(() => r.update(v)),
+      };
+      try {
+        const out = await fn(tx);
+        for (const w of writes) await w();
+        return out;
+      } catch (e) {
+        h.store.clear();
+        for (const [k, v] of before) h.store.set(k, v);
+        throw e;
+      }
+    },
+  };
+  return {
+    db,
+    HttpsError,
+    requireAuth: (req: { auth?: { uid: string } }) => req.auth!.uid,
+    requireRole: async () => ({}),
+    loadUser: async (uid: string) => ({ id: uid, ...(h.store.get(`users/${uid}`) as Doc) }),
+    displayName: () => '',
+    createNotice: async () => undefined,
+  };
+});
+
+import { setProgramStatus } from '../../functions/src/programs';
+
+const call = (uid: string, id: string, status = 'active') =>
+  (setProgramStatus as unknown as { run: (r: unknown) => Promise<unknown> }).run({
+    auth: { uid },
+    data: { id, status },
+  });
+const prog = (id: string, authorId: string, status: string): Doc => ({
+  id,
+  authorId,
+  name: id,
+  weeks: 4,
+  daysPerWeek: 1,
+  status,
+  dayNames: {},
+  items: [{ day: 1, name: 'Squat' }],
+  updatedAt: 1,
+});
+const put = (path: string, d: Doc) => void h.store.set(path, d);
+const get = (path: string) => h.store.get(path);
+
+beforeEach(() => {
+  h.store.clear();
+  put('users/m1', { role: 'member', trainerId: 't1' });
+  put('users/t1', { role: 'trainer' });
+});
+
+describe('setProgramStatus (member, active)', () => {
+  it("a catalog start archives the member's own active program and takes the assignment", async () => {
+    put('programs/prg-old', prog('prg-old', 'm1', 'active'));
+    put('assignments/m1', { memberId: 'm1', programId: 'prg-old', assignedBy: 'm1', startedAt: 5 });
+    put('programs/tl-m1-x', prog('tl-m1-x', 'm1', 'draft'));
+    await call('m1', 'tl-m1-x');
+    expect(get('programs/prg-old')?.status).toBe('archived');
+    expect(get('programs/tl-m1-x')?.status).toBe('active');
+    expect(get('assignments/m1')).toMatchObject({ programId: 'tl-m1-x', assignedBy: 'm1' });
+  });
+
+  it("a catalog start never replaces the trainer's active program and changes nothing", async () => {
+    put('programs/prg-t', prog('prg-t', 't1', 'active'));
+    put('assignments/m1', { memberId: 'm1', programId: 'prg-t', assignedBy: 't1', startedAt: 5 });
+    put('programs/tl-m1-x', prog('tl-m1-x', 'm1', 'draft'));
+    await expect(call('m1', 'tl-m1-x')).rejects.toMatchObject({
+      code: 'failed-precondition',
+      message: 'trainer-program',
+    });
+    expect(get('programs/tl-m1-x')?.status).toBe('draft');
+    expect(get('assignments/m1')).toMatchObject({ programId: 'prg-t', assignedBy: 't1' });
+    expect(get('programs/prg-t')?.status).toBe('active');
+  });
+
+  it('an ordinary program keeps the old behaviour over a trainer assignment', async () => {
+    put('programs/prg-t', prog('prg-t', 't1', 'active'));
+    put('assignments/m1', { memberId: 'm1', programId: 'prg-t', assignedBy: 't1', startedAt: 5 });
+    put('programs/prg-own', prog('prg-own', 'm1', 'draft'));
+    await call('m1', 'prg-own');
+    expect(get('assignments/m1')).toMatchObject({ programId: 'prg-own' });
+  });
+
+  it('a repeated start of the active program keeps startedAt (progress is not reset)', async () => {
+    put('programs/tl-m1-x', prog('tl-m1-x', 'm1', 'active'));
+    put('assignments/m1', { memberId: 'm1', programId: 'tl-m1-x', assignedBy: 'm1', startedAt: 5 });
+    await call('m1', 'tl-m1-x');
+    expect(get('assignments/m1')?.startedAt).toBe(5);
+  });
+
+  it('an active program with no assignment is made the assignment (not a false noop)', async () => {
+    put('programs/tl-m1-x', prog('tl-m1-x', 'm1', 'active'));
+    await call('m1', 'tl-m1-x');
+    expect(get('assignments/m1')).toMatchObject({ programId: 'tl-m1-x', assignedBy: 'm1' });
+  });
+
+  it('a malformed old assignment does not lock the member out', async () => {
+    put('assignments/m1', { memberId: 'm1' });
+    put('programs/tl-m1-x', prog('tl-m1-x', 'm1', 'draft'));
+    await call('m1', 'tl-m1-x');
+    expect(get('assignments/m1')).toMatchObject({ programId: 'tl-m1-x' });
+  });
+
+  it("someone else's program is refused", async () => {
+    put('programs/tl-m2-x', prog('tl-m2-x', 'm2', 'draft'));
+    await expect(call('m1', 'tl-m2-x')).rejects.toMatchObject({ code: 'permission-denied' });
+  });
+});
