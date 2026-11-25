@@ -1647,7 +1647,7 @@ export const en = {
   nicPrivSeeOff: 'Nothing',
   avlTitle: 'Availability',
   avlSeeFull: 'When you are free or busy. Never why.',
-  nicPrivSeeEffects: '“Sleep need +10 min, readiness −3%.” No products or amounts.',
+  nicPrivSeeEffects: '“Sleep need +10 min.” No products or amounts.',
   nicPrivSeeFull: 'Products and your usual amounts.',
   nicPrivData: 'Your data',
   nicPrivDelete: 'Delete nicotine data',
@@ -1803,7 +1803,7 @@ export const en = {
   alcSfAfterSub: 'Hints about alcohol after training',
   alcoholDisclaimer:
     'Estimates are based on population studies of alcohol, sleep and heart rate. Individual response varies. This is not medical advice. Alcohol has no proven safe level for health; see your national guidance.',
-  alcPrivSeeEffects: '“Sleep need +10 min, readiness −4%.” No drinks or amounts.',
+  alcPrivSeeEffects: '“Sleep need +10 min.” No drinks or amounts.',
   alcPrivDelete: 'Delete alcohol data',
   alcPrivDeleteAsk: 'Delete all alcohol data?',
   alcPrivDeleteBody:

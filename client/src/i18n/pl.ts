@@ -1664,7 +1664,7 @@ export const pl: Strings = {
   nicPrivSeeOff: 'Nic',
   avlTitle: 'Dostępność',
   avlSeeFull: 'Kiedy jesteś wolny lub zajęty. Bez powodu.',
-  nicPrivSeeEffects: '„Potrzeba snu +10 min, gotowość −3%”. Bez produktów i ilości.',
+  nicPrivSeeEffects: '„Potrzeba snu +10 min”. Bez produktów i ilości.',
   nicPrivSeeFull: 'Produkty i Twoje zwykłe ilości.',
   nicPrivData: 'Twoje dane',
   nicPrivDelete: 'Usuń dane o nikotynie',
@@ -1818,7 +1818,7 @@ export const pl: Strings = {
   alcSfAfterSub: 'Wskazówki o alkoholu po treningu',
   alcoholDisclaimer:
     'Szacunki opierają się na badaniach populacyjnych dotyczących alkoholu, snu i tętna. Indywidualna reakcja bywa różna. To nie jest porada medyczna. Nie udowodniono bezpiecznego poziomu alkoholu dla zdrowia; zobacz krajowe zalecenia.',
-  alcPrivSeeEffects: '„Potrzeba snu +10 min, gotowość −4%”. Bez napojów i ilości.',
+  alcPrivSeeEffects: '„Potrzeba snu +10 min”. Bez napojów i ilości.',
   alcPrivDelete: 'Usuń dane o alkoholu',
   alcPrivDeleteAsk: 'Usunąć wszystkie dane o alkoholu?',
   alcPrivDeleteBody:

@@ -1650,7 +1650,7 @@ export const et: Strings = {
   nicPrivSeeOff: 'Mitte midagi',
   avlTitle: 'Saadavus',
   avlSeeFull: 'Millal oled vaba või hõivatud. Ilma põhjuseta.',
-  nicPrivSeeEffects: '„Une vajadus +10 min, valmisolek −3%.“ Ilma toodete ja koguseteta.',
+  nicPrivSeeEffects: '„Une vajadus +10 min.“ Ilma toodete ja koguseteta.',
   nicPrivSeeFull: 'Tooted ja sinu tavapärased kogused.',
   nicPrivData: 'Sinu andmed',
   nicPrivDelete: 'Kustuta nikotiiniandmed',
@@ -1804,7 +1804,7 @@ export const et: Strings = {
   alcSfAfterSub: 'Vihjed alkoholi kohta pärast treeningut',
   alcoholDisclaimer:
     'Hinnangud põhinevad alkoholi, une ja pulsi populatsiooniuuringutel. Individuaalne reaktsioon on erinev. See ei ole meditsiiniline nõuanne. Tervisele ohutut alkoholitaset pole tõestatud; vaata riiklikke juhiseid.',
-  alcPrivSeeEffects: '„Une vajadus +10 min, valmisolek −4%.“ Ilma jookide ja koguseteta.',
+  alcPrivSeeEffects: '„Une vajadus +10 min.“ Ilma jookide ja koguseteta.',
   alcPrivDelete: 'Kustuta alkoholiandmed',
   alcPrivDeleteAsk: 'Kustuta kõik alkoholiandmed?',
   alcPrivDeleteBody:

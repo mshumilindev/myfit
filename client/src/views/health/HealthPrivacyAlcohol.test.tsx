@@ -90,9 +90,7 @@ describe('HealthPrivacyView: Alcohol', () => {
     expect(group.getAllByRole('button')).toHaveLength(2);
     expect(group.queryByText('Full')).toBeNull();
     expect(screen.getByText('Full is not offered for Alcohol.')).toBeTruthy();
-    expect(
-      group.getByText('“Sleep need +10 min, readiness −4%.” No drinks or amounts.'),
-    ).toBeTruthy();
+    expect(group.getByText('“Sleep need +10 min.” No drinks or amounts.')).toBeTruthy();
     fireEvent.click(group.getByText('Effects only'));
     expect(alc().settings.sharing).toBe('effects');
     fireEvent.click(group.getByText('Off'));

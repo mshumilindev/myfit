@@ -1679,7 +1679,7 @@ export const lt: Strings = {
   nicPrivSeeOff: 'Nieko',
   avlTitle: 'Prieinamumas',
   avlSeeFull: 'Kada esate laisvi ar užimti. Be priežasties.',
-  nicPrivSeeEffects: '„Miego poreikis +10 min., pasirengimas −3 %.“ Be produktų ir kiekių.',
+  nicPrivSeeEffects: '„Miego poreikis +10 min.“ Be produktų ir kiekių.',
   nicPrivSeeFull: 'Produktai ir jūsų įprasti kiekiai.',
   nicPrivData: 'Jūsų duomenys',
   nicPrivDelete: 'Ištrinti nikotino duomenis',
@@ -1833,7 +1833,7 @@ export const lt: Strings = {
   alcSfAfterSub: 'Užuominos apie alkoholį po treniruotės',
   alcoholDisclaimer:
     'Įverčiai grindžiami populiacijos tyrimais apie alkoholį, miegą ir pulsą. Individualus atsakas skiriasi. Tai nėra medicininis patarimas. Saugaus alkoholio kiekio sveikatai neįrodyta; žr. nacionalines rekomendacijas.',
-  alcPrivSeeEffects: '„Miego poreikis +10 min., pasirengimas −4 %.“ Be gėrimų ir kiekių.',
+  alcPrivSeeEffects: '„Miego poreikis +10 min.“ Be gėrimų ir kiekių.',
   alcPrivDelete: 'Ištrinti alkoholio duomenis',
   alcPrivDeleteAsk: 'Ištrinti visus alkoholio duomenis?',
   alcPrivDeleteBody:
