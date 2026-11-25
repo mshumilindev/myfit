@@ -3,6 +3,7 @@ import { ConfirmDialog } from '../components/ui/Overlays';
 import { currentUid } from '../api';
 import { useT } from '../i18n';
 import { refreshProgramMine, useProgramMine } from '../data/programMine';
+import { setHash } from '../route';
 import { storeHash } from '../addonStore/storeRoute';
 import { CatalogPage } from './CatalogPage';
 import type { CatalogEntry } from './catalog/types';
@@ -51,7 +52,7 @@ export function CatalogRoute({ onClose }: { onClose: () => void }) {
         onClose={onClose}
         onStart={start}
         onGetAddon={(id) => {
-          window.location.hash = storeHash('item', id);
+          setHash(storeHash('item', id));
         }}
         heldHint={trainerHolds ? s.heldHint : undefined}
         starting={starting}

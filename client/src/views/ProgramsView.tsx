@@ -25,6 +25,7 @@ import { ProgramsTabs, type ProgramsPeer } from '../components/ProgramsTabs';
 import { UserAvatar } from '../components/Avatar';
 import { clearProgramSeed, peekProgramSeed } from '../data/programSeed';
 import { PROGRAM_NET_KEY } from '../data/programMine';
+import { CatalogPromoRow } from './programs/CatalogPromoRow';
 import { ProgramTitle } from './programs/ProgramTitle';
 import { useTrainLikeAProHost } from '../trainLikeAProRt';
 import type { ProgramItemLike } from '../data/programCsv';
@@ -436,6 +437,7 @@ export function ProgramsView({
           <tlHost.EntryRow onOpen={() => goTo('#/train-like-a-pro')} />
         </section>
       )}
+      {!tlHost && <CatalogPromoRow />}
 
       <section>
         <div className="pg-label pg-label-row">
