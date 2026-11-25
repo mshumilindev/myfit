@@ -21,6 +21,8 @@ export function CatalogDetail(p: {
   /** A trainer's program is active: it cannot be replaced, so Start is off and says why. */
   heldHint?: string;
   starting?: boolean;
+  /** A result worth a line (saved offline, could not start). */
+  note?: string;
   onBack: () => void;
   onStart?: (e: CatalogEntry) => void;
   onGetAddon?: (id: CatalogNeed) => void;
@@ -61,6 +63,11 @@ export function CatalogDetail(p: {
           </>
         ) : (
           <>
+            {p.note && (
+              <Notice tone="rest" icon="info">
+                {p.note}
+              </Notice>
+            )}
             <Button
               fullWidth
               loading={p.starting}

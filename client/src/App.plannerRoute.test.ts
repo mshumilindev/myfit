@@ -18,3 +18,21 @@ describe('Planner route', () => {
     ).toBe('#/planner');
   });
 });
+
+describe('Train like a pro route', () => {
+  it('#/train-like-a-pro opens the catalog overlay on Programs and back', () => {
+    const r = fromHash('#/train-like-a-pro');
+    expect(r).toEqual({ tab: 'programs', overlay: { screen: 'train-like-a-pro' } });
+    expect(
+      toHash(
+        'programs',
+        r.overlay,
+        'mine' as never,
+        false,
+        'progress',
+        'total' as never,
+        'volume' as never,
+      ),
+    ).toBe('#/train-like-a-pro');
+  });
+});

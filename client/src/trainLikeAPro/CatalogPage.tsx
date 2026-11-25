@@ -36,6 +36,8 @@ export function CatalogPage(p: {
   onStart?: (e: CatalogEntry) => void;
   onGetAddon?: (id: CatalogNeed) => void;
   heldHint?: string;
+  starting?: boolean;
+  note?: string;
 }) {
   const { locale } = useT();
   const s = STRINGS[locale];
@@ -64,6 +66,8 @@ export function CatalogPage(p: {
         installed={installed}
         s={s}
         heldHint={p.heldHint}
+        starting={p.starting}
+        note={p.note}
         onBack={() => setOpenId(null)}
         onStart={p.onStart}
         onGetAddon={p.onGetAddon}

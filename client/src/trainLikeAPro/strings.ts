@@ -42,6 +42,17 @@ export interface TlStrings {
   notVerified: string;
   disclaimer: string;
   weekdays: string[];
+  /** Shown under Start when the trainer's program is the active one (the server refuses too). */
+  heldHint: string;
+  replaceTitle: string;
+  replaceBody: (current: string) => string;
+  replaceBtn: string;
+  cancel: string;
+  /** Created on this device, activation waits for the network. */
+  queued: string;
+  failed: string;
+  /** The quiet row on Programs. */
+  entrySub: string;
 }
 
 const fill1 = (s: string, n: number | string) => s.replace('{n}', String(n));
@@ -111,6 +122,18 @@ const en: TlStrings = {
   disclaimer:
     'Programs are described as published by the source. They are not made, endorsed or checked by the athletes or authors named, and Spotter is not affiliated with them.',
   weekdays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+  heldHint: "Your trainer's program is active. It can't be replaced here.",
+  replaceTitle: 'Replace your current program?',
+  replaceBody: (n) =>
+    '"{n}" is archived and your history stays. This program becomes your active one.'.replace(
+      '{n}',
+      n,
+    ),
+  replaceBtn: 'Replace and start',
+  cancel: 'Cancel',
+  queued: 'Saved on this device. It starts when you are online: tap Start again then.',
+  failed: 'Could not start the program. Try again.',
+  entrySub: 'Programs of famous athletes',
 };
 
 const uk: TlStrings = {
@@ -173,6 +196,16 @@ const uk: TlStrings = {
   disclaimer:
     'Програми описано так, як їх опублікувало джерело. Названі атлети й автори їх не створювали, не схвалювали й не перевіряли, а Spotter з ними не повʼязаний.',
   weekdays: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
+  heldHint: 'Активна програма від вашого тренера. Тут її замінити не можна.',
+  replaceTitle: 'Замінити поточну програму?',
+  replaceBody: (n) =>
+    '«{n}» піде в архів, історія залишиться. Ця програма стане активною.'.replace('{n}', n),
+  replaceBtn: 'Замінити й почати',
+  cancel: 'Скасувати',
+  queued:
+    'Збережено на пристрої. Програма почнеться, коли ви будете онлайн: тоді натисніть старт ще раз.',
+  failed: 'Не вдалося почати програму. Спробуйте ще раз.',
+  entrySub: 'Програми відомих атлетів',
 };
 
 const pl: TlStrings = {
@@ -235,6 +268,15 @@ const pl: TlStrings = {
   disclaimer:
     'Programy są opisane tak, jak opublikowało je źródło. Wymienieni sportowcy i autorzy ich nie stworzyli, nie zatwierdzili ani nie sprawdzili, a Spotter nie jest z nimi powiązany.',
   weekdays: ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nd'],
+  heldHint: 'Aktywny jest program od Twojego trenera. Nie można go tu zastąpić.',
+  replaceTitle: 'Zastąpić obecny program?',
+  replaceBody: (n) =>
+    '„{n}” trafi do archiwum, historia zostanie. Ten program stanie się aktywny.'.replace('{n}', n),
+  replaceBtn: 'Zastąp i zacznij',
+  cancel: 'Anuluj',
+  queued: 'Zapisano na urządzeniu. Ruszy, gdy będziesz online: wtedy użyj startu jeszcze raz.',
+  failed: 'Nie udało się rozpocząć programu. Spróbuj ponownie.',
+  entrySub: 'Programy znanych sportowców',
 };
 
 const lt: TlStrings = {
@@ -307,6 +349,16 @@ const lt: TlStrings = {
   disclaimer:
     'Programos aprašytos taip, kaip jas paskelbė šaltinis. Paminėti sportininkai ir autoriai jų nesukūrė, nepatvirtino ir nepatikrino, o „Spotter“ su jais nėra susijęs.',
   weekdays: ['Pr', 'An', 'Tr', 'Kt', 'Pn', 'Št', 'Sk'],
+  heldHint: 'Aktyvi jūsų trenerio programa. Čia jos pakeisti negalima.',
+  replaceTitle: 'Pakeisti dabartinę programą?',
+  replaceBody: (n) =>
+    '„{n}“ bus archyvuota, istorija liks. Ši programa taps aktyvia.'.replace('{n}', n),
+  replaceBtn: 'Pakeisti ir pradėti',
+  cancel: 'Atšaukti',
+  queued:
+    'Išsaugota įrenginyje. Ji prasidės, kai būsite prisijungę: tada dar kartą paspauskite pradžią.',
+  failed: 'Nepavyko pradėti programos. Bandykite dar kartą.',
+  entrySub: 'Žinomų sportininkų programos',
 };
 
 const et: TlStrings = {
@@ -364,6 +416,15 @@ const et: TlStrings = {
   disclaimer:
     'Programmid on kirjeldatud nii, nagu allikas need avaldas. Nimetatud sportlased ja autorid ei loonud, ei kiitnud heaks ega kontrollinud neid ning Spotter ei ole nendega seotud.',
   weekdays: ['E', 'T', 'K', 'N', 'R', 'L', 'P'],
+  heldHint: 'Aktiivne on teie treeneri programm. Siin seda asendada ei saa.',
+  replaceTitle: 'Kas asendada praegune programm?',
+  replaceBody: (n) =>
+    '„{n}” arhiveeritakse, ajalugu jääb alles. See programm muutub aktiivseks.'.replace('{n}', n),
+  replaceBtn: 'Asenda ja alusta',
+  cancel: 'Tühista',
+  queued: 'Salvestatud seadmesse. See algab, kui olete võrgus: siis vajutage alustamist uuesti.',
+  failed: 'Programmi alustamine ebaõnnestus. Proovige uuesti.',
+  entrySub: 'Kuulsate sportlaste programmid',
 };
 
 export const STRINGS: Record<LocaleId, TlStrings> = { en, uk, pl, lt, et };

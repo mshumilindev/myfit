@@ -25,6 +25,7 @@ import { ProgramsTabs, type ProgramsPeer } from '../components/ProgramsTabs';
 import { UserAvatar } from '../components/Avatar';
 import { clearProgramSeed, peekProgramSeed } from '../data/programSeed';
 import { PROGRAM_NET_KEY } from '../data/programMine';
+import { useTrainLikeAProHost } from '../trainLikeAProRt';
 import type { ProgramItemLike } from '../data/programCsv';
 import { knownExercises } from '../store';
 import { Icon } from '../ui';
@@ -238,6 +239,7 @@ export function ProgramsView({
   }, [loadAssignments]);
 
   const programNames = useLibraryNames(programs ?? []);
+  const tlHost = useTrainLikeAProHost();
   const peopleById = useMemo(() => new Map(people.map((p) => [p.id, p])), [people]);
   const membersOn = (id: string): Person[] =>
     assignments
@@ -426,6 +428,12 @@ export function ProgramsView({
         <ClientProgramExtrasLazy />
       </section>
 
+      {tlHost?.EntryRow && (
+        <section>
+          <tlHost.EntryRow onOpen={() => goTo('#/train-like-a-pro')} />
+        </section>
+      )}
+
       <section>
         <div className="pg-label pg-label-row">
           <span>{t.pgCreatedByMe}</span>
@@ -438,7 +446,7 @@ export function ProgramsView({
           </Card>
         )}
         {!failed && programs === null && <RowListSkeleton rows={3} withAvatar={false} />}
-        {programs && programs.length === 0 && <p className="pg-empty">{t.progEmpty}</p>}
+        {programs && written.length === 0 && <p className="pg-empty">{t.progEmpty}</p>}
         <div className="pg-tiles">
           {visible.map((p) => {
             const on = membersOn(p.id);

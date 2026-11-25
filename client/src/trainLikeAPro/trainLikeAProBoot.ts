@@ -4,7 +4,8 @@
  */
 import { trainLikeAProHost } from '../trainLikeAProRt';
 import { provide, trackerReady } from '../trackerRt';
+import { CatalogRoute } from './CatalogRoute';
+import { TlEntryRow } from './TlEntryRow';
 
-// Screens are provided here as they land (catalog page, entry row); the skeleton announces the chunk only.
-provide(trainLikeAProHost, {});
+provide(trainLikeAProHost, { Page: CatalogRoute, EntryRow: TlEntryRow });
 trackerReady('train-like-a-pro');

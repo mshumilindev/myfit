@@ -107,6 +107,7 @@ import { AtlasOutboxLazy } from './atlas/AtlasOutboxLazy';
 import { useAtlasOutboxClear } from './atlas/useAtlasOutboxClear';
 import { useAddonRuntime } from './addons/useAddonRuntime';
 import { usePlannerHost } from './plannerRt';
+import { useTrainLikeAProHost } from './trainLikeAProRt';
 import { usePeriodizationHost } from './periodizationRt';
 import { apexMastery } from './views/apexMastery';
 import { isStoreHash, StoreScreen, useRoleWithStore } from './addonStore/StoreEntry';
@@ -292,6 +293,7 @@ export type Overlay =
   | { screen: 'themes' }
   | { screen: 'privacy'; page?: 'sharing' }
   | { screen: 'planner' }
+  | { screen: 'train-like-a-pro' }
   | { screen: 'maxes' }
   | { screen: 'theme-settings' }
   | { screen: 'notifications' }
@@ -440,6 +442,7 @@ export function toHash(
   if (overlay?.screen === 'privacy')
     return overlay.page === 'sharing' ? '#/more/privacy/sharing' : '#/more/privacy';
   if (overlay?.screen === 'planner') return '#/planner';
+  if (overlay?.screen === 'train-like-a-pro') return '#/train-like-a-pro';
   if (overlay?.screen === 'maxes') return '#/maxes';
   if (overlay?.screen === 'theme-settings') return '#/theme-settings';
   if (overlay?.screen === 'builder') return '#/builder';
@@ -590,6 +593,8 @@ export function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   if (head === 'history') return { tab: 'today', overlay: { screen: 'history' } };
   if (head === 'themes') return { tab: 'today', overlay: { screen: 'themes' } };
   if (head === 'planner') return { tab: 'today', overlay: { screen: 'planner' } };
+  if (head === 'train-like-a-pro')
+    return { tab: 'programs', overlay: { screen: 'train-like-a-pro' } };
   if (head === 'maxes') return { tab: 'today', overlay: { screen: 'maxes' } };
   if (head === 'theme-settings') return { tab: 'today', overlay: { screen: 'theme-settings' } };
   if (head === 'builder') return { tab: 'today', overlay: { screen: 'builder' } };
@@ -810,6 +815,7 @@ function AppMain() {
     injuryOn,
   } = useAddonRuntime();
   const plannerHost = usePlannerHost();
+  const trainLikeAProHost = useTrainLikeAProHost();
   const periodizationHost = usePeriodizationHost();
   // Rank-up moment: once per crossing, compared against the last surfaced rating.
   useEffect(() => {
@@ -1137,6 +1143,7 @@ function AppMain() {
     (overlay?.screen === 'sleep' && !sleepOn && !nightLive) ||
     (overlay?.screen === 'themes' && !themesOn) ||
     (overlay?.screen === 'planner' && !plannerHost?.Page) ||
+    (overlay?.screen === 'train-like-a-pro' && !trainLikeAProHost?.Page) ||
     (overlay?.screen === 'maxes' && !periodizationHost?.MaxesPage) ||
     (overlay?.screen === 'mastery' && (!apexOn || !masteryOn)) ||
     ((overlay?.screen === 'log-activity' || overlay?.screen === 'activity') && !activitiesOn) ||
@@ -1691,6 +1698,9 @@ function AppMain() {
       )}
       {activeOverlay?.screen === 'planner' && plannerHost?.Page && (
         <plannerHost.Page onClose={closeOverlay} />
+      )}
+      {activeOverlay?.screen === 'train-like-a-pro' && trainLikeAProHost?.Page && (
+        <trainLikeAProHost.Page onClose={closeOverlay} />
       )}
       {activeOverlay?.screen === 'privacy' && (
         <Suspense fallback={<ScreenFallback />}>
