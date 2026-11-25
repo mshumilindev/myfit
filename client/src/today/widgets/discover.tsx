@@ -26,7 +26,6 @@ import { fmtDayMonth, fmtWeekdayShort, getLocale, type LocaleId } from '../../i1
 import type { Strings } from '../../i18n/en';
 import {
   BUILT_IN_CATALOG,
-  muscleInfoByName,
   richExerciseById,
   type MuscleGroup,
   type RichExercise,
@@ -41,7 +40,6 @@ import {
   activeRestPeriod,
   addExercise,
   dayKey,
-  equipmentFor,
   isStrengthExercise,
   liveSleep,
   pickSessionGym,
@@ -74,6 +72,7 @@ import type { WidgetCtx, WidgetDef } from '../registry';
 import { ds, type DiscoverStrings } from './discover.strings';
 import { DAY, hm, pct, signed } from './format';
 import { setHash } from '../../route';
+import { usedKit, KIT_CATS } from './discoverKitHelpers';
 
 /* ---------------------------------------------------------------- helpers */
 
@@ -480,18 +479,6 @@ const tip: WidgetDef = {
 
 /* ------------------------------------------------------------ kit spotlight */
 
-const KIT_CATS = new Set([
-  'machine',
-  'plateLoaded',
-  'cable',
-  'barbell',
-  'dumbbell',
-  'kettlebell',
-  'suspension',
-  'band',
-  'conditioning',
-  'bench',
-]);
 const MOVES_CACHE = new Map<string, string[]>();
 const PRESCRIPTION = ['3 × 10', '3 × 12', '3 × 15'];
 
@@ -521,38 +508,6 @@ function movesFor(item: EquipmentItem): string[] {
 }
 
 const ALL_MUSCLES: MuscleGroup[] = [...new Set(BUILT_IN_CATALOG.map((e) => e.muscle))];
-
-/** Kit the user has effectively used: items picked on a set, plus any item of a
- *  tool class they trained with whose muscles match the lift (a squat with a
- *  barbell counts for every full-body bar; a chest press does not count for the
- *  leg press). Looks at every finished workout, not only this gym. */
-function usedKit(store: WidgetCtx['store'], items: EquipmentItem[]): Set<string> {
-  const used = new Set<string>();
-  const byCls = new Map<string, Set<string>>(); // class → primary muscles trained with it
-  for (const w of store.workouts) {
-    if (w.finishedAt === null) continue;
-    for (const e of w.exercises) {
-      for (const id of e.equipmentItems ?? []) used.add(id);
-      const info = muscleInfoByName(e.name);
-      for (const cls of equipmentFor(e)) {
-        const set = byCls.get(cls) ?? new Set<string>();
-        if (info?.primary) set.add(info.primary);
-        byCls.set(cls, set);
-      }
-    }
-  }
-  for (const it of items) {
-    const ms = byCls.get(it.cls);
-    if (!ms) continue;
-    if (
-      it.muscles.length === 0 ||
-      it.muscles.includes('fullbody' as MuscleGroup) ||
-      it.muscles.some((m) => ms.has(m))
-    )
-      used.add(it.id);
-  }
-  return used;
-}
 
 const kit: WidgetDef = {
   id: 'kit-spotlight',

@@ -77,6 +77,7 @@ import { DAY, clock, signed } from './format';
 import { prRecords } from '../calendarData';
 import { fs, type FunStrings } from './fun.strings';
 import { Textarea } from '../../components/ui/Textarea';
+import { downscale, isoWeek } from './funPhotoHelpers';
 
 /* ---------------------------------------------------------------------------
  * Tiny local stores (this device only)
@@ -151,19 +152,6 @@ function fmtInt(n: number): string {
   return Math.round(n)
     .toString()
     .replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-}
-
-/** ISO week number of a timestamp. */
-function isoWeek(ts: number): number {
-  const d = new Date(ts);
-  const day = (d.getDay() + 6) % 7;
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() - day + 3);
-  const firstThu = new Date(d.getFullYear(), 0, 4);
-  return (
-    1 +
-    Math.round(((d.getTime() - firstThu.getTime()) / DAY - 3 + ((firstThu.getDay() + 6) % 7)) / 7)
-  );
 }
 
 /** Empty / invite card in any size — the kit's WidgetEmpty (+ an optional sheet). */
@@ -1024,30 +1012,6 @@ interface Photo {
 
 const photoStore = localStore<Photo[]>('progress-photos', []);
 const MAX_PHOTOS = 24;
-
-/** Read an image file and downscale it to a ~480px JPEG data URL. */
-function downscale(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error('read'));
-    reader.onload = () => {
-      const img = new Image();
-      img.onerror = () => reject(new Error('decode'));
-      img.onload = () => {
-        const k = Math.min(1, 480 / Math.max(img.width, img.height));
-        const c = document.createElement('canvas');
-        c.width = Math.round(img.width * k);
-        c.height = Math.round(img.height * k);
-        const g = c.getContext('2d');
-        if (!g) return reject(new Error('canvas'));
-        g.drawImage(img, 0, 0, c.width, c.height);
-        resolve(c.toDataURL('image/jpeg', 0.72));
-      };
-      img.src = String(reader.result);
-    };
-    reader.readAsDataURL(file);
-  });
-}
 
 function Thumb({ photo, label, h }: { photo: Photo | undefined; label?: string; h: number }) {
   return (

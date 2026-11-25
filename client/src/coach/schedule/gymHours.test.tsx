@@ -7,6 +7,15 @@ const m = vi.hoisted(() => ({
   parseOpeningHours: vi.fn(() => null),
 }));
 vi.mock('../../data/gymProviders', () => m);
+// The tests reset the module registry on purpose; the real Firebase init must not run twice in one world.
+vi.mock('../../firebase', () => ({
+  app: {},
+  auth: { currentUser: null },
+  db: {},
+  functions: {},
+  storage: {},
+  analytics: null,
+}));
 
 const WEEK = Array.from({ length: 7 }, () => [[360, 1380]]) as Array<Array<[number, number]>>;
 const gym = (id: string, extra: Partial<Gym> = {}): Gym =>
