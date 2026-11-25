@@ -1,0 +1,52 @@
+.uicc {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: var(--s-12);
+  width: 100%;
+  padding: var(--s-16);
+  text-align: left;
+  color: var(--color-text);
+}
+.uicc-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--s-6);
+  min-width: 0;
+}
+.uicc-who {
+  font-size: var(--fs-min);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.uicc-name {
+  min-width: 0;
+  font-size: var(--fs-18);
+  font-weight: 700;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+.uicc-meta {
+  display: block;
+  font-size: var(--fs-13);
+  color: var(--color-text-muted);
+}
+.uicc-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-6);
+}
+.uicc-go {
+  flex: none;
+  align-self: center;
+  color: var(--color-neutral-500);
+  font-size: var(--fs-18);
+}
+.uicc--locked .uicc-who,
+.uicc--locked .uicc-name,
+.uicc--locked .uicc-meta {
+  opacity: 0.65;
+}

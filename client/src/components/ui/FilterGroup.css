@@ -1,0 +1,22 @@
+.uifg {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.uifg-l {
+  padding: 0;
+  font-size: var(--fs-min);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-neutral-500);
+}
+.uifg-c {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+}

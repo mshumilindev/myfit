@@ -1018,7 +1018,43 @@ def o_battery3(c):
     return (0, 0, 0)
 
 
-OBJECTS = {'battery3': o_battery3, 'battery2': o_battery2, 'battery': o_battery, 'traffic': o_traffic, 'thermo': o_thermo, 'hourglass': o_hourglass, 'roller': o_roller, 'beaker': o_beaker, 'gauge': o_gauge, 'plate': o_plate, 'dumbbell': o_dumbbell, 'peak': o_peak, 'whistle': o_whistle, 'apple': o_apple, 'note': o_note, 'heart': o_heart,
+def o_medal(c):  # Train like a pro: gold medal on a ribbon, face-on. MEDAL_ANG (deg) swings it from the ring (animation).
+    import os
+    ang = float(os.environ.get('MEDAL_ANG', '0'))
+    gold = pbr('#e8b93a', metal=1.0, rough=0.2)
+    gold_l = pbr('#f6d26a', metal=1.0, rough=0.14)
+    gold_d = pbr('#c9962a', metal=1.0, rough=0.3)
+    cream = pbr('#f3ead6', rough=0.65, coat=0.1)
+    navy = pbr('#1d3a78', rough=0.6, coat=0.1)
+    pz = 0.33  # ring height: pivot of the swing
+    zc = -0.35 - pz  # disc centre (pivot at origin)
+    yf = -0.52
+    # ribbon: two slanted bands meeting under the ring
+    for s in (-1, 1):
+        band = [(s * 0.62, 1.05 - pz), (s * 0.24, 1.05 - pz), (s * 0.02, 0.36 - pz), (s * 0.4, 0.36 - pz)]
+        slab(band, 0.05, cream, yf, 0.012, 3)
+        stripe = [(s * 0.47, 1.05 - pz), (s * 0.38, 1.05 - pz), (s * 0.17, 0.36 - pz), (s * 0.26, 0.36 - pz)]
+        slab(stripe, 0.02, navy, yf - 0.02, 0.006, 3)
+    # ring and disc
+    torus((0, -0.5, 0.0), 0.12, 0.035, gold)
+    cyl((0, -0.45, zc), 0.62, 0.12, gold, 'Y', 0.03, verts=128)
+    torus((0, -0.53, zc), 0.57, 0.045, gold_l)
+    cyl((0, -0.5, zc), 0.5, 0.06, gold_d, 'Y', 0.01, verts=128)
+    for k in range(48):  # fine reeded edge marks on the inner field
+        a = 2 * math.pi * k / 48
+        box((0.53 * math.cos(a), -0.545, zc + 0.53 * math.sin(a)), (0.022, 0.012, 0.05), gold_l, 0.004, rot=(0, -a + math.pi / 2, 0))
+    # barbell emblem on the face (replaces a star): bar, two plates each side, collars
+    yb = yf - 0.04
+    cyl((0, yb + 0.02, zc), 0.03, 0.74, gold_l, 'X', 0.005)
+    for sx in (-1, 1):
+        box((sx * 0.17, yb, zc), (0.075, 0.05, 0.42), gold_l, 0.012)
+        box((sx * 0.265, yb, zc), (0.065, 0.05, 0.3), gold_l, 0.012)
+        box((sx * 0.335, yb, zc), (0.05, 0.05, 0.19), gold_l, 0.01)
+    box((0, yb, zc), (0.1, 0.05, 0.07), gold_l, 0.012)
+    return (0, ang, 0, (0, 0, pz))
+
+
+OBJECTS = {'medal': o_medal, 'battery3': o_battery3, 'battery2': o_battery2, 'battery': o_battery, 'traffic': o_traffic, 'thermo': o_thermo, 'hourglass': o_hourglass, 'roller': o_roller, 'beaker': o_beaker, 'gauge': o_gauge, 'plate': o_plate, 'dumbbell': o_dumbbell, 'peak': o_peak, 'whistle': o_whistle, 'apple': o_apple, 'note': o_note, 'heart': o_heart,
            'moon': o_moon, 'activity': o_activity, 'house': o_house, 'target': o_target, 'book': o_book, 'sparkle': o_sparkle,
            'broadcast': o_broadcast, 'bell': o_bell, 'notes': o_notes, 'team': o_team, 'lens': o_lens, 'cyber': o_cyber, 'gift': o_gift, 'trophy': o_trophy, 'banana': o_banana, 'stopwatch': o_stopwatch, 'brain': o_brain, 'calendar': o_calendar, 'cal_b': o_cal_b, 'cal_c': o_cal_c, 'cal_d': o_cal_d, 'cal_e': o_cal_e, 'cal_f': o_cal_f, 'cal_g': o_cal_g, 'cal_h': o_cal_h, 'cal_i': o_cal_i, 'cal_j': o_cal_j}
 
@@ -1032,4 +1068,6 @@ def build(gname, tone):
     for ob in OBJS:
         ob.parent = emp
     emp.rotation_euler = (math.radians(pose[0]), math.radians(pose[1]), math.radians(pose[2]))
+    if len(pose) > 3:
+        emp.location = pose[3]
     emp.scale = (0.92, 0.92, 0.92)

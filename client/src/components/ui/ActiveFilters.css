@@ -1,0 +1,17 @@
+.uiaf {
+  display: flex;
+  align-items: center;
+  gap: var(--s-8);
+  min-width: 0;
+}
+.uiaf-c {
+  display: flex;
+  flex: 1;
+  gap: var(--s-8);
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.uiaf-c > * {
+  flex: none;
+}

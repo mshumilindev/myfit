@@ -34,10 +34,12 @@ TONES = {
     4: ('#0a7046', '#0d7f50'), 5: ('#4b4b55', '#6b6b76'), 6: ('#0a6b7a', '#0e7c8f'), 7: ('#a3135f', '#be185d'),
     8: ('#4a6a08', '#587d0a'), 9: ('#0a5fa0', '#0f74c4'),
     10: ('#a2762f', '#cf9a46'), 11: ('#6b4bb0', '#7d59c8'), 12: ('#a12f52', '#c9426a'), 13: ('#227e87', '#289fa9'), 14: ('#336ea8', '#3d84c9'),
+    20: ('#2c2d35', '#4a4c58'),
     15: ('#1f7f6e', '#2fa58f'), 16: ('#3a45a0', '#5662c4'), 17: ('#c5651f', '#ea8a38'), 18: ('#55803f', '#7aa95c'), 19: ('#2b4a5c', '#3f6a80'),
 }
 # item -> (glyph builder name, tone) ; tones from addons/manifest.ts
 ITEMS = {
+    'train-like-a-pro': ('medal', 20),
     'fatigue-readiness': ('battery3', 4), 'fr-battery': ('battery', 4), 'fr-traffic': ('traffic', 4), 'fr-thermo': ('thermo', 4), 'fr-hourglass': ('hourglass', 4), 'fr-roller': ('roller', 4), 'fr-beaker': ('beaker', 4),
     'advanced-training': ('plate', 3),
     'gym': ('dumbbell', 10), 'apex': ('trophy', 11), 'coach': ('whistle', 13), 'nutrition': ('banana', 14), 'music': ('note', 12),
