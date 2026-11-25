@@ -71,7 +71,7 @@ function mount(id = 'open', sh: Shell = shell(), extra: { past?: boolean } = {})
 }
 
 beforeEach(() => {
-  addonsPref.set(['circuit', 'supersets']);
+  addonsPref.set(['circuit', 'supersets', 'fatigue-readiness', 'muscle-map']);
   localStorage.clear();
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
@@ -124,6 +124,15 @@ describe('SessionView · exercise options (focus options sheet)', () => {
     expect(within(d).getByRole('button', { name: /Muscle map/ })).toBeTruthy();
     await userEvent.click(within(d).getByRole('button', { name: /Muscle map/ }));
     expect(document.querySelector('.muscle-map-sheet')).toBeTruthy();
+  });
+
+  it('has no muscle map without the Muscle map add-on', async () => {
+    addonsPref.set(['circuit', 'supersets']);
+    seed([two()]);
+    const { container } = mount();
+    const d = await openOpts(container);
+    expect(within(d).queryByRole('button', { name: /Muscle map/ })).toBeNull();
+    expect(within(container).queryByRole('button', { name: /Muscle map/ })).toBeNull();
   });
 
   it('duplicates the exercise together with its sets', async () => {

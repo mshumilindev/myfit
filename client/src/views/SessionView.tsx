@@ -4,6 +4,7 @@ import {
   equipmentAvailable,
   useEquipmentOn,
   useFatigueOn,
+  useMuscleMapOn,
   usePlaybookOn,
   useReadinessOn,
 } from '../addons/featureGates';
@@ -584,6 +585,7 @@ export function SessionView(props: {
   const equipmentH = useEquipmentHost(); // Equipment: the picker sheet arrives with its chunk
   const equipmentOn = useEquipmentOn();
   const readinessOn = useReadinessOn();
+  const muscleMapOn = useMuscleMapOn();
   const StatePanel = fatigueHost.MuscleStatePanel; // from the add-on's chunk; null until it arrives
   const fatigueOn = useFatigueOn();
   const conditionLimits = useStoredConditionLimits(); // restriction: RPE cap / no-failure / rest scale stay on with the feature off
@@ -4908,7 +4910,7 @@ export function SessionView(props: {
               <div className="muscles-worked">
                 <div className="section-label mworked-head">
                   <span>{props.past ? t.muscleGroupsWorked : t.musclesWorkedLabel}</span>
-                  {!muscleMapInPill && !props.past && (
+                  {muscleMapOn && !muscleMapInPill && !props.past && (
                     <Button
                       variant="secondary"
                       size="sm"
@@ -5037,7 +5039,6 @@ export function SessionView(props: {
                     <Button
                       variant="ghost"
                       className="session-discard-btn umt-8"
-
                       onClick={() => setDialog({ kind: 'del-workout' })}
                     >
                       <Icon name="trash" />
@@ -5241,17 +5242,19 @@ export function SessionView(props: {
                         <Icon name="sliders-horizontal" />
                         {t.sessionSettings}
                       </Button>
-                      <Button
-                        variant="secondary"
-                        className="session-map-btn"
-                        onClick={() => setSheet({ kind: 'musclemap' })}
-                      >
-                        <Icon name="person" />
-                        {t.muscleMapButton}
-                      </Button>
+                      {muscleMapOn && (
+                        <Button
+                          variant="secondary"
+                          className="session-map-btn"
+                          onClick={() => setSheet({ kind: 'musclemap' })}
+                        >
+                          <Icon name="person" />
+                          {t.muscleMapButton}
+                        </Button>
+                      )}
                     </>
                   )}
-                  {props.past && muscleWorkSorted(workout).length > 0 && (
+                  {muscleMapOn && props.past && muscleWorkSorted(workout).length > 0 && (
                     <Button
                       variant="secondary"
                       className="session-map-btn"
@@ -5336,15 +5339,17 @@ export function SessionView(props: {
               label={t.addExercise}
               title={t.addExercise}
             />
-            <IconButton
-              icon="person"
-              variant="ghost"
-              shape="round"
-              className="sp-btn sp-map"
-              onClick={() => setSheet({ kind: 'musclemap' })}
-              label={t.muscleMapButton}
-              title={t.muscleMapButton}
-            />
+            {muscleMapOn && (
+              <IconButton
+                icon="person"
+                variant="ghost"
+                shape="round"
+                className="sp-btn sp-map"
+                onClick={() => setSheet({ kind: 'musclemap' })}
+                label={t.muscleMapButton}
+                title={t.muscleMapButton}
+              />
+            )}
           </div>
           <div className="glass-pill">
             <IconButton
@@ -5609,11 +5614,7 @@ export function SessionView(props: {
           }}
           onDelete={
             sheet.set
-              ? () =>
-                  removeSet(
-                    workout.exercises.find((e) => e.id === sheet.exId)!,
-                    sheet.set!,
-                  )
+              ? () => removeSet(workout.exercises.find((e) => e.id === sheet.exId)!, sheet.set!)
               : undefined
           }
           onExerciseSettings={
@@ -5716,13 +5717,15 @@ export function SessionView(props: {
                 )}
               </div>
               <div className="opts-pinned">
-                <Button
-                  variant="secondary"
-                  icon="person"
-                  onClick={() => setSheet({ kind: 'musclemap' })}
-                >
-                  {t.muscleMapButton}
-                </Button>
+                {muscleMapOn && (
+                  <Button
+                    variant="secondary"
+                    icon="person"
+                    onClick={() => setSheet({ kind: 'musclemap' })}
+                  >
+                    {t.muscleMapButton}
+                  </Button>
+                )}
                 {ex && tab !== 'session' ? (
                   <Button variant="danger" icon="trash" onClick={() => requestDeleteExercise(ex)}>
                     {t.deleteExercise}
@@ -5819,7 +5822,7 @@ export function SessionView(props: {
         />
       )}
 
-      {sheet?.kind === 'musclemap' && (
+      {muscleMapOn && sheet?.kind === 'musclemap' && (
         <SessionMuscleMap
           workout={workout}
           now={now}
