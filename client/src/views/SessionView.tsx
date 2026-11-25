@@ -1352,7 +1352,7 @@ export function SessionView(props: {
       .filter((n): n is number => n !== null);
     const primary = resolveMuscles(ex).primary;
     const finished = store.workouts.filter((w) => w.finishedAt !== null);
-    const stalled = !!primary && stalledMuscles(finished, wallClock()).has(primary);
+    const stalled = !!primary && stalledMuscles(fatigueSource(finished), wallClock()).has(primary);
     return dropTolerance(past, stalled);
   }
   /** Growth value of one more set of this lift vs the first set (0..1). */

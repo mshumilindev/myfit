@@ -5,7 +5,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { addonsPref } from '../addons/enabledSet';
 import { fatigueSource, readinessSource } from '../fatigueApi';
-import { muscleFatigue } from '../fatigue';
+import { muscleFatigue, stalledMuscles } from '../fatigue';
 import { directReadiness, fatigueByGroup, readinessByGroup } from '../picker';
 import { cachedPersonalLandmarks, personalLandmarks } from '../personalize';
 import type { Exercise, Workout } from '../types';
@@ -69,6 +69,13 @@ describe('neutral values without the add-on', () => {
     expect(cachedPersonalLandmarks(HISTORY, NOW)).toBe(on);
     addonsPref.set([]);
     expect(cachedPersonalLandmarks(HISTORY, NOW)).not.toBe(on);
+  });
+
+  it('what is stalled (drop tolerance in a live session) reads an empty history without the add-on', () => {
+    addonsPref.set([]);
+    expect(stalledMuscles(fatigueSource(HISTORY), NOW).size).toBe(0);
+    addonsPref.set(['fatigue-readiness', 'fatigue']);
+    expect(stalledMuscles(fatigueSource(HISTORY), NOW)).toEqual(stalledMuscles(HISTORY, NOW));
   });
 
   it('never changes the stored history', () => {
