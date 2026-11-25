@@ -1,16 +1,16 @@
 /* Superset desktop table column widths (Supersets chunk) */
 .ss-table .ss-col-idx {
-  width: 44px;
+  width: var(--sz-44);
 }
 .ss-table .ss-col-muscles {
-  width: 210px;
+  width: 13.125rem;
 }
 .ss-table .ss-col-equip {
-  width: 150px;
+  width: var(--sz-150);
 }
 .ss-table .ss-col-round {
-  width: 90px;
+  width: 5.625rem;
 }
 .ss-table .ss-col-last {
-  width: 110px;
+  width: 6.875rem;
 }

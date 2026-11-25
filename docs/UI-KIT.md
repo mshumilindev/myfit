@@ -634,7 +634,6 @@ has CSS, a story and a test. Source of truth for look and states: the approved d
 | `SkBackground`     | Animated three-layer wave background, reduced-motion safe, aria-hidden                                                                                                          |
 | `SkHighlight`      | Search match mark: renders text parts, matched ones highlighted                                                                                                                 |
 
-
 ## Weekly-cycle pieces: CycleStrip, LoadField, RepRange (SPO-609)
 
 Three controlled kit parts for the Periodization add-on's editor (the add-on's logic stays in its chunk; the kit holds no training maths and no words, the caller passes both).
