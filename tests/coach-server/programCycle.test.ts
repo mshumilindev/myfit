@@ -1,6 +1,7 @@
 /** Planned sessions of a program with a weekly cycle (SPO-609): what "expected so far" is measured against. */
 import { describe, expect, it } from 'vitest';
 import {
+  plannedFor,
   plannedInWeek,
   plannedThrough,
   type CycledProgram,
@@ -59,5 +60,18 @@ describe('planned sessions', () => {
       cycle: { length: 15, weeks: [] },
     };
     expect(plannedInWeek(long, 13)).toBe(plannedInWeek(long, 1));
+  });
+});
+
+describe('start week of an assigned cycle program', () => {
+  const six = { ...cycled, weeks: 6 };
+  it('from week 1: everything counts', () => {
+    expect(plannedFor(six, 3)).toEqual({ total: 16, planned: 8 });
+  });
+  it('from week 3: weeks 1 and 2 (3 + 4 sessions) were never started, so they are neither expected nor in the total', () => {
+    expect(plannedFor(six, 3, 3)).toEqual({ total: 16 - 7, planned: 8 - 7 });
+  });
+  it('an open-ended program has no total but still skips the unstarted weeks', () => {
+    expect(plannedFor({ ...cycled, weeks: 0 }, 5, 3)).toEqual({ total: 0, planned: 15 - 7 });
   });
 });

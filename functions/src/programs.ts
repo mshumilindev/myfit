@@ -19,7 +19,7 @@ import {
   type UserDoc,
 } from './lib';
 import { listUserWorkouts } from './aggregates';
-import { plannedThrough } from './programCycle';
+import { plannedFor } from './programCycle';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -81,10 +81,7 @@ export async function programProgress(memberId: string) {
   const week = openEnded
     ? Math.floor(elapsedDays / 7) + 1
     : Math.min(p.weeks, Math.floor(elapsedDays / 7) + 1);
-  // Weeks before the start week were never started: they are neither expected nor counted in the total.
-  const skipped = plannedThrough(p, Math.max(0, (asg.startWeek ?? 1) - 1));
-  const total = openEnded ? 0 : Math.max(0, plannedThrough(p, p.weeks) - skipped);
-  const planned = Math.max(0, plannedThrough(p, week) - skipped);
+  const { total, planned } = plannedFor(p, week, asg.startWeek);
   const expectedSoFar = openEnded ? Math.max(1, planned) : Math.min(total, Math.max(1, planned));
   return {
     program: p,

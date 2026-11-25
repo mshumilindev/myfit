@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from 'react';
 import { Tag } from './Tag';
 import type { Tone } from './tones';
 import './CycleStrip.css';
@@ -26,16 +27,35 @@ export interface CycleStripProps {
  * ringed. Words come from the caller (the kit holds no dictionary).
  */
 export function CycleStrip({ weeks, value, onPick, label }: CycleStripProps) {
+  // Tablist keyboard model: one tab stop (the selected week), arrows / Home / End move the selection and the focus.
+  const move = (e: KeyboardEvent<HTMLButtonElement>, i: number) => {
+    const to =
+      e.key === 'ArrowRight' || e.key === 'ArrowDown'
+        ? Math.min(weeks.length - 1, i + 1)
+        : e.key === 'ArrowLeft' || e.key === 'ArrowUp'
+          ? Math.max(0, i - 1)
+          : e.key === 'Home'
+            ? 0
+            : e.key === 'End'
+              ? weeks.length - 1
+              : -1;
+    if (to < 0) return;
+    e.preventDefault();
+    onPick?.(weeks[to].n);
+    (e.currentTarget.parentElement?.children[to] as HTMLElement | undefined)?.focus();
+  };
   return (
     <div className="uicy" role="tablist" aria-label={label}>
-      {weeks.map((w) => (
+      {weeks.map((w, i) => (
         <button
           key={w.n}
           type="button"
           role="tab"
           aria-selected={w.n === value}
+          tabIndex={w.n === value ? 0 : -1}
           className="uicy-wk"
           onClick={() => onPick?.(w.n)}
+          onKeyDown={(e) => move(e, i)}
         >
           <b>{w.title}</b>
           <Tag tone={w.tone ?? 'neutral'}>{w.tag}</Tag>

@@ -2,6 +2,7 @@ import { currentHash } from '../route';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { setViewport } from '../coach/testViewport';
+import { addonsPref } from '../addons/enabledSet';
 import { setLocale } from '../i18n';
 import { en } from '../i18n/en';
 import { pgEn } from '../i18n/coachProgram.en';
@@ -69,6 +70,13 @@ vi.mock('../coach/client/lazy', () => ({
   ClientTrainerDayTagLazy: () => null,
 }));
 
+vi.mock('../periodizationRt', async (orig) => ({
+  ...(await orig<typeof import('../periodizationRt')>()),
+  usePeriodizationHost: vi.fn(() => null),
+}));
+
+import { periodizationHost } from '../periodizationApi';
+import { usePeriodizationHost } from '../periodizationRt';
 import { ProgramsView } from './ProgramsView';
 
 const item = (day: number, id = `i${day}`) => ({
@@ -194,6 +202,26 @@ describe('ProgramsView: the list', () => {
 });
 
 describe('ProgramsView: My program', () => {
+  it('names the cycle week on my program while Periodization is live, and says nothing without it', async () => {
+    addonsPref.set(['periodization']);
+    periodizationHost.cycleNote = (_p, week) => `Cycle week ${week} of 4`;
+    periodizationHost.weekPlan = (() => ({})) as never;
+    const cycle = { length: 4, weeks: [] };
+    m.mine.assignment = assignment(prog('t1', 'Coach plan', { authorId: 'tr', cycle }), {
+      week: 3,
+    });
+    mount();
+    expect(await screen.findByText('Coach plan')).toBeTruthy();
+    expect(screen.queryByText('Cycle week 3 of 4')).toBeNull(); // module off: nothing
+    cleanup();
+    vi.mocked(usePeriodizationHost).mockReturnValue(periodizationHost);
+    mount();
+    expect(await screen.findByText('Cycle week 3 of 4')).toBeTruthy();
+    vi.mocked(usePeriodizationHost).mockReturnValue(null);
+    periodizationHost.cycleNote = null;
+    periodizationHost.weekPlan = null;
+    addonsPref.reset();
+  });
   it('shows the program I am on, the week and who set it', async () => {
     m.mine.assignment = assignment(prog('t1', 'Coach plan', { authorId: 'tr' }), {
       assignedBy: 'Carl',

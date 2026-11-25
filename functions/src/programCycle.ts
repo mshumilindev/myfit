@@ -41,3 +41,19 @@ export function plannedThrough(p: CycledProgram, through: number): number {
   for (let w = 1; w <= through; w++) n += plannedInWeek(p, w);
   return n;
 }
+
+/**
+ * What a member is measured against: sessions planned over the whole program (`total`, 0 when open-ended) and through the
+ * current `week`. Weeks before `startWeek` were never started, so they count in neither.
+ */
+export function plannedFor(
+  p: CycledProgram & { weeks: number },
+  week: number,
+  startWeek = 1,
+): { total: number; planned: number } {
+  const skipped = plannedThrough(p, Math.max(0, startWeek - 1));
+  return {
+    total: p.weeks === 0 ? 0 : Math.max(0, plannedThrough(p, p.weeks) - skipped),
+    planned: Math.max(0, plannedThrough(p, week) - skipped),
+  };
+}

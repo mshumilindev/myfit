@@ -638,7 +638,7 @@ has CSS, a story and a test. Source of truth for look and states: the approved d
 
 Three controlled kit parts for the Periodization add-on's editor (the add-on's logic stays in its chunk; the kit holds no training maths and no words, the caller passes both).
 
-- **`CycleStrip`** (`weeks: {n, title, tag, tone?}[]`, `value`, `onPick`, `label`): one cell per week of a cycle (`role="tablist"`, each cell a `tab`), the picked week ringed, a hint `Tag` under each title. Scrolls sideways for long cycles. Not for: choosing between a few options (`Segmented`).
+- **`CycleStrip`** (`weeks: {n, title, tag, tone?}[]`, `value`, `onPick`, `label`): one cell per week of a cycle (`role="tablist"`, each cell a `tab`), the picked week ringed, a hint `Tag` under each title. Keyboard: one tab stop (the picked week), arrows / Home / End move the pick and the focus. Scrolls sideways for long cycles. Not for: choosing between a few options (`Segmented`).
 - **`LoadField`** (`mode: 'kg' | 'pct'`, `kg`, `pct`, `labels`, `hint?`, `hintWarn?`, `hintAction?`): how heavy a row is, in kilograms or as a percent of the person's max, with what the percent comes to under it (or a warning when there is no max yet). The caller computes the hint.
 - **`RepRange`** (`reps`, `repsMin?`, `labels`, `onChange({reps, repsMin?})`): one rep number by default; "Use a range" swaps it for from / to, "Use one number" swaps back. Valid while from < to.
 

@@ -5,6 +5,7 @@ import { Notice } from '../../../components/ui/Notice';
 import { WeekdayToggle } from '../../../components/ui/WeekdayToggle';
 import { BandRow, BandText, ChangeList } from '../../../tools/programEditor';
 import type { PgStrings } from '../../../i18n/coachProgram';
+import { weekPlanFor, type WeekSource } from '../../../periodizationApi';
 import { trainingDays, type Program } from '../../../views/programs/model';
 import type { Dow } from '../../domain/types';
 import { coachDayMonth } from '../../format';
@@ -35,12 +36,30 @@ export interface AssignmentCardProps {
   onCopyTo: (clientId: string) => void;
 }
 
+/** Weekdays any week of the program trains on: the base week, plus every other cycle week while Periodization is live. */
+export function trainingDaysOfAnyWeek(p: Program): Set<number> {
+  const out = new Set(trainingDays(p));
+  const len = Math.min(12, Math.floor(p.cycle?.length ?? 0));
+  for (let w = 2; w <= len; w++) {
+    const wp = weekPlanFor(p as unknown as WeekSource, w);
+    for (const d of trainingDays({
+      ...p,
+      items: wp.items,
+      dayNames: wp.dayNames,
+      targetMuscles: wp.targetMuscles,
+    }))
+      out.add(d);
+  }
+  return out;
+}
+
 /** The Coach content of the info band: shared-program notice, trainer days (on the ASSIGNMENT, not the program) and the version row with its true diff. */
 export function AssignmentCard(a: AssignmentCardProps) {
   const { p, bundle: b } = a;
   const first = firstName(a.clientName);
   const trainer = firstName(b.trainerName);
-  const days = new Set(trainingDays(a.draft));
+  // a day only a later cycle week trains on is not stale
+  const days = trainingDaysOfAnyWeek(a.draft);
   const others = b.sharedWith;
   const withDays = DOW_OF_ISO.filter(
     (d) => a.trainerDays.includes(d) && days.has(DOW_OF_ISO.indexOf(d) + 1),

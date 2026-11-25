@@ -18,6 +18,8 @@ import { callFn, currentUid, getRole, getUsername, trackMutation } from '../api'
 import { db } from '../firebase';
 import { offlineHydrate, offlineDedupe, offlineRevalidate } from '../offline/offlineCache';
 import { useT } from '../i18n';
+import { cycleNoteFor, type WeekSource } from '../periodizationApi';
+import { usePeriodizationHost } from '../periodizationRt';
 import type { Shell } from '../App';
 import { ProgramsTabs, type ProgramsPeer } from '../components/ProgramsTabs';
 import { UserAvatar } from '../components/Avatar';
@@ -65,7 +67,8 @@ export function ProgramsView({
   /** Peer tabs (Programs ↔ Exercises…) owned by App; now a back link to Overview. */
   onProgramsTab?: (peer: ProgramsPeer) => void;
 }) {
-  const { t } = useT();
+  const { t, locale } = useT();
+  const periodization = usePeriodizationHost();
   const role = getRole();
   const isCoach = role === 'trainer' || role === 'admin';
   const [programs, setPrograms] = useState<Program[] | null>(null);
@@ -363,6 +366,10 @@ export function ProgramsView({
     const p = mine.program;
     const byMe = p.authorId === currentUid() || mine.assignedBy === getUsername();
     const authored = (programs ?? []).find((x) => x.id === p.id);
+    // Where the person is in the cycle ("Cycle week 3 of 4 · Deload"): only while Periodization is live, as on Today.
+    const cycleLine = periodization
+      ? cycleNoteFor(p as unknown as WeekSource, mine.week, locale)
+      : null;
     return (
       <Card
         as="button"
@@ -388,6 +395,7 @@ export function ProgramsView({
         </span>
         <span className="pg-card-name">{p.name}</span>
         <span className="pg-card-meta">{lengthText(p)}</span>
+        {cycleLine ? <span className="pg-card-meta">{cycleLine}</span> : null}
       </Card>
     );
   })();
