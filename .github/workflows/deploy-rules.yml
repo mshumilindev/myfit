@@ -1,0 +1,37 @@
+name: Deploy Firestore rules
+
+# Publishes firestore.rules to the shared project (spotter-64c3b). Manual run, behind the `production` environment.
+# Secret: FIREBASE_SERVICE_ACCOUNT (same as Deploy hosting). The service account needs "Firebase Rules Admin"
+# (or Editor) on top of its hosting/functions roles.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-rules
+  cancel-in-progress: false
+
+env:
+  FIREBASE_PROJECT: spotter-64c3b
+
+jobs:
+  deploy:
+    name: Deploy rules
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Deploy firestore.rules
+        env:
+          FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$FIREBASE_SA" > "$RUNNER_TEMP/sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          trap 'rm -f "$RUNNER_TEMP/sa.json"' EXIT
+          npx -y firebase-tools@15.34.1 deploy --only firestore:rules --project "$FIREBASE_PROJECT" --non-interactive
