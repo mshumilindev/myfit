@@ -402,3 +402,7 @@ html[data-theme] .pg-mine .pg-card-name {
 .pg-actchips .uichip .ui-icon {
   font-size: var(--fs-14);
 }
+
+.pg-who {
+  color: var(--color-accent-400);
+}

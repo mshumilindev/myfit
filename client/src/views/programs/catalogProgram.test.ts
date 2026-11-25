@@ -35,3 +35,22 @@ describe('catalog program marker', () => {
     expect(isOwnProgram(a({ ...base, origin: { v: 1, id: 'x' } }))).toBe(false);
   });
 });
+
+describe('ProgramTitle', () => {
+  it('puts the athlete first in the accent colour for a catalog program only', async () => {
+    const { render, cleanup } = await import('@testing-library/react');
+    const { createElement } = await import('react');
+    const { ProgramTitle } = await import('./ProgramTitle');
+    const cat = render(
+      createElement(ProgramTitle, {
+        program: { name: 'Reg Park: 5x5', origin: { v: 1, id: 'x' } } as never,
+      }),
+    );
+    expect(cat.container.querySelector('.pg-who')?.textContent).toBe('Reg Park');
+    expect(cat.container.textContent).toBe('Reg Park: 5x5');
+    cleanup();
+    const plain = render(createElement(ProgramTitle, { program: { name: 'A: B' } }));
+    expect(plain.container.querySelector('.pg-who')).toBeNull();
+    cleanup();
+  });
+});

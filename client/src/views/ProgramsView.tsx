@@ -25,6 +25,7 @@ import { ProgramsTabs, type ProgramsPeer } from '../components/ProgramsTabs';
 import { UserAvatar } from '../components/Avatar';
 import { clearProgramSeed, peekProgramSeed } from '../data/programSeed';
 import { PROGRAM_NET_KEY } from '../data/programMine';
+import { ProgramTitle } from './programs/ProgramTitle';
 import { useTrainLikeAProHost } from '../trainLikeAProRt';
 import type { ProgramItemLike } from '../data/programCsv';
 import { knownExercises } from '../store';
@@ -398,7 +399,9 @@ export function ProgramsView({
             <span className="pg-by">{t.progStatusMine}</span>
           )}
         </span>
-        <span className="pg-card-name">{p.name}</span>
+        <span className="pg-card-name">
+          <ProgramTitle program={p} />
+        </span>
         <span className="pg-card-meta">{lengthText(p)}</span>
         {cycleLine ? <span className="pg-card-meta">{cycleLine}</span> : null}
       </Card>

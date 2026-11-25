@@ -67,6 +67,7 @@ import {
 import { cycleNoteFor, type WeekSource } from '../periodizationApi';
 import { usePeriodizationHost } from '../periodizationRt';
 import { compactProgramDaySummary, effectiveSets } from './programs/model';
+import { ProgramTitle } from './programs/ProgramTitle';
 import type { MuscleGroup } from '../data/exercises';
 import {
   activeRestPeriod,
@@ -1013,7 +1014,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             <Icon name={headIcon} className="pch-icon" />
             <div className="pch-text">
               <div className="pch-kicker">{kicker}</div>
-              <div className="n">{a.program.name}</div>
+              <div className="n">
+                <ProgramTitle program={a.program} />
+              </div>
               {!compact && (
                 <div className="s">
                   {a.program.weeks !== 0 ? `${t.progWeekN(a.week)} · ` : ''}
