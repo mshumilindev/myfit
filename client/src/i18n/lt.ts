@@ -1829,6 +1829,7 @@ export const lt: Strings = {
     'Palikite tuščia, jei dėsningumo nėra: savaitės kiekis tada paskirstomas tolygiai per visą savaitę.',
   alcCalcMaster: 'Naudoti alkoholį mano skaičiuose',
   alcCalcMasterSub: 'Atsigavimas, miegas, nuovargis, progresija, tendencijos',
+  alcCalcMasterSubPlain: 'Miegas, progresija, tendencijos',
   alcSfAfterSub: 'Užuominos apie alkoholį po treniruotės',
   alcoholDisclaimer:
     'Įverčiai grindžiami populiacijos tyrimais apie alkoholį, miegą ir pulsą. Individualus atsakas skiriasi. Tai nėra medicininis patarimas. Saugaus alkoholio kiekio sveikatai neįrodyta; žr. nacionalines rekomendacijas.',
@@ -1963,6 +1964,7 @@ export const lt: Strings = {
   ] as string[],
   alcCheckTitle: (on: string) => `Ar ${on} buvo alkoholio?`,
   alcCheckSub: 'Jūsų atsakymas naudojamas atsigavimo rodikliuose.',
+  alcCheckSubPlain: 'Jūsų atsakymas naudojamas skaičiavimuose.',
   alcCheckNo: 'Ne',
   alcCheckUsual: (g: number) => `Kaip įprastai (≈ ${g} g)`,
   alcCheckOther: 'Kitas kiekis',

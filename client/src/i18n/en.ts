@@ -1799,6 +1799,7 @@ export const en = {
     'Leave empty if there is no pattern: your weekly amount is then spread evenly across the week.',
   alcCalcMaster: 'Use alcohol in my numbers',
   alcCalcMasterSub: 'Recovery, sleep, fatigue, progression, trends',
+  alcCalcMasterSubPlain: 'Sleep, progression, trends',
   alcSfAfterSub: 'Hints about alcohol after training',
   alcoholDisclaimer:
     'Estimates are based on population studies of alcohol, sleep and heart rate. Individual response varies. This is not medical advice. Alcohol has no proven safe level for health; see your national guidance.',
@@ -1930,6 +1931,7 @@ export const en = {
   ] as string[],
   alcCheckTitle: (on: string) => `Did you have a drink ${on}?`,
   alcCheckSub: 'Your recovery numbers use your answer.',
+  alcCheckSubPlain: 'Your answer is used in the calculations.',
   alcCheckNo: 'No',
   alcCheckUsual: (g: number) => `Usual (≈ ${g} g)`,
   alcCheckOther: 'Different amount',

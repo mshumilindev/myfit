@@ -8,6 +8,7 @@
  */
 import { useState } from 'react';
 import { useT } from '../i18n';
+import { useFatigueOn, useReadinessOn } from '../addons/featureGates';
 import { Button } from './ui/Button';
 import { Card } from './ui/Card';
 import { IconTile } from './ui/IconTile';
@@ -83,6 +84,9 @@ function AmountSheet({
 
 export function AlcoholCheckinCard() {
   const { t } = useT();
+  const readinessOn = useReadinessOn();
+  const fatigueOn = useFatigueOn();
+  const recoveryOn = readinessOn && fatigueOn;
   const pending = usePendingAlcoholCheckin();
   const [sheet, setSheet] = useState(false);
   const [hidden, setHidden] = useState(false);
@@ -99,7 +103,7 @@ export function AlcoholCheckinCard() {
             <div id="alc-check-t" className="ut-base ut-w6">
               {t.alcCheckTitle(t.alcCheckOn[wd])}
             </div>
-            <div className="ut-sm ut-muted">{t.alcCheckSub}</div>
+            <div className="ut-sm ut-muted">{recoveryOn ? t.alcCheckSub : t.alcCheckSubPlain}</div>
           </div>
         </div>
         <div

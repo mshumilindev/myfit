@@ -53,7 +53,7 @@ export function AlcoholCalcView({ onBack }: AlcoholCalcViewProps) {
       master={settings.useInCalculations}
       onMaster={setAlcoholUseInCalculations}
       masterLabel={t.alcCalcMaster}
-      masterSub={t.alcCalcMasterSub}
+      masterSub={gone.size ? t.alcCalcMasterSubPlain : t.alcCalcMasterSub}
       surfaces={settings.surfaces}
       onSurface={setAlcoholSurface}
       research={RESEARCH.filter((x) => !gone.has(x))}

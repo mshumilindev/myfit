@@ -1800,6 +1800,7 @@ export const et: Strings = {
     'Jäta tühjaks, kui mustrit pole: nädalakogus jaotatakse siis ühtlaselt üle kogu nädala.',
   alcCalcMaster: 'Arvesta alkoholi minu numbrites',
   alcCalcMasterSub: 'Taastumine, uni, väsimus, progressioon, trendid',
+  alcCalcMasterSubPlain: 'Uni, progressioon, trendid',
   alcSfAfterSub: 'Vihjed alkoholi kohta pärast treeningut',
   alcoholDisclaimer:
     'Hinnangud põhinevad alkoholi, une ja pulsi populatsiooniuuringutel. Individuaalne reaktsioon on erinev. See ei ole meditsiiniline nõuanne. Tervisele ohutut alkoholitaset pole tõestatud; vaata riiklikke juhiseid.',
@@ -1933,6 +1934,7 @@ export const et: Strings = {
   ] as string[],
   alcCheckTitle: (on: string) => `Kas ${on} oli alkoholi?`,
   alcCheckSub: 'Sinu vastust kasutatakse taastumisnäitajates.',
+  alcCheckSubPlain: 'Sinu vastust kasutatakse arvutustes.',
   alcCheckNo: 'Ei',
   alcCheckUsual: (g: number) => `Nagu tavaliselt (≈ ${g} g)`,
   alcCheckOther: 'Muu kogus',

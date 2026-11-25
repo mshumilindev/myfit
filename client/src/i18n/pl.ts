@@ -1814,6 +1814,7 @@ export const pl: Strings = {
     'Zostaw puste, jeśli nie ma reguły: tygodniowa ilość jest wtedy rozłożona równo na cały tydzień.',
   alcCalcMaster: 'Uwzględniaj alkohol w moich liczbach',
   alcCalcMasterSub: 'Regeneracja, sen, zmęczenie, progresja, trendy',
+  alcCalcMasterSubPlain: 'Sen, progresja, trendy',
   alcSfAfterSub: 'Wskazówki o alkoholu po treningu',
   alcoholDisclaimer:
     'Szacunki opierają się na badaniach populacyjnych dotyczących alkoholu, snu i tętna. Indywidualna reakcja bywa różna. To nie jest porada medyczna. Nie udowodniono bezpiecznego poziomu alkoholu dla zdrowia; zobacz krajowe zalecenia.',
@@ -1948,6 +1949,7 @@ export const pl: Strings = {
   ] as string[],
   alcCheckTitle: (on: string) => `Czy ${on} był alkohol?`,
   alcCheckSub: 'Twoja odpowiedź wpływa na wskaźniki regeneracji.',
+  alcCheckSubPlain: 'Twoja odpowiedź jest używana w obliczeniach.',
   alcCheckNo: 'Nie',
   alcCheckUsual: (g: number) => `Jak zwykle (≈ ${g} g)`,
   alcCheckOther: 'Inna ilość',
