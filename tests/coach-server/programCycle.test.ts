@@ -33,16 +33,31 @@ describe('planned sessions', () => {
   it('a deload week lowers what is expected, so it is not counted as missed', () => {
     expect(plannedThrough(cycled, 3) - plannedThrough(cycled, 2)).toBe(1);
   });
-  it('target-muscle days count; unnamed rows and broken cycles do not break it', () => {
+  it('target-muscle, row and day-name days count; a missing week is the base week', () => {
     const muscles: CycledProgram = {
       daysPerWeek: 2,
-      items: [],
+      items: [{ day: 1, name: 'Squat' }],
       cycle: {
-        length: 2,
-        weeks: [{ targetMuscles: { '2': ['chest'], '4': [] }, items: [{ day: 4, name: ' ' }] }],
+        length: 3,
+        weeks: [
+          {
+            targetMuscles: { '2': ['chest'], '4': [] },
+            items: [{ day: 4, name: ' ' }],
+            dayNames: { '6': 'Arms', '7': ' ' },
+          },
+        ],
       },
     };
-    expect(plannedInWeek(muscles, 2)).toBe(1);
-    expect(plannedInWeek({ daysPerWeek: 4, items: [], cycle: { length: 3 } }, 2)).toBe(4);
+    expect(plannedInWeek(muscles, 2)).toBe(3); // day 2 (muscles), day 4 (a row), day 6 (a name)
+    expect(plannedInWeek(muscles, 3)).toBe(1); // week 3 missing: the base week
+    expect(plannedInWeek({ daysPerWeek: 4, items: [], cycle: { length: 1 } }, 2)).toBe(4);
+  });
+  it('a cycle longer than 12 is cut to 12, like the client', () => {
+    const long: CycledProgram = {
+      daysPerWeek: 3,
+      items: [it1(1)],
+      cycle: { length: 15, weeks: [] },
+    };
+    expect(plannedInWeek(long, 13)).toBe(plannedInWeek(long, 1));
   });
 });

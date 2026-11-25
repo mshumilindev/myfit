@@ -3,7 +3,7 @@
  * The week is the cycle week when Periodization is live, else the program's own (`periodizationApi.weekPlanFor`).
  */
 import type { MuscleGroup } from './exercises';
-import { weekPlanFor, type WeekSource } from '../periodizationApi';
+import { cycleLiveFor, weekPlanFor, type WeekSource } from '../periodizationApi';
 import { readProgramMemory } from './programMemory';
 
 export interface CachedAssignment {
@@ -13,6 +13,8 @@ export interface CachedAssignment {
     items?: { day: number }[];
   };
   week?: number;
+  /** When program week 1 began (the assignment, moved back for a later start week). */
+  startedAt?: number;
 }
 export function readAssignment(): CachedAssignment | null {
   try {
@@ -41,10 +43,16 @@ export function prescribedTrainingDays(): Set<number> {
 }
 
 /** How many days back a "missed" marker is trustworthy — roughly since the
- *  program began (bounded by its current week), matching programDayNameFor. */
-export function programLookbackDays(): number {
+ *  program began (bounded by its current week), matching programDayNameFor.
+ *  With a live weekly cycle the plan on hand is only the current week's, so older days are not judged against it
+ *  (a deload week must not flag last week's days as missed): the lookback stops at the start of the current week. */
+export function programLookbackDays(now: number = Date.now()): number {
   const a = readAssignment();
-  return a ? (a.week ?? 1) * 7 + 6 : 0;
+  if (!a) return 0;
+  const full = (a.week ?? 1) * 7 + 6;
+  if (!cycleLiveFor(a.program as unknown as WeekSource) || !a.startedAt) return full;
+  const into = Math.max(0, Math.floor((now - a.startedAt) / 86_400_000)) % 7;
+  return Math.min(full, into);
 }
 
 /** The assigned program's day name for a weekday (1=Mon…7=Sun), or null. Used to

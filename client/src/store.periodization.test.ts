@@ -102,3 +102,33 @@ describe('what the assigned program prescribes in a cycle week', () => {
     expect(store.programDayNameForWeekday(3)).toBeNull();
   });
 });
+
+describe('how far back "missed" is judged with a cycle', () => {
+  const DAY = 86_400_000;
+  const started = Date.UTC(2026, 10, 2); // week 1 began on a Monday
+  const at = (days: number) => started + days * DAY + 3_600_000;
+  const withStart = (week: number) => ({ ...(plan(week) as object), startedAt: started }) as never;
+
+  it('module on: stops at the start of the current program week (earlier weeks had other days)', () => {
+    addonsPref.set(['periodization']);
+    periodizationHost.weekPlan = activeWeekPlan as never;
+    setProgramMemory(withStart(2));
+    expect(store.programLookbackDays(at(7))).toBe(0); // first day of week 2
+    expect(store.programLookbackDays(at(10))).toBe(3);
+    expect(store.programLookbackDays(at(13))).toBe(6);
+  });
+  it('module off: the old window, since the program began', () => {
+    setProgramMemory(withStart(2));
+    expect(store.programLookbackDays(at(10))).toBe(20);
+  });
+  it('a program without a cycle keeps the old window even with the module on', () => {
+    addonsPref.set(['periodization']);
+    periodizationHost.weekPlan = activeWeekPlan as never;
+    setProgramMemory({
+      week: 2,
+      startedAt: started,
+      program: { dayNames: { '1': 'Squat' }, targetMuscles: {}, items: [{ day: 1 }] },
+    } as never);
+    expect(store.programLookbackDays(at(10))).toBe(20);
+  });
+});

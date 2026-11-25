@@ -47,6 +47,10 @@ interface AssignmentDoc {
   programId: string;
   assignedBy: string;
   startedAt: number;
+  /** Real assignment time; `startedAt` is moved back by (startWeek - 1) weeks to place the member on that program week. */
+  assignedAt?: number;
+  /** First program week the member trains (cycle programs); weeks before it are not expected. */
+  startWeek?: number;
 }
 
 async function programById(id: string): Promise<ProgramDoc | null> {
@@ -69,14 +73,18 @@ export async function programProgress(memberId: string) {
   if (p.status !== 'active') return null;
   const by = await usersById(asg.assignedBy);
   const workouts = await listUserWorkouts(memberId);
-  const done = workouts.filter((w) => w.startedAt >= asg.startedAt && w.finishedAt !== null).length;
+  const done = workouts.filter(
+    (w) => w.startedAt >= (asg.assignedAt ?? asg.startedAt) && w.finishedAt !== null,
+  ).length;
   const openEnded = p.weeks === 0;
   const elapsedDays = Math.max(0, Math.floor((Date.now() - asg.startedAt) / DAY_MS));
   const week = openEnded
     ? Math.floor(elapsedDays / 7) + 1
     : Math.min(p.weeks, Math.floor(elapsedDays / 7) + 1);
-  const total = openEnded ? 0 : plannedThrough(p, p.weeks);
-  const planned = plannedThrough(p, week);
+  // Weeks before the start week were never started: they are neither expected nor counted in the total.
+  const skipped = plannedThrough(p, Math.max(0, (asg.startWeek ?? 1) - 1));
+  const total = openEnded ? 0 : Math.max(0, plannedThrough(p, p.weeks) - skipped);
+  const planned = Math.max(0, plannedThrough(p, week) - skipped);
   const expectedSoFar = openEnded ? Math.max(1, planned) : Math.min(total, Math.max(1, planned));
   return {
     program: p,
@@ -169,6 +177,8 @@ export const assignProgram = onCall(async (req) => {
     programId: p.id,
     assignedBy: uid,
     startedAt,
+    assignedAt: Date.now(),
+    startWeek: sw,
   });
   await db.collection('programs').doc(p.id).update({ status: 'active', updatedAt: Date.now() });
   if (memberId !== uid) {

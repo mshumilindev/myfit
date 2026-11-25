@@ -749,6 +749,59 @@ c(
   { authorId: T, status: 'draft' },
   ended,
 );
+// weekly cycles: a client that predates `cycleV` must not be able to drop a stored cycle
+const withCycle = (d: Db) => {
+  d['programs/prg-client1-1'] = { authorId: T, status: 'active', cycleV: 1, cycle: { length: 4 } };
+};
+c(
+  'J20',
+  'old client saves a cycle program without cycleV (would drop the cycle)',
+  'update',
+  'programs/prg-client1-1',
+  au(T, 'trainer'),
+  false,
+  { authorId: T, status: 'active' },
+  withCycle,
+);
+c(
+  'J21',
+  'new client keeps the cycle (cycleV 1 and cycle present)',
+  'update',
+  'programs/prg-client1-1',
+  au(T, 'trainer'),
+  true,
+  { authorId: T, status: 'active', cycleV: 1, cycle: { length: 4 } },
+  withCycle,
+);
+c(
+  'J22',
+  'new client switches the cycle off on purpose (cycleV 0)',
+  'update',
+  'programs/prg-client1-1',
+  au(T, 'trainer'),
+  true,
+  { authorId: T, status: 'active', cycleV: 0 },
+  withCycle,
+);
+c(
+  'J23',
+  'cycleV 1 without a cycle is refused',
+  'update',
+  'programs/prg-client1-1',
+  au(T, 'trainer'),
+  false,
+  { authorId: T, status: 'active', cycleV: 1 },
+  withCycle,
+);
+c(
+  'J24',
+  'old client still saves a program that never had a cycle',
+  'update',
+  'programs/prg-client1-1',
+  au(T, 'trainer'),
+  true,
+  { authorId: T, status: 'draft' },
+);
 // misc
 c('K01', 'anyone reads coachKeys (directory)', 'get', `coachKeys/${T}`, au(M), true);
 c('K02', 'signed-out read coachKeys', 'get', `coachKeys/${T}`, null, false);

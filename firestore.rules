@@ -226,6 +226,14 @@ service cloud.firestore {
         : p.size() == 8 ? p[1] + '-' + p[2] + '-' + p[3] + '-' + p[4] + '-' + p[5] + '-' + p[6]
         : '';
     }
+    // Weekly cycles (SPO-618): a program stored with `cycleV == 1` may only be saved by a client that writes `cycleV`
+    // (1 keeps the cycle, 0 switches it off on purpose). A client from before cycles rebuilds the document from a fixed
+    // field list and would silently drop the cycle and the percent loads, so its save is refused instead.
+    function keepsCycle() {
+      return !(resource.data.get('cycleV', 0) == 1)
+        || (request.resource.data.get('cycleV', -1) in [0, 1]
+          && (request.resource.data.cycleV == 0 || 'cycle' in request.resource.data));
+    }
     function prgOk(pid) {
       return !pid.matches('prg-.*')
         || (prgClient(pid) != '' && isActiveCoachOf(prgClient(pid)));
@@ -969,7 +977,8 @@ service cloud.firestore {
       allow update: if isSignedIn()
         && resource.data.authorId == uid()
         && request.resource.data.authorId == uid()
-        && prgOk(programId);
+        && prgOk(programId)
+        && keepsCycle();
       allow delete: if isSignedIn() && resource.data.authorId == uid() && prgOk(programId);
     }
 

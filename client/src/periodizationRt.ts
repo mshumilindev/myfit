@@ -15,7 +15,7 @@ export type { PeriodizationHost } from './periodizationApi';
 // The data export always names Advanced training: its files when the chunk is loaded, otherwise "not included" (the data stays stored).
 registerAddonExport('advanced-training', () =>
   periodizationHost.exportFiles
-    ? { files: periodizationHost.exportFiles(), missing: [] }
+    ? periodizationHost.exportFiles()
     : {
         files: [],
         missing: [

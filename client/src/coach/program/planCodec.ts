@@ -239,6 +239,8 @@ export function runnableProgram(
   void _e;
   return {
     ...base,
+    // The writer marker of the cycle (rules refuse a save over a cycle program that omits it): derived, never stored in a version
+    cycleV: base.cycle ? 1 : 0,
     id: o.id,
     authorId: o.authorId,
     status: 'draft',

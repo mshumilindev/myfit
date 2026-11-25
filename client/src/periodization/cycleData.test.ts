@@ -4,6 +4,7 @@ import './periodizationBoot';
 import {
   duplicateOf,
   freshProgram,
+  MAX_WEEK_ROWS,
   normalizeProgram,
   toSaved,
   type Program,
@@ -192,6 +193,22 @@ describe('copies get fresh ids', () => {
 });
 
 describe('document size', () => {
+  it('a week keeps at most MAX_WEEK_ROWS rows, so a cycle cannot outgrow the document', () => {
+    const many = Array.from({ length: MAX_WEEK_ROWS + 30 }, (_, i) =>
+      row((i % 7) + 1, { id: `r${i}` }),
+    );
+    const saved = toSaved(base({ items: many }), 'u', 'x');
+    expect(saved.items).toHaveLength(MAX_WEEK_ROWS);
+    const cyc = toSaved(
+      base({
+        items: many,
+        cycle: { length: 2, weeks: [{ dayNames: {}, targetMuscles: {}, items: many }] },
+      }),
+      'u',
+      'x',
+    );
+    expect(cyc.cycle?.weeks[0]?.items).toHaveLength(MAX_WEEK_ROWS);
+  });
   it('a 12-week cycle of 7 days x 12 rows with the longest names and notes stays below 80% of the 1 MiB document limit (measured: about 548 KB)', () => {
     const rows = (): ProgramItem[] =>
       Array.from({ length: 7 * 12 }, (_, i) =>

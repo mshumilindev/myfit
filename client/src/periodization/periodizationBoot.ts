@@ -14,7 +14,7 @@ import { StartWeekField } from './editor/StartWeekField';
 import { CycleWrap, RowLoad, RowReps, WeekBar } from './editor/CycleEditor';
 import { maxFor } from './maxes';
 import { MaxesPage } from './MaxesPage';
-import { getTypedMaxes, startMaxesSync } from './maxesSync';
+import { getTypedMaxes, isMaxesLoaded, startMaxesSync } from './maxesSync';
 import { STRINGS } from './strings';
 import { TargetLine } from './TargetLine';
 
@@ -48,14 +48,28 @@ provide(periodizationHost, {
     label: STRINGS[locale].name,
     onSelect: open,
   }),
-  exportFiles: () => [
-    {
-      name: 'maxes.json',
-      about: 'The maxes you typed, per exercise (kg).',
-      content: { kind: 'json', value: getTypedMaxes() },
-      rows: Object.keys(getTypedMaxes().maxes).length,
-    },
-  ],
+  exportFiles: () =>
+    isMaxesLoaded()
+      ? {
+          files: [
+            {
+              name: 'maxes.json',
+              about: 'The maxes you typed, per exercise (kg).',
+              content: { kind: 'json', value: getTypedMaxes() },
+              rows: Object.keys(getTypedMaxes().maxes).length,
+            },
+          ],
+          missing: [],
+        }
+      : {
+          files: [],
+          missing: [
+            {
+              item: 'Your typed maxes (still loading: try again in a moment)',
+              reason: 'not-loaded',
+            },
+          ],
+        },
 });
 trackerReady('periodization');
 

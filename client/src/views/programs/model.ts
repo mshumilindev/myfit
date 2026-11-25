@@ -92,6 +92,11 @@ export interface Program {
   activitiesEnc?: VaultEnvelope;
   /** Optional weekly cycle; absent = every week is the same. Kept stored while the add-on is off. */
   cycle?: ProgramCycle;
+  /**
+   * Writer marker for `cycle` (1 = the document carries a cycle, 0 = deliberately none). Clients that predate weekly
+   * cycles never write it, and `firestore.rules` refuses their save over a cycle program instead of letting them drop it.
+   */
+  cycleV?: 0 | 1;
   updatedAt?: number;
 }
 
@@ -311,11 +316,17 @@ function savedItems(src: ProgramItem[]): ProgramItem[] {
     });
 }
 
+/**
+ * Most rows one saved week keeps (12 a day). The program is one Firestore document (1 MiB) that carries every cycle week, so
+ * the cap is what keeps a 12-week cycle under the limit: `cycleData.test.ts` measures exactly this worst case.
+ */
+export const MAX_WEEK_ROWS = 84;
+
 /** The saved days of one week: rows, day names, and target muscles only for days without rows. */
 export function savedWeekParts(
   src: Pick<WeekPlan, 'items' | 'dayNames' | 'targetMuscles'>,
 ): Pick<WeekPlan, 'items' | 'dayNames' | 'targetMuscles'> {
-  const items = savedItems(src.items ?? []);
+  const items = savedItems(src.items ?? []).slice(0, MAX_WEEK_ROWS);
   const withItems = new Set(items.map((i) => String(i.day)));
   const targetMuscles: Record<string, MuscleGroup[]> = {};
   for (const [d, ms] of Object.entries(sanitizeTargetMuscles(src.targetMuscles))) {
@@ -346,6 +357,7 @@ export function toSaved(p: Program, uid: string, fallbackName: string): Program 
     targetMuscles,
     items,
     ...(savedCycle ? { cycle: savedCycle } : {}),
+    cycleV: savedCycle ? 1 : 0,
     // Sealing happens at write time (activitiesVault.ts); a list this device can't
     // open (`activities` undefined) keeps its stored envelope.
     ...(p.activities !== undefined

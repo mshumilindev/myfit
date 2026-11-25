@@ -13,7 +13,7 @@ import type { MoreMenuItem } from './components/ui/MoreMenu';
 import type { ProgramCycle, ProgramItem, WeekPlan } from './views/programs/modelTypes';
 import type { MuscleGroup } from './data/exercises';
 import type { Exercise } from './types';
-import type { ExportFile } from './legal/export/exportTypes';
+import type { AddonExportPart } from './legal/export/addonExport';
 import type { EditorSlots, ProgramEditorHost } from './tools/programEditor/host';
 
 /** The least a program must have for a cycle to apply to it. */
@@ -42,7 +42,7 @@ export interface PeriodizationHost {
   /** The one plain row in More. */
   moreItem: ((locale: LocaleId, open: () => void) => MoreMenuItem) | null;
   /** The typed maxes, decrypted on this device, for the data export. */
-  exportFiles: (() => ExportFile[]) | null;
+  exportFiles: (() => AddonExportPart) | null;
   /** The person's max for an exercise in kg (typed, else the estimate from history); null when there is none. */
   maxFor: ((exerciseName: string) => number | null) | null;
   /** The days of program week `week` (the cycle week it falls on). */
@@ -96,6 +96,9 @@ export const periodizationHost: PeriodizationHost = {
 
 /** True when the module is installed and its chunk has filled the host. */
 const live = (): boolean => periodizationAvailable() && periodizationHost.weekPlan !== null;
+
+/** True when this program's weeks differ (it has a cycle and the module is live), so a past day belongs to its own cycle week. */
+export const cycleLiveFor = (p: Pick<WeekSource, 'cycle'>): boolean => !!p.cycle && live();
 
 /** The days to train in program week `week`: the cycle week when the module is live, else the program's own week. */
 export function weekPlanFor(p: WeekSource, week: number): WeekPlan {
