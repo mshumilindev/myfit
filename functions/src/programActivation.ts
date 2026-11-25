@@ -19,6 +19,8 @@ export interface ActivationInput {
   assignedProgramStatus: string | null;
   /** Role of the user who made the current assignment; null = that user does not exist. */
   assignerRole: string | null;
+  /** Only catalog programs (Train like a pro) are refused over a trainer's program; ordinary programs keep the old behaviour. */
+  protectTrainer: boolean;
 }
 
 export type ActivationPlan = 'noop' | 'blocked' | 'apply';
@@ -27,6 +29,7 @@ export function planActivation(i: ActivationInput): ActivationPlan {
   const a = i.assignment;
   if (a && a.programId === i.programId && i.programStatus === 'active') return 'noop';
   if (
+    i.protectTrainer &&
     a &&
     a.assignedBy !== i.uid &&
     i.assignedProgramStatus === 'active' &&

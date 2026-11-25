@@ -136,7 +136,13 @@ export const setProgramStatus = onCall(async (req) => {
       const freshSnap = await tx.get(db.collection('programs').doc(id));
       let assignedProgramStatus: string | null = null;
       let assignerRole: string | null = null;
-      if (asg && asg.programId !== id) {
+      const validAsg =
+        !!asg &&
+        typeof asg.programId === 'string' &&
+        asg.programId.length > 0 &&
+        typeof asg.assignedBy === 'string' &&
+        asg.assignedBy.length > 0;
+      if (asg && validAsg && asg.programId !== id) {
         const ap = await tx.get(db.collection('programs').doc(asg.programId));
         assignedProgramStatus = ap.exists ? String((ap.data() as ProgramDoc).status) : null;
         const au = await tx.get(db.collection('users').doc(asg.assignedBy));
@@ -150,9 +156,11 @@ export const setProgramStatus = onCall(async (req) => {
         programId: id,
         programStatus: String((freshSnap.data() as ProgramDoc | undefined)?.status ?? ''),
         trainerId: me.trainerId ?? null,
-        assignment: asg ? { programId: asg.programId, assignedBy: asg.assignedBy } : null,
+        assignment:
+          asg && validAsg ? { programId: asg.programId, assignedBy: asg.assignedBy } : null,
         assignedProgramStatus,
         assignerRole,
+        protectTrainer: id.startsWith('tl-'),
       });
       if (plan === 'noop') return;
       if (plan === 'blocked') throw new HttpsError('failed-precondition', 'trainer-program');

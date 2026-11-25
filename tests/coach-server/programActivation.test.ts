@@ -10,6 +10,7 @@ const base: ActivationInput = {
   assignment: null,
   assignedProgramStatus: null,
   assignerRole: null,
+  protectTrainer: true,
 };
 const held = (o: Partial<ActivationInput> = {}): ActivationInput => ({
   ...base,
@@ -56,6 +57,19 @@ describe('planActivation', () => {
   it("an active trainer's program is never replaced", () => {
     expect(planActivation(held())).toBe('blocked');
     expect(planActivation(held({ assignerRole: 'admin', trainerId: null }))).toBe('blocked');
+  });
+  it('an ordinary (non-catalog) program keeps the old behaviour: replaces the trainer assignment', () => {
+    expect(planActivation(held({ protectTrainer: false }))).toBe('apply');
+  });
+  it('an active program without an assignment is applied, not a false noop', () => {
+    expect(planActivation({ ...base, programStatus: 'active' })).toBe('apply');
+    expect(
+      planActivation({
+        ...base,
+        programStatus: 'active',
+        assignment: { programId: 'prg-x', assignedBy: 'm1' },
+      }),
+    ).toBe('apply');
   });
   it('a stale assignment does not lock the member out', () => {
     expect(planActivation(held({ assignedProgramStatus: null }))).toBe('apply'); // program deleted
