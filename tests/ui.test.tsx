@@ -1,7 +1,7 @@
 import React from 'react';
 import { act, cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Shell } from '../client/src/App';
 import { App } from '../client/src/App';
 import type { StoreState } from '../client/src/store';
@@ -17,6 +17,13 @@ import { AdminView } from '../client/src/views/AdminView';
 import { ProgramsView } from '../client/src/views/ProgramsView';
 import { addExercise, __getStateForTests, __replaceStateForTests } from '../client/src/store';
 import { setRole } from '../client/src/api';
+import { addonsPref } from '../client/src/addons/queue';
+// The add-on chunks' code, as it is once they are installed (the store/session read it through their hosts).
+import '../client/src/supersets/supersetsBoot';
+import '../client/src/setTypes/setTypesBoot';
+import '../client/src/effort/effortBoot';
+import '../client/src/equipment/equipmentBoot';
+import '../client/src/circuit/circuitBoot';
 import { emptyCycleState } from '../client/src/cycle/cycleState';
 
 // Test shim standing in for the removed setAuth: mark a signed-in user so
@@ -787,6 +794,15 @@ describe.skip('F-09 programs UI', () => {
 });
 
 describe('F-03 session UI', () => {
+  // The session screen's supersets, set types, effort and equipment are add-ons: this world installs them, and removes them again.
+  let installedBefore: string[] = [];
+  beforeEach(() => {
+    installedBefore = [...addonsPref.get()];
+    addonsPref.set(['equipment', 'supersets', 'circuit', 'effort', 'set-types']);
+  });
+  afterEach(() => {
+    addonsPref.set(installedBefore);
+  });
   it('renders a live session without tabbar and exposes ghost row logging', () => {
     const s = sampleStore();
     __replaceStateForTests(s);

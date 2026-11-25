@@ -2,6 +2,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import type { StoreState } from '../client/src/store';
 import { addonsPref } from '../client/src/addons/queue';
+// The add-on chunks' code, as it is once they are installed (the store/session read it through their hosts).
+import '../client/src/supersets/supersetsBoot';
+import '../client/src/setTypes/setTypesBoot';
+import '../client/src/effort/effortBoot';
+import '../client/src/equipment/equipmentBoot';
+import '../client/src/circuit/circuitBoot';
 import type { Exercise, SetEntry, SleepNight, Workout } from '../client/src/types';
 import {
   __applySleepSnapshotForTests,
@@ -693,6 +699,9 @@ describe('EQ equipment resolution', () => {
 });
 
 describe('SS supersets', () => {
+  beforeEach(() => {
+    addonsPref.set(['equipment', 'supersets', 'circuit', 'effort', 'set-types']); // Supersets decides what a group is; the global afterEach removes it again
+  });
   it('groups exercises into blocks and counts rounds', () => {
     const w = workout({
       exercises: [
