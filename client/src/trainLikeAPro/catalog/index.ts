@@ -3,4 +3,3 @@ import data from './catalog.json';
 import type { CatalogEntry } from './types';
 
 export const CATALOG = data as unknown as CatalogEntry[];
-export const entryById = (id: string): CatalogEntry | undefined => CATALOG.find((e) => e.id === id);

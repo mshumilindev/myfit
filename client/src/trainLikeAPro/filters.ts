@@ -79,7 +79,7 @@ export function facetValues(entry: CatalogEntry, group: FacetGroup): string[] {
 const norm = (s: string): string => s.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '');
 
 /** Text a search looks in: athlete, title, source and every exercise name ("where is deadlift"). */
-export function searchText(entry: CatalogEntry): string {
+function searchText(entry: CatalogEntry): string {
   const names = new Set(entry.items.map((r) => r.name));
   return norm([entry.who, entry.title, entry.origin.label, ...names].join(' '));
 }
@@ -168,6 +168,3 @@ export function sortEntries(
     return a.who.localeCompare(b.who) || a.title.localeCompare(b.title);
   });
 }
-
-/** A beginner-only caution: elite programs are shown with a warning to someone who has not trained yet. */
-export const needsEliteWarning = (entry: CatalogEntry): boolean => entry.elite;
