@@ -286,6 +286,20 @@ export const addonStoreEn = {
         'Private plans, never seen by trainers',
       ],
     },
+    'train-like-a-pro': {
+      name: 'Train like a pro',
+      tagline: 'Start a program the pros followed',
+      desc: 'Browse programs well-known lifters followed and start one as it was written.',
+      about:
+        'Browse programs that well-known lifters and coaches have shared, from classic strength routines to bodybuilding splits. Each one shows who it is by, how many days a week it takes, how long it runs and where the details come from.\n\nPick a program and start it as written. It runs in your Programs like any other, with the days, sets and reps in place, and your history stays when you switch. A program from your trainer cannot be replaced from here.\n\nFilter by goal, level, days a week and equipment, or search by name. Some programs need another add-on, for example weekly cycles; you can still read them and the page tells you what to add.\n\nThese programs are put together from public sources and are not affiliated with or endorsed by the athletes. They were built for people who already train, so start with one that fits your level.',
+      highlights: [
+        'Programs of well-known lifters, in one place',
+        'Start a program exactly as written',
+        'Filter by goal, level, days and equipment',
+        'See who it is by and where it comes from',
+        'Your history stays when you switch',
+      ],
+    },
     playbook: {
       name: 'Playbook',
       tagline: 'Your regular sessions, ready to go',

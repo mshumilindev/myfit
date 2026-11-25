@@ -123,6 +123,15 @@ export const ADDONS: readonly AddonManifest[] = [
     category: 'workouts',
   },
   { id: 'playbook', kind: 'addon', requires: 'gym', tone: 7, roles: ALL, category: 'workouts' },
+  // Train like a pro (SPO-307): a catalog of programs well-known lifters followed; a member starts one as written. Members only in v1.
+  {
+    id: 'train-like-a-pro',
+    kind: 'addon',
+    requires: 'gym',
+    tone: 0,
+    roles: ['member'],
+    category: 'workouts',
+  },
   // Advanced training (SPO-558): the pro tools of Gym. First module: Periodization (SPO-609). Off until the person installs it.
   {
     id: 'advanced-training',

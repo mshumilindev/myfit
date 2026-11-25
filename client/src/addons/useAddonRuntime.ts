@@ -98,6 +98,12 @@ export function useAddonRuntime() {
   useEffect(() => {
     if (equipmentOn) loadTracker('equipment', () => import('../equipment/equipmentBoot'));
   }, [equipmentOn]);
+  // Train like a pro is a separate lazy package: its catalog and screens are fetched only while it is installed (addons.md item 14).
+  const trainLikeAProOn = useAddonOrBase('train-like-a-pro');
+  useEffect(() => {
+    if (trainLikeAProOn)
+      loadTracker('train-like-a-pro', () => import('../trainLikeAPro/trainLikeAProBoot'));
+  }, [trainLikeAProOn]);
   // Circuit (a module of Advanced training): the round screens are a lazy chunk too.
   const circuitOn = useAddonOrBase('circuit');
   useEffect(() => {

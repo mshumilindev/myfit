@@ -282,6 +282,20 @@ export const addonStoreLt: typeof addonStoreEn = {
         'Planus gali skaityti tik tu',
       ],
     },
+    'train-like-a-pro': {
+      name: 'Train like a pro',
+      tagline: 'Treniruokis pagal žinomų sportininkų programą',
+      desc: 'Naršyk žinomų sportininkų programas ir paleisk bet kurią tiksliai taip, kaip ji aprašyta.',
+      about:
+        'Naršyk programas, kuriomis pasidalijo žinomi sportininkai ir treneriai: nuo klasikinių jėgos planų iki kultūrizmo skaidymų. Prie kiekvienos matyti, kieno ji, kiek dienų per savaitę užima, kiek trunka ir iš kur paimtos detalės.\n\nPasirink programą ir paleisk ją taip, kaip aprašyta. Ji veikia tavo Programose kaip ir bet kuri kita: dienos, serijos ir pakartojimai jau savo vietose, o istorija lieka, kai keiti programą. Trenerio programos iš čia pakeisti negalima.\n\nFiltruok pagal tikslą, lygį, dienas per savaitę ir įrangą arba ieškok pagal pavadinimą. Kai kurioms programoms reikia kito papildinio, pavyzdžiui, savaitės ciklų: jas vis tiek galima perskaityti, o puslapis pasakys, ką pridėti.\n\nŠios programos sudėliotos iš viešų šaltinių, nesusijusios su sportininkais ir jų nepatvirtintos. Jos sukurtos jau besitreniruojantiems, tad pradėk nuo tos, kuri tinka tavo lygiui.',
+      highlights: [
+        'Žinomų sportininkų programos vienoje vietoje',
+        'Programa paleidžiama tiksliai kaip aprašyta',
+        'Filtrai: tikslas, lygis, dienos ir įranga',
+        'Matyti, kieno programa ir iš kur ji',
+        'Istorija lieka pakeitus programą',
+      ],
+    },
     playbook: {
       name: 'Playbook',
       tagline: 'Įprastos treniruotės jau paruoštos',

@@ -9,7 +9,10 @@ import { describe, expect, it } from 'vitest';
  * The add-on may import the core; the core never imports the add-on.
  */
 const SRC = join(__dirname, '..');
-const SEPARATE = [{ id: 'planner', dir: 'planner', allowed: ['addons/useAddonRuntime.ts'] }];
+const SEPARATE = [
+  { id: 'planner', dir: 'planner', allowed: ['addons/useAddonRuntime.ts'] },
+  { id: 'train-like-a-pro', dir: 'trainLikeAPro', allowed: ['addons/useAddonRuntime.ts'] },
+];
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const f of readdirSync(dir)) {

@@ -281,6 +281,20 @@ export const addonStorePl: typeof addonStoreEn = {
         'Plany widoczne tylko dla Ciebie',
       ],
     },
+    'train-like-a-pro': {
+      name: 'Train like a pro',
+      tagline: 'Trenuj według programu znanych sportowców',
+      desc: 'Przeglądaj programy znanych sportowców i uruchom dowolny dokładnie tak, jak go opisano.',
+      about:
+        'Przeglądaj programy, którymi podzielili się znani sportowcy i trenerzy: od klasycznych planów siłowych po podziały kulturystyczne. Przy każdym widać, czyj jest, ile dni w tygodniu zajmuje, jak długo trwa i skąd pochodzą szczegóły.\n\nWybierz program i uruchom go tak, jak został opisany. Działa w Twoich Programach jak każdy inny: dni, serie i powtórzenia są na miejscu, a historia zostaje, gdy zmieniasz program. Programu od trenera nie można stąd zastąpić.\n\nFiltruj według celu, poziomu, dni w tygodniu i sprzętu albo szukaj po nazwie. Niektóre programy wymagają innego dodatku, na przykład cykli tygodniowych: nadal można je przeczytać, a strona podpowie, co dodać.\n\nTe programy powstały z publicznych źródeł, nie są powiązane ze sportowcami ani przez nich zatwierdzone. Zostały stworzone dla osób, które już trenują, więc zacznij od tego, który pasuje do Twojego poziomu.',
+      highlights: [
+        'Programy znanych sportowców w jednym miejscu',
+        'Start programu dokładnie tak, jak opisano',
+        'Filtry: cel, poziom, dni i sprzęt',
+        'Widać, czyj to program i skąd pochodzi',
+        'Historia zostaje po zmianie programu',
+      ],
+    },
     playbook: {
       name: 'Playbook',
       tagline: 'Twoje sprawdzone dni treningowe',

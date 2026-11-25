@@ -53,6 +53,23 @@ export function plannerAvailable(): boolean {
   }
 }
 
+/**
+ * Train like a pro (the catalog of programs well-known lifters followed): its screens and data sit in a lazy chunk that loads only
+ * while it is installed; the core keeps this gate and a host the chunk fills. Programs a person already started stay theirs.
+ */
+export function trainLikeAProAvailable(): boolean {
+  try {
+    return addonAvailable('train-like-a-pro');
+  } catch {
+    return false;
+  }
+}
+
+/** The same Train like a pro gate for components. */
+export function useTrainLikeAProOn(): boolean {
+  return useAddonOrBase('train-like-a-pro');
+}
+
 /** Apex ranks (standards tiers): without the module nothing derives a rank or tier, not even inside other widgets. */
 export function apexRanksAvailable(): boolean {
   try {

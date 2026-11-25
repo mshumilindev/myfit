@@ -284,6 +284,20 @@ export const addonStoreEt: typeof addonStoreEn = {
         'Sinu plaanid jäävad sulle',
       ],
     },
+    'train-like-a-pro': {
+      name: 'Train like a pro',
+      tagline: 'Treeni tuntud sportlaste programmi järgi',
+      desc: 'Sirvi tuntud sportlaste programme ja alusta ükskõik millisega täpselt nii, nagu see on kirjeldatud.',
+      about:
+        'Sirvi programme, mida tuntud sportlased ja treenerid on jaganud: klassikalistest jõuplaanidest kulturismi jaotusteni. Igaühe juures on näha, kelle oma see on, mitu päeva nädalas see võtab, kui kaua kestab ja kust üksikasjad pärinevad.\n\nVali programm ja alusta seda nii, nagu see on kirjeldatud. See töötab sinu Programmides nagu iga teine: päevad, seeriad ja kordused on paigas ning ajalugu jääb alles, kui programmi vahetad. Treeneri programmi ei saa siit asendada.\n\nFiltreeri eesmärgi, taseme, päevade arvu ja varustuse järgi või otsi nime järgi. Mõni programm vajab teist lisa, näiteks nädalatsükleid: neid saab ikka lugeda ja leht ütleb, mida lisada.\n\nNeed programmid on koostatud avalikest allikatest ega ole sportlastega seotud ega nende poolt heaks kiidetud. Need on tehtud neile, kes juba treenivad, nii et alusta sellest, mis sobib sinu tasemele.',
+      highlights: [
+        'Tuntud sportlaste programmid ühes kohas',
+        'Programmi alustamine täpselt nagu kirjeldatud',
+        'Filtrid: eesmärk, tase, päevad ja varustus',
+        'Näha, kelle programm see on ja kust see pärineb',
+        'Ajalugu jääb alles programmi vahetamisel',
+      ],
+    },
     playbook: {
       name: 'Playbook',
       tagline: 'Sinu tuttavad treeningud on valmis',

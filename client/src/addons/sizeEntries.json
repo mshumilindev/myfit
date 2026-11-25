@@ -141,6 +141,9 @@
     "js": ["planner/"],
     "assets": ["sounds/spotter_plan.ogg", "sounds/spotter_plan.mp3"]
   },
+  "train-like-a-pro": {
+    "js": ["trainLikeAPro/"]
+  },
   "planner-availability": {
     "js": ["planner/AvailabilityPage", "planner/availability"]
   },
