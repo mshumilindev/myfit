@@ -5,6 +5,7 @@ import { reconcileOrphanedConsentsAfter, watchAddonRemoval } from './withdrawCon
 import { useChallenges } from '../challengesState';
 import { getStoredUsage, syncSleepAutoQueue, whenAccountLoaded, whenPrefsLoaded } from '../store';
 import { getRole } from '../api';
+import { useTrainLikeAProOn } from './featureGates';
 import { auth } from '../firebase';
 import { migrateBrassGlass, migrateRoleAddons } from './migrateRoles';
 import { setAllowedThemes } from '../themes/registry';
@@ -99,7 +100,7 @@ export function useAddonRuntime() {
     if (equipmentOn) loadTracker('equipment', () => import('../equipment/equipmentBoot'));
   }, [equipmentOn]);
   // Train like a pro is a separate lazy package: its catalog and screens are fetched only while it is installed (addons.md item 14).
-  const trainLikeAProOn = useAddonOrBase('train-like-a-pro');
+  const trainLikeAProOn = useTrainLikeAProOn();
   useEffect(() => {
     if (trainLikeAProOn)
       loadTracker('train-like-a-pro', () => import('../trainLikeAPro/trainLikeAProBoot'));

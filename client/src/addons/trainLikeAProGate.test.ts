@@ -42,4 +42,16 @@ describe('Train like a pro add-on gate (SPO-307)', () => {
     act(() => addonsPref.reset());
     expect(result.current).toBeNull();
   });
+  it('is for members only: a trainer or admin never gets it, not even as the "base" of a role the store skips', () => {
+    trackerReady('train-like-a-pro');
+    addonsPref.set(['train-like-a-pro']);
+    for (const role of ['trainer', 'admin']) {
+      localStorage.setItem('spotter.role', role);
+      expect(trainLikeAProAvailable()).toBe(false);
+      const { result } = renderHook(() => useTrainLikeAProHost());
+      expect(result.current).toBeNull();
+      cleanup();
+    }
+    localStorage.setItem('spotter.role', 'member');
+  });
 });
