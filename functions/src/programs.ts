@@ -20,6 +20,7 @@ import {
 } from './lib';
 import { listUserWorkouts } from './aggregates';
 import { plannedFor } from './programCycle';
+import { planActivation } from './programActivation';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -125,23 +126,46 @@ export const setProgramStatus = onCall(async (req) => {
   }
   const me = await loadUser(uid);
   const now = Date.now();
-  const batch = db.batch();
   if (me.role === 'member' && status === 'active') {
-    // At most one active self-authored program (AC-PROG-05).
-    const others = await db
-      .collection('programs')
-      .where('authorId', '==', uid)
-      .where('status', '==', 'active')
-      .get();
-    for (const d of others.docs)
-      if (d.id !== id) batch.update(d.ref, { status: 'archived', updatedAt: now });
-    batch.set(db.collection('assignments').doc(uid), {
-      memberId: uid,
-      programId: id,
-      assignedBy: uid,
-      startedAt: now,
+    // One transaction: the trainer's-program check, the archive of the member's other active programs and the new
+    // assignment must see the same state, or two quick starts could both pass the check.
+    await db.runTransaction(async (tx) => {
+      const asgRef = db.collection('assignments').doc(uid);
+      const asgSnap = await tx.get(asgRef);
+      const asg = asgSnap.exists ? (asgSnap.data() as AssignmentDoc) : null;
+      const freshSnap = await tx.get(db.collection('programs').doc(id));
+      let assignedProgramStatus: string | null = null;
+      let assignerRole: string | null = null;
+      if (asg && asg.programId !== id) {
+        const ap = await tx.get(db.collection('programs').doc(asg.programId));
+        assignedProgramStatus = ap.exists ? String((ap.data() as ProgramDoc).status) : null;
+        const au = await tx.get(db.collection('users').doc(asg.assignedBy));
+        assignerRole = au.exists ? String((au.data() as UserDoc).role) : null;
+      }
+      const others = await tx.get(
+        db.collection('programs').where('authorId', '==', uid).where('status', '==', 'active'),
+      );
+      const plan = planActivation({
+        uid,
+        programId: id,
+        programStatus: String((freshSnap.data() as ProgramDoc | undefined)?.status ?? ''),
+        trainerId: me.trainerId ?? null,
+        assignment: asg ? { programId: asg.programId, assignedBy: asg.assignedBy } : null,
+        assignedProgramStatus,
+        assignerRole,
+      });
+      if (plan === 'noop') return;
+      if (plan === 'blocked') throw new HttpsError('failed-precondition', 'trainer-program');
+      // At most one active self-authored program (AC-PROG-05).
+      for (const d of others.docs)
+        if (d.id !== id) tx.update(d.ref, { status: 'archived', updatedAt: now });
+      tx.set(asgRef, { memberId: uid, programId: id, assignedBy: uid, startedAt: now });
+      tx.update(db.collection('programs').doc(id), { status, updatedAt: now });
     });
-  } else if (me.role === 'member') {
+    return { ok: true };
+  }
+  const batch = db.batch();
+  if (me.role === 'member') {
     const asg = await db.collection('assignments').doc(uid).get();
     if (asg.exists && (asg.data() as AssignmentDoc).programId === id)
       batch.delete(db.collection('assignments').doc(uid));

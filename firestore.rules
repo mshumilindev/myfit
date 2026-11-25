@@ -238,6 +238,27 @@ service cloud.firestore {
       return !pid.matches('prg-.*')
         || (prgClient(pid) != '' && isActiveCoachOf(prgClient(pid)));
     }
+    // Train like a pro (SPO-307): a program started from the catalog has the id `tl-<uid>-<entry>` and carries
+    // `origin` ({ v, id }). Nobody may create an id with the `tl-` prefix for another person's uid (squatting),
+    // `origin` only goes with such an id, and a program that has `origin` is never edited by the client afterwards:
+    // only its status / updatedAt move (a repeated start archives and re-activates it, it is not rewritten).
+    function catalogIdOk(pid) {
+      return !pid.matches('tl-.*') || pid.matches('tl-' + uid() + '-.+');
+    }
+    function catalogOriginOk(pid) {
+      return !('origin' in request.resource.data)
+        || (pid.matches('tl-.*')
+          && request.resource.data.origin is map
+          && request.resource.data.origin.keys().hasOnly(['v', 'id'])
+          && request.resource.data.origin.v is int
+          && request.resource.data.origin.id is string);
+    }
+    function keepsOrigin() {
+      return !('origin' in resource.data)
+        ? !('origin' in request.resource.data)
+        : (request.resource.data.get('origin', null) == resource.data.origin
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']));
+    }
     // Live presence: the original five fields stay valid for current clients; the
     // sealed extension (name/gym/counts inside `enc`, sub-key "live") is additive.
     function validLiveSession(athleteId) {
@@ -973,12 +994,14 @@ service cloud.firestore {
           && get(/databases/$(database)/documents/assignments/$(uid())).data.programId == programId
         )
       );
-      allow create: if isSignedIn() && request.resource.data.authorId == uid() && prgOk(programId);
+      allow create: if isSignedIn() && request.resource.data.authorId == uid() && prgOk(programId)
+        && catalogIdOk(programId) && catalogOriginOk(programId);
       allow update: if isSignedIn()
         && resource.data.authorId == uid()
         && request.resource.data.authorId == uid()
         && prgOk(programId)
-        && keepsCycle();
+        && keepsCycle()
+        && keepsOrigin();
       allow delete: if isSignedIn() && resource.data.authorId == uid() && prgOk(programId);
     }
 
