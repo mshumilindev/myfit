@@ -102,7 +102,7 @@ Run the emulator suite where Java 21 exists: `npx firebase emulators:exec --only
 
 ## Residuals
 
-- `assignments/{member}` readable by any trainer (Programs screen `documentId() in` query); only memberId + programId.
+- `assignments/{member}` readable by the member, by the trainer the member is assigned to (`users.trainerId`) and by the member's active coach (SPO-307 R24); the Programs screen lists them through the `programAssignments` function (trainer: own clients, admin: all); only memberId + programId + startedAt leave.
 - `sharedGyms` open write (pre-existing, no personal data).
 - Plans/schedules cannot compare their `keyEpoch` to the conversation (the cid is an HMAC); AAD binds cid + epoch instead.
 - Live docs of an ended relationship rely on the end routine deleting them.

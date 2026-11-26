@@ -1272,6 +1272,16 @@ describe('publishPlanVersion (R-BE-PRG-9)', () => {
     await publishPlanVersion(ctx(), trainer, { clientId: 'c1', n: 4 });
     expect(await kv.get('assignments/c1')).toMatchObject({ programId: 'p4', startedAt: T0 + 5000 });
   });
+  it("archives the member's own other active programs and leaves everyone else's alone (SPO-307 R25)", async () => {
+    await kv.set('programs/own', { id: 'own', authorId: 'c1', status: 'active', items: [] });
+    await kv.set('programs/other', { id: 'other', authorId: 'c2', status: 'active', items: [] });
+    await kv.set('programs/p1', { id: 'p1', authorId: 't1', status: 'active', items: [] });
+    await publishPlanVersion(ctx(), trainer, { clientId: 'c1', n: 2 });
+    expect(await kv.get('programs/own')).toMatchObject({ status: 'archived' });
+    expect(await kv.get('programs/other')).toMatchObject({ status: 'active' });
+    expect(await kv.get('programs/p1')).toMatchObject({ status: 'active' });
+    expect(await kv.get('programs/p2')).toMatchObject({ status: 'active' });
+  });
   it("refuses a version whose runnable program is missing or not the trainer's own", async () => {
     await kv.del('programs/p2');
     expect(await code(publishPlanVersion(ctx(), trainer, { clientId: 'c1', n: 2 }))).toBe(

@@ -127,6 +127,11 @@ beforeEach(() => {
     if (name === 'programMine') return { assignment: m.mine.assignment };
     if (name === 'trainerClients') return { clients: m.reval.rows };
     if (name === 'adminPeople') return { people: m.reval.rows };
+    if (name === 'programAssignments') {
+      m.queryCalls.push('assignments');
+      if (m.getDocsFail) throw new Error('offline');
+      return { assignments: m.assignDocs };
+    }
     return {};
   });
   window.location.hash = '#/programs';

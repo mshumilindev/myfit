@@ -712,15 +712,31 @@ c('J02', 'other member reads it', 'get', 'programs/prg-client1-1', au(C2), false
 c('J03', 'assigned member reads it', 'get', 'programs/prg-client1-1', au(C), true);
 c(
   'J04',
-  'any trainer reads another trainers member assignment',
+  'another trainer (not the member trainer, no coaching) reads the assignment',
   'get',
   `assignments/${C}`,
   au(T2, 'trainer'),
-  true,
-  undefined,
-  undefined,
-  'JUSTIFIED: the Programs screen lists assignments with a documentId() `in` query that a per-trainer rule could not prove; the doc holds only memberId and programId (no health data). Tracked as a residual.',
+  false,
 );
+c(
+  'J04b',
+  'the trainer of the member reads the assignment',
+  'get',
+  `assignments/${C}`,
+  au(T, 'trainer'),
+  true,
+);
+c(
+  'J04c',
+  'an admin who is not the member trainer reads it directly',
+  'get',
+  `assignments/${C}`,
+  au(A, 'admin'),
+  false,
+);
+c('J04d', 'the member reads their own assignment', 'get', `assignments/${C}`, au(C), true);
+c('J04e', 'another member reads it', 'get', `assignments/${C}`, au(C2), false);
+c('J04f', 'nobody lists assignments from a client', 'list', 'assignments', au(T, 'trainer'), false);
 c(
   'J05',
   'member squats victim program id prg-client2-1',

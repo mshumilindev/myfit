@@ -13,7 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { ListRow } from '../components/ui/GroupedList';
-import { collection, documentId, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { callFn, currentUid, getRole, getUsername, trackMutation } from '../api';
 import { db } from '../firebase';
 import { offlineHydrate, offlineDedupe, offlineRevalidate } from '../offline/offlineCache';
@@ -206,32 +206,19 @@ export function ProgramsView({
     });
   }, [isCoach, role]);
 
-  // Each client's current assignment (one per member, doc id = member id);
-  // trainers/admins may read them. Tells who is on which of my programs and
-  // who is on something else.
+  // Each client's current assignment, served by the `programAssignments` function: the rules admit only the member
+  // and their coach, and cannot prove a per-trainer list query (SPO-307 R24). Tells who is on which of my programs.
   const memberIds = useMemo(() => people.map((p) => p.id).join(','), [people]);
   const loadAssignments = useCallback(() => {
     if (!isCoach || !memberIds) return;
-    const ids = memberIds.split(',');
-    const chunks: string[][] = [];
-    for (let i = 0; i < ids.length; i += 30) chunks.push(ids.slice(i, i + 30));
-    Promise.all(
-      chunks.map((c) =>
-        getDocs(query(collection(db, 'assignments'), where(documentId(), 'in', c))),
-      ),
-    )
-      .then((snaps) =>
+    callFn<{ assignments?: MemberAssignment[] }>('programAssignments')
+      .then((r) =>
         setAssignments(
-          snaps.flatMap((s) =>
-            s.docs.map((d) => {
-              const a = d.data() as MemberAssignment;
-              return {
-                memberId: a.memberId ?? d.id,
-                programId: a.programId,
-                startedAt: a.startedAt,
-              };
-            }),
-          ),
+          (r.assignments ?? []).map((a) => ({
+            memberId: a.memberId,
+            programId: a.programId,
+            startedAt: a.startedAt,
+          })),
         ),
       )
       .catch(() => setAssignments([]));

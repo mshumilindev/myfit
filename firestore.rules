@@ -1052,10 +1052,14 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Program assignments: readable by the member and by trainers/admins;
-    // written only by functions (single-active invariant + notice fan-out).
+    // Program assignments: readable by the member, by the trainer the member is assigned to (`users.trainerId`) and by
+    // the active coach of the member (SPO-307 R24: no longer any trainer/admin); the Programs screen lists them through
+    // the `programAssignments` function. Written only by functions (single-active invariant + notice fan-out).
     match /assignments/{memberId} {
-      allow read: if isSelf(memberId) || isTrainerOrAdmin();
+      allow read: if isSelf(memberId)
+        || (isTrainerOrAdmin()
+            && (get(/databases/$(database)/documents/users/$(memberId)).data.get('trainerId', '') == uid()
+                || isActiveCoachOf(memberId)));
       allow write: if false;
     }
 

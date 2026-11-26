@@ -201,20 +201,41 @@ export const assignProgram = onCall(async (req) => {
     throw new HttpsError('permission-denied', 'not your client');
   const sw = Math.max(1, Math.min(p.weeks === 0 ? 52 : p.weeks, Number(startWeek) || 1));
   const startedAt = Date.now() - (sw - 1) * 7 * DAY_MS;
-  const prior = await db.collection('assignments').doc(memberId).get();
-  await db.collection('assignments').doc(memberId).set({
-    memberId,
-    programId: p.id,
-    assignedBy: uid,
-    startedAt,
-    assignedAt: Date.now(),
-    startWeek: sw,
+  // One transaction: the member's own active programs, the assignment and the program status move together.
+  // The assigned program becomes THE active one: the member's own other active programs are archived (as in
+  // `setProgramStatus`). A trainer assigning to themselves keeps their library as it is, and the trainer's own
+  // programs (including the one replaced here, which may be assigned to other clients) are never touched.
+  const prior = await db.runTransaction(async (tx) => {
+    const asgRef = db.collection('assignments').doc(memberId);
+    const priorSnap = await tx.get(asgRef);
+    const own =
+      memberId === uid
+        ? null
+        : await tx.get(
+            db
+              .collection('programs')
+              .where('authorId', '==', memberId)
+              .where('status', '==', 'active'),
+          );
+    const now = Date.now();
+    if (own)
+      for (const d of own.docs)
+        if (d.id !== p.id) tx.update(d.ref, { status: 'archived', updatedAt: now });
+    tx.set(asgRef, {
+      memberId,
+      programId: p.id,
+      assignedBy: uid,
+      startedAt,
+      assignedAt: now,
+      startWeek: sw,
+    });
+    tx.update(db.collection('programs').doc(p.id), { status: 'active', updatedAt: now });
+    return priorSnap.exists;
   });
-  await db.collection('programs').doc(p.id).update({ status: 'active', updatedAt: Date.now() });
   if (memberId !== uid) {
     await createNotice(
       memberId,
-      prior.exists ? 'program-replaced' : 'program-assigned',
+      prior ? 'program-replaced' : 'program-assigned',
       displayName(me),
       p.name,
     );
@@ -247,4 +268,30 @@ export const deleteProgram = onCall(async (req) => {
   for (const d of assigned.docs) batch.delete(d.ref);
   await batch.commit();
   return { ok: true };
+});
+
+/**
+ * The assignments the Programs screen shows: a trainer sees their clients' (`users.trainerId`), an admin everyone's.
+ * Only `memberId`, `programId`, `startedAt` leave. Served here because the rules cannot prove a per-trainer
+ * `documentId() in` list query (SPO-307 R24); the `assignments` rules now admit only the member and the coach.
+ */
+export const programAssignments = onCall(async (req) => {
+  const { uid, user: me } = await requireRole(req, ['trainer', 'admin']);
+  const pick = (id: string, a: Partial<AssignmentDoc>) => ({
+    memberId: a.memberId ?? id,
+    programId: a.programId,
+    startedAt: a.startedAt,
+  });
+  let rows: Array<ReturnType<typeof pick>>;
+  if (me.role === 'admin') {
+    const snap = await db.collection('assignments').get();
+    rows = snap.docs.map((d) => pick(d.id, d.data() as AssignmentDoc));
+  } else {
+    const clients = await db.collection('users').where('trainerId', '==', uid).get();
+    const snaps = await Promise.all(
+      clients.docs.map((c) => db.collection('assignments').doc(c.id).get()),
+    );
+    rows = snaps.filter((s) => s.exists).map((s) => pick(s.id, s.data() as AssignmentDoc));
+  }
+  return { assignments: rows.filter((r) => typeof r.programId === 'string') };
 });
