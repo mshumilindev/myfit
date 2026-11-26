@@ -201,3 +201,78 @@ export function blockRemainSec(s: BlockSpec, elapsedSec: number): number | null 
   const cap = blockCapSec(s);
   return cap == null ? null : Math.max(0, Math.ceil(cap - Math.max(0, elapsedSec)));
 }
+
+/** One exercise of a block: a name and the reps (or time) per round, as text ("5", "40 s"). */
+export interface BlockMember {
+  name: string;
+  reps?: string;
+}
+
+/** What was achieved. AMRAP / intervals / EMOM: rounds + extra reps. For time: the time it took. */
+export interface BlockResult {
+  rounds?: number;
+  extraReps?: number;
+  timeSec?: number;
+  /** AMRAP/EMOM/intervals: the time ran out; For time: the cap stopped it. */
+  capHit?: boolean;
+  scaled?: boolean;
+  /** Optional "what you actually did": reps per member index when it differs from the plan. Absent = as planned. */
+  actuals?: Record<number, number>;
+  savedAt: number;
+}
+
+/**
+ * A time block inside a session (stored on the sealed session, `Workout.blocks`). Self-contained: the members are names, not
+ * session exercises, so the block never touches the strength sets, volume or muscle maths.
+ */
+export interface WorkoutBlock {
+  id: string;
+  spec: BlockSpec;
+  members: BlockMember[];
+  /** Where it sits among the session's exercises: n - 0.5 means "after the n-th exercise" (see `blockOrder`). */
+  position: number;
+  run?: BlockRun;
+  /** AMRAP / For time: rounds counted so far with the Round button. */
+  roundsDone?: number;
+  result?: BlockResult;
+}
+
+export type BlockStatus = 'ready' | 'running' | 'paused' | 'ended' | 'logged';
+
+export function blockStatus(b: WorkoutBlock): BlockStatus {
+  if (b.result) return 'logged';
+  if (!b.run) return 'ready';
+  if (b.run.finishedAt != null) return 'ended';
+  return b.run.pausedAt != null ? 'paused' : 'running';
+}
+
+let seq = 0;
+export function newBlockId(now: number): string {
+  seq += 1;
+  return `blk-${now.toString(36)}-${seq.toString(36)}`;
+}
+
+/** Blocks, in the order they sit among `exerciseCount` exercises. */
+export function blockOrder(blocks: readonly WorkoutBlock[]): WorkoutBlock[] {
+  return [...blocks].sort((a, b) => a.position - b.position);
+}
+
+/** Is a result worth saving (something was achieved)? Rounds/time of zero with no extra reps is not. */
+export function resultHasData(r: BlockResult | undefined): boolean {
+  return !!r && ((r.rounds ?? 0) > 0 || (r.extraReps ?? 0) > 0 || (r.timeSec ?? 0) > 0);
+}
+
+/** Starting values for the result sheet, from how the block went. */
+export function suggestResult(b: WorkoutBlock, elapsedSec: number, now: number): BlockResult {
+  const view = blockView(b.spec, elapsedSec);
+  if (b.spec.fmt === 'fortime') {
+    return { timeSec: Math.floor(elapsedSec), capHit: view.done, savedAt: now };
+  }
+  const total = b.spec.fmt === 'emom' || b.spec.fmt === 'intervals' ? (b.spec.rounds ?? 0) : null;
+  return {
+    rounds: total ?? b.roundsDone ?? 0,
+    extraReps: 0,
+    capHit: view.done,
+    savedAt: now,
+  };
+}

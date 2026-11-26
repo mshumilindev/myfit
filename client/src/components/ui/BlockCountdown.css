@@ -8,9 +8,9 @@
   justify-content: space-between;
   gap: var(--s-24);
   padding: var(--s-24) var(--s-16);
-  padding-bottom: calc(var(--s-24) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(var(--s-24) + env(safe-area-inset-bottom));
   background: color-mix(in srgb, var(--color-bg) 94%, transparent);
-  backdrop-filter: blur(var(--s-16));
+  backdrop-filter: var(--bf-banner);
 }
 .uicd-top {
   display: flex;
@@ -50,7 +50,7 @@
 .uicd-dots i {
   width: var(--s-8);
   height: var(--s-8);
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--color-text) 16%, transparent);
 }
 .uicd-dots i.on {

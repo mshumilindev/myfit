@@ -5,6 +5,7 @@
 import { timeBlocksHost } from '../timeBlocksApi';
 import { provide, trackerReady } from '../trackerRt';
 import { BlockCountdownRun } from './BlockCountdownRun';
+import { SessionBlocks } from './SessionBlock';
 
-provide(timeBlocksHost, { Countdown: BlockCountdownRun });
+provide(timeBlocksHost, { Countdown: BlockCountdownRun, Blocks: SessionBlocks });
 trackerReady('time-blocks');

@@ -5,6 +5,7 @@
  */
 import type { BandRung } from './loads';
 import type { MuscleGroup } from './data/exercises';
+import type { WorkoutBlock } from './timeBlocks/model';
 
 export type SetType = 'working' | 'warmup' | 'drop' | 'reverse-drop' | 'static-dynamic';
 
@@ -156,6 +157,8 @@ export interface Workout {
   /** The home set template this session was started from (if any). */
   homeSetId?: string | null;
   exercises: Exercise[];
+  /** Time blocks (Advanced training › Time blocks): self-contained, sealed with the session. Absent = none. */
+  blocks?: WorkoutBlock[];
 }
 
 /** One weigh-in (no notes). */

@@ -15,6 +15,7 @@ import {
 } from '../addons/featureGates';
 import { useSupersetsHost } from '../supersetsRt';
 import { useCircuitHost } from '../circuitRt';
+import { useTimeBlocksHost } from '../timeBlocksRt';
 import { inShownGroup } from '../supersetBlocks';
 import { useSleepsForCalc } from '../addons/useSleeps';
 import { getSyncMeta } from '../syncMeta';
@@ -585,6 +586,8 @@ export function SessionView(props: {
   const SupersetSheet = supersetsH?.Sheet ?? NOTHING;
   const SupersetBlock = supersetsH?.Block ?? NOTHING;
   const circuitH = useCircuitHost();
+  const timeBlocksH = useTimeBlocksHost(); // Time blocks (Advanced training): its cards arrive with its chunk
+  const TimeBlocks = timeBlocksH?.Blocks ?? null;
   const circuitCtl = circuitH?.Controls ?? null;
   const CircuitBlock = circuitH?.Block ?? NOTHING;
   const CircuitRunSheet = circuitH?.RunSheet ?? NOTHING;
@@ -837,6 +840,8 @@ export function SessionView(props: {
 
   const sets = workoutSets(workout);
   const entries = workout.exercises.reduce((n, e) => n + e.sets.length, 0);
+  // A session made of a logged time block alone is still a session to finish.
+  const blockLogged = timeBlocksH ? (workout.blocks ?? []).filter((b) => b.result).length : 0;
   const volume = workoutVolumeKg(workout);
   const cardioMinutes = workoutCardioMinutes(workout);
   const cardioDistance = workoutCardioDistanceKm(workout);
@@ -2494,7 +2499,7 @@ export function SessionView(props: {
       <Button
         variant="ok-fill"
         className="focus-finish"
-        disabled={entries === 0}
+        disabled={entries === 0 && blockLogged === 0}
         onClick={requestFinish}
         aria-label={t.finish}
         title={t.finish}
@@ -4979,6 +4984,7 @@ export function SessionView(props: {
           })()}
 
         <div className="session-body">
+          {TimeBlocks && <TimeBlocks workoutId={workout.id} past={!!props.past} />}
           {focusView ? (
             renderFocusView()
           ) : (
@@ -5294,7 +5300,7 @@ export function SessionView(props: {
                       <Button
                         variant="primary"
                         className="session-finish-docked"
-                        disabled={entries === 0}
+                        disabled={entries === 0 && blockLogged === 0}
                         onClick={requestFinish}
                       >
                         <Icon name="check" />
@@ -5363,7 +5369,7 @@ export function SessionView(props: {
               variant="primary"
               shape="round"
               className="sp-btn sp-finish"
-              disabled={entries === 0}
+              disabled={entries === 0 && blockLogged === 0}
               onClick={requestFinish}
               label={t.finish}
               title={t.finish}

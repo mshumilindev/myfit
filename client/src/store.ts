@@ -85,6 +85,7 @@ import {
   type NicotineState,
   type NicotineSurface,
 } from './types';
+import type { WorkoutBlock } from './timeBlocks/model';
 import { setSyncMeta, snapMeta, syncStatusOf, type SnapMeta } from './syncMeta';
 import {
   canonicalExerciseName,
@@ -959,6 +960,21 @@ export function setCircuitRounds(workoutId: string, groupId: string, rounds: num
     (e.groupId ?? null) === groupId ? { ...e, plannedSets: r } : e,
   );
   patchWorkout(workoutId, { exercises: next });
+  saveWorkout(workoutId);
+}
+
+/**
+ * Time blocks (Advanced training): replace the session's block list. A session whose first item is a block starts its clock
+ * now, like a first exercise does. Callers (the `timeBlocks/` chunk) build the new list; the store only writes it.
+ */
+export function setWorkoutBlocks(workoutId: string, blocks: WorkoutBlock[]): void {
+  const w = state.workouts.find((x) => x.id === workoutId);
+  if (!w) return;
+  const starting = w.finishedAt === null && w.exercises.length === 0 && !(w.blocks?.length ?? 0);
+  patchWorkout(workoutId, {
+    blocks: blocks.length ? blocks : undefined,
+    ...(starting && blocks.length ? { startedAt: Date.now() } : {}),
+  });
   saveWorkout(workoutId);
 }
 
@@ -2188,7 +2204,7 @@ export function deleteExercise(workoutId: string, exerciseId: string): void {
   const exercises = w.exercises.filter((e) => e.id !== exerciseId);
   // Removing the last exercise of a live session turns it back into a draft:
   // the clock resets and waits for the next first exercise.
-  const backToDraft = w.finishedAt === null && exercises.length === 0;
+  const backToDraft = w.finishedAt === null && exercises.length === 0 && !(w.blocks?.length ?? 0);
   patchWorkout(workoutId, backToDraft ? { exercises, startedAt: Date.now() } : { exercises });
   saveWorkout(workoutId);
   if (backToDraft) finishLiveSession();

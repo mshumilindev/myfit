@@ -20,11 +20,15 @@ export interface BlockCountdownHostProps {
 export interface TimeBlocksHost {
   /** The full-screen get-ready countdown before a block starts. */
   Countdown: ComponentType<BlockCountdownHostProps> | null;
+  /** The blocks of one session: cards, the builder, the clock and the result. */
+  Blocks: ComponentType<{ workoutId: string; past: boolean }> | null;
 }
 
-export const timeBlocksHost: TimeBlocksHost = { Countdown: null };
+export const timeBlocksHost: TimeBlocksHost = { Countdown: null, Blocks: null };
 
 /** Is the module installed AND its chunk loaded? */
 export function timeBlocksLive(): boolean {
-  return timeBlocksAvailable() && timeBlocksHost.Countdown !== null;
+  return (
+    timeBlocksAvailable() && timeBlocksHost.Countdown !== null && timeBlocksHost.Blocks !== null
+  );
 }
