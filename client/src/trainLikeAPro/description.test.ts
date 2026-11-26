@@ -32,4 +32,12 @@ describe('describeProgram', () => {
       expect(describeProgram(e, STRINGS[l]).more.join(' ')).not.toMatch(/: Mon, Wed/);
     }
   });
+  it('skips day labels that only number the day ("Week 1")', () => {
+    for (const e of CATALOG) {
+      for (const l of Object.keys(STRINGS) as (keyof typeof STRINGS)[]) {
+        const text = describeProgram(e, STRINGS[l]).more.join(' ');
+        expect(text).not.toMatch(/(Week|Day|Phase) \d+\./);
+      }
+    }
+  });
 });

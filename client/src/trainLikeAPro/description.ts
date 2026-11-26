@@ -35,6 +35,9 @@ export function mainWork(e: CatalogEntry, limit = 3): string[] {
     });
 }
 
+/** Source labels that only number the day ("Week 1", "Day 3"): they say nothing about its focus. */
+const GENERIC_DAY = /^(week|day|phase|workout|session)\s*\d+$/i;
+
 export function describeProgram(e: CatalogEntry, s: TlStrings): ProgramDescription {
   const aims = e.goals.map((g) => s.goal[g].toLowerCase()).join(', ');
   const lead = [s.splitInfo[e.split], aims ? s.aimedAt(aims) : ''].filter(Boolean).join(' ');
@@ -43,7 +46,14 @@ export function describeProgram(e: CatalogEntry, s: TlStrings): ProgramDescripti
   const focus: string[] = [];
   for (let d = 1; d <= 7; d++) {
     const n = e.dayNames[String(d)];
-    if (n && !isWeekdayName(n) && n !== s.weekdays[d - 1] && !focus.includes(n)) focus.push(n);
+    if (
+      n &&
+      !isWeekdayName(n) &&
+      !GENERIC_DAY.test(n) &&
+      n !== s.weekdays[d - 1] &&
+      !focus.includes(n)
+    )
+      focus.push(n);
   }
   if (focus.length > 0) more.push(s.daysFocus(focus.join(', ')));
 
