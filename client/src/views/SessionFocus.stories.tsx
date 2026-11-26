@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useEffect, type ReactNode } from 'react';
+import { userEvent, within } from 'storybook/test';
 import { SessionView } from './SessionView';
 import { applyRemoteInputMode } from '../inputModeStore';
 import { seedStore, storyShell, workoutOn } from '../stories/fixtures';
@@ -56,6 +57,25 @@ type Story = StoryObj<typeof meta>;
 
 /** Set-entry panel with Log, between the step line and the nav. */
 export const SetEntry: Story = {};
+
+/** Set options (SPO-608): the set screen with More open, Exercise / Session at its end, Cancel / Log pinned in the footer. */
+export const SetOptions: Story = {
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement.ownerDocument.body);
+    await userEvent.click(await c.findByRole('button', { name: 'Set options' }));
+    await userEvent.click(await c.findByRole('button', { name: /^More/ }));
+  },
+};
+
+/** Exercise options: the drill-in screen with its Back to the set. */
+export const ExerciseOptions: Story = {
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement.ownerDocument.body);
+    await userEvent.click(await c.findByRole('button', { name: 'Set options' }));
+    await userEvent.click(await c.findByRole('button', { name: /^More/ }));
+    await userEvent.click(await c.findByRole('button', { name: /^Exercise/ }));
+  },
+};
 
 /** Shows the wheel entry for the story and puts the default (− / +) back when it unmounts, so other stories are unaffected. */
 function WheelMode({ children }: { children: ReactNode }) {

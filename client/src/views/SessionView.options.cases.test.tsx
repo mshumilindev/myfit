@@ -14,6 +14,7 @@ import '../supersets/supersetsBoot'; // Supersets too
 // Wednesday 14 Oct 2026, 18:00 local — fixed wall clock, only Date is faked so timers/userEvent keep running.
 const NOW = new Date(2026, 9, 14, 18, 0).getTime();
 import { openScope } from './optsNav.testkit';
+import { currentHash, setHash } from '../route';
 const MIN = 60000;
 
 const shell = (): Shell => ({
@@ -126,6 +127,23 @@ describe('SessionView · exercise options (focus options sheet)', () => {
     await userEvent.click(within(d).getByRole('button', { name: /Muscle map/ }));
     // the map is a lazy chunk (Muscle map add-on): it arrives a tick after the tap
     await waitFor(() => expect(document.querySelector('.muscle-map-sheet')).toBeTruthy());
+  });
+
+  it('shows the Advanced training store row in the footer only while it is not installed (SPO-608)', async () => {
+    addonsPref.set(['muscle-map']); // Circuit / Supersets would pull Advanced training in with them
+    seed([two()]);
+    const { container } = mount();
+    const d = await openOpts(container);
+    expect(within(d).getByText('Advanced training')).toBeTruthy();
+    await userEvent.click(within(d).getByRole('button', { name: 'Add' }));
+    expect(currentHash()).toBe('#/store/item/advanced-training');
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull()); // the sheet closed
+    cleanup();
+    setHash('#/session', true);
+    addonsPref.set(['advanced-training', 'circuit', 'supersets']);
+    const again = mount();
+    const d2 = await openOpts(again.container);
+    expect(within(d2).queryByText('Advanced training')).toBeNull();
   });
 
   it('has no muscle map without the Muscle map add-on', async () => {
