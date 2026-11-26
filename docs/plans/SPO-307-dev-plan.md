@@ -192,7 +192,7 @@ unit/contract (запис→Program, вправи, еліта, фільтри), 
 
 Базова лінія 26.11 (фінал): `src/trainLikeAPro`, `src/views/programs`, `ProgramsView`, `addons`, `addonStore` — 63 файли, 567 тестів зелені; `tests/kit-guard.test.ts` 19/19; CI зелений на 21e005df.
 
-e2e: `tests/e2e/train-like-a-pro.e2e.ts` (відкриття каталогу, опис і Read more/less, шторка дня, аддон не встановлено → порожньо), у job `client-e2e`; 24/24 за `--repeat-each=12`. Старт програми в e2e не входить (пише в бекенд): покрито `startProgram.test.ts` і `setProgramStatus.tx.test.ts`.
+e2e: `tests/e2e/train-like-a-pro.e2e.ts` (відкриття каталогу, опис і Read more/less, шторка дня, аддон не встановлено → порожньо), у job `client-e2e`; 24/24 за `--repeat-each=12`. Старт програми в браузерний e2e не входить (Firestore-запис без мережі не підтверджується): його покриває інтеграційний тест з in-memory базою `startFlow.integration.test.tsx` (екран → `startCatalogProgram` → записи в `programs/{id}` і `assignments/{uid}`: старт, повторний старт без перезапису, заміна власної, програма тренера, офлайн), плюс `startProgram.test.ts` і `setProgramStatus.tx.test.ts`.
 
 Швидкість: +~20 с у `client-e2e` (спільні збірки), у межах цілі.
 
