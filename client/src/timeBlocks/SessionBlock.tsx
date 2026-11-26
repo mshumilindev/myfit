@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ExercisePicker } from '../components/ExercisePicker';
 import { Button } from '../components/ui/Button';
 import { ConfirmDialog } from '../components/ui/Overlays';
-import { setWorkoutBlocks, useStore } from '../store';
+import { deleteExercise, restoreExercise, setWorkoutBlocks, useStore } from '../store';
+import type { Exercise } from '../types';
 import { BlockBuilder } from './BlockBuilder';
 import { BlockCountdownRun } from './BlockCountdownRun';
 import { playCue, primeBlockAudio } from './blockAudio';
@@ -41,6 +42,13 @@ import {
 export interface SessionBlocksProps {
   workoutId: string;
   past: boolean;
+  /** undefined: all blocks as cards; null: engine only (clock, cues, overlays); id: only that block's card. */
+  focusId?: string | null;
+  /** Opens an exercise's details (the app's exercise screen). */
+  onInfo?: (name: string) => void;
+  /** "Time block…" from an exercise's options: the builder opens with that exercise inside; Add block moves it into the block. */
+  intake?: Exercise | null;
+  onIntakeDone?: (moved?: { text: string; undo: () => void }) => void;
 }
 
 type Mode =
@@ -51,7 +59,14 @@ type Mode =
   | { kind: 'delete'; id: string };
 
 /** The time blocks of one session: list of cards, the builder drawer, the countdown overlay, the result card. */
-export function SessionBlocks({ workoutId, past }: SessionBlocksProps) {
+export function SessionBlocks({
+  workoutId,
+  past,
+  focusId,
+  onInfo,
+  intake,
+  onIntakeDone,
+}: SessionBlocksProps) {
   const t = useBlockStrings();
   const store = useStore();
   const workout = store.workouts.find((w) => w.id === workoutId);
@@ -94,7 +109,7 @@ export function SessionBlocks({ workoutId, past }: SessionBlocksProps) {
 
   if (!workout) return null;
   const save = (b: WorkoutBlock[]) => setWorkoutBlocks(workoutId, b);
-  const ordered = blockOrder(blocks);
+  const ordered = blockOrder(blocks).filter((b) => focusId === undefined || b.id === focusId);
   const byId = (id: string) => blocks.find((b) => b.id === id);
 
   function begin(id: string) {
@@ -105,7 +120,8 @@ export function SessionBlocks({ workoutId, past }: SessionBlocksProps) {
     setMode({ kind: 'result', id });
   }
 
-  const builder = (m: Mode | null) => {
+  const builder = (m0: Mode | null) => {
+    const m: Mode | null = m0 ?? (intake ? { kind: 'new' } : null);
     if (!m || (m.kind !== 'new' && m.kind !== 'edit' && m.kind !== 'pick')) return null;
     const cur = m.kind === 'pick' ? m.back : m;
     const editing = cur.kind === 'edit' ? byId(cur.id) : undefined;
@@ -128,9 +144,33 @@ export function SessionBlocks({ workoutId, past }: SessionBlocksProps) {
       <BlockBuilder
         key={cur.kind === 'edit' ? cur.id : 'new'}
         initial={editing ? { spec: editing.spec, members: editing.members } : undefined}
-        onClose={() => setMode(null)}
+        startedFrom={!editing ? intake?.name : undefined}
+        startMembers={!editing && intake ? [{ name: intake.name }] : undefined}
+        onClose={() => {
+          setMode(null);
+          if (intake) onIntakeDone?.();
+        }}
         onPickExercise={(add) => setMode({ kind: 'pick', add, back: cur })}
         onSave={(spec: BlockSpec, members) => {
+          if (!editing && intake && workout) {
+            // The exercise leaves the session list and takes its place as the block (Undo puts both back).
+            const before = blocks;
+            const idx = [...workout.exercises]
+              .sort((a, b) => a.position - b.position)
+              .findIndex((e) => e.id === intake.id);
+            const made = addBlock(blocks, spec, members, Math.max(0, idx), Date.now());
+            save(made);
+            deleteExercise(workout.id, intake.id);
+            setMode(null);
+            onIntakeDone?.({
+              text: t.movedIntoBlock(intake.name),
+              undo: () => {
+                restoreExercise(workout.id, intake);
+                save(before);
+              },
+            });
+            return;
+          }
           save(
             editing
               ? editBlock(blocks, editing.id, spec, members)
@@ -158,6 +198,7 @@ export function SessionBlocks({ workoutId, past }: SessionBlocksProps) {
               block={b}
               onEdit={() => setMode({ kind: 'edit', id: b.id })}
               onStart={() => begin(b.id)}
+              onInfo={onInfo}
             />
           );
         if (st === 'running' || st === 'paused')
@@ -171,6 +212,7 @@ export function SessionBlocks({ workoutId, past }: SessionBlocksProps) {
               onResume={() => save(resumeBlock(blocks, b.id, Date.now()))}
               onRound={() => save(countRound(blocks, b.id))}
               onFinish={() => save(endBlock(blocks, b.id, Date.now()))}
+              onInfo={onInfo}
             />
           );
         if (st === 'ended') {
@@ -214,7 +256,7 @@ export function SessionBlocks({ workoutId, past }: SessionBlocksProps) {
           }}
         />
       )}
-      {!past && (
+      {!past && focusId === undefined && (
         <Button
           variant="secondary"
           size="md"

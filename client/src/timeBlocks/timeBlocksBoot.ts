@@ -7,6 +7,14 @@ import { provide, trackerReady } from '../trackerRt';
 import { BlockCountdownRun } from './BlockCountdownRun';
 import { SessionBlocks } from './SessionBlock';
 import { BlockRecap } from './BlockRecap';
+import { specTitle } from './specText';
+import { RowLabel } from './BlockUi';
 
-provide(timeBlocksHost, { Countdown: BlockCountdownRun, Blocks: SessionBlocks, Recap: BlockRecap });
+provide(timeBlocksHost, {
+  Countdown: BlockCountdownRun,
+  Blocks: SessionBlocks,
+  Recap: BlockRecap,
+  RowLabel,
+  stepLabel: (b) => specTitle(b.spec),
+});
 trackerReady('time-blocks');

@@ -6,7 +6,8 @@ import { addonsPref } from '../addons/enabledSet';
 import { COACH_DEFAULT } from '../atlas/types';
 import { emptyCycleState } from '../cycle/cycleState';
 import { __getStateForTests, __replaceStateForTests } from '../store';
-import type { Workout } from '../types';
+import type { Exercise, Workout } from '../types';
+import { openScope } from '../views/optsNav.testkit';
 import { SessionView } from '../views/SessionView';
 import './timeBlocksBoot';
 import type { WorkoutBlock } from './model';
@@ -30,13 +31,20 @@ const block = (o: Partial<WorkoutBlock> = {}): WorkoutBlock => ({
   position: -0.5,
   ...o,
 });
-function seed(blocks: WorkoutBlock[]) {
+const ex = (id: string, name: string, position: number): Exercise => ({
+  id,
+  name,
+  kind: 'strength',
+  position,
+  sets: [],
+});
+function seed(blocks: WorkoutBlock[], exercises: Exercise[] = []) {
   const w: Workout = {
     id: 'open',
     startedAt: NOW - 600000,
     finishedAt: null,
     autoFinished: false,
-    exercises: [],
+    exercises,
     blocks,
   };
   __replaceStateForTests({
@@ -51,7 +59,8 @@ function seed(blocks: WorkoutBlock[]) {
   });
 }
 const mine = () => __getStateForTests().workouts.find((w) => w.id === 'open')!;
-const mount = () => render(<SessionView workoutId="open" shell={shell()} onClose={vi.fn()} />);
+const mount = (sh: Shell = shell()) =>
+  render(<SessionView workoutId="open" shell={sh} onClose={vi.fn()} />);
 
 beforeEach(() => {
   addonsPref.set(['advanced-training', 'time-blocks']);
@@ -100,7 +109,9 @@ describe('Time blocks in the session', () => {
     mount();
     await userEvent.click(await screen.findByRole('button', { name: 'Round' }));
     expect(mine().blocks?.[0].roundsDone).toBe(1);
-    await userEvent.click(screen.getByRole('button', { name: 'Finish' }));
+    await userEvent.click(
+      within(screen.getByRole('timer')).getByRole('button', { name: 'Finish' }),
+    );
     await userEvent.click(await screen.findByRole('button', { name: 'Log result' }));
     await userEvent.click(
       within(await screen.findByTestId('block-result')).getByRole('button', { name: 'Save' }),
@@ -121,5 +132,41 @@ describe('Time blocks in the session', () => {
       within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Delete block' }),
     );
     expect(mine().blocks).toBeUndefined();
+  });
+
+  it('is a step of the focus flow: a segment in the progress, reached with Next, and named on the Next button', async () => {
+    seed([block({ position: 0.5 })], [ex('a', 'Bench Press', 0), ex('b', 'Barbell Row', 1)]);
+    const { container } = mount();
+    await waitFor(() =>
+      expect(container.querySelectorAll('.plan-segments > span')).toHaveLength(3),
+    );
+    expect(container.querySelectorAll('.plan-segments > span.tb')).toHaveLength(1);
+    expect(screen.queryByTestId('block-ready')).toBeNull(); // not on it yet
+    await userEvent.click(container.querySelector('.focus-next') as HTMLElement);
+    expect(await screen.findByTestId('block-ready')).toBeTruthy();
+    expect(container.querySelector('.focus-next')!.textContent).toContain('Barbell Row');
+  });
+
+  it('moves an exercise into a new block from its options, and Undo puts it back', async () => {
+    const sh = shell();
+    seed([], [ex('a', 'Bench Press', 0), ex('b', 'Barbell Row', 1)]);
+    const { container } = mount(sh);
+    await userEvent.click(
+      within(container.querySelector('.focus-view') as HTMLElement).getByRole('button', {
+        name: 'Set options',
+      }),
+    );
+    const d = screen.getByRole('dialog');
+    await openScope(d, 'Exercise');
+    await userEvent.click(within(d).getByRole('button', { name: /Time block/ }));
+    const sheet = await screen.findByRole('dialog', { name: /New block|Time block/i });
+    await userEvent.click(within(sheet).getByRole('button', { name: /Add block/ }));
+    await waitFor(() => expect(mine().blocks).toHaveLength(1));
+    expect(mine().blocks![0].members.map((m) => m.name)).toEqual(['Bench Press']);
+    expect(mine().exercises.map((e) => e.name)).toEqual(['Barbell Row']);
+    const snack = (sh.snack as ReturnType<typeof vi.fn>).mock.calls[0][0] as { onUndo: () => void };
+    snack.onUndo();
+    expect(mine().exercises.map((e) => e.name)).toEqual(['Bench Press', 'Barbell Row']);
+    expect(mine().blocks ?? []).toHaveLength(0);
   });
 });

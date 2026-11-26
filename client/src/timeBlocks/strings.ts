@@ -70,6 +70,8 @@ export interface TimeBlocksStrings {
   deleteBlockBody: string;
   keep: string;
   timeBlockRow: string;
+  exerciseInfo: string;
+  movedIntoBlock: (name: string) => string;
   timeBlockHint: string;
   blockLabel: string;
 }
@@ -150,6 +152,8 @@ const en: TimeBlocksStrings = {
   deleteBlockBody: 'The block and its result are removed from this session.',
   keep: 'Keep',
   timeBlockRow: 'Time block…',
+  exerciseInfo: 'Exercise details',
+  movedIntoBlock: (n) => `${n} moved into the block`,
   timeBlockHint: 'Move this exercise into a timed block',
   blockLabel: 'Time block',
 };
@@ -230,6 +234,8 @@ const uk: TimeBlocksStrings = {
   deleteBlockBody: 'Блок і його результат буде прибрано з цього тренування.',
   keep: 'Залишити',
   timeBlockRow: 'Часовий блок…',
+  exerciseInfo: 'Про вправу',
+  movedIntoBlock: (n) => `${n} перенесено в блок`,
   timeBlockHint: 'Перенести цю вправу в часовий блок',
   blockLabel: 'Часовий блок',
 };
@@ -308,6 +314,8 @@ const pl: TimeBlocksStrings = {
   deleteBlockBody: 'Blok i jego wynik zostaną usunięte z tego treningu.',
   keep: 'Zostaw',
   timeBlockRow: 'Blok czasowy…',
+  exerciseInfo: 'Szczegóły ćwiczenia',
+  movedIntoBlock: (n) => `${n} przeniesione do bloku`,
   timeBlockHint: 'Przenieś to ćwiczenie do bloku czasowego',
   blockLabel: 'Blok czasowy',
 };
@@ -387,6 +395,8 @@ const lt: TimeBlocksStrings = {
   deleteBlockBody: 'Blokas ir jo rezultatas bus pašalinti iš šios treniruotės.',
   keep: 'Palikti',
   timeBlockRow: 'Laiko blokas…',
+  exerciseInfo: 'Pratimo informacija',
+  movedIntoBlock: (n) => `${n} perkeltas į bloką`,
   timeBlockHint: 'Perkelti šį pratimą į laiko bloką',
   blockLabel: 'Laiko blokas',
 };
@@ -466,6 +476,8 @@ const et: TimeBlocksStrings = {
   deleteBlockBody: 'Plokk ja selle tulemus eemaldatakse sellest treeningust.',
   keep: 'Jäta',
   timeBlockRow: 'Ajaplokk…',
+  exerciseInfo: 'Harjutuse info',
+  movedIntoBlock: (n) => `${n} liigutati plokki`,
   timeBlockHint: 'Liiguta see harjutus ajaplokki',
   blockLabel: 'Ajaplokk',
 };

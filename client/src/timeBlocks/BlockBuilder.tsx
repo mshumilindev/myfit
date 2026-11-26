@@ -65,6 +65,8 @@ export interface BlockBuilderProps {
   initial?: { spec: BlockSpec; members: BlockMember[] };
   /** Members already chosen (e.g. the exercise this block started from). */
   startedFrom?: string;
+  /** Members to begin with in a new block (the exercise it was started from). */
+  startMembers?: BlockMember[];
   onSave: (spec: BlockSpec, members: BlockMember[]) => void;
   onClose: () => void;
   /** Open the exercise picker; it calls back with a name. */
@@ -75,7 +77,7 @@ export interface BlockBuilderProps {
 export function BlockBuilder(p: BlockBuilderProps) {
   const t = useBlockStrings();
   const [spec, setSpec] = useState<BlockSpec>(p.initial?.spec ?? DEFAULTS.amrap);
-  const [members, setMembers] = useState<BlockMember[]>(p.initial?.members ?? []);
+  const [members, setMembers] = useState<BlockMember[]>(p.initial?.members ?? p.startMembers ?? []);
   const [preset, setPreset] = useState<string | null>(null);
   const guide = useSaveGuide([{ id: 'ex', label: t.needExercise, done: members.length > 0 }]);
   const num = (o: Partial<BlockSpec>) => setSpec((s) => ({ ...s, ...o }));

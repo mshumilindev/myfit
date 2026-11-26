@@ -4,6 +4,8 @@ import { Chip } from '../components/ui/Chip';
 import { NumberStepper } from '../components/ui/NumberStepper';
 import { Tag } from '../components/ui/Tag';
 import { Icon } from '../ui';
+import { IconButton } from '../components/ui/Button';
+import { exerciseImage } from '../data/exercises';
 import { useT } from '../i18n';
 import {
   blockRemainSec,
@@ -31,16 +33,40 @@ export const useBlockStrings = (): TimeBlocksStrings => STRINGS[useT().locale];
 export const membersLine = (ms: readonly BlockMember[]) =>
   ms.map((m) => `${m.reps ?? ''} ${m.name}`.trim()).join(' · ');
 
-function Members({ members }: { members: readonly BlockMember[] }) {
+function Members({
+  members,
+  onInfo,
+}: {
+  members: readonly BlockMember[];
+  onInfo?: (name: string) => void;
+}) {
+  const t = useBlockStrings();
   if (!members.length) return null;
   return (
     <ul className="tb-mems">
-      {members.map((m, i) => (
-        <li key={`${m.name}-${i}`} className="tb-mem">
-          <span className="tb-mem-n">{m.reps}</span>
-          <span className="tb-mem-name">{m.name}</span>
-        </li>
-      ))}
+      {members.map((m, i) => {
+        const img = exerciseImage(m.name);
+        return (
+          <li key={`${m.name}-${i}`} className="tb-mem">
+            {img ? (
+              <img className="tb-mem-img" src={img} alt="" loading="lazy" />
+            ) : (
+              <span className="tb-mem-img" aria-hidden="true">
+                <Icon name="barbell" />
+              </span>
+            )}
+            <span className="tb-mem-n">{m.reps}</span>
+            <span className="tb-mem-name">{m.name}</span>
+            {onInfo && (
+              <IconButton
+                icon="info"
+                label={`${t.exerciseInfo}: ${m.name}`}
+                onClick={() => onInfo(m.name)}
+              />
+            )}
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -59,6 +85,7 @@ export function BlockReadyCard(p: {
   block: WorkoutBlock;
   onEdit: () => void;
   onStart: () => void;
+  onInfo?: (name: string) => void;
 }) {
   const t = useBlockStrings();
   const { spec, members } = p.block;
@@ -76,7 +103,7 @@ export function BlockReadyCard(p: {
           {t.edit}
         </Button>
       </div>
-      <Members members={members} />
+      <Members members={members} onInfo={p.onInfo} />
       <Button variant="secondary" size="sm" icon="plus" fullWidth onClick={p.onEdit}>
         {t.addExercise}
       </Button>
@@ -114,6 +141,7 @@ export function BlockTimerCard(p: {
   onResume: () => void;
   onRound: () => void;
   onFinish: () => void;
+  onInfo?: (name: string) => void;
 }) {
   const t = useBlockStrings();
   const { spec, members } = p.block;
@@ -158,7 +186,7 @@ export function BlockTimerCard(p: {
       ) : (
         <progress className="tb-track" max={100} value={pct} aria-hidden="true" />
       )}
-      <Members members={members} />
+      <Members members={members} onInfo={p.onInfo} />
       {(v.fmt === 'amrap' || v.fmt === 'fortime') && (
         <Button
           variant="primary"
@@ -386,3 +414,8 @@ export function BlockLoggedRow(p: {
 }
 
 export { blockRemainSec };
+
+/** The "Time block…" label of the exercise options row. */
+export function RowLabel() {
+  return <>{useBlockStrings().timeBlockRow}</>;
+}

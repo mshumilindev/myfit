@@ -16,6 +16,7 @@ import {
 import { useSupersetsHost } from '../supersetsRt';
 import { useCircuitHost } from '../circuitRt';
 import { useTimeBlocksHost } from '../timeBlocksRt';
+import type { WorkoutBlock } from '../timeBlocks/model';
 import { inShownGroup } from '../supersetBlocks';
 import { useSleepsForCalc } from '../addons/useSleeps';
 import { getSyncMeta } from '../syncMeta';
@@ -717,6 +718,9 @@ export function SessionView(props: {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   /** Focus is the only live-session view: one exercise full-screen with
    *  Back/Next (past sessions still show the list). */
+  const [blockIntake, setBlockIntake] = useState<Exercise | null>(null);
+  const openExerciseInfo = (name: string): void =>
+    props.shell.openOverlay({ screen: 'exercise-detail', name });
   const focusMode = true;
   const [focusStarted, setFocusStarted] = useState(false);
   const [focusIdx, setFocusIdx] = useState(0);
@@ -908,12 +912,34 @@ export function SessionView(props: {
   // A superset or circuit is ONE focus step: its members are done in turns,
   // so they share a slide (the same block the classic list rendered).
   const focusBlocks = sessionBlocks(workout);
-  const focusSteps = focusBlocks.map((b) =>
-    b.kind === 'group' ? b.group.exercises : [b.exercise],
+  // Time blocks (Advanced training) are steps of their own: a block sits after the n-th exercise (position n - 0.5).
+  const tbOrdered = TimeBlocks
+    ? [...(workout.blocks ?? [])].sort((a, b) => a.position - b.position)
+    : [];
+  const focusItems: { ex: (typeof focusBlocks)[number] | null; tb: WorkoutBlock | null }[] = [];
+  {
+    let seen = 0;
+    let ti = 0;
+    const flush = (upto: number) => {
+      while (ti < tbOrdered.length && Math.ceil(tbOrdered[ti].position) <= upto) {
+        focusItems.push({ ex: null, tb: tbOrdered[ti++] });
+      }
+    };
+    flush(0);
+    for (const b of focusBlocks) {
+      focusItems.push({ ex: b, tb: null });
+      seen += b.kind === 'group' ? b.group.exercises.length : 1;
+      flush(seen);
+    }
+    while (ti < tbOrdered.length) focusItems.push({ ex: null, tb: tbOrdered[ti++] });
+  }
+  const focusSteps = focusItems.map((it) =>
+    it.ex ? (it.ex.kind === 'group' ? it.ex.group.exercises : [it.ex.exercise]) : [],
   );
   const focusCount = focusSteps.length;
   const focusPos = Math.min(Math.max(0, focusIdx), Math.max(0, focusCount - 1));
-  const focusBlock = focusBlocks[focusPos] ?? null;
+  const focusBlock = focusItems[focusPos]?.ex ?? null;
+  const focusTb = focusItems[focusPos]?.tb ?? null;
   const focusGroup = focusBlock?.kind === 'group' ? focusBlock.group : null;
   // In a group, the member whose turn it is (fewest sets logged, in order).
   const focusGroupLogged = focusGroup
@@ -2483,18 +2509,19 @@ export function SessionView(props: {
     // Focus header: the gym stays in the hero above, Finish sits next to Next
     // at the bottom, everything else lives behind the options door. Only an
     // empty focus (nothing to log yet) needs a door up here.
-    const fmActions = !focusEx ? (
-      <div className="fm-actions">
-        <IconButton
-          icon="sliders-horizontal"
-          onClick={() =>
-            setSheet({ kind: 'opts', tab: 'session', exId: null, set: null, ghost: null })
-          }
-          label={t.sessionSettings}
-          title={t.sessionSettings}
-        />
-      </div>
-    ) : null;
+    const fmActions =
+      !focusEx && !focusTb ? (
+        <div className="fm-actions">
+          <IconButton
+            icon="sliders-horizontal"
+            onClick={() =>
+              setSheet({ kind: 'opts', tab: 'session', exId: null, set: null, ghost: null })
+            }
+            label={t.sessionSettings}
+            title={t.sessionSettings}
+          />
+        </div>
+      ) : null;
     const finishBtn = (
       <Button
         variant="ok-fill"
@@ -2507,10 +2534,10 @@ export function SessionView(props: {
         <Icon name="check" weight="bold" />
       </Button>
     );
-    if (!focusEx && live && workout!.exercises.length === 0) {
+    if (!focusEx && !focusTb && live && workout!.exercises.length === 0) {
       return <div className="focus-view focus-view-empty">{renderEmptyStart()}</div>;
     }
-    if (!focusEx) {
+    if (!focusEx && !focusTb) {
       return (
         <div className="focus-view">
           <div className="fm-modebar">{fmActions}</div>
@@ -2551,10 +2578,20 @@ export function SessionView(props: {
       );
     }
     const nx = focusSteps[focusPos + 1]?.[0] ?? null;
-    const nxBlock = focusBlocks[focusPos + 1] ?? null;
+    const nxBlock = focusItems[focusPos + 1]?.ex ?? null;
+    const nxTb = focusItems[focusPos + 1]?.tb ?? null;
     const segs = [
       ...focusSteps.map((st, i) => {
         const e = st[0];
+        if (!e) {
+          const tb = focusItems[i].tb;
+          return (
+            <span
+              key={tb?.id ?? `tb${i}`}
+              className={`${i < focusPos ? 'done' : i === focusPos ? 'cur' : ''} tb`}
+            />
+          );
+        }
         return (
           <span
             key={e.id}
@@ -2587,7 +2624,18 @@ export function SessionView(props: {
           {circuitBanner}
           <div className="focus-stage" ref={focusStageRef}>
             <div className="focus-live" ref={focusLiveRef}>
-              {focusGroup ? renderGroupStep(focusGroup) : renderCard(focusEx, null)}
+              {focusTb && TimeBlocks ? (
+                <TimeBlocks
+                  workoutId={workout!.id}
+                  past={false}
+                  focusId={focusTb.id}
+                  onInfo={openExerciseInfo}
+                />
+              ) : focusGroup ? (
+                renderGroupStep(focusGroup)
+              ) : focusEx ? (
+                renderCard(focusEx, null)
+              ) : null}
             </div>
           </div>
         </div>
@@ -2618,13 +2666,15 @@ export function SessionView(props: {
                 return img ? <img className="fn-thumb" src={img} alt="" /> : null;
               })()}
               <span className="fn-label">
-                {nxBlock?.kind === 'group'
-                  ? t.focusNext(
-                      nxBlock.group.circuit
-                        ? t.circuitTitle(nxBlock.group.letter)
-                        : t.supersetTag(nxBlock.group.letter),
-                    )
-                  : t.focusNext(nx?.name ?? '')}
+                {nxTb
+                  ? t.focusNext(timeBlocksH?.stepLabel?.(nxTb) ?? '')
+                  : nxBlock?.kind === 'group'
+                    ? t.focusNext(
+                        nxBlock.group.circuit
+                          ? t.circuitTitle(nxBlock.group.letter)
+                          : t.supersetTag(nxBlock.group.letter),
+                      )
+                    : t.focusNext(nx?.name ?? '')}
               </span>
               <Icon name="caret-right" />
             </Button>
@@ -4077,6 +4127,20 @@ export function SessionView(props: {
             onClick={() => setSheet({ kind: 'superset', exId: ex.id })}
           />
         )}
+      {TimeBlocks &&
+        !props.past &&
+        isStrengthExercise(ex) &&
+        !ex.groupId &&
+        ex.sets.length === 0 && (
+          <ListRow
+            icon={<IconTile icon="timer" />}
+            label={timeBlocksH?.RowLabel ? <timeBlocksH.RowLabel /> : ''}
+            onClick={() => {
+              setBlockIntake(ex);
+              setSheet(null);
+            }}
+          />
+        )}
       {inShownGroup(ex, workout!) && (
         <ListRow
           icon={<IconTile icon="x" />}
@@ -4984,7 +5048,19 @@ export function SessionView(props: {
           })()}
 
         <div className="session-body">
-          {TimeBlocks && <TimeBlocks workoutId={workout.id} past={!!props.past} />}
+          {TimeBlocks && !(focusView && focusTb) && (
+            <TimeBlocks
+              workoutId={workout.id}
+              past={!!props.past}
+              focusId={focusView ? null : undefined}
+              onInfo={openExerciseInfo}
+              intake={blockIntake}
+              onIntakeDone={(moved) => {
+                setBlockIntake(null);
+                if (moved) props.shell.snack({ text: moved.text, onUndo: moved.undo });
+              }}
+            />
+          )}
           {focusView ? (
             renderFocusView()
           ) : (
