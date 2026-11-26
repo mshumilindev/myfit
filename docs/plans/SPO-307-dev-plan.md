@@ -168,7 +168,7 @@ unit/contract (запис→Program, вправи, еліта, фільтри), 
 
 Рішення людини: R25 (зміна наявної поведінки `assignProgram`) і R24 (звуження читання assignments) пропоную власнику; решта в межах узгодженого. Нова оцінка: ризиків 30, High-ризики R1–R3, R15–R16, R18–R21 закрити тестами до Done.
 
-## 7. Risk close-out (26.11, проміжний; фіча ще не 100%)
+## 7. Risk close-out (26.11, фінальний)
 
 Базова лінія (зачеплені модулі, Mac, 26.11): `src/trainLikeAPro` + `src/views/programs` — 23 файли, 225 тестів зелені; `src/addonStore/storeInfo.ui` 9/9; `tests/coach-server` (programActivation 8, setProgramStatus.tx 7) зелені; rules-логіка каталожних програм через інтерпретатор репо зелена.
 
@@ -176,19 +176,29 @@ unit/contract (запис→Program, вправи, еліта, фільтри), 
 | ---------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | R1, R15, R16, R19, R20 | закрито кодом і тестами            | `programActivation.test.ts`, `setProgramStatus.tx.test.ts` (ідемпотентний старт, протухле призначення, транзакція, тренерська не перезаписується); `catalogPrograms.rules.logic.test.ts`, `adversarial.rules.test.ts`; **емулятор `test:rules` лише в CI — чекаю** |
 | R2, R5, R26            | закрито                            | `catalog.contract.test.ts`, `entryToProgram.test.ts` (усі 48 записів без втрат, вправи резолвляться, активація проходить — тест додано 26.11)                                                                                                                      |
-| R3, R18                | закрито логікою, чекає CI-емулятор | rules-логіка зелена; повний `test:rules` у CI                                                                                                                                                                                                                      |
+| R3, R18                | закрито логікою, чекає CI-емулятор | rules-логіка зелена; `test:rules` на емуляторі зелений у CI, правила й 5 функцій задеплоєно (21e005df)                                                                                                                                                             |
 | R4, R12                | прийнято за спайком                | рівень/мітка/дисклеймер у UI; **вичитка `{{ЮРИСТ}}` (SPO-258) лишається відкритою**                                                                                                                                                                                |
 | R6                     | закрито                            | `exclusion.contract.test.ts`, `boundary.contract.test.ts`, `trainLikeAProGate.test.ts` (member-only)                                                                                                                                                               |
 | R7, R17, R21, R27, R28 | закрито                            | `catalogProgram.test.ts`, `programActivities` (`isOwnProgram`), `CatalogPromoRow.test.tsx`, поле `origin` замість `source`                                                                                                                                         |
 | R9                     | закрито                            | Programs/Today показують `ProgramTitle` з атлетом; скріни прев'ю 26.11                                                                                                                                                                                             |
 | R10, R13               | закрито                            | `sizeEntries.contract.test.ts`, `storeInfo.contract.test.ts`; іконка 320×320; прев'ю `storeInfo.ui` зелені                                                                                                                                                         |
-| R11                    | **відкрито**                       | `audit:stories` / геометрія — лише CI                                                                                                                                                                                                                              |
+| R11                    | закрито                            | CI `layout` (контраст і геометрія, усі шарди) зелений на 21e005df після виправлення `CatalogCard` (`color-mix`, 4 комбінації перевірено локально)                                                                                                                  |
 | R14, R29               | закрито                            | `startProgram.test.ts` (queued/held/failed), `CatalogRoute.test.tsx`                                                                                                                                                                                               |
 | R22, R23, R30          | закрито                            | шифрування активностей — `startProgram.test.ts`; запис R27 у `data-registry.md`; доповнення в ADR 011 (26.11); `tl-` документи мають `authorId = uid` у тій самій колекції `programs/{id}`, що вже в реєстрі/експорті/каскаді R27 (нової колекції немає)           |
 | R8, R25                | рішення власника                   | транзакція `setProgramStatus` архівує власні активні; `assignProgram` (призначення тренером) не змінювали — питання власнику                                                                                                                                       |
 | R24                    | рішення власника                   | звуження читання `assignments` не робили                                                                                                                                                                                                                           |
 
-Прогалини оцінки, знайдені по ходу: (1) gate аддона давав трейнерам/адмінам «базу» → member-only gate + тест; (2) `Program` не можна розширювати без `dataLoss.program.test.ts` → `isCatalogProgram`; (3) Programs-екран використовує path-маршрути (`setHash`), не `location.hash`. Прогалин оцінки: 3, усі закриті.
+Прогалини оцінки, знайдені по ходу: (1) gate аддона давав трейнерам/адмінам «базу» → member-only gate + тест; (2) `Program` не можна розширювати без `dataLoss.program.test.ts` → `isCatalogProgram`; (3) Programs-екран використовує path-маршрути (`setHash`), не `location.hash`. Прогалини оцінки, знайдені після цього (фінал): (4) спільний `GroupedList` (фокус/вигляд рядків-лінків) — виправлено в кіті з тестом; (5) `CatalogCard` не проходив контраст у світлій/lime темі — `color-mix`; (6) `SessionView` лениво тягне мапу м'язів і `sizeEntries` — перевірено, розмір аддона виміряно; (7) нова функція «опис програми + Read more» (`description.ts`, 5 локалей) — тести `description.test.ts`, `CatalogPage.test.tsx`; (8) назви днів «Day N» у описі — `GENERIC_DAY` + тест. Усі закриті.
+
+Базова лінія 26.11 (фінал): `src/trainLikeAPro`, `src/views/programs`, `ProgramsView`, `addons`, `addonStore` — 63 файли, 567 тестів зелені; `tests/kit-guard.test.ts` 19/19; CI зелений на 21e005df.
+
+e2e: `tests/e2e/train-like-a-pro.e2e.ts` (відкриття каталогу, опис і Read more/less, шторка дня, аддон не встановлено → порожньо), у job `client-e2e`; 24/24 за `--repeat-each=12`. Старт програми в e2e не входить (пише в бекенд): покрито `startProgram.test.ts` і `setProgramStatus.tx.test.ts`.
+
+Швидкість: +~20 с у `client-e2e` (спільні збірки), у межах цілі.
+
+Лишається відкритим (потрібен власник/юрист): R4/R12 — вичитка `{{ЮРИСТ}}`/takedown (SPO-258); R8/R25/R24 — рішення власника (`assignProgram`, читання `assignments`); жива перевірка встановлення/видалення на чистому не-прод профілі.
+
+ризики: 30 оцінено, 25 закрито, 5 чекають рішення власника/юриста, 5 знайдено по ходу, прогалин оцінки 8 (усі закриті)
 
 ## 8. Рішення (26.11, власник делегував вибір)
 
