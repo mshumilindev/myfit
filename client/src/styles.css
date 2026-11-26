@@ -23301,9 +23301,51 @@ body {
   font-size: var(--fs-12);
   color: var(--color-neutral-500);
 }
-/* Tabs are a kit <Segmented>. */
-.opts-sheet .opts-tabs {
-  margin-bottom: var(--s-14);
+/* Set screen header: "Set 4 · 3 sets" under the exercise name; drill screens put a Back before the title (SPO-608). */
+.opts-sheet .opts-sub--set {
+  font-size: var(--fs-18);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-text);
+}
+.opts-sheet .opts-sub--set span {
+  font-size: var(--fs-13);
+  font-weight: 500;
+  color: var(--color-neutral-500);
+}
+.opts-sheet .opts-head--nav .opts-title {
+  font-size: var(--fs-18);
+  font-weight: 700;
+}
+.opts-sheet .opts-head--nav .opts-sub {
+  font-size: var(--fs-13);
+}
+/* More: one row that says what is inside; Exercise / Session rows close it. */
+.opts-sheet .se-more {
+  margin: var(--s-16) 0 var(--s-20);
+  padding: var(--s-4) 0;
+  border-block: var(--bw-1) solid var(--color-divider);
+}
+.opts-sheet .opts-scopes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin-top: var(--s-16);
+}
+/* Footer: Cancel / Log (and Delete set) always visible, separated from the destructive row under them. */
+.opts-sheet .opts-pin-set {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 100%;
+  gap: var(--s-8);
+  min-width: 0;
+  padding-bottom: var(--s-12);
+  border-bottom: var(--bw-1) solid var(--color-divider);
+}
+.opts-sheet .opts-pin-btns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-8);
 }
 .opts-sheet .opts-list {
   display: flex;
@@ -23332,6 +23374,7 @@ body {
 }
 .opts-sheet .opts-pinned {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--s-8);
   margin-top: var(--s-16);
   padding-top: var(--s-12);
@@ -24113,7 +24156,6 @@ body {
   padding-bottom: calc(var(--space-4) + var(--safe-bottom));
 }
 .opts-sheet > .opts-head,
-.opts-sheet > .opts-tabs,
 .opts-sheet > .opts-pinned {
   flex: none;
 }

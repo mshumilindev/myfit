@@ -25,6 +25,7 @@ import '../client/src/effort/effortBoot';
 import '../client/src/equipment/equipmentBoot';
 import '../client/src/circuit/circuitBoot';
 import { emptyCycleState } from '../client/src/cycle/cycleState';
+import { openScope } from '../client/src/views/optsNav.testkit';
 
 // Test shim standing in for the removed setAuth: mark a signed-in user so
 // role/uid gates pass. (Data now comes from Firestore/callables, mocked in
@@ -845,7 +846,7 @@ describe('F-03 session UI', () => {
     __replaceStateForTests(s);
     render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
     await userEvent.click(screen.getByRole('button', { name: 'Set options' }));
-    await userEvent.click(screen.getByRole('tab', { name: /Exercise/ }));
+    await openScope(screen.getByRole('dialog'), 'Exercise');
     expect(screen.getByRole('button', { name: /Replace exercise/ })).toBeTruthy();
   });
 
@@ -1083,17 +1084,15 @@ describe('F-03 session UI', () => {
     expect(within(nav).getByRole('button', { name: 'Finish' })).toBeTruthy();
     await userEvent.click(screen.getByRole('button', { name: 'Set options' }));
     const dialog = screen.getByRole('dialog');
-    expect(
-      within(dialog)
-        .getByRole('tab', { name: /This set/ })
-        .getAttribute('aria-selected'),
-    ).toBe('true');
-    await userEvent.click(within(dialog).getByRole('tab', { name: /Exercise/ }));
+    // no tabs: the options sheet opens on the set screen; Exercise and Session are rows inside More
+    expect(within(dialog).queryByRole('tab')).toBeNull();
+    expect(within(dialog).getByText(/^Set \d+$/)).toBeTruthy();
+    await openScope(dialog, 'Exercise');
     expect(within(dialog).getByRole('button', { name: /Replace exercise/ })).toBeTruthy();
     expect(within(dialog).getByRole('button', { name: /Equipment/ })).toBeTruthy();
-    await userEvent.click(within(dialog).getByRole('tab', { name: /Session/ }));
+    await openScope(dialog, 'Session');
     expect(within(dialog).getByRole('button', { name: /Circuit/ })).toBeTruthy();
-    // pinned on every tab
+    // pinned on every screen
     expect(within(dialog).getByRole('button', { name: /Muscle map/ })).toBeTruthy();
     expect(within(dialog).getByRole('button', { name: /Discard session/ })).toBeTruthy();
     localStorage.removeItem('spotter.session.focus');

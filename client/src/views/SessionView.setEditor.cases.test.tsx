@@ -216,6 +216,8 @@ describe('SessionView · set editor (strength)', () => {
     mount();
     await userEvent.click(screen.getByRole('button', { name: /set options/i }));
     const dlg = screen.getByRole('dialog');
+    // the Bodyweight switch lives inside More of the options sheet (SPO-608)
+    await userEvent.click(within(dlg).getByRole('button', { name: /^More/ }));
     const sw = within(dlg).getByRole('switch', { name: 'Bodyweight set' });
     expect(sw.getAttribute('aria-checked')).toBe('true');
     await userEvent.click(within(dlg).getByRole('button', { name: 'Log' }));

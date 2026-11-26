@@ -13,6 +13,7 @@ import '../supersets/supersetsBoot'; // Supersets too
 
 // Wednesday 14 Oct 2026, 18:00 local — fixed wall clock, only Date is faked so timers/userEvent keep running.
 const NOW = new Date(2026, 9, 14, 18, 0).getTime();
+import { openScope } from './optsNav.testkit';
 const MIN = 60000;
 
 const shell = (): Shell => ({
@@ -111,16 +112,16 @@ const openOpts = async (container: HTMLElement) => {
   );
   return screen.getByRole('dialog');
 };
-const tab = (d: HTMLElement, name: RegExp) => within(d).getByRole('tab', { name });
 
 describe('SessionView · exercise options (focus options sheet)', () => {
   it('opens on "This set" with the set editor, and the pinned footer has the muscle map and delete', async () => {
     seed([two()]);
     const { container } = mount();
     const d = await openOpts(container);
-    expect(tab(d, /This set/).getAttribute('aria-selected')).toBe('true');
+    expect(within(d).getByText(/^Set 3$/)).toBeTruthy(); // the set screen, no tabs
+    expect(within(d).queryByRole('tab')).toBeNull();
     expect(d.querySelector('.opts-title')!.textContent).toBe('Bench press');
-    expect(d.querySelector('.opts-sub')!.textContent).toBe('Sets · 2');
+    expect(d.querySelector('.opts-sub')!.textContent).toMatch(/^Set 3 · 2 sets/);
     expect(within(d).getByRole('button', { name: /Muscle map/ })).toBeTruthy();
     await userEvent.click(within(d).getByRole('button', { name: /Muscle map/ }));
     // the map is a lazy chunk (Muscle map add-on): it arrives a tick after the tap
@@ -140,7 +141,7 @@ describe('SessionView · exercise options (focus options sheet)', () => {
     seed([two()]);
     const { container } = mount();
     const d = await openOpts(container);
-    await userEvent.click(tab(d, /Exercise/));
+    await openScope(d, 'Exercise');
     await userEvent.click(within(d).getByRole('button', { name: /Duplicate with sets/ }));
     const names = mine().exercises.map((e) => [e.name, e.sets.length]);
     expect(names.filter(([n]) => n === 'Bench press')).toEqual([
@@ -154,7 +155,7 @@ describe('SessionView · exercise options (focus options sheet)', () => {
     seed([two()]);
     const { container, sh } = mount();
     const d = await openOpts(container);
-    await userEvent.click(tab(d, /Exercise/));
+    await openScope(d, 'Exercise');
     await userEvent.click(within(d).getByRole('button', { name: 'Clear all sets' }));
     expect(mine().exercises[0].sets).toHaveLength(0);
     const snack = (sh.snack as ReturnType<typeof vi.fn>).mock.calls[0][0] as {
@@ -191,7 +192,7 @@ describe('SessionView · exercise options (focus options sheet)', () => {
     seed([two()]);
     const { container } = mount();
     const d = await openOpts(container);
-    await userEvent.click(tab(d, /Exercise/));
+    await openScope(d, 'Exercise');
     await userEvent.click(within(d).getByRole('button', { name: /Replace exercise/ }));
     await userEvent.type(
       screen.getByPlaceholderText('Search by name, muscle or equipment'),
@@ -208,14 +209,14 @@ describe('SessionView · exercise options (focus options sheet)', () => {
     seed([two()]);
     const { container, sh } = mount();
     const d = await openOpts(container);
-    await userEvent.click(tab(d, /Exercise/));
+    await openScope(d, 'Exercise');
     await userEvent.click(within(d).getByRole('button', { name: /Details/ }));
     expect(sh.openOverlay).toHaveBeenLastCalledWith({
       screen: 'exercise-detail',
       name: 'Bench press',
     });
     const d2 = await openOpts(container);
-    await userEvent.click(tab(d2, /Exercise/));
+    await openScope(d2, 'Exercise');
     await userEvent.click(within(d2).getByRole('button', { name: /history/i }));
     expect(sh.openOverlay).toHaveBeenLastCalledWith({
       screen: 'exercise-history',
@@ -227,7 +228,7 @@ describe('SessionView · exercise options (focus options sheet)', () => {
     seed([two()]);
     const { container } = mount();
     const d = await openOpts(container);
-    await userEvent.click(tab(d, /Exercise/));
+    await openScope(d, 'Exercise');
     await userEvent.click(within(d).getByRole('button', { name: /Superset with/ }));
     const sheet = screen.getByRole('dialog');
     expect(
@@ -240,7 +241,7 @@ describe('SessionView · exercise options (focus options sheet)', () => {
     expect(a.groupId).toBe(b.groupId);
     // the focus view shows the pair as one step; ungroup from its menu
     const d3 = await openOpts(container);
-    await userEvent.click(tab(d3, /Exercise/));
+    await openScope(d3, 'Exercise');
     await userEvent.click(within(d3).getByRole('button', { name: 'Ungroup' }));
     expect(mine().exercises.every((e) => !e.groupId)).toBe(true);
   });
@@ -249,7 +250,7 @@ describe('SessionView · exercise options (focus options sheet)', () => {
     seed([two()], { gyms: [{ id: 'g1', name: 'Smartfit', lat: 50.45, lng: 30.52, radiusM: 150 }] });
     const { container } = mount();
     const d = await openOpts(container);
-    await userEvent.click(tab(d, /Session/));
+    await openScope(d, 'Session');
     const circuit = d.querySelector('.ss-circuit') as HTMLElement;
     expect(circuit.className).not.toContain(' on');
     await userEvent.click(circuit);
@@ -258,7 +259,7 @@ describe('SessionView · exercise options (focus options sheet)', () => {
     await userEvent.click(await screen.findByText('Smartfit'));
     expect(mine().gymId).toBe('g1');
     const d2 = await openOpts(container);
-    await userEvent.click(tab(d2, /Session/));
+    await openScope(d2, 'Session');
     await userEvent.click(within(d2).getByRole('button', { name: 'Discard session' }));
     expect(screen.getByRole('alertdialog').textContent).toContain('Discard session');
   });

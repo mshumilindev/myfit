@@ -1,4 +1,5 @@
 /** Live session + past workout editing — design S-17…S-31 + SS/DS/MG/EQ. */
+import { createPortal } from 'react-dom';
 import { fatigueHost, fatigueSource } from '../fatigueApi';
 import {
   equipmentAvailable,
@@ -603,6 +604,8 @@ export function SessionView(props: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [sheet, setSheet] = useState<SheetState>(null);
+  // Footer slot of the options sheet: the set editor portals Cancel / Log into it (always visible, SPO-608).
+  const [optsPin, setOptsPin] = useState<HTMLElement | null>(null);
   // Weight taken from the cross-gym estimate, per exercise (this session only).
   const [takenKg, setTakenKg] = useState<Record<string, number>>({});
   // Full-screen exercise photos (start → end frames) from the focus card.
@@ -5656,39 +5659,70 @@ export function SessionView(props: {
                 ? 'session'
                 : sheet.tab;
           const img = ex ? exerciseImage(ex.name, exerciseKind(ex)) : undefined;
-          const tabsDef: { k: OptsTab; label: string; icon: string; off: boolean }[] = [
-            { k: 'set', label: t.optsTabSet, icon: 'sliders-horizontal', off: !canSet },
-            { k: 'exercise', label: t.optsTabExercise, icon: 'barbell', off: !ex },
-            { k: 'session', label: t.optsTabSession, icon: 'timer', off: false },
-          ];
+          const setIdx =
+            ex && sheet.set
+              ? [...ex.sets]
+                  .sort((x, y) => x.position - y.position)
+                  .findIndex((x) => x.id === sheet.set!.id) + 1
+              : ex
+                ? ex.sets.length + 1
+                : 0;
+          // Exercise / Session are two rows inside More of the set screen; each drills into its own screen with a Back.
+          // Without a set (the menu of a cardio move, Session settings) the other screen is one row under the list.
+          const scopeRows = (which: OptsTab[]) => (
+            <div className="opts-scopes">
+              <div className="opts-group-label">{t.optsOtherSettings}</div>
+              {which.map((k) => (
+                <ListRow
+                  key={k}
+                  icon={<IconTile icon={k === 'exercise' ? 'barbell' : 'timer'} />}
+                  label={k === 'exercise' ? t.optsTabExercise : t.optsTabSession}
+                  value={k === 'exercise' ? t.optsExerciseValue : t.optsSessionValue}
+                  chevron
+                  onClick={() => setSheet({ ...sheet, tab: k })}
+                />
+              ))}
+            </div>
+          );
+          const otherSettings = canSet ? scopeRows(['exercise', 'session']) : null;
           return (
             <Sheet className="opts-sheet" onClose={() => setSheet(null)}>
-              <div className="opts-head">
-                {img ? <img className="opts-thumb" src={img} alt="" /> : null}
-                <div className="opts-head-text">
-                  <span className="opts-title">{ex ? exName(ex.name) : t.sessionSettings}</span>
-                  <span className="opts-sub">
-                    {ex && !isMarkerExercise(ex) ? `${t.setsStat} · ${ex.sets.length}` : ''}
-                  </span>
+              {tab === 'set' && ex ? (
+                <div className="opts-head">
+                  {img ? <img className="opts-thumb" src={img} alt="" /> : null}
+                  <div className="opts-head-text">
+                    <span className="opts-title">{exName(ex.name)}</span>
+                    <span className="opts-sub opts-sub--set">
+                      {t.setNumber(setIdx)}
+                      <span>{` · ${ex.sets.length} ${t.setsStat.toLowerCase()}`}</span>
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <Segmented
-                className="opts-tabs"
-                tabs
-                label={t.sessionSettings}
-                value={tab}
-                onChange={(k) => setSheet({ ...sheet, tab: k })}
-                options={tabsDef.map((d) => ({
-                  value: d.k,
-                  label: d.label,
-                  icon: d.icon,
-                  disabled: d.off,
-                }))}
-              />
+              ) : (
+                <div className="opts-head opts-head--nav">
+                  {canSet ? (
+                    <BackButton
+                      label={t.backAction}
+                      text={t.setNumber(setIdx)}
+                      onClick={() => setSheet({ ...sheet, tab: 'set' })}
+                    />
+                  ) : null}
+                  <div className="opts-head-text">
+                    <span className="opts-title">
+                      {tab === 'exercise' ? t.optsExerciseTitle : t.optsSessionTitle}
+                    </span>
+                    <span className="opts-sub">
+                      {tab === 'exercise' && ex ? exName(ex.name) : t.optsWholeWorkout}
+                    </span>
+                  </div>
+                </div>
+              )}
               <div className="opts-body">
                 {tab === 'set' && ex && sheet.ghost ? (
                   <SetEditorSheet
                     embedded
+                    pinTo={optsPin}
+                    otherSettings={otherSettings}
                     key={sheet.set?.id ?? 'ghost'}
                     exercise={ex}
                     set={sheet.set}
@@ -5719,12 +5753,21 @@ export function SessionView(props: {
                     onClose={() => setSheet(null)}
                   />
                 ) : tab === 'exercise' && ex ? (
-                  <div className="opts-list">{renderExerciseOptions(ex, true)}</div>
+                  <>
+                    <div className="opts-list">{renderExerciseOptions(ex, true)}</div>
+                    {!canSet && scopeRows(['session'])}
+                  </>
                 ) : (
-                  <div className="opts-list session-settings">{renderSessionOptions(true)}</div>
+                  <>
+                    <div className="opts-list session-settings">{renderSessionOptions(true)}</div>
+                    {!canSet && ex && scopeRows(['exercise'])}
+                  </>
                 )}
               </div>
               <div className="opts-pinned">
+                {tab === 'set' && ex && sheet.ghost ? (
+                  <div className="opts-pin-set" ref={setOptsPin} />
+                ) : null}
                 {muscleMapOn && (
                   <Button
                     variant="secondary"
@@ -6628,8 +6671,12 @@ function SetEditorSheet(props: {
   onSave: (vals: Omit<SetEntry, 'id' | 'position'>) => void;
   onDelete?: () => void;
   onExerciseSettings?: () => void;
-  /** Rendered inside the focus options sheet (tabs) instead of its own sheet. */
+  /** Rendered inside the focus options sheet instead of its own sheet. */
   embedded?: boolean;
+  /** Embedded: the sheet's footer slot that Cancel / Log (and Delete set) are portaled into. */
+  pinTo?: HTMLElement | null;
+  /** Embedded: the Exercise / Session rows, shown at the end of More. */
+  otherSettings?: ReactNode;
   onClose: () => void;
 }) {
   const { t } = useT();
@@ -6645,6 +6692,7 @@ function SetEditorSheet(props: {
   const isAssist = loadType === 'assist';
   const isBand = loadType === 'band';
   const [view, setView] = useState<'main' | 'type' | 'load'>('main');
+  const [moreOpen, setMoreOpen] = useState(false);
   // A stopwatch move (plank…) logs only a hold: no reps, load type, set type or drops. A set
   // that was saved some other way keeps the full editor, so nothing already logged is lost.
   const holdOnly =
@@ -6664,6 +6712,14 @@ function SetEditorSheet(props: {
         : shownSetType(props.ghost.type ?? 'working', holdMove),
   );
   const typeRows = SET_TYPE_ROWS.filter((r) => setTypeOffered(r.type));
+  // With the Set types module there are five choices: short labels in one row, the full name on the line below.
+  const typeShort: Record<SetType, string> = {
+    working: t.setShortWorking,
+    warmup: t.setShortWarmup,
+    drop: t.setShortDrop,
+    'reverse-drop': t.setShortReverse,
+    'static-dynamic': t.setSDShort,
+  };
   // The athlete opened the type picker and chose — pin the warm-up/working
   // state so auto-detection won't override it.
   const [typeTouched, setTypeTouched] = useState(false);
@@ -6908,18 +6964,31 @@ function SetEditorSheet(props: {
     );
   }
 
+  // More: Effort, the rarer toggles and (in the options sheet) the Exercise / Session rows, folded behind one row.
+  const moreHasGroup = !(holdOnly && (holdNoLoad || !unitEligible));
+  const showMore = !!effort || moreHasGroup || !!props.otherSettings;
+  const moreSummary = [
+    effort ? t.rpe : null,
+    unitEligible && !holdNoLoad && !isAssist && !isBand && !bw ? t.unitLabel : null,
+    sidesOk && !holdOnly && !isAssist && !isBand ? t.sidesLabel : null,
+    props.otherSettings ? `${t.optsTabExercise}, ${t.optsTabSession}` : null,
+  ]
+    .filter(Boolean)
+    .join(', ');
+
   return (
     <SetEditorFrame embedded={!!props.embedded} onClose={props.onClose}>
-      <div className="sheet-head">
-        <span className="t">
-          {props.embedded
-            ? t.setNumber(idx)
-            : timed
-              ? t.entryN(idx, props.exercise.name)
-              : t.setN(idx, props.exercise.name)}
-        </span>
-        {props.set && <span className="m">{t.loggedAt(fmtClock(openedAt))}</span>}
-      </div>
+      {/* Embedded: the options sheet's header already says "Set N"; only the logged-at line stays. */}
+      {(!props.embedded || props.set) && (
+        <div className="sheet-head">
+          {!props.embedded && (
+            <span className="t">
+              {timed ? t.entryN(idx, props.exercise.name) : t.setN(idx, props.exercise.name)}
+            </span>
+          )}
+          {props.set && <span className="m">{t.loggedAt(fmtClock(openedAt))}</span>}
+        </div>
+      )}
       {timed ? (
         <>
           <div className="steppers">
@@ -6997,6 +7066,8 @@ function SetEditorSheet(props: {
             />
             {effort?.CardioStepper && <effort.CardioStepper value={rpe} onChange={setRpe} />}
           </div>
+          {/* A timed entry has no More: the Exercise / Session rows sit right under the readings. */}
+          {props.otherSettings}
         </>
       ) : (
         <>
@@ -7162,172 +7233,199 @@ function SetEditorSheet(props: {
             <>
               <div className="se-label">{t.setTypeLabel}</div>
               <div className={`se-card se-kind-${type}`}>
-                <div className="se-types">
-                  {typeRows.map((row) => (
-                    <Chip
-                      key={row.type}
-                      className={`se-kind-${row.type}`}
-                      selected={type === row.type}
-                      onClick={() => {
-                        setType(row.type);
-                        setTypeTouched(true);
-                        if (row.type === 'warmup') setBw(false);
-                      }}
-                    >
-                      {typeMeta[row.type].name}
-                    </Chip>
-                  ))}
-                </div>
+                <Segmented<SetType>
+                  label={t.setTypeLabel}
+                  fill
+                  size="sm"
+                  variant="buttons"
+                  tone={
+                    type === 'warmup' ? 'warmup' : type === 'working' ? 'accent' : 'conditioning'
+                  }
+                  value={type}
+                  onChange={(v) => {
+                    setType(v);
+                    setTypeTouched(true);
+                    if (v === 'warmup') setBw(false);
+                  }}
+                  options={typeRows.map((row) => ({
+                    value: row.type,
+                    label: typeRows.length > 2 ? typeShort[row.type] : typeMeta[row.type].name,
+                    icon: row.icon,
+                    ariaLabel: typeMeta[row.type].name,
+                  }))}
+                />
                 {typeMeta[type].hint ? <div className="se-hint">{typeMeta[type].hint}</div> : null}
               </div>
             </>
           )}
-          {effort && (
-            <>
-              {effort.Label ? <effort.Label /> : <div className="se-label">{t.failToggle}</div>}
-              <div className={`se-card se-kind-${type}`}>
-                <div className="se-rpe">
-                  {effort?.Chips && (
-                    <effort.Chips
-                      rpe={rpe}
-                      failOn={failOn}
-                      onPick={(v) => {
-                        setRpe(v);
-                        // Picking an effort below 10 says "not to failure"; 10 or
-                        // Skip leave it to the app (an 'auto' mark is dismissed).
-                        setFail(v >= 6 && v < 10 ? 'no' : fail === 'auto' ? 'no' : null);
-                      }}
-                    />
-                  )}
-                  {!isSD && (
-                    <Chip
-                      size="md"
-                      tone="danger"
-                      className="rpe-f"
-                      selected={failOn}
-                      aria-label={t.failToggle}
-                      onClick={() => {
-                        setFail('manual');
-                        setRpe(10);
-                      }}
-                    >
-                      F
-                    </Chip>
-                  )}
-                </div>
-                {(failOn || effort) && (
-                  <div className="se-hint">
-                    {failOn ? (
-                      fail === 'auto' ? (
-                        t.rpeHintFAuto
-                      ) : (
-                        t.rpeHintF
-                      )
-                    ) : effort?.Hint ? (
-                      <effort.Hint rpe={rpe} est={rpeEst} />
-                    ) : null}
-                  </div>
-                )}
-                {type !== 'warmup' && <SupplementRpeNote />}
-                {failOn && (
-                  <div className="se-partials">
-                    <span className="lab">{t.partialsLabel}</span>
-                    <NumberStepper
-                      label=""
-                      value={partials}
-                      step={1}
-                      min={0}
-                      max={20}
-                      onChange={setPartials}
-                    />
-                  </div>
-                )}
-              </div>
-            </>
-          )}
           {type !== 'warmup' && <CycleSessionNote />}
-          {!(holdOnly && (holdNoLoad || !unitEligible)) && (
+          {showMore && (
             <>
-              <div className="se-label se-label-more">{t.seGroupMore}</div>
-              <div className="se-group">
-                {sidesOk && !holdOnly && !isAssist && !isBand && (
-                  <div className="sides-block">
-                    <ListRow
-                      className="sides-row"
-                      icon={<Icon name="arrows-out-line-horizontal" />}
-                      label={t.sidesLabel}
-                      trailing={
-                        <Segmented
-                          className="sides-seg"
-                          size="sm"
-                          label={t.sidesLabel}
-                          value={sides}
-                          onChange={(v) => pickSides(v)}
-                          options={[
-                            { value: 'both', label: t.sidesBoth },
-                            { value: 'one', label: t.sidesOne },
-                          ]}
-                        />
-                      }
-                    />
-                    {sides === 'one' && (
-                      <div className="sides-note">
-                        <Icon name="info" />
-                        {t.sidesNote}
+              {props.embedded && (
+                <div className="se-more">
+                  <ListRow
+                    icon={<IconTile icon="sliders-horizontal" />}
+                    label={t.seGroupMore}
+                    value={moreOpen ? undefined : moreSummary}
+                    trailing={<Icon name={moreOpen ? 'caret-up' : 'caret-down'} />}
+                    aria-expanded={moreOpen}
+                    onClick={() => setMoreOpen((o) => !o)}
+                  />
+                </div>
+              )}
+              {(!props.embedded || moreOpen) && (
+                <>
+                  {effort && (
+                    <>
+                      {effort.Label ? (
+                        <effort.Label />
+                      ) : (
+                        <div className="se-label">{t.failToggle}</div>
+                      )}
+                      <div className={`se-card se-kind-${type}`}>
+                        <div className="se-rpe">
+                          {effort?.Chips && (
+                            <effort.Chips
+                              rpe={rpe}
+                              failOn={failOn}
+                              onPick={(v) => {
+                                setRpe(v);
+                                // Picking an effort below 10 says "not to failure"; 10 or
+                                // Skip leave it to the app (an 'auto' mark is dismissed).
+                                setFail(v >= 6 && v < 10 ? 'no' : fail === 'auto' ? 'no' : null);
+                              }}
+                            />
+                          )}
+                          {!isSD && (
+                            <Chip
+                              size="md"
+                              tone="danger"
+                              className="rpe-f"
+                              selected={failOn}
+                              aria-label={t.failToggle}
+                              onClick={() => {
+                                setFail('manual');
+                                setRpe(10);
+                              }}
+                            >
+                              F
+                            </Chip>
+                          )}
+                        </div>
+                        {(failOn || effort) && (
+                          <div className="se-hint">
+                            {failOn ? (
+                              fail === 'auto' ? (
+                                t.rpeHintFAuto
+                              ) : (
+                                t.rpeHintF
+                              )
+                            ) : effort?.Hint ? (
+                              <effort.Hint rpe={rpe} est={rpeEst} />
+                            ) : null}
+                          </div>
+                        )}
+                        {type !== 'warmup' && <SupplementRpeNote />}
+                        {failOn && (
+                          <div className="se-partials">
+                            <span className="lab">{t.partialsLabel}</span>
+                            <NumberStepper
+                              label=""
+                              value={partials}
+                              step={1}
+                              min={0}
+                              max={20}
+                              onChange={setPartials}
+                            />
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                )}
-                {unitEligible && !holdNoLoad && !isAssist && !isBand && !bw && (
-                  <ListRow
-                    className="unit-row"
-                    icon={<Icon name="scales" />}
-                    label={t.unitLabel}
-                    trailing={
-                      <Segmented
-                        size="sm"
-                        className="unit-seg"
-                        label={t.unitLabel}
-                        options={(['kg', 'lb'] as DisplayUnit[]).map((u) => ({
-                          value: u,
-                          label: u,
-                        }))}
-                        value={unit}
-                        onChange={setUnit}
-                      />
-                    }
-                  />
-                )}
-                {unitEligible &&
-                  !holdNoLoad &&
-                  !isAssist &&
-                  !isBand &&
-                  unit === 'lb' &&
-                  !bw &&
-                  weight > 0 && (
-                    <div className="unit-equiv">{t.unitStoredKg(fmtWeightValue(weight))}</div>
+                    </>
                   )}
-                {!holdOnly && !isAssist && !isBand && <InputModeRow />}
-                {isBarbell && !holdOnly && !isAssist && !isBand && !bw && (
-                  <ListRow
-                    icon={<Icon name="barbell" />}
-                    label={t.plateTitle}
-                    value={`${fmtWeightValue(weight)} ${t.kgCol.toLowerCase()}`}
-                    valueTone="accent"
-                    chevron
-                    onClick={() => setPlateOpen(true)}
-                  />
-                )}
-                {!holdOnly && !isAssist && !isBand && (
-                  <ListRow
-                    icon={<Icon name="barbell" />}
-                    label={t.bodyweightSet}
-                    trailing={
-                      <KitSwitch checked={bw} aria-label={t.bodyweightSet} onChange={setBw} />
-                    }
-                  />
-                )}
-              </div>
+                  {moreHasGroup && (
+                    <div className="se-group">
+                      {sidesOk && !holdOnly && !isAssist && !isBand && (
+                        <div className="sides-block">
+                          <ListRow
+                            className="sides-row"
+                            icon={<Icon name="arrows-out-line-horizontal" />}
+                            label={t.sidesLabel}
+                            trailing={
+                              <Segmented
+                                className="sides-seg"
+                                size="sm"
+                                label={t.sidesLabel}
+                                value={sides}
+                                onChange={(v) => pickSides(v)}
+                                options={[
+                                  { value: 'both', label: t.sidesBoth },
+                                  { value: 'one', label: t.sidesOne },
+                                ]}
+                              />
+                            }
+                          />
+                          {sides === 'one' && (
+                            <div className="sides-note">
+                              <Icon name="info" />
+                              {t.sidesNote}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {unitEligible && !holdNoLoad && !isAssist && !isBand && !bw && (
+                        <ListRow
+                          className="unit-row"
+                          icon={<Icon name="scales" />}
+                          label={t.unitLabel}
+                          trailing={
+                            <Segmented
+                              size="sm"
+                              className="unit-seg"
+                              label={t.unitLabel}
+                              options={(['kg', 'lb'] as DisplayUnit[]).map((u) => ({
+                                value: u,
+                                label: u,
+                              }))}
+                              value={unit}
+                              onChange={setUnit}
+                            />
+                          }
+                        />
+                      )}
+                      {unitEligible &&
+                        !holdNoLoad &&
+                        !isAssist &&
+                        !isBand &&
+                        unit === 'lb' &&
+                        !bw &&
+                        weight > 0 && (
+                          <div className="unit-equiv">{t.unitStoredKg(fmtWeightValue(weight))}</div>
+                        )}
+                      {!holdOnly && !isAssist && !isBand && <InputModeRow />}
+                      {isBarbell && !holdOnly && !isAssist && !isBand && !bw && (
+                        <ListRow
+                          icon={<Icon name="barbell" />}
+                          label={t.plateTitle}
+                          value={`${fmtWeightValue(weight)} ${t.kgCol.toLowerCase()}`}
+                          valueTone="accent"
+                          chevron
+                          onClick={() => setPlateOpen(true)}
+                        />
+                      )}
+                      {!holdOnly && !isAssist && !isBand && (
+                        <ListRow
+                          icon={<Icon name="barbell" />}
+                          label={t.bodyweightSet}
+                          trailing={
+                            <KitSwitch checked={bw} aria-label={t.bodyweightSet} onChange={setBw} />
+                          }
+                        />
+                      )}
+                    </div>
+                  )}
+                  {props.otherSettings}
+                </>
+              )}
             </>
           )}
         </>
@@ -7341,20 +7439,43 @@ function SetEditorSheet(props: {
           onClick={props.onExerciseSettings}
         />
       )}
-      <div className="sheet-actions">
-        {props.onDelete && (
-          <Button variant="danger" style={{ minHeight: 44 }} onClick={props.onDelete}>
-            <Icon name="trash" />
-            {t.deleteSet}
+      {props.embedded ? (
+        props.pinTo ? (
+          createPortal(
+            <>
+              <div className="opts-pin-btns">
+                <Button variant="secondary" fullWidth onClick={props.onClose}>
+                  {t.cancel}
+                </Button>
+                <Button variant="primary" fullWidth onClick={save}>
+                  {props.set ? t.save : t.log}
+                </Button>
+              </div>
+              {props.onDelete && (
+                <Button variant="danger" fullWidth icon="trash" onClick={props.onDelete}>
+                  {t.deleteSet}
+                </Button>
+              )}
+            </>,
+            props.pinTo,
+          )
+        ) : null
+      ) : (
+        <div className="sheet-actions">
+          {props.onDelete && (
+            <Button variant="danger" style={{ minHeight: 44 }} onClick={props.onDelete}>
+              <Icon name="trash" />
+              {t.deleteSet}
+            </Button>
+          )}
+          <Button variant="secondary" className="grow" onClick={props.onClose}>
+            {t.cancel}
           </Button>
-        )}
-        <Button variant="secondary" className="grow" onClick={props.onClose}>
-          {t.cancel}
-        </Button>
-        <Button variant="primary" className="grow" onClick={save}>
-          {props.set ? t.save : t.log}
-        </Button>
-      </div>
+          <Button variant="primary" className="grow" onClick={save}>
+            {props.set ? t.save : t.log}
+          </Button>
+        </div>
+      )}
       {plateOpen && (
         <PlateSheet
           targetKg={weight}

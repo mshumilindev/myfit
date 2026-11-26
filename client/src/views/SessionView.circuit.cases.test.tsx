@@ -13,6 +13,7 @@ import '../supersets/supersetsBoot'; // Supersets too
 
 // Wednesday 14 Oct 2026, 18:00 local — fixed wall clock, only Date is faked so timers/userEvent keep running.
 const NOW = new Date(2026, 9, 14, 18, 0).getTime();
+import { openScope } from './optsNav.testkit';
 const MIN = 60000;
 
 const shell = (): Shell => ({
@@ -214,7 +215,7 @@ describe('SessionView · circuits', () => {
         name: 'Set options',
       }),
     );
-    await userEvent.click(within(screen.getByRole('dialog')).getByRole('tab', { name: /Session/ }));
+    await openScope(screen.getByRole('dialog'), 'Session');
     await userEvent.click(document.querySelector('.ss-circuit') as HTMLElement);
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());

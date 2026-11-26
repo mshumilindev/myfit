@@ -17,6 +17,7 @@ import '../equipment/equipmentBoot'; // Equipment installed and loaded: its pick
 
 // Wednesday 14 Oct 2026, 18:00 local — fixed wall clock, only Date is faked so timers/userEvent keep running.
 const NOW = new Date(2026, 9, 14, 18, 0).getTime();
+import { openScope } from './optsNav.testkit';
 const MIN = 60000;
 
 const shell = (): Shell => ({
@@ -222,6 +223,8 @@ describe('SessionView · set options from the focus card', () => {
     mount();
     await userEvent.click(screen.getByRole('button', { name: 'Set options' }));
     const dlg = screen.getByRole('dialog');
+    // Effort lives inside More (SPO-608): open it, then pick
+    await userEvent.click(within(dlg).getByRole('button', { name: /^More/ }));
     await userEvent.click(within(dlg).getByRole('button', { name: '9' }));
     await userEvent.click(within(dlg).getByRole('button', { name: 'Log' }));
     const sets = mine().exercises[0].sets;
@@ -348,7 +351,7 @@ describe('SessionView · entry points and shortcuts', () => {
         name: 'Set options',
       }),
     );
-    await userEvent.click(within(screen.getByRole('dialog')).getByRole('tab', { name: /Session/ }));
+    await openScope(screen.getByRole('dialog'), 'Session');
     await userEvent.click(within(screen.getByRole('dialog')).getByText('Today’s readiness'));
     expect(document.querySelector('.coach-sheet')).toBeTruthy();
     expect(document.querySelector('.coach-sheet')!.textContent).toContain(
@@ -374,7 +377,7 @@ describe('SessionView · entry points and shortcuts', () => {
         name: 'Set options',
       }),
     );
-    await userEvent.click(within(screen.getByRole('dialog')).getByRole('tab', { name: /Session/ }));
+    await openScope(screen.getByRole('dialog'), 'Session');
     const dlg = within(screen.getByRole('dialog'));
     expect(dlg.getByText('Today’s plan')).toBeTruthy();
     expect(dlg.queryByText('Today’s readiness')).toBeNull();
@@ -406,9 +409,7 @@ describe('SessionView · sheets and dialogs close cleanly', () => {
         name: 'Set options',
       }),
     );
-    await userEvent.click(
-      within(screen.getByRole('dialog')).getByRole('tab', { name: /Exercise/ }),
-    );
+    await openScope(screen.getByRole('dialog'), 'Exercise');
     await userEvent.click(
       within(screen.getByRole('dialog')).getByRole('button', { name: /Superset with/ }),
     );

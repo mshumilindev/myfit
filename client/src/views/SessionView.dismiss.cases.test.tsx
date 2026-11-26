@@ -8,6 +8,7 @@ import { __getStateForTests, __replaceStateForTests } from '../store';
 import type { Exercise, SetEntry, Workout } from '../types';
 import { SessionView } from './SessionView';
 import { clearSummaryReturn } from './sessionSummary/NextUp';
+import { openScope } from './optsNav.testkit';
 
 // Wednesday 14 Oct 2026, 18:00 local — fixed wall clock, only Date is faked so timers/userEvent keep running.
 const NOW = new Date(2026, 9, 14, 18, 0).getTime();
@@ -117,25 +118,20 @@ describe('SessionView · every sheet can be dismissed without changing anything'
         name: 'Set options',
       }),
     );
-    await userEvent.click(
-      within(screen.getByRole('dialog')).getByRole('tab', { name: /Exercise/ }),
-    );
+    await openScope(screen.getByRole('dialog'), 'Exercise');
     await userEvent.click(within(screen.getByRole('dialog')).getByText('Replace exercise'));
     await userEvent.keyboard('{Escape}');
     await gone();
     expect(snapshot()).toBe(before);
   });
 
-  it('the set editor: its Exercise settings link opens the Exercise tab, Cancel closes', async () => {
+  it('the set editor: its Exercise settings link opens the Exercise options screen, Cancel closes', async () => {
     seed([one()]);
     mount();
     await userEvent.click(screen.getByRole('button', { name: /^1880\.0/ }));
     await userEvent.click(within(screen.getByRole('dialog')).getByText('Exercise settings'));
-    expect(
-      within(screen.getByRole('dialog'))
-        .getByRole('tab', { name: /Exercise/ })
-        .getAttribute('aria-selected'),
-    ).toBe('true');
+    // the link opens the Exercise screen of the options sheet
+    expect(within(screen.getByRole('dialog')).getByText('Exercise options')).toBeTruthy();
     await userEvent.keyboard('{Escape}');
     await gone();
     await userEvent.click(screen.getByRole('button', { name: /^1880\.0/ }));
@@ -175,7 +171,7 @@ describe('SessionView · every sheet can be dismissed without changing anything'
         name: 'Set options',
       }),
     );
-    await userEvent.click(within(screen.getByRole('dialog')).getByRole('tab', { name: /Session/ }));
+    await openScope(screen.getByRole('dialog'), 'Session');
     await userEvent.click(within(screen.getByRole('dialog')).getByText('Today’s readiness'));
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(document.querySelector('.coach-sheet')).toBeNull());
