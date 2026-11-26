@@ -1,5 +1,9 @@
 /** Live session + past workout editing — design S-17…S-31 + SS/DS/MG/EQ. */
 import { createPortal } from 'react-dom';
+import { useAddonOrBase } from '../addons/enabledSet';
+import { setHash } from '../route';
+import { storeHash } from '../addonStore/storeRoute';
+import { AdvancedNudge } from './AdvancedNudge';
 import { fatigueHost, fatigueSource } from '../fatigueApi';
 import {
   equipmentAvailable,
@@ -220,7 +224,7 @@ import { bandForKg, assistStack, BAND_HEX, type BandRung, type LoadType } from '
 import { LiveHero } from '../components/LiveHero';
 import { SessionStartCoach, hasSessionStartCoach } from '../components/SessionStartCoach';
 import { EnergyPlaque, LiveEnergyCounter } from '../components/SessionEnergy';
-import { PlateSheet } from '../components/PlateSheet';
+import { PlateMini, PlateSheet } from '../components/PlateSheet';
 import { useEquipmentHost } from '../equipmentRt';
 import { CardioMachineList, CardioMachineSheet } from '../components/CardioMachineList';
 import { ExercisePicker, ExerciseDetail } from '../components/ExercisePicker';
@@ -585,6 +589,8 @@ export function SessionView(props: {
   const CircuitBlock = circuitH?.Block ?? NOTHING;
   const CircuitRunSheet = circuitH?.RunSheet ?? NOTHING;
   const effort = useEffortHost(); // the effort entry (RPE / RIR) is a module: nothing of it shows without it
+  // The store row at the foot of the options sheet: only while Advanced training is offered and not installed.
+  const advancedOn = useAddonOrBase('advanced-training');
   const sleepsForCalc = useSleepsForCalc();
   const playbookOn = usePlaybookOn();
   const equipmentH = useEquipmentHost(); // Equipment: the picker sheet arrives with its chunk
@@ -4101,25 +4107,20 @@ export function SessionView(props: {
         </>
       )}
       {tabs && !isMarkerExercise(ex) && (
-        <div className="opts-quick">
-          <Button
-            variant="secondary"
-            size="sm"
-            icon="copy"
-            fullWidth
+        <>
+          <div className="opts-group-label">{t.optsGroupManage}</div>
+          <ListRow
+            icon={<IconTile icon="copy" />}
+            label={t.duplicateWithSets}
             onClick={() => {
               duplicateExercise(workout!.id, ex.id);
               setSheet(null);
             }}
-          >
-            {t.duplicateWithSets}
-          </Button>
+          />
           {ex.sets.length > 0 && (
-            <Button
-              variant="secondary"
-              size="sm"
-              icon="eraser"
-              fullWidth
+            <ListRow
+              icon={<IconTile icon="eraser" />}
+              label={t.clearAllSets}
               onClick={() => {
                 const removed = clearSets(workout!.id, ex.id);
                 setSheet(null);
@@ -4132,11 +4133,9 @@ export function SessionView(props: {
                   });
                 }
               }}
-            >
-              {t.clearAllSets}
-            </Button>
+            />
           )}
-        </div>
+        </>
       )}
       {!tabs && ex.sets.length > 0 && (
         <ListRow
@@ -5793,6 +5792,14 @@ export function SessionView(props: {
                     {t.discardSession}
                   </Button>
                 )}
+                {!advancedOn && (
+                  <AdvancedNudge
+                    onOpen={() => {
+                      setSheet(null);
+                      setHash(storeHash('item', 'advanced-training'));
+                    }}
+                  />
+                )}
               </div>
             </Sheet>
           );
@@ -7406,7 +7413,12 @@ function SetEditorSheet(props: {
                         <ListRow
                           icon={<Icon name="barbell" />}
                           label={t.plateTitle}
-                          value={`${fmtWeightValue(weight)} ${t.kgCol.toLowerCase()}`}
+                          value={
+                            <span className="pl-mini-val">
+                              <PlateMini kg={weight} unit={unit === 'lb' ? 'lb' : 'kg'} />
+                              {`${fmtWeightValue(weight)} ${t.kgCol.toLowerCase()}`}
+                            </span>
+                          }
                           valueTone="accent"
                           chevron
                           onClick={() => setPlateOpen(true)}

@@ -36,6 +36,51 @@ function plateHeight(denom: number, unit: PlateUnit): number {
 }
 
 /**
+ * The plates one side of the bar takes for `kg`, drawn side by side (heaviest first): the row in the set
+ * editor says what to put on the bar at a glance (SPO-608). Derived from the weight, never stored.
+ */
+export function PlateMini({
+  kg,
+  unit = 'kg',
+  barKg = 20,
+}: {
+  kg: number;
+  unit?: PlateUnit;
+  barKg?: number;
+}) {
+  const { perSide } = solvePlates(kg, { barKg, unit });
+  if (perSide.length === 0) return null;
+  const shown = perSide.slice(0, 6);
+  const H = 28; // drawing box: the tallest plate (25 kg) fills it
+  const W = 4; // plate thickness
+  const GAP = 2;
+  return (
+    <svg
+      className="pl-mini"
+      width={shown.length * (W + GAP) - GAP}
+      height={H}
+      viewBox={`0 0 ${shown.length * (W + GAP) - GAP} ${H}`}
+      aria-hidden
+    >
+      {shown.map((d, i) => {
+        const h = Math.round((plateHeight(d, unit) / 100) * H);
+        return (
+          <rect
+            key={i}
+            x={i * (W + GAP)}
+            y={(H - h) / 2}
+            width={W}
+            height={h}
+            rx={1}
+            fill={plateColor(d, unit)}
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
+/**
  * Barbell drawing (design "Load entry"): a long central grip with the loaded
  * plates stacked outboard on both sides — heaviest nearest the collar — capped
  * by sleeves and end caps. Flexbox, mirroring the design's `.bb` component, so

@@ -15818,6 +15818,14 @@ button.badge {
     inset 0 0 0 1px color-mix(in srgb, var(--c-ffffff) 20%, transparent),
     inset 0 0 0 4px color-mix(in srgb, var(--c-000000) 16%, transparent);
 }
+.pl-mini {
+  flex: none;
+}
+.pl-mini-val {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-8);
+}
 .pl-readout {
   display: flex;
   flex-direction: column;
@@ -23342,6 +23350,11 @@ body {
   padding-bottom: var(--s-12);
   border-bottom: var(--bw-1) solid var(--color-divider);
 }
+.opts-sheet .opts-nudge {
+  flex: 1 0 100%;
+  min-height: 0;
+  background: transparent;
+}
 .opts-sheet .opts-pin-btns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -23517,38 +23530,6 @@ body {
 }
 
 /* ---- Options sheet: Exercise tab quick actions, compact circuit ---- */
-.opts-sheet .opts-quick {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--s-6);
-  margin-top: var(--s-12);
-}
-.opts-sheet .opts-quick button {
-  min-height: var(--sz-60);
-  border: none;
-  border-radius: var(--r-14);
-  background: var(--color-neutral-900);
-  color: var(--color-neutral-300);
-  font: inherit;
-  font-size: var(--fs-13);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s-6);
-  cursor: pointer;
-}
-.opts-sheet .opts-quick button i {
-  font-size: var(--fs-18);
-  color: var(--color-accent);
-}
-.opts-sheet .opts-quick button:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-.opts-sheet .opts-quick + .sheet-rule {
-  display: none;
-}
 .opts-sheet .session-settings .ss-circuit {
   padding: var(--s-12) var(--s-14);
   border-radius: var(--r-14);
@@ -23643,9 +23624,6 @@ body {
 }
 .plate-sheet .pl-ctl-row {
   justify-content: space-between;
-}
-.opts-sheet .opts-quick:has(> :only-child) {
-  grid-template-columns: minmax(0, 1fr);
 }
 /* Rail sits right under the hero — no "Exercise · 1 of N" caption */
 .focus-view .focus-step {
@@ -24130,24 +24108,6 @@ body {
 }
 
 /* Quick tiles (Duplicate / Clear): icon inline with the label, like the rows. */
-.opts-sheet .opts-quick button {
-  flex-direction: row;
-  gap: var(--s-10);
-  min-height: var(--sz-52);
-  padding: 0 var(--s-12);
-  font-size: var(--fs-14);
-  line-height: 1.2;
-  text-align: left;
-}
-.opts-sheet .opts-quick button i {
-  flex: none;
-}
-.opts-sheet .opts-quick {
-  grid-template-columns: minmax(0, 1fr);
-}
-.opts-sheet .opts-quick button {
-  white-space: nowrap;
-}
 
 /* ---- Options drawer: header + tabs and Muscle map / Discard stay put; only
    the tab body scrolls between them. ---- */
