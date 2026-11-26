@@ -23,7 +23,9 @@ import {
   type DragEvent,
   type KeyboardEvent,
   Fragment,
+  lazy,
   type ReactNode,
+  Suspense,
   useCallback,
   useEffect,
   useMemo,
@@ -229,7 +231,9 @@ import {
   pace500Sec,
   type CardioField,
 } from '../cardio';
-import { SessionMuscleMap } from '../components/SessionMuscleMap';
+const SessionMuscleMap = lazy(() =>
+  import('../components/SessionMuscleMap').then((m) => ({ default: m.SessionMuscleMap })),
+);
 import { GymPicker } from '../components/GymPicker';
 import { GymThumb } from '../components/GymThumb';
 import {
@@ -5827,12 +5831,14 @@ export function SessionView(props: {
       )}
 
       {muscleMapOn && sheet?.kind === 'musclemap' && (
-        <SessionMuscleMap
-          workout={workout}
-          now={now}
-          onOpenMuscle={openMuscleHistory}
-          onClose={() => setSheet(null)}
-        />
+        <Suspense fallback={null}>
+          <SessionMuscleMap
+            workout={workout}
+            now={now}
+            onOpenMuscle={openMuscleHistory}
+            onClose={() => setSheet(null)}
+          />
+        </Suspense>
       )}
 
       {sheet?.kind === 'settings' && (

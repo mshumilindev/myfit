@@ -194,6 +194,6 @@
     "js": ["fatigue/Readiness"]
   },
   "muscle-map": {
-    "js": ["fatigue/MuscleStatePanel"]
+    "js": ["fatigue/MuscleStatePanel", "views/MuscleHistoryView", "components/SessionMuscleMap"]
   }
 }
