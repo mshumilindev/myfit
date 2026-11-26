@@ -185,7 +185,7 @@
     "js": ["periodization/"]
   },
   "fatigue-readiness": {
-    "js": ["fatigue/"]
+    "js": ["fatigue"]
   },
   "fatigue": {
     "js": ["fatigue/FatigueWidget"]

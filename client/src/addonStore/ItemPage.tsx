@@ -59,7 +59,11 @@ export function ItemPage({
   const children = itemsOfApp(m.id).filter((a) => !a.soon && a.kind !== 'module');
   const modules = itemsOfApp(m.id).filter((a) => a.kind === 'module');
   // Real size from the last build; an app is the whole of it, and an item whose code is its parent's has none of its own.
-  const sizeBytes = sizes?.[m.id] ?? null;
+  // An add-on with modules is the whole of it: its own code plus every module's (Advanced training: the thin app is a few KB, the work sits in its modules).
+  const sizeBytes =
+    sizes?.[m.id] == null
+      ? null
+      : sizes[m.id] + modules.reduce((n, a) => n + (sizes[a.id] ?? 0), 0);
   const name = itemName(st, m.id);
   const shots = WEEK_SHOTS[m.id] ?? MODULE_SHOTS[m.id] ?? [];
   if (m.soon) return <ComingSoon id={m.id} ctx={ctx} />;

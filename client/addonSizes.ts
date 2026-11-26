@@ -119,7 +119,7 @@ function sourceFiles(srcDir: string): string[] {
       const st = statSync(join(srcDir, r));
       if (st.isDirectory()) {
         if (f !== '__fixtures__' && f !== 'stories' && f !== 'node_modules') walk(r);
-      } else if (/\.(ts|tsx)$/.test(f) && !/\.(test|stories|cases\.test)\./.test(f)) out.push(r);
+      } else if (/\.(ts|tsx|json)$/.test(f) && !/\.(test|stories)\.|golden/i.test(f)) out.push(r); // json: the data an add-on ships (train-like-a-pro catalog)
     }
   };
   walk('');

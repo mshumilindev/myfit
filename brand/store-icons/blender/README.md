@@ -29,8 +29,8 @@ The animated icon is the same cell charging: 16 frames with FR_LEVEL 0..4 (fract
 
 ## Animated icon (Train like a pro)
 
-The medal swings from its ring: 12 frames, `MEDAL_ANG = 16 * sin(2*pi*i/12)` degrees, i = 0..11 (a seamless loop).
+A soft diagonal streak of light runs across the gold of the medal (the medal itself stays still): `MEDAL_SHEEN` (-1..1) is the streak position along the 45-degree diagonal of the disc, `-9` = no streak (see `_sheen` in real.py).
 
-    for i in 0..11: MEDAL_ANG=<angle> SIZE=320 SAMPLES=32 python3 gen.py out s12 train-like-a-pro   # -> out/fNN.png
-    # crop every frame to the tile box (44,44,276,276), resize to 320, save as WebP (90 ms per frame, loop 0, quality 70)
-    # result: client/public/store-icons/train-like-a-pro-anim.webp (about 58 KB); listed in ANIMATED_ICONS (storeItems.tsx)
+    for i in 0..9: MEDAL_SHEEN=<-0.95 + 1.9*i/8 for i<=8, -9 for i=9> SIZE=320 SAMPLES=32 python3 gen.py out s12 train-like-a-pro
+    # crop every frame to the tile box (44,44,276,276), resize to 320, WebP: 70 ms per frame, the last (no streak) 900 ms, loop 0, quality 70
+    # result: client/public/store-icons/train-like-a-pro-anim.webp (about 29 KB); listed in ANIMATED_ICONS (storeItems.tsx)
