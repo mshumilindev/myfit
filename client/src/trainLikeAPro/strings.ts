@@ -39,7 +39,6 @@ export interface TlStrings {
   rest: string;
   source: string;
   sourceKind: string;
-  notVerified: string;
   disclaimer: string;
   weekdays: string[];
   /** Shown under Start when the trainer's program is the active one (the server refuses too). */
@@ -118,7 +117,6 @@ const en: TlStrings = {
   rest: 'Rest',
   source: 'Source',
   sourceKind: 'Where it comes from',
-  notVerified: 'Not checked against the original publication.',
   disclaimer:
     'Programs are described as published by the source. They are not made, endorsed or checked by the athletes or authors named, and Spotter is not affiliated with them.',
   weekdays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
@@ -192,7 +190,6 @@ const uk: TlStrings = {
   rest: 'Відпочинок',
   source: 'Джерело',
   sourceKind: 'Звідки це',
-  notVerified: 'Не звірено з оригінальною публікацією.',
   disclaimer:
     'Програми описано так, як їх опублікувало джерело. Названі атлети й автори їх не створювали, не схвалювали й не перевіряли, а Spotter з ними не повʼязаний.',
   weekdays: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
@@ -264,7 +261,6 @@ const pl: TlStrings = {
   rest: 'Odpoczynek',
   source: 'Źródło',
   sourceKind: 'Skąd pochodzi',
-  notVerified: 'Nie sprawdzono z oryginalną publikacją.',
   disclaimer:
     'Programy są opisane tak, jak opublikowało je źródło. Wymienieni sportowcy i autorzy ich nie stworzyli, nie zatwierdzili ani nie sprawdzili, a Spotter nie jest z nimi powiązany.',
   weekdays: ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nd'],
@@ -345,7 +341,6 @@ const lt: TlStrings = {
   rest: 'Poilsis',
   source: 'Šaltinis',
   sourceKind: 'Iš kur tai',
-  notVerified: 'Nepatikrinta pagal originalų leidinį.',
   disclaimer:
     'Programos aprašytos taip, kaip jas paskelbė šaltinis. Paminėti sportininkai ir autoriai jų nesukūrė, nepatvirtino ir nepatikrino, o „Spotter“ su jais nėra susijęs.',
   weekdays: ['Pr', 'An', 'Tr', 'Kt', 'Pn', 'Št', 'Sk'],
@@ -412,7 +407,6 @@ const et: TlStrings = {
   rest: 'Puhkus',
   source: 'Allikas',
   sourceKind: 'Kust see pärineb',
-  notVerified: 'Originaalväljaandega kontrollimata.',
   disclaimer:
     'Programmid on kirjeldatud nii, nagu allikas need avaldas. Nimetatud sportlased ja autorid ei loonud, ei kiitnud heaks ega kontrollinud neid ning Spotter ei ole nendega seotud.',
   weekdays: ['E', 'T', 'K', 'N', 'R', 'L', 'P'],

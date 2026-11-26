@@ -67,4 +67,15 @@ describe('CatalogPage', () => {
     ).toBe(true);
     expect(screen.getByText("Your trainer's program is active.")).toBeTruthy();
   });
+
+  it('detail: a week day opens its exercises in a drawer; the source is plain text, no "not checked" row', () => {
+    render(<CatalogPage onClose={() => {}} />);
+    const e = CATALOG.find((x) => x.id === 'linear-5x5-ab')!;
+    fireEvent.click(screen.getByRole('button', { name: `${e.who}. ${e.title}` }));
+    expect(screen.queryByText(/Not checked against/)).toBeNull();
+    const first = e.items.filter((r) => r.day === 1).sort((a, b) => a.position - b.position)[0]!;
+    fireEvent.click(screen.getByRole('button', { name: /^Mon/ }));
+    const sheet = screen.getByRole('dialog');
+    expect(within(sheet).getByText(first.name)).toBeTruthy();
+  });
 });

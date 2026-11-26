@@ -1,8 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { GroupedList, ListRow } from '../components/ui/GroupedList';
 import { Notice } from '../components/ui/Notice';
+import { Sheet, SheetPin } from '../components/ui/Overlays';
 import { PageHead } from '../components/ui/PageHead';
+import { SectionLabel } from '../components/ui/SectionLabel';
 import { Tag } from '../components/ui/Tag';
 import { useAddonStoreT } from '../i18n/addonStore';
 import type { CatalogEntry, CatalogNeed } from './catalog/types';
@@ -29,6 +31,7 @@ export function CatalogDetail(p: {
 }) {
   const { entry: e, s } = p;
   const { st } = useAddonStoreT();
+  const [openDay, setOpenDay] = useState<number | null>(null);
   const missing = missingNeeds(e, p.installed);
   const name = (id: CatalogNeed) => st.items[id].name;
   const days = useMemo(() => {
@@ -83,6 +86,8 @@ export function CatalogDetail(p: {
           {days.map(([d, n]) => (
             <ListRow
               key={d}
+              chevron
+              onClick={() => setOpenDay(d)}
               label={s.weekdays[d - 1]}
               sub={
                 e.dayNames[String(d)]
@@ -92,12 +97,36 @@ export function CatalogDetail(p: {
             />
           ))}
         </GroupedList>
-        <GroupedList header={s.source}>
-          <ListRow label={e.origin.label} sub={s.origin[e.origin.kind]} />
-          <ListRow label={s.notVerified} />
-        </GroupedList>
+        <div>
+          <SectionLabel>{s.source}</SectionLabel>
+          <p className="tl-fine">
+            {e.origin.label} · {s.origin[e.origin.kind]}
+          </p>
+        </div>
         <p className="tl-fine">{s.disclaimer}</p>
       </div>
+      {openDay != null && (
+        <Sheet onClose={() => setOpenDay(null)} label={s.weekdays[openDay - 1]} closeLabel={s.back}>
+          <SheetPin>
+            <h3 className="title-20">{s.weekdays[openDay - 1]}</h3>
+            {e.dayNames[String(openDay)] && (
+              <p className="tl-fine">{e.dayNames[String(openDay)]}</p>
+            )}
+          </SheetPin>
+          <GroupedList surface="raised">
+            {e.items
+              .filter((r) => r.day === openDay)
+              .sort((a, b) => a.position - b.position)
+              .map((r) => (
+                <ListRow
+                  key={`${r.day}-${r.position}`}
+                  label={r.name}
+                  value={r.bare ? undefined : `${r.sets}×${r.reps}`}
+                />
+              ))}
+          </GroupedList>
+        </Sheet>
+      )}
     </div>
   );
 }
