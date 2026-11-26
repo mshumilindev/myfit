@@ -184,7 +184,7 @@ unit/contract (запис→Program, вправи, еліта, фільтри), 
 | R10, R13 | закрито | `sizeEntries.contract.test.ts`, `storeInfo.contract.test.ts`; іконка 320×320; прев'ю `storeInfo.ui` зелені |
 | R11 | **відкрито** | `audit:stories` / геометрія — лише CI |
 | R14, R29 | закрито | `startProgram.test.ts` (queued/held/failed), `CatalogRoute.test.tsx` |
-| R22, R23, R30 | частково | шифрування активностей — `startProgram.test.ts`; запис R27 у `data-registry.md`; **правка ADR 011 і перевірка експорту — лишились** |
+| R22, R23, R30 | закрито | шифрування активностей — `startProgram.test.ts`; запис R27 у `data-registry.md`; доповнення в ADR 011 (26.11); `tl-` документи мають `authorId = uid` у тій самій колекції `programs/{id}`, що вже в реєстрі/експорті/каскаді R27 (нової колекції немає) |
 | R8, R25 | рішення власника | транзакція `setProgramStatus` архівує власні активні; `assignProgram` (призначення тренером) не змінювали — питання власнику |
 | R24 | рішення власника | звуження читання `assignments` не робили |
 
