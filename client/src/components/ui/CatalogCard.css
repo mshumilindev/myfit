@@ -21,7 +21,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   /* Still the accent's hue, pulled toward the text colour: the bare accent text is 3:1 on a light card with the lime accent. */
-  color: color-mix(in srgb, var(--color-accent-text) 55%, var(--color-text));
+  color: color-mix(in srgb, var(--color-accent-text) 35%, var(--color-text));
 }
 .uicc-name {
   min-width: 0;
@@ -47,9 +47,11 @@
   color: var(--color-neutral-500);
   font-size: var(--fs-18);
 }
-.uicc--locked .uicc-who,
 .uicc--locked .uicc-name {
   opacity: 0.65;
+}
+.uicc--locked .uicc-who {
+  color: color-mix(in srgb, var(--color-text) 62%, var(--color-tile));
 }
 .uicc--locked .uicc-meta {
   color: color-mix(in srgb, var(--color-text) 62%, var(--color-tile));
