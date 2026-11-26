@@ -39,7 +39,25 @@ export interface TlStrings {
   rest: string;
   source: string;
   sourceKind: string;
-  disclaimer: string;
+  readMore: string;
+  readLess: string;
+  /** What each split means, one sentence; the same for every program with that split. */
+  splitInfo: Record<
+    | 'full-body'
+    | 'body-part'
+    | 'push-pull-legs'
+    | 'lift-per-day'
+    | 'single-lift'
+    | 'squat-plus'
+    | 'daily',
+    string
+  >;
+  disciplineInfo: Record<'bodybuilding' | 'strength' | 'powerlifting' | 'bodyweight', string>;
+  aimedAt: (list: string) => string;
+  daysFocus: (list: string) => string;
+  mainWork: (list: string) => string;
+  perSession: (n: number) => string;
+  runsFor: (n: number) => string;
   weekdays: string[];
   /** Shown under Start when the trainer's program is the active one (the server refuses too). */
   heldHint: string;
@@ -117,8 +135,31 @@ const en: TlStrings = {
   rest: 'Rest',
   source: 'Source',
   sourceKind: 'Where it comes from',
-  disclaimer:
-    'Programs are described as published by the source. They are not made, endorsed or checked by the athletes or authors named, and Spotter is not affiliated with them.',
+  readMore: 'Read more',
+  readLess: 'Read less',
+  splitInfo: {
+    'full-body': 'Every session trains the whole body, with rest days in between.',
+    'body-part':
+      'Each day targets one or two muscle groups, so every muscle gets a hard session once or twice a week.',
+    'push-pull-legs': 'The week is split into pushing days, pulling days and leg days.',
+    'lift-per-day': 'Each day is built around one main lift, with supporting work after it.',
+    'single-lift': 'The plan is built around a single lift that is trained again and again.',
+    'squat-plus': 'The squat leads each session, with a few basic lifts added.',
+    daily: 'You train every day, with short sessions.',
+  },
+  disciplineInfo: {
+    bodybuilding:
+      'Bodybuilding style: moderate to high reps and several exercises for each muscle.',
+    strength: 'Strength style: heavy compound lifts and fewer reps.',
+    powerlifting:
+      'Powerlifting style: everything revolves around the squat, the bench press and the deadlift.',
+    bodyweight: 'Bodyweight style: the work is done with your own body weight.',
+  },
+  aimedAt: (x) => 'Aimed at: {x}.'.replace('{x}', x),
+  daysFocus: (x) => 'The days: {x}.'.replace('{x}', x),
+  mainWork: (x) => 'Recurring exercises: {x}.'.replace('{x}', x),
+  perSession: (n) => fill1('About {n} working sets per session.', n),
+  runsFor: (n) => fill1('It runs for {n} weeks.', n),
   weekdays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
   heldHint: "Your trainer's program is active. It can't be replaced here.",
   replaceTitle: 'Replace your current program?',
@@ -190,8 +231,30 @@ const uk: TlStrings = {
   rest: 'Відпочинок',
   source: 'Джерело',
   sourceKind: 'Звідки це',
-  disclaimer:
-    'Програми описано так, як їх опублікувало джерело. Названі атлети й автори їх не створювали, не схвалювали й не перевіряли, а Spotter з ними не повʼязаний.',
+  readMore: 'Детальніше',
+  readLess: 'Менше',
+  splitInfo: {
+    'full-body': 'Кожне тренування залучає все тіло, між ними дні відпочинку.',
+    'body-part':
+      'Кожен день присвячений одній-двом групам м’язів, тож кожен м’яз отримує важке тренування раз чи двічі на тиждень.',
+    'push-pull-legs': 'Тиждень поділений на дні жимів, дні тяг і дні ніг.',
+    'lift-per-day':
+      'Кожен день будується навколо однієї головної вправи, після неї йде допоміжна робота.',
+    'single-lift': 'План побудований навколо однієї вправи, яку тренують знову і знову.',
+    'squat-plus': 'Присідання відкриває кожне тренування, до нього додано кілька базових вправ.',
+    daily: 'Тренування щодня, короткими сесіями.',
+  },
+  disciplineInfo: {
+    bodybuilding: 'Стиль бодібілдингу: помірні й великі повторення та кілька вправ на кожен м’яз.',
+    strength: 'Силовий стиль: важкі базові вправи й менше повторень.',
+    powerlifting: 'Стиль пауерліфтингу: усе навколо присідання, жиму лежачи й станової тяги.',
+    bodyweight: 'Стиль з власною вагою: вправи виконуються з вагою вашого тіла.',
+  },
+  aimedAt: (x) => 'Ціль: {x}.'.replace('{x}', x),
+  daysFocus: (x) => 'Дні: {x}.'.replace('{x}', x),
+  mainWork: (x) => 'Вправи, що повторюються: {x}.'.replace('{x}', x),
+  perSession: (n) => fill1('Близько {n} робочих підходів за тренування.', n),
+  runsFor: (n) => fill1('Програма триває {n} тиж.', n),
   weekdays: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
   heldHint: 'Активна програма від вашого тренера. Тут її замінити не можна.',
   replaceTitle: 'Замінити поточну програму?',
@@ -261,8 +324,33 @@ const pl: TlStrings = {
   rest: 'Odpoczynek',
   source: 'Źródło',
   sourceKind: 'Skąd pochodzi',
-  disclaimer:
-    'Programy są opisane tak, jak opublikowało je źródło. Wymienieni sportowcy i autorzy ich nie stworzyli, nie zatwierdzili ani nie sprawdzili, a Spotter nie jest z nimi powiązany.',
+  readMore: 'Czytaj więcej',
+  readLess: 'Mniej',
+  splitInfo: {
+    'full-body': 'Każdy trening obejmuje całe ciało, między treningami są dni odpoczynku.',
+    'body-part':
+      'Każdy dzień skupia się na jednej lub dwóch grupach mięśni, więc każdy mięsień dostaje mocny trening raz lub dwa razy w tygodniu.',
+    'push-pull-legs': 'Tydzień jest podzielony na dni pchania, dni ciągnięcia i dni nóg.',
+    'lift-per-day':
+      'Każdy dzień opiera się na jednym głównym ćwiczeniu, po którym następuje praca uzupełniająca.',
+    'single-lift': 'Plan opiera się na jednym ćwiczeniu, trenowanym raz za razem.',
+    'squat-plus':
+      'Przysiad otwiera każdy trening, a do niego dołączono kilka podstawowych ćwiczeń.',
+    daily: 'Trenujesz codziennie, krótkimi sesjami.',
+  },
+  disciplineInfo: {
+    bodybuilding:
+      'Styl kulturystyczny: umiarkowane i wysokie powtórzenia oraz kilka ćwiczeń na każdy mięsień.',
+    strength: 'Styl siłowy: ciężkie ćwiczenia wielostawowe i mniej powtórzeń.',
+    powerlifting:
+      'Styl trójboju siłowego: wszystko kręci się wokół przysiadu, wyciskania leżąc i martwego ciągu.',
+    bodyweight: 'Styl z masą własnego ciała: ćwiczenia wykonuje się z ciężarem własnego ciała.',
+  },
+  aimedAt: (x) => 'Cel: {x}.'.replace('{x}', x),
+  daysFocus: (x) => 'Dni: {x}.'.replace('{x}', x),
+  mainWork: (x) => 'Powtarzające się ćwiczenia: {x}.'.replace('{x}', x),
+  perSession: (n) => fill1('Około {n} serii roboczych na trening.', n),
+  runsFor: (n) => fill1('Program trwa {n} tyg.', n),
   weekdays: ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nd'],
   heldHint: 'Aktywny jest program od Twojego trenera. Nie można go tu zastąpić.',
   replaceTitle: 'Zastąpić obecny program?',
@@ -341,8 +429,33 @@ const lt: TlStrings = {
   rest: 'Poilsis',
   source: 'Šaltinis',
   sourceKind: 'Iš kur tai',
-  disclaimer:
-    'Programos aprašytos taip, kaip jas paskelbė šaltinis. Paminėti sportininkai ir autoriai jų nesukūrė, nepatvirtino ir nepatikrino, o „Spotter“ su jais nėra susijęs.',
+  readMore: 'Skaityti daugiau',
+  readLess: 'Mažiau',
+  splitInfo: {
+    'full-body': 'Kiekviena treniruotė apima visą kūną, tarp jų – poilsio dienos.',
+    'body-part':
+      'Kiekviena diena skirta vienai ar dviem raumenų grupėms, todėl kiekvienas raumuo gauna sunkią treniruotę kartą ar du per savaitę.',
+    'push-pull-legs': 'Savaitė padalyta į stūmimo, traukimo ir kojų dienas.',
+    'lift-per-day':
+      'Kiekviena diena sukurta aplink vieną pagrindinį pratimą, po jo – papildomas darbas.',
+    'single-lift': 'Planas sukurtas aplink vieną pratimą, kuris treniruojamas vėl ir vėl.',
+    'squat-plus':
+      'Kiekvieną treniruotę pradeda prisitūpimai, prie jų pridėta keletas pagrindinių pratimų.',
+    daily: 'Treniruojamasi kasdien trumpomis sesijomis.',
+  },
+  disciplineInfo: {
+    bodybuilding:
+      'Kultūrizmo stilius: vidutinis ir didelis pakartojimų skaičius bei keli pratimai kiekvienam raumeniui.',
+    strength: 'Jėgos stilius: sunkūs pagrindiniai pratimai ir mažiau pakartojimų.',
+    powerlifting:
+      'Jėgos trikovės stilius: viskas sukasi apie prisitūpimus, spaudimą gulint ir trauką.',
+    bodyweight: 'Stilius su savo svoriu: pratimai atliekami su savo kūno svoriu.',
+  },
+  aimedAt: (x) => 'Tikslas: {x}.'.replace('{x}', x),
+  daysFocus: (x) => 'Dienos: {x}.'.replace('{x}', x),
+  mainWork: (x) => 'Pasikartojantys pratimai: {x}.'.replace('{x}', x),
+  perSession: (n) => fill1('Maždaug {n} darbinių serijų per treniruotę.', n),
+  runsFor: (n) => fill1('Programa trunka {n} sav.', n),
   weekdays: ['Pr', 'An', 'Tr', 'Kt', 'Pn', 'Št', 'Sk'],
   heldHint: 'Aktyvi jūsų trenerio programa. Čia jos pakeisti negalima.',
   replaceTitle: 'Pakeisti dabartinę programą?',
@@ -407,8 +520,30 @@ const et: TlStrings = {
   rest: 'Puhkus',
   source: 'Allikas',
   sourceKind: 'Kust see pärineb',
-  disclaimer:
-    'Programmid on kirjeldatud nii, nagu allikas need avaldas. Nimetatud sportlased ja autorid ei loonud, ei kiitnud heaks ega kontrollinud neid ning Spotter ei ole nendega seotud.',
+  readMore: 'Loe edasi',
+  readLess: 'Vähem',
+  splitInfo: {
+    'full-body': 'Iga trenn koormab kogu keha, treeningute vahel on puhkepäevad.',
+    'body-part':
+      'Iga päev keskendub ühele-kahele lihasgrupile, nii saab iga lihas kord või paar korda nädalas tugeva treeningu.',
+    'push-pull-legs': 'Nädal on jagatud tõukepäevadeks, tõmbepäevadeks ja jalapäevadeks.',
+    'lift-per-day': 'Iga päev on üles ehitatud ühe põhiharjutuse ümber, sellele järgneb abitöö.',
+    'single-lift': 'Plaan on üles ehitatud ühe harjutuse ümber, mida treenitakse korduvalt.',
+    'squat-plus': 'Kükk avab iga treeningu, lisatud on mõned põhiharjutused.',
+    daily: 'Treenid iga päev, lühikeste seanssidega.',
+  },
+  disciplineInfo: {
+    bodybuilding:
+      'Kulturismi stiil: mõõdukad ja kõrged kordused ning mitu harjutust iga lihase jaoks.',
+    strength: 'Jõustiil: rasked põhiharjutused ja vähem kordusi.',
+    powerlifting: 'Jõutõstmise stiil: kõik keerleb kükkide, lamades surumise ja jõutõmbe ümber.',
+    bodyweight: 'Keharaskuse stiil: harjutusi tehakse oma keharaskusega.',
+  },
+  aimedAt: (x) => 'Eesmärk: {x}.'.replace('{x}', x),
+  daysFocus: (x) => 'Päevad: {x}.'.replace('{x}', x),
+  mainWork: (x) => 'Korduvad harjutused: {x}.'.replace('{x}', x),
+  perSession: (n) => fill1('Umbes {n} töösarja treeningu kohta.', n),
+  runsFor: (n) => fill1('Programm kestab {n} näd.', n),
   weekdays: ['E', 'T', 'K', 'N', 'R', 'L', 'P'],
   heldHint: 'Aktiivne on teie treeneri programm. Siin seda asendada ei saa.',
   replaceTitle: 'Kas asendada praegune programm?',

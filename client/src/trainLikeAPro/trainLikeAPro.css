@@ -34,6 +34,20 @@
   font-size: var(--fs-12);
   line-height: 1.5;
 }
+.tl-about {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-8);
+}
+.tl-about p {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+.tl-about .tl-lead {
+  color: var(--color-text);
+}
 .tl-tags {
   display: flex;
   flex-wrap: wrap;

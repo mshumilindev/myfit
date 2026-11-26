@@ -78,4 +78,16 @@ describe('CatalogPage', () => {
     const sheet = screen.getByRole('dialog');
     expect(within(sheet).getByText(first.name)).toBeTruthy();
   });
+
+  it('detail: a description with Read more, and no disclaimer line', () => {
+    render(<CatalogPage onClose={() => {}} />);
+    const e = CATALOG.find((x) => x.id === 'linear-5x5-ab')!;
+    fireEvent.click(screen.getByRole('button', { name: `${e.who}. ${e.title}` }));
+    expect(screen.queryByText(/Programs are described as published/)).toBeNull();
+    expect(screen.queryByText(/Recurring exercises:/)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Read more' }));
+    expect(screen.getByText(/Recurring exercises:/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Read less' }));
+    expect(screen.queryByText(/Recurring exercises:/)).toBeNull();
+  });
 });

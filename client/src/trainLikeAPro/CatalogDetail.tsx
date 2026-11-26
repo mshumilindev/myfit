@@ -11,6 +11,7 @@ import type { CatalogEntry, CatalogNeed } from './catalog/types';
 import { missingNeeds } from './filters';
 import type { TlStrings } from './strings';
 import { metaLine } from './meta';
+import { describeProgram, isWeekdayName } from './description';
 
 /**
  * One program: who, the facts, the one action, the week and where it comes from. A program that needs an add-on that is not
@@ -34,9 +35,11 @@ export function CatalogDetail(p: {
   /** The day's own name, unless the source only repeats the weekday. */
   const dayName = (d: number) => {
     const n = e.dayNames[String(d)];
-    return n && n !== s.weekdays[d - 1] ? n : undefined;
+    return n && !isWeekdayName(n) && n !== s.weekdays[d - 1] ? n : undefined;
   };
   const [openDay, setOpenDay] = useState<number | null>(null);
+  const [readMore, setReadMore] = useState(false);
+  const desc = useMemo(() => describeProgram(e, s), [e, s]);
   const missing = missingNeeds(e, p.installed);
   const name = (id: CatalogNeed) => st.items[id].name;
   const days = useMemo(() => {
@@ -54,6 +57,13 @@ export function CatalogDetail(p: {
           {e.levels.map((l) => (
             <Tag key={l}>{s.level[l]}</Tag>
           ))}
+        </div>
+        <div className="tl-about">
+          <p className="tl-lead">{desc.lead}</p>
+          {readMore && desc.more.map((t) => <p key={t}>{t}</p>)}
+          <Button variant="link" onClick={() => setReadMore((v) => !v)}>
+            {readMore ? s.readLess : s.readMore}
+          </Button>
         </div>
         {e.elite && (
           <Notice tone="rest" icon="warning">
@@ -104,7 +114,6 @@ export function CatalogDetail(p: {
             {e.origin.label} · {s.origin[e.origin.kind]}
           </p>
         </div>
-        <p className="tl-fine">{s.disclaimer}</p>
       </div>
       {openDay != null && (
         <Sheet onClose={() => setOpenDay(null)} label={s.weekdays[openDay - 1]} closeLabel={s.back}>

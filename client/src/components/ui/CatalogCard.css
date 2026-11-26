@@ -20,7 +20,8 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-accent-text);
+  /* Still the accent's hue, pulled toward the text colour: the bare accent text is 3:1 on a light card with the lime accent. */
+  color: color-mix(in srgb, var(--color-accent-text) 55%, var(--color-text));
 }
 .uicc-name {
   min-width: 0;
