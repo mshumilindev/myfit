@@ -1,0 +1,108 @@
+/* BlockCountdown — Spotter UI kit primitive. Tokens only. */
+.uicd {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-120);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--s-24);
+  padding: var(--s-24) var(--s-16);
+  padding-bottom: calc(var(--s-24) + env(safe-area-inset-bottom, 0px));
+  background: color-mix(in srgb, var(--color-bg) 94%, transparent);
+  backdrop-filter: blur(var(--s-16));
+}
+.uicd-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-8);
+  text-align: center;
+}
+.uicd-title {
+  font-size: var(--fs-18);
+  font-weight: 700;
+}
+.uicd-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-24);
+}
+.uicd-num {
+  font-size: var(--fs-120);
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  animation: uicd-pop 1s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+.uicd--last .uicd-num {
+  color: var(--color-danger);
+}
+.uicd--go .uicd-num {
+  color: var(--color-ok);
+}
+.uicd-dots {
+  display: flex;
+  gap: var(--s-8);
+}
+.uicd-dots i {
+  width: var(--s-8);
+  height: var(--s-8);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-text) 16%, transparent);
+}
+.uicd-dots i.on {
+  background: currentcolor;
+}
+.uicd--last .uicd-dots {
+  color: var(--color-danger);
+}
+.uicd--go .uicd-dots {
+  color: var(--color-ok);
+}
+.uicd:not(.uicd--last):not(.uicd--go) .uicd-dots {
+  color: var(--color-text);
+}
+.uicd-foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+}
+.uicd-hint {
+  text-align: center;
+  font-size: var(--fs-13);
+  font-weight: 600;
+  color: var(--color-neutral-500);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+@keyframes uicd-pop {
+  0% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+  25% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  85% {
+    transform: scale(0.94);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+}
+/* Storybook/design shots: freeze the pop mid-flight so the digit is visible. */
+.uicd--still .uicd-num {
+  animation-play-state: paused;
+  animation-delay: -0.3s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .uicd-num {
+    animation: none;
+  }
+}

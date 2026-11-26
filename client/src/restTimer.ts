@@ -194,6 +194,11 @@ export function primeRestAudio(): void {
   }
 }
 
+/** The shared (primed) audio context, or null before the first user gesture: other timers play their own tones on it. */
+export function restAudioCtx(): AudioContext | null {
+  return audioCtx && audioCtx.state === 'running' ? audioCtx : null;
+}
+
 function chime(): void {
   const ctx = audioCtx;
   if (!ctx || ctx.state !== 'running') return;

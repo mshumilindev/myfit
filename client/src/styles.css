@@ -292,6 +292,7 @@
   --fs-40: 40px;
   --fs-44: 44px;
   --fs-52: 52px;
+  --fs-120: 120px; /* BlockCountdown digit */
   /* Radius scale — every border-radius in the app is one of these. */
   --r-2: 2px;
   --r-4: 4px;
