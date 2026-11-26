@@ -21,6 +21,8 @@ import {
   type ProgramItemDoc,
   type WarmupExerciseDoc,
 } from './doc';
+import { copyBlocks, dayBlocks, dropDayBlocks, withBlocks } from './dayBlocks';
+export { dayBlocks, removeBlock, updateBlock } from './dayBlocks';
 
 /* ---- ids ----------------------------------------------------------------------------------------------------- */
 
@@ -50,13 +52,6 @@ export function setDayName<P extends ProgramDoc>(p: P, day: number, name: string
 /** A weekday that trains nothing yet gets a name so it counts as a training day. */
 export function startDay<P extends ProgramDoc>(p: P, day: number, name: string): P {
   return { ...p, dayNames: { ...p.dayNames, [String(day)]: name } };
-}
-
-/** `p` without the blocks of `day` (the key goes when none are left, so a program without blocks stays without it). */
-function dropDayBlocks<P extends ProgramDoc>(p: P, day: number): P {
-  const { blocks, ...rest } = p;
-  const kept = (blocks ?? []).filter((b) => b.day !== day);
-  return (kept.length ? { ...rest, blocks: kept } : rest) as P;
 }
 
 /** Turn a weekday into rest: drops its name, muscles and items (planned activities are kept apart; see copyDay). */
@@ -119,29 +114,6 @@ export function toMusclesMode<P extends ProgramDoc>(
   return dropDayBlocks({ ...p, targetMuscles, items: p.items.filter((i) => i.day !== day) }, day);
 }
 
-/** The blocks of `from` as new blocks of `to` (new ids; a block keeps following the copy of its row). */
-function copyBlocks(
-  src: ProgramDoc,
-  from: number,
-  to: number,
-  idMap: Map<string, string>,
-): ProgramBlockDoc[] {
-  return (src.blocks ?? [])
-    .filter((b) => b.day === from)
-    .map((b) => ({
-      ...b,
-      id: genId(),
-      day: to,
-      ...(b.afterItemId ? { afterItemId: idMap.get(b.afterItemId) ?? null } : {}),
-    }));
-}
-
-/** `{ blocks }` of `base` plus `extra`, or nothing when there are none (an empty list is not stored). */
-function withBlocks(base: ProgramDoc, extra: ProgramBlockDoc[]): Pick<ProgramDoc, 'blocks'> {
-  const all = [...(base.blocks ?? []), ...extra];
-  return all.length ? { blocks: all } : {};
-}
-
 /** Copy a day onto another weekday (replacing it): name, muscles, items, activities. */
 export function copyDay<P extends ProgramDoc>(p: P, from: number, to: number): P {
   if (from === to) return p;
@@ -158,7 +130,7 @@ export function copyDay<P extends ProgramDoc>(p: P, from: number, to: number): P
     idMap.set(it.id, id);
     return { ...it, id, day: to, groupId };
   });
-  const copiedBlocks = copyBlocks(p, from, to, idMap);
+  const copiedBlocks = copyBlocks(p, from, to, idMap, genId);
   const base = clearDay(p, to);
   const dayNames = { ...base.dayNames };
   const n = dayName(p, from);
@@ -198,7 +170,7 @@ export function importDay<P extends ProgramDoc>(
     idMap.set(it.id, id);
     return { ...it, id, day, groupId };
   });
-  const copiedBlocks = copyBlocks(src, srcDay, day, idMap);
+  const copiedBlocks = copyBlocks(src, srcDay, day, idMap, genId);
   const dayNames = { ...base.dayNames };
   const n = dayName(src, srcDay);
   if (n) dayNames[String(day)] = n;
@@ -598,11 +570,6 @@ export function addExerciseWithTargets<P extends ProgramDoc>(
 
 /* ---- time blocks --------------------------------------------------------------------------------------------- */
 
-/** A day's blocks, in order. */
-export function dayBlocks(p: ProgramDoc, day: number): ProgramBlockDoc[] {
-  return (p.blocks ?? []).filter((b) => b.day === day).sort((a, b) => a.position - b.position);
-}
-
 /** Add a block to a day (after `afterItemId`, null = first, undefined = the end). The host's save step clamps and cleans it. */
 export function addBlock<P extends ProgramDoc>(
   p: P,
@@ -620,19 +587,4 @@ export function addBlock<P extends ProgramDoc>(
     members: block.members,
   };
   return { ...p, blocks: [...(p.blocks ?? []), next] };
-}
-
-/** Change a block's numbers and members. */
-export function updateBlock<P extends ProgramDoc>(
-  p: P,
-  id: string,
-  patch: Partial<Pick<ProgramBlockDoc, 'spec' | 'members'>>,
-): P {
-  return { ...p, blocks: (p.blocks ?? []).map((b) => (b.id === id ? { ...b, ...patch } : b)) };
-}
-
-export function removeBlock<P extends ProgramDoc>(p: P, id: string): P {
-  const { blocks, ...rest } = p;
-  const kept = (blocks ?? []).filter((b) => b.id !== id);
-  return (kept.length ? { ...rest, blocks: kept } : rest) as P;
 }
