@@ -26,3 +26,11 @@ The animated icon is the same cell charging: 16 frames with FR_LEVEL 0..4 (fract
     # all frames: bash anim-frames.sh 0 18   (writes out/f00.png .. f18.png, renamed from fatigue-readiness.png)
     # assemble: Pillow, frames 0..18 then 17, 16 (ping-pong), durations 400, 14 x 90, 300, 4 x 140, 500 ms, loop 0, lossy q82
     # result: client/public/store-icons/fatigue-readiness-anim.webp (about 16 KB)
+
+## Animated icon (Train like a pro)
+
+The medal swings from its ring: 12 frames, `MEDAL_ANG = 16 * sin(2*pi*i/12)` degrees, i = 0..11 (a seamless loop).
+
+    for i in 0..11: MEDAL_ANG=<angle> SIZE=320 SAMPLES=32 python3 gen.py out s12 train-like-a-pro   # -> out/fNN.png
+    # crop every frame to the tile box (44,44,276,276), resize to 320, save as WebP (90 ms per frame, loop 0, quality 70)
+    # result: client/public/store-icons/train-like-a-pro-anim.webp (about 58 KB); listed in ANIMATED_ICONS (storeItems.tsx)

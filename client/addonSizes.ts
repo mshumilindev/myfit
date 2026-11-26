@@ -110,6 +110,57 @@ export function ownerOf(
   return best?.id;
 }
 
+/** Source files (no tests, stories or fixtures) under `src/`, as `/`-separated paths relative to it. */
+function sourceFiles(srcDir: string): string[] {
+  const out: string[] = [];
+  const walk = (rel: string) => {
+    for (const f of readdirSync(join(srcDir, rel)).sort()) {
+      const r = rel ? `${rel}/${f}` : f;
+      const st = statSync(join(srcDir, r));
+      if (st.isDirectory()) {
+        if (f !== '__fixtures__' && f !== 'stories' && f !== 'node_modules') walk(r);
+      } else if (/\.(ts|tsx)$/.test(f) && !/\.(test|stories|cases\.test)\./.test(f)) out.push(r);
+    }
+  };
+  walk('');
+  return out;
+}
+
+/**
+ * Dev-server stand-in (no chunks exist in dev): the gzip of each add-on's own source (longest matching prefix owns a file),
+ * plus its CSS and media. Close to the build's number but not the same; it only fills what the last build lacks, so a
+ * new add-on never shows "—" on localhost.
+ */
+export function estimateAddonSizes(
+  srcDir: string,
+  publicDir: string,
+  parts: Readonly<Record<string, SizePart>>,
+): Record<string, number> {
+  const gz = (b: Uint8Array | string) => gzipSync(b, { level: 6 }).length;
+  const groups: Record<string, Buffer[]> = Object.fromEntries(
+    Object.keys(parts).map((id) => [id, []]),
+  );
+  for (const f of sourceFiles(srcDir)) {
+    const id = ownerOf(f, parts);
+    if (id) groups[id].push(readFileSync(join(srcDir, f)));
+  }
+  const out: Record<string, number> = {};
+  for (const [id, p] of Object.entries(parts)) {
+    let n = groups[id].length ? gz(Buffer.concat(groups[id])) : 0;
+    for (const f of p.css ?? [])
+      if (existsSync(join(srcDir, f))) n += gz(readFileSync(join(srcDir, f)));
+    for (const f of p.assets ?? [])
+      n += listAssetFiles(publicDir, f).reduce((a, x) => a + x.bytes, 0);
+    out[id] = n;
+  }
+  return out;
+}
+
+/** Pure. The add-ons that have no measured size (missing or 0): a build with such a hole must fail, not ship "—" in the store. */
+export function unsized(sizes: Readonly<Record<string, number>>, ids: readonly string[]): string[] {
+  return ids.filter((id) => !(sizes[id] > 0));
+}
+
 export function addonSizes(): Plugin {
   let root = process.cwd();
   return {
@@ -124,18 +175,28 @@ export function addonSizes(): Plugin {
     configureServer(server) {
       server.middlewares.use('/addon-sizes.json', (_req, res) => {
         const file = join(root, 'dist', 'addon-sizes.json');
-        if (!existsSync(file)) {
-          res.statusCode = 404;
-          res.end();
-          return;
+        const sizes = (existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {}) as Record<
+          string,
+          number
+        >;
+        // Whatever the last build did not measure (a new add-on, or no build at all) is estimated from the sources.
+        const missing = unsized(sizes, Object.keys(entries));
+        if (missing.length) {
+          const est = estimateAddonSizes(
+            join(root, 'src'),
+            join(root, 'public'),
+            entries as Record<string, SizePart>,
+          );
+          for (const id of missing) sizes[id] = est[id];
         }
-        const sizes = JSON.parse(readFileSync(file, 'utf8')) as Record<string, number>;
         // A build older than the media packs lacks their bytes: add them from public/ so the number is real in dev too.
         if (!existsSync(join(root, 'dist', 'addon-packs.json')))
           for (const [id, fs] of Object.entries(
             mediaPacks(join(root, 'public'), entries as Record<string, SizePart>),
           ))
-            for (const f of fs) if (f.path.includes('/')) sizes[id] = (sizes[id] ?? 0) + f.bytes;
+            for (const f of fs)
+              if (f.path.includes('/') && !missing.includes(id))
+                sizes[id] = (sizes[id] ?? 0) + f.bytes;
         res.setHeader('content-type', 'application/json');
         res.end(JSON.stringify(sizes));
       });
@@ -228,6 +289,8 @@ export function addonSizes(): Plugin {
           }
         }
       }
+      const holes = unsized(sizes, Object.keys(entries));
+      if (holes.length) this.error(`addon-sizes: no size measured for: ${holes.join(', ')}`);
       this.emitFile({
         type: 'asset',
         fileName: 'addon-eager-edges.txt',

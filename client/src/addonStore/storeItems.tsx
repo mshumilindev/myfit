@@ -39,7 +39,10 @@ export const itemHighlights = (st: AddonStoreStrings, id: string): readonly stri
 export const iconUrl = (id: string) => `${import.meta.env.BASE_URL ?? '/'}store-icons/${id}.webp`;
 
 /** Items with an animated icon (public/store-icons/<id>-anim.webp). It plays only on the item page and banners, never in lists. */
-export const ANIMATED_ICONS: ReadonlySet<string> = new Set(['fatigue-readiness']);
+export const ANIMATED_ICONS: ReadonlySet<string> = new Set([
+  'fatigue-readiness',
+  'train-like-a-pro',
+]);
 export const animIconUrl = (id: string) =>
   `${import.meta.env.BASE_URL ?? '/'}store-icons/${id}-anim.webp`;
 
