@@ -110,6 +110,11 @@ export function useAddonRuntime() {
   useEffect(() => {
     if (circuitOn) loadTracker('circuit', () => import('../circuit/circuitBoot'));
   }, [circuitOn]);
+  // Time blocks (a module of Advanced training): the block clock, countdown and editor are a lazy chunk too.
+  const timeBlocksOn = useAddonOrBase('time-blocks');
+  useEffect(() => {
+    if (timeBlocksOn) loadTracker('time-blocks', () => import('../timeBlocks/timeBlocksBoot'));
+  }, [timeBlocksOn]);
   // RPE / RIR (a module of Advanced training): the effort entry is a lazy chunk too.
   const effortOn = useAddonOrBase('effort');
   useEffect(() => {

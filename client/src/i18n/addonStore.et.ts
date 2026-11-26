@@ -428,6 +428,10 @@ export const addonStoreEt: typeof addonStoreEn = {
     equipment: { name: 'Varustus', desc: 'Jõusaali varustus, varustuse kaardid ja filtrid.' },
     supersets: { name: 'Superseeriad', desc: 'Tee kaks või enam harjutust üksteise järel.' },
     circuit: { name: 'Ringtreening', desc: 'Ringid harjutuste grupi peale, ringide loenduriga.' },
+    'time-blocks': {
+      name: 'Ajablokid',
+      desc: 'AMRAP-, EMOM-, ajale- ja intervallblokid taimeri, 5-sekundilise loenduse ja helisignaalidega.',
+    },
     effort: { name: 'RPE / RIR', desc: 'Hinda, kui raske seeria oli, ja vaata äpi hinnangut.' },
     'set-types': { name: 'Seeriatüübid', desc: 'Dropid, pöörddropid ja raskusega hoidmised.' },
     fatigue: { name: 'Väsimus', desc: 'Lihaste väsimus, stagnatsioon ja kergema nädala vihjed.' },

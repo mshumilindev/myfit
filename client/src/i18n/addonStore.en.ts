@@ -430,6 +430,10 @@ export const addonStoreEn = {
     equipment: { name: 'Equipment', desc: 'Gym inventory, equipment cards and filters.' },
     supersets: { name: 'Supersets', desc: 'Do two or more exercises back to back.' },
     circuit: { name: 'Circuit', desc: 'Rounds over a group of exercises, with a round counter.' },
+    'time-blocks': {
+      name: 'Time blocks',
+      desc: 'AMRAP, EMOM, For time and interval blocks with a clock, a 5-second countdown and sound cues.',
+    },
     effort: { name: 'RPE / RIR', desc: 'Rate how hard a set felt; see the app’s estimate.' },
     'set-types': { name: 'Set types', desc: 'Drop sets, reverse drops and weighted holds.' },
     fatigue: { name: 'Fatigue', desc: 'Per-muscle fatigue, stalled muscles and deload hints.' },

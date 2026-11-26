@@ -246,6 +246,23 @@ export function useCircuitOn(): boolean {
 }
 
 /**
+ * Time blocks (AMRAP, EMOM, For time, intervals): without it a stored block reads as its exercises in order with no clock, and no
+ * block can be built or started. The data stays and comes back on re-install.
+ */
+export function timeBlocksAvailable(): boolean {
+  try {
+    return addonAvailable('time-blocks');
+  } catch {
+    return false;
+  }
+}
+
+/** The same Time blocks gate for components. */
+export function useTimeBlocksOn(): boolean {
+  return useAddonOrBase('time-blocks');
+}
+
+/**
  * RPE / RIR (effort entry): without it a set has no effort chips, hint, estimate pill or effort column, and nothing of it is
  * asked. The app's own effort estimate keeps working underneath (rest, failure and signals read it), and stored values stay.
  */

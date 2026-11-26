@@ -206,6 +206,14 @@ export const ADDONS: readonly AddonManifest[] = [
     category: 'workouts',
   },
   {
+    id: 'time-blocks',
+    kind: 'module',
+    parent: 'advanced-training',
+    tone: 3,
+    roles: ALL,
+    category: 'workouts',
+  },
+  {
     id: 'effort',
     kind: 'module',
     parent: 'advanced-training',

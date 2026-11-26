@@ -175,6 +175,9 @@
   "supersets": {
     "js": ["supersetsRt", "supersetsApi", "supersets/"]
   },
+  "time-blocks": {
+    "js": ["timeBlocksApi", "timeBlocks/"]
+  },
   "effort": {
     "js": ["effort/"]
   },

@@ -426,6 +426,10 @@ export const addonStoreLt: typeof addonStoreEn = {
     equipment: { name: 'Įranga', desc: 'Salės inventorius, įrangos kortelės ir filtrai.' },
     supersets: { name: 'Supersetai', desc: 'Atlik dvi ar daugiau pratimų iš eilės.' },
     circuit: { name: 'Ratas', desc: 'Ratai per pratimų grupę su ratų skaitikliu.' },
+    'time-blocks': {
+      name: 'Laiko blokai',
+      desc: 'AMRAP, EMOM, į laiką ir intervalų blokai su laikmačiu, 5 sekundžių atskaita ir garso signalais.',
+    },
     effort: {
       name: 'RPE / RIR',
       desc: 'Įvertink, kiek sunki buvo serija, ir matyk programos įvertį.',

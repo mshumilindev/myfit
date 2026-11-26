@@ -105,6 +105,11 @@ export const EXCLUSION: Readonly<Record<string, Exclusion>> = {
     files: ['addons/featureGates.ts', 'circuitApi.ts'],
     names: ['circuitAvailable', 'useCircuitOn', 'useCircuitHost'],
   },
+  'time-blocks': {
+    via: ['gate'],
+    files: ['addons/featureGates.ts', 'timeBlocksApi.ts'],
+    names: ['timeBlocksAvailable', 'useTimeBlocksOn', 'useTimeBlocksHost'],
+  },
   effort: {
     via: ['gate'],
     files: ['addons/featureGates.ts', 'effortApi.ts'],

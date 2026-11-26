@@ -425,6 +425,10 @@ export const addonStorePl: typeof addonStoreEn = {
     equipment: { name: 'Sprzęt', desc: 'Wyposażenie siłowni, karty sprzętu i filtry.' },
     supersets: { name: 'Superserie', desc: 'Rób dwa lub więcej ćwiczeń jedno po drugim.' },
     circuit: { name: 'Obwód', desc: 'Rundy po grupie ćwiczeń z licznikiem rund.' },
+    'time-blocks': {
+      name: 'Bloki czasowe',
+      desc: 'Bloki AMRAP, EMOM, na czas i interwałowe z zegarem, 5-sekundowym odliczaniem i sygnałami dźwiękowymi.',
+    },
     effort: {
       name: 'RPE / RIR',
       desc: 'Oceniaj, jak ciężka była seria, i zobacz szacunek aplikacji.',
