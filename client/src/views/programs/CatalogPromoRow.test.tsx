@@ -22,13 +22,17 @@ describe('CatalogPromoRow (Programs, add-on not installed)', () => {
     const { container } = render(<CatalogPromoRow />);
     expect(container.textContent).toBe('');
   });
-  it('shows nothing to a trainer or an admin', () => {
+  it('shows the quiet row to a trainer or an admin too (they have Gym), but nothing to a manager', () => {
     for (const role of ['trainer', 'admin']) {
       localStorage.setItem('spotter.role', role);
       const { container } = render(<CatalogPromoRow />);
-      expect(container.textContent).toBe('');
+      expect(container.textContent, role).toContain('Train like a pro');
       cleanup();
     }
+    localStorage.setItem('spotter.role', 'manager');
+    const { container } = render(<CatalogPromoRow />);
+    expect(container.textContent).toBe('');
+    cleanup();
     localStorage.setItem('spotter.role', 'member');
   });
 });

@@ -3,7 +3,13 @@
  * stored goals stay and come back on re-install. Playbook is computed from the history, so it is only a gate on its screens,
  * tiles, nudge, widget and suggestions. One gate each; screens ask it, they do not re-implement it.
  */
-import { addonAvailable, isAddonEnabled, useAddonOrBase, useEnabledAddons } from './enabledSet';
+import {
+  addonAvailable,
+  isAddonAllowed,
+  isAddonEnabled,
+  useAddonOrBase,
+  useEnabledAddons,
+} from './enabledSet';
 import { getRole } from '../api';
 
 /** Pure code (no hook): true while Goals is installed or not offered to this role. Never throws (a storage error = off: a hard guard). */
@@ -57,11 +63,11 @@ export function plannerAvailable(): boolean {
 /**
  * Train like a pro (the catalog of programs well-known lifters followed): its screens and data sit in a lazy chunk that loads only
  * while it is installed; the core keeps this gate and a host the chunk fills. Programs a person already started stay theirs.
- * Members only, and only when installed: a role the store does not offer it to (trainer, admin) must not get it as "base".
+ * Every role that has Gym (member, trainer, admin), and only when installed: a role the store does not offer it to (manager) never gets it.
  */
 export function trainLikeAProAvailable(): boolean {
   try {
-    return getRole() === 'member' && isAddonEnabled('train-like-a-pro', 'member');
+    return isAddonEnabled('train-like-a-pro', getRole());
   } catch {
     return false;
   }
@@ -70,7 +76,7 @@ export function trainLikeAProAvailable(): boolean {
 /** The same Train like a pro gate for components. */
 export function useTrainLikeAProOn(): boolean {
   const installed = useEnabledAddons().has('train-like-a-pro');
-  return installed && getRole() === 'member';
+  return installed && isAddonAllowed('train-like-a-pro', getRole());
 }
 
 /** Apex ranks (standards tiers): without the module nothing derives a rank or tier, not even inside other widgets. */

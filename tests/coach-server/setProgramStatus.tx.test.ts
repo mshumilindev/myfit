@@ -168,3 +168,35 @@ describe('setProgramStatus (member, active)', () => {
     await expect(call('m1', 'tl-m2-x')).rejects.toMatchObject({ code: 'permission-denied' });
   });
 });
+
+describe('setProgramStatus (trainer and admin, catalog start)', () => {
+  it.each(['trainer', 'admin'])(
+    'a %s starting a catalog program takes their own assignment and archives their other active one',
+    async (role) => {
+      put('users/x1', { role });
+      put('programs/prg-old', prog('prg-old', 'x1', 'active'));
+      put('programs/tl-x1-y', prog('tl-x1-y', 'x1', 'draft'));
+      await call('x1', 'tl-x1-y');
+      expect(get('programs/prg-old')?.status).toBe('archived');
+      expect(get('programs/tl-x1-y')?.status).toBe('active');
+      expect(get('assignments/x1')).toMatchObject({ programId: 'tl-x1-y', assignedBy: 'x1' });
+    },
+  );
+
+  it("a trainer's ordinary program (no tl- id) still only changes its status", async () => {
+    put('users/x1', { role: 'trainer' });
+    put('programs/prg-own', prog('prg-own', 'x1', 'draft'));
+    await call('x1', 'prg-own');
+    expect(get('programs/prg-own')?.status).toBe('active');
+    expect(get('assignments/x1')).toBeUndefined();
+  });
+
+  it("archiving the started catalog program drops the trainer's own assignment", async () => {
+    put('users/x1', { role: 'trainer' });
+    put('programs/tl-x1-y', prog('tl-x1-y', 'x1', 'active'));
+    put('assignments/x1', { memberId: 'x1', programId: 'tl-x1-y', assignedBy: 'x1', startedAt: 5 });
+    await call('x1', 'tl-x1-y', 'archived');
+    expect(get('programs/tl-x1-y')?.status).toBe('archived');
+    expect(get('assignments/x1')).toBeUndefined();
+  });
+});

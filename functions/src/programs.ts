@@ -126,7 +126,8 @@ export const setProgramStatus = onCall(async (req) => {
   }
   const me = await loadUser(uid);
   const now = Date.now();
-  if (me.role === 'member' && status === 'active') {
+  // Members always; a trainer or admin starting a catalog program (`tl-` id) gets the same transaction: their own assignment.
+  if ((me.role === 'member' || id.startsWith('tl-')) && status === 'active') {
     // One transaction: the trainer's-program check, the archive of the member's other active programs and the new
     // assignment must see the same state, or two quick starts could both pass the check.
     await db.runTransaction(async (tx) => {
@@ -173,7 +174,7 @@ export const setProgramStatus = onCall(async (req) => {
     return { ok: true };
   }
   const batch = db.batch();
-  if (me.role === 'member') {
+  if (me.role === 'member' || id.startsWith('tl-')) {
     const asg = await db.collection('assignments').doc(uid).get();
     if (asg.exists && (asg.data() as AssignmentDoc).programId === id)
       batch.delete(db.collection('assignments').doc(uid));
