@@ -347,8 +347,8 @@ export function resultSummary(t: TimeBlocksStrings, spec: BlockSpec, r: BlockRes
 /** A logged block: one quiet row, tap to edit the result. */
 export function BlockLoggedRow(p: {
   block: WorkoutBlock;
-  onOpen: () => void;
-  onDelete: () => void;
+  onOpen?: () => void;
+  onDelete?: () => void;
 }) {
   const t = useBlockStrings();
   const { spec, result } = p.block;
@@ -360,22 +360,26 @@ export function BlockLoggedRow(p: {
           <div className="tb-t">{result ? resultSummary(t, spec, result) : ''}</div>
           <div className="tb-sub">{membersLine(p.block.members)}</div>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          shape="round"
-          icon="pencil-simple"
-          aria-label={t.edit}
-          onClick={p.onOpen}
-        />
-        <Button
-          variant="ghost"
-          size="sm"
-          shape="round"
-          icon="trash"
-          aria-label={t.deleteBlock}
-          onClick={p.onDelete}
-        />
+        {p.onOpen && (
+          <Button
+            variant="ghost"
+            size="sm"
+            shape="round"
+            icon="pencil-simple"
+            aria-label={t.edit}
+            onClick={p.onOpen}
+          />
+        )}
+        {p.onDelete && (
+          <Button
+            variant="ghost"
+            size="sm"
+            shape="round"
+            icon="trash"
+            aria-label={t.deleteBlock}
+            onClick={p.onDelete}
+          />
+        )}
       </div>
     </div>
   );

@@ -7,6 +7,7 @@
  */
 import type { ComponentType } from 'react';
 import { timeBlocksAvailable } from './addons/featureGates';
+import type { Workout } from './types';
 import type { BlockSpec } from './timeBlocks/model';
 
 export interface BlockCountdownHostProps {
@@ -22,9 +23,11 @@ export interface TimeBlocksHost {
   Countdown: ComponentType<BlockCountdownHostProps> | null;
   /** The blocks of one session: cards, the builder, the clock and the result. */
   Blocks: ComponentType<{ workoutId: string; past: boolean }> | null;
+  /** Read-only list of a finished session's blocks (the trainer's view of a client's session). */
+  Recap: ComponentType<{ workout: Workout }> | null;
 }
 
-export const timeBlocksHost: TimeBlocksHost = { Countdown: null, Blocks: null };
+export const timeBlocksHost: TimeBlocksHost = { Countdown: null, Blocks: null, Recap: null };
 
 /** Is the module installed AND its chunk loaded? */
 export function timeBlocksLive(): boolean {

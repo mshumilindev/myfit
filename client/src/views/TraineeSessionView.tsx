@@ -27,6 +27,7 @@ import type { Strings } from '../i18n/en';
 import { Icon, useExerciseName } from '../ui';
 import { Tag } from '../components/ui/Tag';
 import { SetRow } from '../components/ui/SetRow';
+import { useTimeBlocksHost } from '../timeBlocksRt';
 
 function mmss(sec: number): string {
   const s = Math.max(0, Math.round(sec));
@@ -208,6 +209,7 @@ export function TraineeSessionView({
 }) {
   void shell;
   const { t, locale } = useT();
+  const BlockRecap = useTimeBlocksHost()?.Recap ?? null; // Time blocks installed on the viewer's side
   const [res, setRes] = useState<
     { forId: string; w: Workout } | { forId: string; msg: string } | null
   >(null);
@@ -256,6 +258,8 @@ export function TraineeSessionView({
 
       {loading && <div className="detail-muted">…</div>}
       {errMsg && <div className="detail-muted">{errMsg}</div>}
+
+      {w && BlockRecap && <BlockRecap workout={w} />}
 
       {w && (
         <div className="ul-flex ul-col ug-8">
