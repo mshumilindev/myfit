@@ -20,7 +20,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-accent);
+  color: var(--color-accent-text);
 }
 .uicc-name {
   min-width: 0;
@@ -32,7 +32,8 @@
 .uicc-meta {
   display: block;
   font-size: var(--fs-13);
-  color: var(--color-text-muted);
+  /* The muted token is 3.8:1 on the card's tile: a text/tile blend keeps the quieter line above 4.5:1 in every theme and mode. */
+  color: color-mix(in srgb, var(--color-text) 70%, var(--color-tile));
 }
 .uicc-tags {
   display: flex;
@@ -46,7 +47,9 @@
   font-size: var(--fs-18);
 }
 .uicc--locked .uicc-who,
-.uicc--locked .uicc-name,
-.uicc--locked .uicc-meta {
+.uicc--locked .uicc-name {
   opacity: 0.65;
+}
+.uicc--locked .uicc-meta {
+  color: color-mix(in srgb, var(--color-text) 62%, var(--color-tile));
 }

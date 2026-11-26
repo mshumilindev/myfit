@@ -1,4 +1,4 @@
-import { act, cleanup, render, screen, within } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Shell } from '../App';
@@ -123,7 +123,8 @@ describe('SessionView · exercise options (focus options sheet)', () => {
     expect(d.querySelector('.opts-sub')!.textContent).toBe('Sets · 2');
     expect(within(d).getByRole('button', { name: /Muscle map/ })).toBeTruthy();
     await userEvent.click(within(d).getByRole('button', { name: /Muscle map/ }));
-    expect(document.querySelector('.muscle-map-sheet')).toBeTruthy();
+    // the map is a lazy chunk (Muscle map add-on): it arrives a tick after the tap
+    await waitFor(() => expect(document.querySelector('.muscle-map-sheet')).toBeTruthy());
   });
 
   it('has no muscle map without the Muscle map add-on', async () => {
