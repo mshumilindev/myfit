@@ -5,23 +5,26 @@ import { Tag } from '../components/ui/Tag';
 import { useT } from '../i18n';
 import { STRINGS } from './strings';
 
-const VALUES = [0, 6, 7, 8, 9, 10];
+// No "Skip" cell: nothing chosen is the empty state, and tapping the chosen value again clears it
+// (SPO-608). Five values + F fit the editor row at any locale length.
+const VALUES = [6, 7, 8, 9, 10];
 
 export function Chips(props: { rpe: number; failOn: boolean; onPick: (v: number) => void }) {
-  const { locale } = useT();
-  const s = STRINGS[locale];
   return (
     <>
-      {VALUES.map((v) => (
-        <Chip
-          key={v}
-          size="md"
-          selected={props.rpe === v && !props.failOn}
-          onClick={() => props.onPick(v)}
-        >
-          {v === 0 ? s.none : v}
-        </Chip>
-      ))}
+      {VALUES.map((v) => {
+        const selected = props.rpe === v && !props.failOn;
+        return (
+          <Chip
+            key={v}
+            size="md"
+            selected={selected}
+            onClick={() => props.onPick(selected ? 0 : v)}
+          >
+            {v}
+          </Chip>
+        );
+      })}
     </>
   );
 }

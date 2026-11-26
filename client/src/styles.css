@@ -23899,9 +23899,6 @@ body {
   background: var(--color-accent);
   color: var(--color-on-accent);
 }
-.se-rpe button:first-child {
-  font-size: var(--fs-13);
-}
 .se-card .band-tile {
   background: var(--color-bg);
 }
@@ -24449,10 +24446,7 @@ body {
   color: var(--color-neutral-500);
 }
 
-/* Editor: F at the end of the effort row + partials */
-.se-rpe:has(.rpe-f) {
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-}
+/* Editor: F at the end of the effort row (5 values + F = the 6 columns of .se-rpe) + partials */
 .se-partials {
   display: flex;
   align-items: center;

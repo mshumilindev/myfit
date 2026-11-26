@@ -3,14 +3,12 @@ import type { LocaleId } from '../i18n';
 /** Words of the effort (RPE) entry. RPE / RIR's own words live in its chunk, not in the core i18n (add-on boundary). */
 export interface EffortStrings {
   label: string;
-  none: string;
   hint: (v: number) => string;
   estHint: (v: string) => string;
 }
 
 const en: EffortStrings = {
   label: 'Effort (RPE)',
-  none: 'Skip',
   hint: (v: number) =>
     v >= 10
       ? 'Max — nothing left in the tank'
@@ -29,7 +27,6 @@ const en: EffortStrings = {
 
 const uk: EffortStrings = {
   label: 'Зусилля (RPE)',
-  none: 'Без',
   hint: (v) =>
     v >= 10
       ? 'Максимум — більше жодного'
@@ -48,7 +45,6 @@ const uk: EffortStrings = {
 
 const pl: EffortStrings = {
   label: 'Wysiłek (RPE)',
-  none: 'Pomiń',
   hint: (v) =>
     v >= 10
       ? 'Maksimum — nic w zapasie'
@@ -67,7 +63,6 @@ const pl: EffortStrings = {
 
 const et: EffortStrings = {
   label: 'Pingutus (RPE)',
-  none: 'Jäta',
   hint: (v) =>
     v >= 10
       ? 'Maksimum — midagi ei jäänud'
@@ -86,7 +81,6 @@ const et: EffortStrings = {
 
 const lt: EffortStrings = {
   label: 'Pastangos (RPE)',
-  none: 'Be',
   hint: (v) =>
     v >= 10
       ? 'Maksimumas — nieko nebeliko'

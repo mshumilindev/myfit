@@ -5,13 +5,16 @@ import { Chips, EffortHint, EffortTag } from './pieces';
 import { STRINGS } from './strings';
 
 describe('effort pieces', () => {
-  it('offers Skip and 6–10, marks the chosen one, and not while failure is on', () => {
+  it('offers 6–10 (no Skip cell), marks the chosen one, clears on a second tap, and not while failure is on', () => {
     const onPick = vi.fn();
     const { rerender } = render(<Chips rpe={8} failOn={false} onPick={onPick} />);
-    expect(screen.getAllByRole('button')).toHaveLength(6);
+    expect(screen.getAllByRole('button')).toHaveLength(5);
+    expect(screen.queryByText('Skip')).toBeNull();
     fireEvent.click(screen.getByText('9'));
     expect(onPick).toHaveBeenCalledWith(9);
     expect(screen.getByText('8').closest('button')!.className).toContain('is-selected');
+    fireEvent.click(screen.getByText('8'));
+    expect(onPick).toHaveBeenLastCalledWith(0);
     rerender(<Chips rpe={8} failOn onPick={onPick} />);
     expect(screen.getByText('8').closest('button')!.className).not.toContain('is-selected');
   });
