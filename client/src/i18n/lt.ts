@@ -4529,6 +4529,8 @@ export const lt: Strings = {
   // --- Home set ---
   startHomeTitle: 'Namų rinkinys',
   startHomeSub: 'Prisitraukimai, vakuumas, atsispaudimai — be sporto salės',
+  startBlockTitle: 'Laiko blokas',
+  startBlockSub: 'AMRAP, EMOM, į laiką',
   startProgramsTitle: 'Programos',
   startProgramsSub: 'Tavo planas ir treniruočių dienos',
   startFinishFirst: (name: string) => `Pirma užbaik ${name}`,

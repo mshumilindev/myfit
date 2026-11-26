@@ -124,6 +124,7 @@ export const pgEt: typeof pgEn = {
     dayName: 'päeva nimi',
     muscles: 'sihtlihased',
     activities: 'planeeritud tegevused',
+    blocks: 'ajaplokid',
   },
   edDiffNone: 'Kehtivast versioonist muudatusi pole.',
   edDiffLive: (v) => `Kehtiv: v${v}`,

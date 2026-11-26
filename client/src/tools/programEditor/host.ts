@@ -159,6 +159,14 @@ export interface WrapProps {
   ) => ReactNode;
 }
 
+/** What the host's "time blocks of a day" block gets: the document, the day, and an edit function (one history step). */
+export interface DayBlocksSlotProps {
+  doc: ProgramDoc;
+  day: number;
+  readOnly: boolean;
+  edit: (fn: (d: ProgramDoc) => ProgramDoc, label?: string) => void;
+}
+
 export interface EditorSlots {
   /** Wraps the editor so a host can edit another view of the document (a week of a cycle) through the same tool. */
   wrap?: ComponentType<WrapProps>;
@@ -180,6 +188,8 @@ export interface EditorSlots {
   preview?: ComponentType<PreviewProps>;
   /** Replaces the Add pane's "Browse all exercises" overlay with the host's own picker (the app's full exercise picker). */
   exercisePicker?: ComponentType<ExercisePickerSlotProps>;
+  /** The time blocks of the open day (Advanced training › Time blocks), shown under the day's rows with their own add button. */
+  dayBlocks?: ComponentType<DayBlocksSlotProps>;
   /** A small tag beside a day in the week strip (the athlete's "With your trainer"). `day` is ISO 1..7. */
   dayTag?: ComponentType<{ day: number }>;
 }

@@ -71,6 +71,11 @@ export interface TimeBlocksStrings {
   keep: string;
   timeBlockRow: string;
   exerciseInfo: string;
+  /** Long one-line summary parts: "12 min", "target 8 rounds", "cap 15 min", "every 60 s × 10". */
+  minN: (m: number) => string;
+  targetN: (n: number) => string;
+  capN: (m: number) => string;
+  everyN: (s: number, n: number) => string;
   movedIntoBlock: (name: string) => string;
   timeBlockHint: string;
   blockLabel: string;
@@ -153,6 +158,10 @@ const en: TimeBlocksStrings = {
   keep: 'Keep',
   timeBlockRow: 'Time block…',
   exerciseInfo: 'Exercise details',
+  minN: (m) => `${m} min`,
+  targetN: (n) => `target ${n} rounds`,
+  capN: (m) => `cap ${m} min`,
+  everyN: (s, n) => `every ${s} s × ${n}`,
   movedIntoBlock: (n) => `${n} moved into the block`,
   timeBlockHint: 'Move this exercise into a timed block',
   blockLabel: 'Time block',
@@ -235,6 +244,10 @@ const uk: TimeBlocksStrings = {
   keep: 'Залишити',
   timeBlockRow: 'Часовий блок…',
   exerciseInfo: 'Про вправу',
+  minN: (m) => `${m} хв`,
+  targetN: (n) => `ціль: ${n} раундів`,
+  capN: (m) => `ліміт ${m} хв`,
+  everyN: (s, n) => `кожні ${s} с × ${n}`,
   movedIntoBlock: (n) => `${n} перенесено в блок`,
   timeBlockHint: 'Перенести цю вправу в часовий блок',
   blockLabel: 'Часовий блок',
@@ -315,6 +328,10 @@ const pl: TimeBlocksStrings = {
   keep: 'Zostaw',
   timeBlockRow: 'Blok czasowy…',
   exerciseInfo: 'Szczegóły ćwiczenia',
+  minN: (m) => `${m} min`,
+  targetN: (n) => `cel: ${n} rund`,
+  capN: (m) => `limit ${m} min`,
+  everyN: (s, n) => `co ${s} s × ${n}`,
   movedIntoBlock: (n) => `${n} przeniesione do bloku`,
   timeBlockHint: 'Przenieś to ćwiczenie do bloku czasowego',
   blockLabel: 'Blok czasowy',
@@ -396,6 +413,10 @@ const lt: TimeBlocksStrings = {
   keep: 'Palikti',
   timeBlockRow: 'Laiko blokas…',
   exerciseInfo: 'Pratimo informacija',
+  minN: (m) => `${m} min.`,
+  targetN: (n) => `tikslas: ${n} ratų`,
+  capN: (m) => `riba ${m} min.`,
+  everyN: (s, n) => `kas ${s} s × ${n}`,
   movedIntoBlock: (n) => `${n} perkeltas į bloką`,
   timeBlockHint: 'Perkelti šį pratimą į laiko bloką',
   blockLabel: 'Laiko blokas',
@@ -477,6 +498,10 @@ const et: TimeBlocksStrings = {
   keep: 'Jäta',
   timeBlockRow: 'Ajaplokk…',
   exerciseInfo: 'Harjutuse info',
+  minN: (m) => `${m} min`,
+  targetN: (n) => `siht: ${n} ringi`,
+  capN: (m) => `piir ${m} min`,
+  everyN: (s, n) => `iga ${s} s × ${n}`,
   movedIntoBlock: (n) => `${n} liigutati plokki`,
   timeBlockHint: 'Liiguta see harjutus ajaplokki',
   blockLabel: 'Ajaplokk',

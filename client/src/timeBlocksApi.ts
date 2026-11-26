@@ -8,6 +8,8 @@
 import type { ComponentType } from 'react';
 import { timeBlocksAvailable } from './addons/featureGates';
 import type { Exercise, Workout } from './types';
+import type { ProgramBlockMember, ProgramBlockSpec } from './views/programs/programBlocks';
+import type { DayBlocksSlotProps } from './tools/programEditor';
 import type { BlockSpec, WorkoutBlock } from './timeBlocks/model';
 
 export interface BlockCountdownHostProps {
@@ -28,9 +30,21 @@ export interface TimeBlocksHost {
     /** undefined: every block as a card (classic list). null: only the clock engine (no card). id: that block's card (a focus step). */
     focusId?: string | null;
     onInfo?: (name: string) => void;
+    /** Opens the block builder each time this number goes up (Start tile, the picker's Time block entry). */
+    newSignal?: number;
     intake?: Exercise | null;
     onIntakeDone?: (moved?: { text: string; undo: () => void }) => void;
   }> | null;
+  /** The day's blocks inside a plan card (Today's program card), read-only. */
+  PlanBlocks: ComponentType<{
+    blocks: readonly {
+      id: string;
+      spec: ProgramBlockSpec;
+      members: readonly ProgramBlockMember[];
+    }[];
+  }> | null;
+  /** The time blocks of one program day in the program editor (its `dayBlocks` slot). */
+  DayBlocks: ComponentType<DayBlocksSlotProps> | null;
   /** Short language-neutral name of a block for the "Next · …" button. */
   stepLabel: ((b: WorkoutBlock) => string) | null;
   /** The "Time block…" row label (a component: it follows the language) of the exercise options, in the current language. */
@@ -43,6 +57,8 @@ export const timeBlocksHost: TimeBlocksHost = {
   Countdown: null,
   Blocks: null,
   Recap: null,
+  DayBlocks: null,
+  PlanBlocks: null,
   stepLabel: null,
   RowLabel: null,
 };

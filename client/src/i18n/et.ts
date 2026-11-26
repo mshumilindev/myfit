@@ -4488,6 +4488,8 @@ export const et: Strings = {
   // --- Home set ---
   startHomeTitle: 'Kodune kava',
   startHomeSub: 'Lõuatõmbed, vaakum, kätekõverdused — ilma jõusaalita',
+  startBlockTitle: 'Ajaplokk',
+  startBlockSub: 'AMRAP, EMOM, ajale',
   startProgramsTitle: 'Programmid',
   startProgramsSub: 'Sinu plaan ja treeningupäevad',
   startFinishFirst: (name: string) => `Lõpeta enne ${name}`,

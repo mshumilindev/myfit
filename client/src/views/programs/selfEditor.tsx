@@ -50,6 +50,7 @@ import {
 } from '../../tools/programEditor';
 import { usePeriodizationHost } from '../../periodizationRt';
 import { useEffortHost } from '../../effortRt';
+import { useTimeBlocksHost } from '../../timeBlocksRt';
 import { useWeekStartDay, weekOrder } from '../../weekStart';
 import type { Program } from './model';
 import { SelfExercisePicker } from './selfPicker';
@@ -144,6 +145,7 @@ export function useSelfEditorHost(o: SelfHostOptions = {}): ProgramEditorHost {
   const { shell, readOnly } = o;
   const periodization = usePeriodizationHost();
   const effort = useEffortHost();
+  const timeBlocks = useTimeBlocksHost();
   const activitiesLocked = o.activitiesLocked || !activitiesOn;
   return useMemo(() => {
     // Only for the person training it: a coach building a client's plan has their own limits.
@@ -200,12 +202,24 @@ export function useSelfEditorHost(o: SelfHostOptions = {}): ProgramEditorHost {
       slots: {
         muscleMap: MusclePickerMap,
         ...(readOnly ? { dayTag: TrainerDayTag } : { exercisePicker: SelfExercisePicker }),
+        ...(timeBlocks?.DayBlocks ? { dayBlocks: timeBlocks.DayBlocks } : {}),
         ...periodization?.editorSlots,
         ...effort?.editorSlots,
       },
       ...periodization?.editorCheck,
     };
-  }, [t, locale, start, limits, shell, readOnly, activitiesLocked, periodization, effort]);
+  }, [
+    t,
+    locale,
+    start,
+    limits,
+    shell,
+    readOnly,
+    activitiesLocked,
+    periodization,
+    effort,
+    timeBlocks,
+  ]);
 }
 
 export interface SelfProgramEditorProps extends Omit<

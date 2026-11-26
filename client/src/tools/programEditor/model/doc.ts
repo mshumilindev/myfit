@@ -93,6 +93,26 @@ export interface ProgramActivityDoc {
   when: ActivityWhen;
 }
 
+/** A time block of a day (Advanced training › Time blocks): beside the rows, never among them. Structural twin of the host's type. */
+export interface ProgramBlockDoc {
+  id: string;
+  day: number;
+  position: number;
+  /** The row it follows (null = before the first row; a missing row = the end of the day). */
+  afterItemId?: string | null;
+  spec: {
+    fmt: 'amrap' | 'emom' | 'fortime' | 'intervals';
+    capSec?: number;
+    everySec?: number;
+    rounds?: number;
+    workSec?: number;
+    restSec?: number;
+    scheme?: number[];
+    targetRounds?: number;
+  };
+  members: { name: string; reps?: string }[];
+}
+
 export interface ProgramDoc {
   name: string;
   /** Per-day name, keyed by weekday ("1" = Monday). */
@@ -101,6 +121,7 @@ export interface ProgramDoc {
   targetMuscles: Record<string, MuscleGroup[]>;
   items: ProgramItemDoc[];
   activities?: ProgramActivityDoc[];
+  blocks?: ProgramBlockDoc[];
 }
 
 /** Per-host view of the calendar: the order the training week is read in (a user's week-start setting). */

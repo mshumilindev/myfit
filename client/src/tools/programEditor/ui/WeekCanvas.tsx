@@ -57,6 +57,7 @@ export function WeekCanvas({ state, actions, note }: CanvasProps) {
           actions.select(id);
         }}
         onAddExercise={() => actions.openPane('add')}
+        onEdit={actions.edit}
         onAddActivity={() => actions.openPane('actadd')}
         onPreview={() => actions.openPane('view')}
         onCopyDay={() => actions.openPane('copy')}

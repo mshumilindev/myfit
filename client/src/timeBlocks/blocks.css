@@ -234,3 +234,25 @@
   display: grid;
   gap: var(--s-12);
 }
+.tb-pblocks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--s-8);
+}
+.tb-plan {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--s-8);
+}
+.tb-plan-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-12);
+  padding: var(--s-12);
+  border-radius: var(--r-12);
+  background: color-mix(in srgb, var(--color-conditioning) 12%, var(--color-surface));
+}

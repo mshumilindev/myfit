@@ -119,6 +119,20 @@ export function genProgram(seed: number, id = planProgramId(C)): Program {
       },
       { id: `a${seed}-2`, day: 5, type: 'yoga', minutes: 45, effort: 'light', when: 'any' },
     ];
+  if (r() < 0.6)
+    p.blocks = [
+      {
+        id: `b${seed}-1`,
+        day: 1,
+        position: 0,
+        afterItemId: null,
+        spec: { fmt: 'amrap', capSec: 600 + Math.floor(r() * 600), targetRounds: 6 },
+        members: [
+          { name: 'Pullups', reps: '5' },
+          { name: 'Pushups', reps: '10' },
+        ],
+      },
+    ];
   return p;
 }
 

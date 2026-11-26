@@ -818,6 +818,50 @@ c(
   true,
   { authorId: T, status: 'draft' },
 );
+// time blocks (SPO-608): a client that predates `blockV` must not be able to drop stored blocks
+const withBlocks = (d: Db) => {
+  d['programs/prg-client1-1'] = { authorId: T, status: 'active', blockV: 1, blocks: [{ id: 'b1' }] };
+};
+c(
+  'J30',
+  'old client saves a program with blocks without blockV (would drop the blocks)',
+  'update',
+  'programs/prg-client1-1',
+  au(T, 'trainer'),
+  false,
+  { authorId: T, status: 'active' },
+  withBlocks,
+);
+c(
+  'J31',
+  'new client keeps the blocks (blockV 1 and blocks present)',
+  'update',
+  'programs/prg-client1-1',
+  au(T, 'trainer'),
+  true,
+  { authorId: T, status: 'active', blockV: 1, blocks: [{ id: 'b1' }] },
+  withBlocks,
+);
+c(
+  'J32',
+  'new client removes the blocks on purpose (blockV 0)',
+  'update',
+  'programs/prg-client1-1',
+  au(T, 'trainer'),
+  true,
+  { authorId: T, status: 'active', blockV: 0 },
+  withBlocks,
+);
+c(
+  'J33',
+  'blockV 1 without blocks is refused',
+  'update',
+  'programs/prg-client1-1',
+  au(T, 'trainer'),
+  false,
+  { authorId: T, status: 'active', blockV: 1 },
+  withBlocks,
+);
 // misc
 c('K01', 'anyone reads coachKeys (directory)', 'get', `coachKeys/${T}`, au(M), true);
 c('K02', 'signed-out read coachKeys', 'get', `coachKeys/${T}`, null, false);

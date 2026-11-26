@@ -1,9 +1,18 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ProgramAssignment, ProgramItem } from './programMine';
 
-const m = vi.hoisted(() => ({ startWorkout: vi.fn(), addExercise: vi.fn(), on: false }));
+const m = vi.hoisted(() => ({
+  startWorkout: vi.fn(),
+  addExercise: vi.fn(),
+  setWorkoutBlocks: vi.fn(),
+  on: false,
+  blocksOn: false,
+}));
 // The store is mocked below, so the gate is too: the module is "installed" while `m.on` is true.
-vi.mock('../addons/featureGates', () => ({ periodizationAvailable: () => m.on }));
+vi.mock('../addons/featureGates', () => ({
+  periodizationAvailable: () => m.on,
+  timeBlocksAvailable: () => m.blocksOn,
+}));
 vi.mock('firebase/firestore', () => ({ doc: () => ({}), getDoc: vi.fn() }));
 vi.mock('../firebase', () => ({ db: {} }));
 vi.mock('../api', () => ({ callFn: vi.fn() }));
@@ -14,7 +23,11 @@ vi.mock('../offline/offlineCache', () => ({
   offlineHydrate: vi.fn(async () => false),
 }));
 vi.mock('../views/programs/activitiesVault', () => ({ openActivities: async (p: unknown) => p }));
-vi.mock('../store', () => ({ startWorkout: m.startWorkout, addExercise: m.addExercise }));
+vi.mock('../store', () => ({
+  startWorkout: m.startWorkout,
+  addExercise: m.addExercise,
+  setWorkoutBlocks: m.setWorkoutBlocks,
+}));
 vi.mock('../nicotineApply', () => ({ nicMid: () => 0 }));
 
 import { periodizationHost } from '../periodizationApi';
@@ -77,7 +90,9 @@ const loadChunk = (max: number | null) => {
 beforeEach(() => {
   m.startWorkout.mockReset().mockReturnValue({ id: 'w' });
   m.addExercise.mockReset();
+  m.setWorkoutBlocks.mockReset();
   m.on = false;
+  m.blocksOn = false;
 });
 afterEach(() => {
   m.on = false;
@@ -131,5 +146,58 @@ describe('starting a program day with Periodization on', () => {
     startProgramDaySession(assignment(2), 1, 'Day', null);
     expect(firstPlan()).toMatchObject({ planItemId: 'w1' });
     expect(firstPlan()).not.toHaveProperty('plannedPct');
+  });
+});
+
+describe('starting a program day that has time blocks (SPO-608)', () => {
+  const withBlocks = (): ProgramAssignment => {
+    const a = assignment(1);
+    a.program.items = [row({ id: 'r1' }), row({ id: 'r2', position: 1, name: 'Plank' })];
+    a.program.blocks = [
+      {
+        id: 'b1',
+        day: 1,
+        position: 0,
+        afterItemId: 'r1',
+        spec: { fmt: 'amrap', capSec: 600 },
+        members: [{ name: 'Pullups', reps: '5' }],
+      },
+      {
+        id: 'b2',
+        day: 1,
+        position: 1,
+        afterItemId: null,
+        spec: { fmt: 'emom', everySec: 60, rounds: 8 },
+        members: [{ name: 'Burpee' }],
+      },
+      {
+        id: 'b3',
+        day: 1,
+        position: 2,
+        spec: { fmt: 'fortime', scheme: [21, 15, 9] },
+        members: [{ name: 'Pullups' }],
+      },
+    ];
+    return a;
+  };
+
+  it('puts each block after its row (before the first, after the n-th, or at the end) into the session', () => {
+    m.blocksOn = true;
+    startProgramDaySession(withBlocks(), 1, 'Day', null);
+    const [wid, blocks] = m.setWorkoutBlocks.mock.calls[0] as [
+      string,
+      { id: string; position: number }[],
+    ];
+    expect(wid).toBe('w');
+    expect(blocks.map((b) => [b.id, b.position])).toEqual([
+      ['blk-b1', 0.5],
+      ['blk-b2', -0.5],
+      ['blk-b3', 1.5],
+    ]);
+  });
+
+  it('brings nothing while Time blocks is not installed (the stored blocks stay)', () => {
+    startProgramDaySession(withBlocks(), 1, 'Day', null);
+    expect(m.setWorkoutBlocks).not.toHaveBeenCalled();
   });
 });

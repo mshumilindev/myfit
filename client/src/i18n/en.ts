@@ -4504,6 +4504,8 @@ export const en = {
   // --- Home set ---
   startHomeTitle: 'Home set',
   startHomeSub: 'Pull-ups, vacuum, push-ups — no gym',
+  startBlockTitle: 'Time block',
+  startBlockSub: 'AMRAP, EMOM, for time',
   startProgramsTitle: 'Programs',
   startProgramsSub: 'Your plan and training days',
   startFinishFirst: (name: string) => `Finish ${name} first`,

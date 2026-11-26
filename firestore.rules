@@ -234,6 +234,14 @@ service cloud.firestore {
         || (request.resource.data.get('cycleV', -1) in [0, 1]
           && (request.resource.data.cycleV == 0 || 'cycle' in request.resource.data));
     }
+    // Time blocks (SPO-608): a program stored with `blockV == 1` may only be saved by a client that writes `blockV`
+    // (1 keeps the blocks, 0 removes them on purpose). A client from before time blocks rebuilds the document from a
+    // fixed field list and would silently drop them, so its save is refused instead (the `keepsCycle` pattern).
+    function keepsBlocks() {
+      return !(resource.data.get('blockV', 0) == 1)
+        || (request.resource.data.get('blockV', -1) in [0, 1]
+          && (request.resource.data.blockV == 0 || 'blocks' in request.resource.data));
+    }
     function prgOk(pid) {
       return !pid.matches('prg-.*')
         || (prgClient(pid) != '' && isActiveCoachOf(prgClient(pid)));
@@ -1001,6 +1009,7 @@ service cloud.firestore {
         && request.resource.data.authorId == uid()
         && prgOk(programId)
         && keepsCycle()
+        && keepsBlocks()
         && keepsOrigin();
       allow delete: if isSignedIn() && resource.data.authorId == uid() && prgOk(programId);
     }

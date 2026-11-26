@@ -4514,6 +4514,8 @@ export const pl: Strings = {
   // --- Home set ---
   startHomeTitle: 'Zestaw w domu',
   startHomeSub: 'Podciąganie, próżnia, pompki — bez siłowni',
+  startBlockTitle: 'Blok czasowy',
+  startBlockSub: 'AMRAP, EMOM, na czas',
   startProgramsTitle: 'Programy',
   startProgramsSub: 'Twój plan i dni treningowe',
   startFinishFirst: (name: string) => `Najpierw zakończ ${name}`,

@@ -79,6 +79,8 @@ export interface ExercisePickerProps {
   /** The three below are unused in `warmup` mode. */
   onMarker?: (kind: 'warmup' | 'cooldown') => void;
   onCardio?: () => void;
+  /** Time blocks module: adds a "Time block" entry next to the kinds; it opens the block builder instead of picking one exercise. */
+  onBlock?: () => void;
   onCreate?: (name: string) => void;
   onClose: () => void;
   /** Program authoring: the same picker without recommendations — no
@@ -386,12 +388,13 @@ export function ExercisePicker(props: ExercisePickerProps) {
   // Strength is where you are; the other three act straight away (a marker, or
   // the cardio machine list) — so they're plain buttons, not tabs.
   const kindTabs = (
-    <Segmented<'strength' | 'warmup' | 'cardio' | 'cooldown'>
+    <Segmented<'strength' | 'warmup' | 'cardio' | 'cooldown' | 'block'>
       className="xp-kinds"
       label={t.pgItemType}
       value="strength"
       onChange={(k) => {
-        if (k === 'cardio') props.onCardio?.();
+        if (k === 'block') props.onBlock?.();
+        else if (k === 'cardio') props.onCardio?.();
         else if (k === 'warmup' || k === 'cooldown') props.onMarker?.(k);
       }}
       options={[
@@ -399,6 +402,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
         { value: 'warmup', label: t.exerciseKindNames.warmup },
         { value: 'cardio', label: t.exerciseKindNames.cardio },
         { value: 'cooldown', label: t.exerciseKindNames.cooldown },
+        ...(props.onBlock ? [{ value: 'block' as const, label: t.startBlockTitle }] : []),
       ]}
     />
   );

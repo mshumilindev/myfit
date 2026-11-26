@@ -482,6 +482,25 @@ describe('StartSheet · tiles', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it('has a Time block tile only while the module is installed, and it opens a session with the builder (SPO-608)', async () => {
+    addonsPref.set(['health']);
+    const none = render(<StartSheet shell={shell()} onClose={vi.fn()} />);
+    expect(screen.queryByText('Time block')).toBeNull();
+    none.unmount();
+    addonsPref.set(['advanced-training', 'time-blocks']);
+    seed([], { gyms: [gym] });
+    gps({ lat: 50.45, lng: 30.52, accuracy: 10 });
+    const sh = shell();
+    render(<StartSheet shell={sh} onClose={vi.fn()} />);
+    await userEvent.click(tile('Time block'));
+    await waitFor(() => expect(sh.openOverlay).toHaveBeenCalled());
+    expect(sh.openOverlay).toHaveBeenCalledWith({
+      screen: 'session',
+      workoutId: liveWorkouts()[0].id,
+      startBlock: true,
+    });
+  });
+
   it('offers no Health tile until the Health add-on is installed (SPO-518)', () => {
     addonsPref.set(['activities']);
     render(<StartSheet shell={shell()} onClose={vi.fn()} />);

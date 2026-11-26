@@ -10,7 +10,9 @@ import { db } from '../firebase';
 import { callFn } from '../api';
 import { offlineDedupe, offlineHydrate, offlineRemove, offlineSet } from '../offline/offlineCache';
 import { readProgramMemory, setProgramMemory } from './programMemory';
-import { addExercise, startWorkout } from '../store';
+import { addExercise, setWorkoutBlocks, startWorkout } from '../store';
+import { timeBlocksAvailable } from '../addons/featureGates';
+import { dayBlocks, type ProgramBlock } from '../views/programs/programBlocks';
 import { openActivities } from '../views/programs/activitiesVault';
 import { nicMid } from '../nicotineApply';
 import type { ExerciseKind } from '../types';
@@ -70,6 +72,8 @@ export interface ProgramAssignment {
     activities?: ProgramActivity[];
     /** Sealed form of `activities`, present while the list is encrypted. */
     activitiesEnc?: unknown;
+    /** Time blocks of the days (Advanced training › Time blocks); the same every week. Read through `programDayBlocks` (add-on gate). */
+    blocks?: ProgramBlock[];
     /** Optional weekly cycle (Periodization); every reader goes through `assignmentWeek`, which applies the add-on gate. */
     cycle?: ProgramCycle;
   };
@@ -236,6 +240,11 @@ export function programDayItems(a: ProgramAssignment, day: number): ProgramItem[
     .sort((x, y) => x.position - y.position);
 }
 
+/** The day's time blocks; none while Time blocks is not installed (the stored blocks stay). */
+export function programDayBlocks(a: ProgramAssignment, day: number): ProgramBlock[] {
+  return timeBlocksAvailable() ? dayBlocks(a.program, day) : [];
+}
+
 export function programDayMuscles(a: ProgramAssignment, day: number): MuscleGroup[] {
   return assignmentWeek(a).targetMuscles?.[String(day)] ?? [];
 }
@@ -324,6 +333,28 @@ export function startProgramDaySession(
       groupId: item.groupId ?? null,
       groupOrder: item.groupOrder ?? null,
     });
+  }
+  const blocks = programDayBlocks(a, day);
+  if (blocks.length) {
+    // A block follows its row: its place is "after the n-th exercise" (position n - 0.5); a missing row = the end of the day.
+    const order = items.map((i) => i.id);
+    setWorkoutBlocks(
+      w.id,
+      blocks.map((b) => {
+        const n =
+          b.afterItemId === null
+            ? 0
+            : b.afterItemId === undefined
+              ? order.length
+              : order.indexOf(b.afterItemId) + 1 || order.length;
+        return {
+          id: `blk-${b.id}`,
+          spec: { ...b.spec },
+          members: b.members.map((m) => ({ ...m })),
+          position: n - 0.5,
+        };
+      }),
+    );
   }
   return w.id;
 }

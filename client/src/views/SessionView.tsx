@@ -575,6 +575,8 @@ export function SessionView(props: {
   workoutId: string;
   past?: boolean;
   startAdd?: boolean;
+  /** Opened from the Start sheet's Time block tile: the block builder opens at once. */
+  startBlock?: boolean;
   shell: Shell;
   onClose: () => void;
 }) {
@@ -719,6 +721,8 @@ export function SessionView(props: {
   /** Focus is the only live-session view: one exercise full-screen with
    *  Back/Next (past sessions still show the list). */
   const [blockIntake, setBlockIntake] = useState<Exercise | null>(null);
+  // Counts "open the block builder" requests (Start tile, the picker's Time block entry).
+  const [newBlock, setNewBlock] = useState(props.startBlock ? 1 : 0);
   const openExerciseInfo = (name: string): void =>
     props.shell.openOverlay({ screen: 'exercise-detail', name });
   const focusMode = true;
@@ -5054,6 +5058,7 @@ export function SessionView(props: {
               past={!!props.past}
               focusId={focusView ? null : undefined}
               onInfo={openExerciseInfo}
+              newSignal={newBlock}
               intake={blockIntake}
               onIntakeDone={(moved) => {
                 setBlockIntake(null);
@@ -5596,6 +5601,14 @@ export function SessionView(props: {
         <AddExerciseSheet
           workout={workout}
           gym={gym}
+          onBlock={
+            TimeBlocks && !props.past
+              ? () => {
+                  setSheet(null);
+                  setNewBlock((n) => n + 1);
+                }
+              : undefined
+          }
           onPick={(name, kind, meta) => {
             const base = meta
               ? {
@@ -6194,6 +6207,7 @@ function AddExerciseSheet(props: {
   /** Substitute an existing exercise rather than add a new one — the pick swaps
    *  the target's identity and keeps its sets. */
   replacing?: boolean;
+  onBlock?: () => void;
   onPick: (name: string, kind: ExerciseKind, meta?: NewExerciseMeta) => void;
   onClose: () => void;
 }) {
@@ -6260,6 +6274,7 @@ function AddExerciseSheet(props: {
       }
       onMarker={(k) => props.onPick(t.defaultTimedExerciseNames[k], k)}
       onCardio={() => setMachineView(true)}
+      onBlock={props.onBlock}
       onCreate={setCreating}
       onClose={props.onClose}
     />

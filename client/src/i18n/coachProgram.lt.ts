@@ -126,6 +126,7 @@ export const pgLt: typeof pgEn = {
     dayName: 'dienos pavadinimas',
     muscles: 'tiksliniai raumenys',
     activities: 'planuojamos veiklos',
+    blocks: 'laiko blokai',
   },
   edDiffNone: 'Nėra pakeitimų nuo galiojančios versijos.',
   edDiffLive: (v) => `Galioja: v${v}`,

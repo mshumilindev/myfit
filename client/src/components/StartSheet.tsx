@@ -23,6 +23,7 @@ import type { Gym } from '../types';
 import { HOME_BACKFILL_MIN, type HomeSet } from '../homeSets';
 import { currentUid } from '../api';
 import { useAddonOrBase } from '../addons/enabledSet';
+import { useTimeBlocksOn } from '../addons/featureGates';
 import {
   activeRestPeriod,
   backfillHomeSet,
@@ -81,6 +82,7 @@ export function StartSheet({
   const sleepOn = useAddonOrBase('sleep');
   const activitiesOn = useActivitiesOn();
   const homeOn = useAddonOrBase('home-sets');
+  const blocksOn = useTimeBlocksOn();
   const store = useStore();
   const { assignment, active: assignedActive } = useProgramMine();
   const [sub, setSub] = useState<Sub>(null);
@@ -148,6 +150,7 @@ export function StartSheet({
     if (workoutId) shell.openOverlay({ screen: 'session', workoutId });
   }
   /** Where the picked gym leads: a blank session, or the hero's prefilled one. */
+  const [blockStart, setBlockStart] = useState(false);
   const [gymFor, setGymFor] = useState<'scratch' | 'hero'>('scratch');
   function beginScratch(gymId: string | null) {
     const w = startWorkout(gymId);
@@ -166,6 +169,7 @@ export function StartSheet({
     beginScratch(gymId);
   }
   async function startScratch() {
+    setBlockStart(false);
     if (resumeLive()) return onClose();
     // Standing in one of your gyms → no question, just start there. Otherwise
     // ask — the picker also finds gyms nearby that aren't saved yet.
@@ -176,7 +180,24 @@ export function StartSheet({
       setSub('gym');
     }
   }
+  /** Time block tile: a blank session that opens with the block builder. */
+  async function startBlock() {
+    if (resumeLive()) return onClose();
+    setBlockStart(true);
+    const here = await gymAtCurrentPosition(store.gyms);
+    if (here) beginBlock(here.id);
+    else {
+      setGymFor('scratch');
+      setSub('gym');
+    }
+  }
+  function beginBlock(gymId: string | null) {
+    const w = startWorkout(gymId);
+    onClose();
+    if (w) shell.openOverlay({ screen: 'session', workoutId: w.id, startBlock: true });
+  }
   async function startHero() {
+    setBlockStart(false);
     if (resumeLive()) return onClose();
     if (!(program && programToday) && !usual) return void startScratch();
     // Same gym step as a blank session: in one of your gyms → start there;
@@ -233,7 +254,7 @@ export function StartSheet({
         gyms={store.gyms}
         title={t.pickGymTitle}
         onClose={onClose}
-        onPick={gymFor === 'hero' ? beginHero : beginScratch}
+        onPick={gymFor === 'hero' ? beginHero : blockStart ? beginBlock : beginScratch}
       />
     );
   else if (sub === 'past')
@@ -374,6 +395,18 @@ export function StartSheet({
           lockedSub={t.startFinishFirst(liveName)}
           onClick={autoBuild}
         />
+        {blocksOn && (
+          <StartTile
+            lockable
+            locked={locked}
+            tone="conditioning"
+            icon="timer"
+            title={t.startBlockTitle}
+            sub={t.startBlockSub}
+            lockedSub={t.startFinishFirst(liveName)}
+            onClick={() => void startBlock()}
+          />
+        )}
         {activitiesOn && (
           <StartTile
             lockable

@@ -56,6 +56,7 @@ import { dayReadoutLabel, type TrainingDay } from '../data/daySuggest';
 import {
   assignmentWeek,
   programDayHasPlan,
+  programDayBlocks,
   programDayItems,
   programDayMuscles,
   programDayName,
@@ -66,6 +67,7 @@ import {
 } from '../data/programMine';
 import { cycleNoteFor, type WeekSource } from '../periodizationApi';
 import { usePeriodizationHost } from '../periodizationRt';
+import { useTimeBlocksHost } from '../timeBlocksRt';
 import { compactProgramDaySummary, effectiveSets } from './programs/model';
 import { ProgramTitle } from './programs/ProgramTitle';
 import type { MuscleGroup } from '../data/exercises';
@@ -155,6 +157,7 @@ const PROGRAM_MODE_TONE: Record<WeekMode, Tone> = {
 export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const { withGym, gymPicker } = useGymStep();
   const isDesktop = useIsDesktop();
+  const timeBlocksH = useTimeBlocksHost();
   const atlasOn = useAddonOrBase('atlas');
   const sleepOn = useAddonOrBase('sleep');
   const alcoholOn = useAddonOrBase('alcohol');
@@ -1040,6 +1043,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             <div className="pch-ex">{todayMuscles.map((m) => t.muscleGroups[m]).join(' · ')}</div>
           )}
           {exList}
+          {timeBlocksH?.PlanBlocks && (mode === 'train' || mode === 'injury') && (
+            <timeBlocksH.PlanBlocks blocks={programDayBlocks(a, todayWeekday)} />
+          )}
           {po.weekPills && <WeekPills cells={cells} />}
           {renderPlannerEntry(po, true)}
         </Card>

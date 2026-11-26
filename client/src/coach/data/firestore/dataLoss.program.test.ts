@@ -81,6 +81,8 @@ const PROGRAM_KEYS: Record<keyof Program, true> = {
   items: true,
   cycle: true,
   cycleV: true,
+  blocks: true,
+  blockV: true,
   activities: true,
   activitiesEnc: true,
   updatedAt: true,
@@ -108,7 +110,9 @@ describe('the generator reaches every key of the model (so the property below me
     expect(missing(ACT_KEYS, seenAct)).toEqual([]);
     // `activitiesEnc` is the athlete's own stored form of the list; `updatedAt` and `cycleV` (the writer marker of `cycle`)
     // are stamped by whoever writes the document
-    expect(missing(PROGRAM_KEYS, seenProg, ['activitiesEnc', 'updatedAt', 'cycleV'])).toEqual([]);
+    expect(
+      missing(PROGRAM_KEYS, seenProg, ['activitiesEnc', 'updatedAt', 'cycleV', 'blockV']),
+    ).toEqual([]);
   });
 });
 

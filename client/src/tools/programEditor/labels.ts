@@ -145,7 +145,8 @@ export interface ProgramEditorLabels {
     | 'cardio'
     | 'dayName'
     | 'muscles'
-    | 'activities',
+    | 'activities'
+    | 'blocks',
     string
   >;
   edDone: string;

@@ -7,14 +7,17 @@ import { provide, trackerReady } from '../trackerRt';
 import { BlockCountdownRun } from './BlockCountdownRun';
 import { SessionBlocks } from './SessionBlock';
 import { BlockRecap } from './BlockRecap';
+import { ProgramDayBlocks } from './ProgramDayBlocks';
 import { specTitle } from './specText';
-import { RowLabel } from './BlockUi';
+import { PlanBlocks, RowLabel } from './BlockUi';
 
 provide(timeBlocksHost, {
   Countdown: BlockCountdownRun,
   Blocks: SessionBlocks,
   Recap: BlockRecap,
   RowLabel,
+  DayBlocks: ProgramDayBlocks,
+  PlanBlocks,
   stepLabel: (b) => specTitle(b.spec),
 });
 trackerReady('time-blocks');

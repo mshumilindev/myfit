@@ -14,7 +14,7 @@ import type { Workout } from '../../types';
 import { Sheet } from '../../components/ui/Overlays';
 
 /** Program authoring has no live workout: the picker only needs a blank one. */
-const PLAIN_WORKOUT: Workout = {
+export const PLAIN_WORKOUT: Workout = {
   id: 'program-authoring',
   startedAt: 0,
   finishedAt: null,

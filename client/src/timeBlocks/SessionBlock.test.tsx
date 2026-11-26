@@ -59,8 +59,8 @@ function seed(blocks: WorkoutBlock[], exercises: Exercise[] = []) {
   });
 }
 const mine = () => __getStateForTests().workouts.find((w) => w.id === 'open')!;
-const mount = (sh: Shell = shell()) =>
-  render(<SessionView workoutId="open" shell={sh} onClose={vi.fn()} />);
+const mount = (sh: Shell = shell(), startBlock = false) =>
+  render(<SessionView workoutId="open" startBlock={startBlock} shell={sh} onClose={vi.fn()} />);
 
 beforeEach(() => {
   addonsPref.set(['advanced-training', 'time-blocks']);
@@ -89,7 +89,7 @@ describe('Time blocks in the session', () => {
     seed([block()]);
     mount();
     const card = await screen.findByTestId('block-ready');
-    expect(within(card).getByText('12:00')).toBeTruthy();
+    expect(within(card).getByText('12 min')).toBeTruthy(); // the approved design's long form
     await userEvent.click(within(card).getByRole('button', { name: 'Start' }));
     expect(await screen.findByRole('dialog', { name: /get ready/i })).toBeTruthy();
     await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
@@ -168,5 +168,11 @@ describe('Time blocks in the session', () => {
     snack.onUndo();
     expect(mine().exercises.map((e) => e.name)).toEqual(['Bench Press', 'Barbell Row']);
     expect(mine().blocks ?? []).toHaveLength(0);
+  });
+
+  it('opens the block builder at once when the session starts from the Time block tile', async () => {
+    seed([]);
+    mount(shell(), true);
+    expect(await screen.findByRole('dialog', { name: /New block|Time block/i })).toBeTruthy();
   });
 });

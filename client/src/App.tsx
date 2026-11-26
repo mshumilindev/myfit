@@ -280,7 +280,7 @@ const ProgramsView = lazy(() =>
 export type Tab = 'today' | 'overview' | 'progress' | 'gyms' | 'programs' | 'people' | 'me';
 
 export type Overlay =
-  | { screen: 'session'; workoutId: string }
+  | { screen: 'session'; workoutId: string; startBlock?: boolean }
   | { screen: 'activity'; newType?: string; editId?: string }
   | { screen: 'log-activity'; cat?: 'conditioning' | 'sport' | 'recovery' }
   | { screen: 'sleep'; wake?: boolean; mode?: 'backfill' | 'schedule' | 'edit'; nightId?: string }
@@ -1610,7 +1610,12 @@ function AppMain() {
   const renderOverlay = (activeOverlay: NonNullable<Overlay>) => (
     <Suspense fallback={<ScreenFallback />}>
       {activeOverlay?.screen === 'session' && (
-        <SessionView workoutId={activeOverlay.workoutId} shell={shell} onClose={closeOverlay} />
+        <SessionView
+          workoutId={activeOverlay.workoutId}
+          startBlock={activeOverlay.startBlock}
+          shell={shell}
+          onClose={closeOverlay}
+        />
       )}
       {activeOverlay?.screen === 'builder' && (
         <Suspense fallback={null}>

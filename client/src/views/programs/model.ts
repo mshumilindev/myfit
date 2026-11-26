@@ -15,6 +15,7 @@ import type { VaultEnvelope } from '../../vaultCrypto';
 import type { MuscleGroup } from '../../data/exercises';
 import { weekOrder } from '../../weekStart';
 import { sanitizeWarmupItems } from '../../tools/programEditor';
+import { sanitizeProgramBlocks, type ProgramBlock } from './programBlocks';
 import { cloneCycleFor, rowExtrasFor, sanitizeCycleFor } from '../../periodizationApi';
 
 export type {
@@ -90,6 +91,14 @@ export interface Program {
   activities?: ProgramActivity[];
   /** The stored (sealed) form of `activities`; present when the list is encrypted. */
   activitiesEnc?: VaultEnvelope;
+  /** Time blocks of the days (Advanced training › Time blocks); beside the rows, never among them. Kept stored while the add-on is off. */
+  blocks?: ProgramBlock[];
+  /**
+   * Writer marker for `blocks` (1 = the document carries blocks, 0 = deliberately none). A client from before time blocks
+   * never writes it and rebuilds the document from a fixed field list, so `firestore.rules` refuses its save over a program
+   * with blocks instead of letting it drop them (the `cycleV` pattern).
+   */
+  blockV?: 0 | 1;
   /** Optional weekly cycle; absent = every week is the same. Kept stored while the add-on is off. */
   cycle?: ProgramCycle;
   /**
@@ -227,6 +236,7 @@ export function normalizeProgram<T extends Program>(p: T): T {
     ...rest,
     ...(cycle ? { cycle } : {}),
     ...(p.activities ? { activities: sanitizeActivities(p.activities) } : {}),
+    ...(p.blocks ? { blocks: sanitizeProgramBlocks(p.blocks) } : {}),
     dayNames,
     targetMuscles,
     items,
@@ -352,6 +362,8 @@ export function toSaved(p: Program, uid: string, fallbackName: string): Program 
   const weeks = rawW === 0 ? 0 : Math.max(1, Math.min(52, rawW || 8));
   const { items, dayNames, targetMuscles } = savedWeekParts(p);
   const savedCycle = sanitizeCycleFor(p.cycle, { items, dayNames, targetMuscles });
+  // Blocks of a day without rows or name are still kept: a day can be only a time block.
+  const savedBlocks = sanitizeProgramBlocks(p.blocks);
   const next: Program = {
     id: p.id,
     authorId: uid,
@@ -364,6 +376,7 @@ export function toSaved(p: Program, uid: string, fallbackName: string): Program 
     items,
     ...(savedCycle ? { cycle: savedCycle } : {}),
     cycleV: savedCycle ? 1 : 0,
+    ...(savedBlocks.length ? { blocks: savedBlocks, blockV: 1 as const } : { blockV: 0 as const }),
     // Sealing happens at write time (activitiesVault.ts); a list this device can't
     // open (`activities` undefined) keeps its stored envelope.
     ...(p.activities !== undefined

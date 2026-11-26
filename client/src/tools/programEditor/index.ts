@@ -62,6 +62,7 @@ export {
   type EditorFeatures,
   type EditorMode,
   type EditorSlots,
+  type DayBlocksSlotProps,
   type ExercisePickerSlotProps,
   type EditorState,
   type ExerciseCatalog,

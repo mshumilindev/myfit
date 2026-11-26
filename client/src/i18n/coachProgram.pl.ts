@@ -135,6 +135,7 @@ export const pgPl: typeof pgEn = {
     dayName: 'nazwę dnia',
     muscles: 'mięśnie docelowe',
     activities: 'zaplanowane aktywności',
+    blocks: 'bloki czasowe',
   },
   edDiffNone: 'Bez zmian względem obowiązującej wersji.',
   edDiffLive: (v) => `Obowiązuje: v${v}`,

@@ -128,6 +128,7 @@ export const pgEn = {
     dayName: 'day name',
     muscles: 'target muscles',
     activities: 'planned activities',
+    blocks: 'time blocks',
   },
   edDiffNone: 'No changes from the live version.',
   edDiffLive: (v: number) => `Live: v${v}`,

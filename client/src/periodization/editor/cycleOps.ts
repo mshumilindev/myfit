@@ -47,7 +47,7 @@ export function weekView(doc: CycleDoc, cw: number): CycleDoc {
   };
 }
 
-/** An edit made on the view of week `cw` put back into the full document. Activities are the same every week. */
+/** An edit made on the view of week `cw` put back into the full document. Activities and blocks are the same every week. */
 export function mergeWeek(doc: CycleDoc, cw: number, next: CycleDoc): CycleDoc {
   if (cw <= 1 || !doc.cycle) return { ...next, ...(doc.cycle ? { cycle: doc.cycle } : {}) };
   const weeks = doc.cycle.weeks.map((w, i) =>
@@ -60,7 +60,12 @@ export function mergeWeek(doc: CycleDoc, cw: number, next: CycleDoc): CycleDoc {
         }
       : w,
   );
-  return { ...doc, activities: next.activities, cycle: { ...doc.cycle, weeks } };
+  return {
+    ...doc,
+    activities: next.activities,
+    blocks: next.blocks,
+    cycle: { ...doc.cycle, weeks },
+  };
 }
 
 /** Switch the cycle on: `length` weeks, each starting as a copy of the program's own week. */

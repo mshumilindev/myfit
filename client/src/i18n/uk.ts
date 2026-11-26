@@ -4551,6 +4551,8 @@ export const uk: Strings = {
   // --- Home set ---
   startHomeTitle: 'Домашній сет',
   startHomeSub: 'Підтягування, вакуум, віджимання — без залу',
+  startBlockTitle: 'Часовий блок',
+  startBlockSub: 'AMRAP, EMOM, на час',
   startProgramsTitle: 'Програми',
   startProgramsSub: 'Твій план і дні тренувань',
   startFinishFirst: (name: string) => `Спершу заверш ${name}`,

@@ -47,6 +47,8 @@ export interface SessionBlocksProps {
   /** Opens an exercise's details (the app's exercise screen). */
   onInfo?: (name: string) => void;
   /** "Time block…" from an exercise's options: the builder opens with that exercise inside; Add block moves it into the block. */
+  /** Opens the builder each time this number goes up. */
+  newSignal?: number;
   intake?: Exercise | null;
   onIntakeDone?: (moved?: { text: string; undo: () => void }) => void;
 }
@@ -64,6 +66,7 @@ export function SessionBlocks({
   past,
   focusId,
   onInfo,
+  newSignal,
   intake,
   onIntakeDone,
 }: SessionBlocksProps) {
@@ -72,6 +75,7 @@ export function SessionBlocks({
   const workout = store.workouts.find((w) => w.id === workoutId);
   const blocks = useMemo(() => workout?.blocks ?? [], [workout?.blocks]);
   const [mode, setMode] = useState<Mode | null>(null);
+  const seenSignal = useRef(0);
   const [counting, setCounting] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const prevRemain = useRef<Record<string, number>>({});
@@ -106,6 +110,12 @@ export function SessionBlocks({
     }
     if (next) setWorkoutBlocks(workoutId, next);
   }, [now, blocks, workout, workoutId, prefs]);
+
+  useEffect(() => {
+    if (!newSignal || newSignal <= seenSignal.current || !workout) return;
+    seenSignal.current = newSignal;
+    setMode({ kind: 'new' });
+  }, [newSignal, workout]);
 
   if (!workout) return null;
   const save = (b: WorkoutBlock[]) => setWorkoutBlocks(workoutId, b);

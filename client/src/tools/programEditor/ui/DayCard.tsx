@@ -59,6 +59,8 @@ export interface DayCardProps {
   onToggleMuscle: (m: MuscleGroup) => void;
   onBareToTargets: (id: string) => void;
   onAddExercise: () => void;
+  /** One history step on the document (the host's time blocks slot uses it). */
+  onEdit?: (fn: (d: ProgramDoc) => ProgramDoc, label?: string) => void;
   onAddActivity: () => void;
   onPreview: () => void;
   onCopyDay: () => void;
@@ -85,6 +87,7 @@ export function DayCard(c: DayCardProps) {
   const bare = lifts.filter((i) => isBare(i)).length;
   const actMin = acts.reduce((n, a) => n + a.minutes, 0);
   const title = dayName(d, day) || p.dowFull[dow];
+  const BlocksSlot = c.host.slots?.dayBlocks;
 
   const actRow = (a: ProgramActivityDoc) => {
     const type = c.host.activities.find((x) => x.key === a.type);
@@ -340,6 +343,9 @@ export function DayCard(c: DayCardProps) {
             {acts.length > 0 && <li className="pe-xsub">{p.edActivitiesBeside}</li>}
             {acts.map(actRow)}
           </ul>
+          {BlocksSlot && c.onEdit && (
+            <BlocksSlot doc={d} day={day} readOnly={c.readOnly} edit={c.onEdit} />
+          )}
         </>
       )}
 

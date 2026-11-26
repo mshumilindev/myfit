@@ -582,5 +582,13 @@ function snapshot(p: Program): string {
     activities: [...(p.activities ?? [])]
       .sort((a, b) => a.day - b.day || a.id.localeCompare(b.id))
       .map((a) => [a.day, a.type, a.minutes, a.effort, a.when]),
+    blocks: [...(p.blocks ?? [])]
+      .sort((a, b) => a.day - b.day || a.position - b.position)
+      .map((b) => [
+        b.day,
+        b.afterItemId ?? null,
+        b.spec,
+        b.members.map((m) => [m.name, m.reps ?? '']),
+      ]),
   });
 }

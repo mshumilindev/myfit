@@ -24,7 +24,8 @@ export type Change =
         | 'cardio'
         | 'dayName'
         | 'muscles'
-        | 'activities';
+        | 'activities'
+        | 'blocks';
     };
 
 const same = (a: unknown, b: unknown): boolean =>
@@ -121,6 +122,9 @@ function diffWeek(live: ProgramDoc, draft: ProgramDoc): Change[] {
     const la = sortedBy(live.activities?.filter((a) => a.day === day));
     const da = sortedBy(draft.activities?.filter((a) => a.day === day));
     if (!same(la, da)) out.push({ op: 'change', day, name: label, what: 'activities' });
+    const lb = sortedBy(live.blocks?.filter((b) => b.day === day));
+    const db = sortedBy(draft.blocks?.filter((b) => b.day === day));
+    if (!same(lb, db)) out.push({ op: 'change', day, name: label, what: 'blocks' });
   }
   for (const l of live.items)
     if (l.kind === 'strength' && !draftIds.has(l.id))
@@ -149,8 +153,8 @@ export function diffPrograms(live: ProgramDoc, draft: ProgramDoc): Change[] {
   for (let cw = 2; cw <= Math.max(len(live), len(draft)); cw++)
     out.push(
       ...diffWeek(
-        { ...weekDoc(live, cw), activities: [] },
-        { ...weekDoc(draft, cw), activities: [] },
+        { ...weekDoc(live, cw), activities: [], blocks: [] },
+        { ...weekDoc(draft, cw), activities: [], blocks: [] },
       ),
     );
   return out;

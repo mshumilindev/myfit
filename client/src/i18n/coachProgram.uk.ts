@@ -126,6 +126,7 @@ export const pgUk: typeof pgEn = {
     dayName: 'назву дня',
     muscles: 'цільові м’язи',
     activities: 'заплановану активність',
+    blocks: 'часові блоки',
   },
   edDiffNone: 'Без змін щодо чинної версії.',
   edDiffLive: (v) => `Чинна: v${v}`,

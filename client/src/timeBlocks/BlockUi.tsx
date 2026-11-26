@@ -16,7 +16,7 @@ import {
   type BlockView,
   type WorkoutBlock,
 } from './model';
-import { mmss, specTitle } from './specText';
+import { mmss, specLong, specTitle } from './specText';
 import { STRINGS, type TimeBlocksStrings } from './strings';
 import './blocks.css';
 
@@ -94,7 +94,7 @@ export function BlockReadyCard(p: {
       <div className="tb-row">
         <Icon name={FMT_ICON[spec.fmt]} />
         <div className="tb-main">
-          <div className="tb-t">{specTitle(spec)}</div>
+          <div className="tb-t">{specLong(t, spec)}</div>
           <div className="tb-sub tb-cap">
             <b>{t.formats[spec.fmt]}</b> {t.ready}
           </div>
@@ -418,4 +418,27 @@ export { blockRemainSec };
 /** The "Time block…" label of the exercise options row. */
 export function RowLabel() {
   return <>{useBlockStrings().timeBlockRow}</>;
+}
+
+/** The day's blocks in a plan (the Today program card): the format tag, the long spec and the members, read-only. */
+export function PlanBlocks({
+  blocks,
+}: {
+  blocks: readonly { id: string; spec: BlockSpec; members: readonly BlockMember[] }[];
+}) {
+  const t = useBlockStrings();
+  if (!blocks.length) return null;
+  return (
+    <ul className="tb-plan" data-testid="plan-blocks">
+      {blocks.map((b) => (
+        <li key={b.id} className="tb-plan-row">
+          <FormatTag fmt={b.spec.fmt} />
+          <div className="tb-main">
+            <div className="tb-t">{specLong(t, b.spec)}</div>
+            <div className="tb-sub">{membersLine(b.members)}</div>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
 }
