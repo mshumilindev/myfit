@@ -167,3 +167,25 @@ unit/contract (запис→Program, вправи, еліта, фільтри), 
 | R30 | Експорт/каскад: каскад покриває `tl-` автоматично (`accountDeletionCore.ts:161-162,205`); експорт не перевірено | — | L/L | guard-тест повноти + тест каскаду з `tl-` | тест |
 
 Рішення людини: R25 (зміна наявної поведінки `assignProgram`) і R24 (звуження читання assignments) пропоную власнику; решта в межах узгодженого. Нова оцінка: ризиків 30, High-ризики R1–R3, R15–R16, R18–R21 закрити тестами до Done.
+
+## 7. Risk close-out (26.11, проміжний; фіча ще не 100%)
+
+Базова лінія (зачеплені модулі, Mac, 26.11): `src/trainLikeAPro` + `src/views/programs` — 23 файли, 225 тестів зелені; `src/addonStore/storeInfo.ui` 9/9; `tests/coach-server` (programActivation 8, setProgramStatus.tx 7) зелені; rules-логіка каталожних програм через інтерпретатор репо зелена.
+
+| Ризик | Статус | Доказ / що лишилось |
+|---|---|---|
+| R1, R15, R16, R19, R20 | закрито кодом і тестами | `programActivation.test.ts`, `setProgramStatus.tx.test.ts` (ідемпотентний старт, протухле призначення, транзакція, тренерська не перезаписується); `catalogPrograms.rules.logic.test.ts`, `adversarial.rules.test.ts`; **емулятор `test:rules` лише в CI — чекаю** |
+| R2, R5, R26 | закрито | `catalog.contract.test.ts`, `entryToProgram.test.ts` (усі 48 записів без втрат, вправи резолвляться, активація проходить — тест додано 26.11) |
+| R3, R18 | закрито логікою, чекає CI-емулятор | rules-логіка зелена; повний `test:rules` у CI |
+| R4, R12 | прийнято за спайком | рівень/мітка/дисклеймер у UI; **вичитка `{{ЮРИСТ}}` (SPO-258) лишається відкритою** |
+| R6 | закрито | `exclusion.contract.test.ts`, `boundary.contract.test.ts`, `trainLikeAProGate.test.ts` (member-only) |
+| R7, R17, R21, R27, R28 | закрито | `catalogProgram.test.ts`, `programActivities` (`isOwnProgram`), `CatalogPromoRow.test.tsx`, поле `origin` замість `source` |
+| R9 | закрито | Programs/Today показують `ProgramTitle` з атлетом; скріни прев'ю 26.11 |
+| R10, R13 | закрито | `sizeEntries.contract.test.ts`, `storeInfo.contract.test.ts`; іконка 320×320; прев'ю `storeInfo.ui` зелені |
+| R11 | **відкрито** | `audit:stories` / геометрія — лише CI |
+| R14, R29 | закрито | `startProgram.test.ts` (queued/held/failed), `CatalogRoute.test.tsx` |
+| R22, R23, R30 | частково | шифрування активностей — `startProgram.test.ts`; запис R27 у `data-registry.md`; **правка ADR 011 і перевірка експорту — лишились** |
+| R8, R25 | рішення власника | транзакція `setProgramStatus` архівує власні активні; `assignProgram` (призначення тренером) не змінювали — питання власнику |
+| R24 | рішення власника | звуження читання `assignments` не робили |
+
+Прогалини оцінки, знайдені по ходу: (1) gate аддона давав трейнерам/адмінам «базу» → member-only gate + тест; (2) `Program` не можна розширювати без `dataLoss.program.test.ts` → `isCatalogProgram`; (3) Programs-екран використовує path-маршрути (`setHash`), не `location.hash`. Прогалин оцінки: 3, усі закриті.

@@ -45,6 +45,17 @@ describe('entryToProgram', () => {
     }
   });
 
+  it('every entry passes the server activation rule (a named item on some day) and has a day name per training day', () => {
+    for (const e of CATALOG) {
+      const p = entryToProgram(e, 'u1', 1);
+      const days = new Set(
+        p.items.filter((it) => (it.name ?? '').trim()).map((it) => Number(it.day)),
+      );
+      expect(days.size, e.id).toBeGreaterThan(0);
+      for (const d of days) expect(p.dayNames[String(d)], `${e.id} day ${d}`).toBeTruthy();
+    }
+  });
+
   it('activities survive the program sanitiser unchanged', () => {
     for (const e of CATALOG.filter((x) => x.activities.length)) {
       const p = entryToProgram(e, 'u1', 1);
