@@ -305,6 +305,7 @@ const QUIET_CALLABLES = new Set([
   'trainerClients',
   'trainerClientDetail',
   'programMine',
+  'programAssignments',
   'profileMe',
   'athleteExerciseHistory',
   'athleteWorkout',
