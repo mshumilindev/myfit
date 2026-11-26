@@ -31,6 +31,11 @@ export function CatalogDetail(p: {
 }) {
   const { entry: e, s } = p;
   const { st } = useAddonStoreT();
+  /** The day's own name, unless the source only repeats the weekday. */
+  const dayName = (d: number) => {
+    const n = e.dayNames[String(d)];
+    return n && n !== s.weekdays[d - 1] ? n : undefined;
+  };
   const [openDay, setOpenDay] = useState<number | null>(null);
   const missing = missingNeeds(e, p.installed);
   const name = (id: CatalogNeed) => st.items[id].name;
@@ -89,11 +94,7 @@ export function CatalogDetail(p: {
               chevron
               onClick={() => setOpenDay(d)}
               label={s.weekdays[d - 1]}
-              sub={
-                e.dayNames[String(d)]
-                  ? `${e.dayNames[String(d)]} · ${s.exercises(n)}`
-                  : s.exercises(n)
-              }
+              sub={dayName(d) ? `${dayName(d)} · ${s.exercises(n)}` : s.exercises(n)}
             />
           ))}
         </GroupedList>
@@ -109,9 +110,7 @@ export function CatalogDetail(p: {
         <Sheet onClose={() => setOpenDay(null)} label={s.weekdays[openDay - 1]} closeLabel={s.back}>
           <SheetPin>
             <h3 className="title-20">{s.weekdays[openDay - 1]}</h3>
-            {e.dayNames[String(openDay)] && (
-              <p className="tl-fine">{e.dayNames[String(openDay)]}</p>
-            )}
+            {dayName(openDay) && <p className="tl-fine">{dayName(openDay)}</p>}
           </SheetPin>
           <GroupedList surface="raised">
             {e.items
