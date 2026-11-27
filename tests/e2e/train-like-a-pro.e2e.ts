@@ -32,7 +32,7 @@ test.afterAll(() => {
 });
 
 const CONSENT_VERIFIED = JSON.stringify({
-  'e2e-m': 'terms@2026-11-12,policy-ack@2026-11-27,age-18@2026-10-21',
+  'e2e-m': 'terms@2026-11-12,policy-ack@2026-11-28,age-18@2026-10-21',
 });
 
 async function openCatalog(page: Page, installed: boolean) {
