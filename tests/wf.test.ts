@@ -263,3 +263,33 @@ describe('wf hardening, round 3', () => {
     }
   });
 });
+
+describe('wf verify gate (SPO-642, D+)', () => {
+  it('an item added with --verify closes only with a PASS verdict file', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'wf-'));
+    const file = (name: string, body: unknown) => {
+      const f = join(dir, name);
+      writeFileSync(f, JSON.stringify(body));
+      return f;
+    };
+    run(['start', 'S'], { dir, now: T });
+    run(['add', 'a', '--verify'], { dir, now: T });
+    expect(run(['done', 'a', '--evidence', 'x'], { dir, now: T }).code).toBe(2);
+    const fail = file('f.json', { verdict: 'FAIL', verifiers: ['verify-ac'] });
+    expect(run(['done', 'a', '--evidence', 'x', '--verdict', fail], { dir, now: T }).code).toBe(2);
+    const empty = file('e.json', { verdict: 'PASS', verifiers: [] });
+    expect(run(['done', 'a', '--evidence', 'x', '--verdict', empty], { dir, now: T }).code).toBe(2);
+    const pass = file('p.json', { verdict: 'PASS', verifiers: ['verify-ac', 'verify-tests'] });
+    expect(run(['done', 'a', '--evidence', 'x', '--verdict', pass], { dir, now: T }).code).toBe(0);
+    expect(
+      run(['done', 'a', '--evidence', 'x', '--verdict', '/nope.json'], { dir, now: T }).code,
+    ).toBe(2);
+  });
+
+  it('items without --verify are unaffected', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'wf-'));
+    run(['start', 'S'], { dir, now: T });
+    run(['add', 'a'], { dir, now: T });
+    expect(run(['done', 'a', '--evidence', 'x'], { dir, now: T }).code).toBe(0);
+  });
+});

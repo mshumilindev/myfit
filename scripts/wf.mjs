@@ -3,9 +3,9 @@
  * SPO-639 (WF-A): `wf` — mechanical task progress, like `git status`.
  *
  *   node scripts/wf.mjs start <TASK> [title]
- *   node scripts/wf.mjs add <item> [--kind ac|step|extra] [--text "…"]
+ *   node scripts/wf.mjs add <item> [--kind ac|step|extra] [--text "…"] [--verify]
  *   node scripts/wf.mjs doing <item>
- *   node scripts/wf.mjs done <item> --evidence "<command|file|link>"
+ *   node scripts/wf.mjs done <item> --evidence "<command|file|link>" [--verdict verify.json]
  *   node scripts/wf.mjs block <item> --needs design|cpd|decision|access [--reason "…"]
  *   node scripts/wf.mjs unblock <item>
  *   node scripts/wf.mjs heartbeat
@@ -30,7 +30,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { emptyState, isValidState, reduce, renderStatus, toJournalEntry } from './lib/wf-core.mjs';
 
-const BOOLEAN_FLAGS = new Set(['force']);
+const BOOLEAN_FLAGS = new Set(['force', 'verify']);
 const sleep = (ms) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 
 /** Cross-process lock (O_EXCL lockfile) so parallel `wf` calls never lose updates; stale locks expire. */
@@ -88,6 +88,18 @@ export function parseArgs(argv) {
   return { positional, flags };
 }
 
+/** Reads `verify.json` ({ verdict: 'PASS'|'FAIL'|'CANNOT_VERIFY', verifiers: [...] }); only the verdict is kept. */
+export function readVerdict(file) {
+  if (typeof file !== 'string') return undefined;
+  try {
+    const v = JSON.parse(readFileSync(file, 'utf8'));
+    const ok = Array.isArray(v.verifiers) && v.verifiers.length > 0;
+    return ok && ['PASS', 'FAIL', 'CANNOT_VERIFY'].includes(v.verdict) ? v.verdict : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function buildEvent(cmd, { positional, flags }, now = Date.now()) {
   const [first, ...rest] = positional;
   switch (cmd) {
@@ -100,6 +112,7 @@ export function buildEvent(cmd, { positional, flags }, now = Date.now()) {
         item: first,
         kind: flags.kind ?? 'step',
         text: typeof flags.text === 'string' ? flags.text : '',
+        verify: flags.verify === true,
       };
     case 'doing':
     case 'unblock':
@@ -110,6 +123,7 @@ export function buildEvent(cmd, { positional, flags }, now = Date.now()) {
         ts: now,
         item: first,
         evidence: flags.evidence === true ? '' : flags.evidence,
+        verdict: readVerdict(flags.verdict),
       };
     case 'block':
       return {

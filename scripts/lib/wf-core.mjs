@@ -68,7 +68,8 @@ export function isValidState(state) {
       typeof i.id === 'string' &&
       ID_RE.test(i.id) &&
       STATUSES.includes(i.status) &&
-      (i.status !== 'blocked' || NEEDS.includes(i.needs)),
+      (i.status !== 'blocked' || NEEDS.includes(i.needs)) &&
+      (i.verify === undefined || i.verify === true),
   );
 }
 
@@ -86,7 +87,13 @@ export function reduce(state, event) {
     case 'add':
       if (next.items.some((i) => i.id === event.item))
         throw new Error(`item exists: ${event.item}`);
-      next.items.push({ id: event.item, text: event.text ?? '', kind: event.kind, status: 'todo' });
+      next.items.push({
+        id: event.item,
+        text: event.text ?? '',
+        kind: event.kind,
+        status: 'todo',
+        ...(event.verify ? { verify: true } : {}),
+      });
       return next;
     case 'doing': {
       const item = findItem(next, event.item);
@@ -97,6 +104,11 @@ export function reduce(state, event) {
     case 'done': {
       const item = findItem(next, event.item);
       assertFrom(item, ['todo', 'doing'], event.type);
+      if (item.verify && event.verdict !== 'PASS') {
+        throw new Error(
+          `${item.id} потребує незалежної перевірки з вердиктом PASS (--verdict <файл>)`,
+        );
+      }
       item.status = 'done';
       item.evidence = event.evidence;
       next.stall = 0;
