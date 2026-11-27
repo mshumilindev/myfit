@@ -10,6 +10,7 @@
  *   node scripts/wf.mjs unblock <item>
  *   node scripts/wf.mjs heartbeat
  *   node scripts/wf.mjs status
+ *   node scripts/wf.mjs report [--at 02:15]   markdown for the Linear progress comment
  *
  * State: .claude/state/wf.json (gitignored); journal: .claude/state/wf-events.jsonl (ids/categories/time only).
  * WF_STATE_DIR overrides the directory (tests). Exit codes: 0 ok, 2 rejected input, 1 unexpected error.
@@ -28,7 +29,14 @@ import {
 } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { emptyState, isValidState, reduce, renderStatus, toJournalEntry } from './lib/wf-core.mjs';
+import {
+  emptyState,
+  isValidState,
+  reduce,
+  renderReport,
+  renderStatus,
+  toJournalEntry,
+} from './lib/wf-core.mjs';
 
 const BOOLEAN_FLAGS = new Set(['force', 'verify']);
 const sleep = (ms) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
@@ -180,6 +188,18 @@ export function run(
   { dir = process.env.WF_STATE_DIR ?? join(ROOT, '.claude/state'), now = Date.now() } = {},
 ) {
   const [cmd, ...restArgs] = argv;
+  if (cmd === 'report') {
+    const state = load(join(dir, 'wf.json'));
+    return state && state.task
+      ? {
+          code: 0,
+          out: renderReport(
+            state,
+            typeof parseArgs(restArgs).flags.at === 'string' ? parseArgs(restArgs).flags.at : '',
+          ),
+        }
+      : { code: 2, out: 'wf: немає активної задачі (wf start <id>)' };
+  }
   if (cmd === 'status' || cmd === undefined) {
     const state = load(join(dir, 'wf.json'));
     return state

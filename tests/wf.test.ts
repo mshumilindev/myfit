@@ -388,3 +388,23 @@ describe('wf verify gate, mutation-survivor guards', () => {
     expect(run(['status'], { dir, now: T }).code).toBe(2);
   });
 });
+
+describe('wf report (SPO-643)', () => {
+  it('renders checklist, progress and the owner queue for the Linear comment', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'wf-'));
+    run(['start', 'S'], { dir, now: T });
+    run(['add', 'a', '--text', 'first'], { dir, now: T });
+    run(['add', 'b'], { dir, now: T });
+    run(['done', 'a', '--evidence', 'x'], { dir, now: T });
+    run(['block', 'b', '--needs', 'cpd', '--reason', 'push'], { dir, now: T });
+    const r = run(['report', '--at', '02:15'], { dir, now: T });
+    expect(r.code).toBe(0);
+    expect(r.out).toContain('**Прогрес 02:15 · 1/2 (50%) · лишилось 50%**');
+    expect(r.out).toContain('- [x] a first');
+    expect(r.out).toContain('- [ ] b — _чекає на мене: cpd_');
+    expect(r.out).toContain('**Чекає на мене (1):** b [cpd] push');
+  });
+  it('is rejected without an active task', () => {
+    expect(run(['report'], { dir: mkdtempSync(join(tmpdir(), 'wf-')) }).code).toBe(2);
+  });
+});

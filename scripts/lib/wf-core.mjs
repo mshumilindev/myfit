@@ -176,3 +176,31 @@ export function renderStatus(state) {
   }
   return out.join('\n');
 }
+
+/** Markdown for the pinned "Прогрес" Linear comment (SPO-643); the poster is whoever has Linear access. */
+export function renderReport(state, nowLabel = '') {
+  if (!state.task) return '';
+  const { done, total, pct, left } = progress(state);
+  const mark = { done: 'x', todo: ' ', doing: ' ', blocked: ' ' };
+  const lines = [
+    `**Прогрес${nowLabel ? ` ${nowLabel}` : ''} · ${done}/${total} (${pct}%) · лишилось ${left}%**`,
+    '',
+  ];
+  for (const i of state.items) {
+    const tag =
+      i.status === 'doing'
+        ? ' — _в роботі_'
+        : i.status === 'blocked'
+          ? ` — _чекає на мене: ${i.needs}_`
+          : '';
+    lines.push(`- [${mark[i.status]}] ${i.id}${i.text ? ` ${i.text}` : ''}${tag}`);
+  }
+  const waiting = state.items.filter((i) => i.status === 'blocked');
+  if (waiting.length > 0) {
+    lines.push(
+      '',
+      `**Чекає на мене (${waiting.length}):** ${waiting.map((i) => `${i.id} [${i.needs}]${i.reason ? ` ${i.reason}` : ''}`).join(' · ')}`,
+    );
+  }
+  return lines.join('\n');
+}
