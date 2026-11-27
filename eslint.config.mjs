@@ -53,6 +53,7 @@ export default tseslint.config(
       'desktop/src/**/*.ts',
       'functions/src/**/*.ts',
       'scripts/**/*.mjs',
+      'dev-dashboard/server/**/*.mjs',
       'client/scripts/**/*.mjs',
     ],
     languageOptions: {

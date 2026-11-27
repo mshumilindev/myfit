@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "workspaces": [
     "client",
-    "desktop"
+    "desktop",
+    "dev-dashboard"
   ],
   "scripts": {
     "dev:client": "npm run dev -w client",
@@ -23,7 +24,7 @@
     "dev": "npm run dev -w client",
     "build": "npm run build -w client && npm run build -w desktop",
     "tray": "npm run start -w desktop",
-    "typecheck": "npm run typecheck -w client && npm run typecheck -w desktop",
+    "typecheck": "npm run typecheck -w client && npm run typecheck -w desktop && npm run typecheck -w dev-dashboard",
     "lint": "eslint .",
     "i18n:check": "node scripts/check-i18n.mjs",
     "exercise-images": "tsx scripts/exercise-images/cli.ts",
