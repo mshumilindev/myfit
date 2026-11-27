@@ -86,6 +86,11 @@ describe('planActivation', () => {
 
 describe('replacesOwnCatalogAssignment', () => {
   const own = { programId: 'tl-u-x', assignedBy: 'u' };
+  it("another person's catalog program (assigned by an admin) is never replaced", () => {
+    expect(
+      replacesOwnCatalogAssignment({ programId: 'tl-t9-x', assignedBy: 'u' }, 'u', 'prg-1'),
+    ).toBe(false);
+  });
   it('own catalog start + an ordinary program: replaces', () => {
     expect(replacesOwnCatalogAssignment(own, 'u', 'prg-1')).toBe(true);
   });

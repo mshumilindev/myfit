@@ -212,6 +212,38 @@ describe('setProgramStatus (trainer and admin, catalog start)', () => {
     },
   );
 
+  it("an admin's assignment of someone else's catalog program is never archived", async () => {
+    put('users/x1', { role: 'admin' });
+    put('programs/tl-t9-x', prog('tl-t9-x', 't9', 'active'));
+    put('assignments/x1', { memberId: 'x1', programId: 'tl-t9-x', assignedBy: 'x1', startedAt: 5 });
+    put('programs/prg-own', prog('prg-own', 'x1', 'draft'));
+    await call('x1', 'prg-own');
+    expect(get('programs/tl-t9-x')?.status).toBe('active');
+    expect(get('programs/prg-own')?.status).toBe('active');
+  });
+
+  it('an orphan assignment (the catalog program is gone) does not lock the trainer out', async () => {
+    put('users/x1', { role: 'trainer' });
+    put('assignments/x1', {
+      memberId: 'x1',
+      programId: 'tl-x1-gone',
+      assignedBy: 'x1',
+      startedAt: 5,
+    });
+    put('programs/prg-own', prog('prg-own', 'x1', 'draft'));
+    await call('x1', 'prg-own');
+    expect(get('programs/prg-own')?.status).toBe('active');
+    expect(get('assignments/x1')).toMatchObject({ programId: 'prg-own' });
+  });
+
+  it('a malformed assignment does not lock the trainer out', async () => {
+    put('users/x1', { role: 'trainer' });
+    put('assignments/x1', { memberId: 'x1' });
+    put('programs/prg-own', prog('prg-own', 'x1', 'draft'));
+    await call('x1', 'prg-own');
+    expect(get('programs/prg-own')?.status).toBe('active');
+  });
+
   it("a trainer's assignment that is not their own catalog start is left as it is", async () => {
     put('users/x1', { role: 'trainer' });
     put('programs/prg-a', prog('prg-a', 'x1', 'active'));

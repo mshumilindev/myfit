@@ -191,10 +191,14 @@ export const setProgramStatus = onCall(async (req) => {
         )
       )
         return false;
-      tx.update(db.collection('programs').doc(asg.programId), {
-        status: 'archived',
-        updatedAt: now,
-      });
+      // Reads before writes; a catalog program that is gone (orphan assignment) must not lock the person out.
+      const catRef = db.collection('programs').doc(asg.programId);
+      const [catSnap, newSnap] = await Promise.all([
+        tx.get(catRef),
+        tx.get(db.collection('programs').doc(id)),
+      ]);
+      if (!newSnap.exists) return false;
+      if (catSnap.exists) tx.update(catRef, { status: 'archived', updatedAt: now });
       tx.set(asgRef, { memberId: uid, programId: id, assignedBy: uid, startedAt: now });
       tx.update(db.collection('programs').doc(id), { status, updatedAt: now });
       return true;
