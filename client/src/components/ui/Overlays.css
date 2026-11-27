@@ -175,7 +175,9 @@
   flex-direction: column;
   gap: var(--space-4);
   height: auto;
-  max-height: calc(100dvh - 46px);
+  /* The same room `.sheet-full` has: a drawer is compact while its content fits that, full only when it does not. A smaller cap left a
+     band (content between the cap and the full height) where the drawer went full with empty space under the content (Start drawer, SPO-608). */
+  max-height: calc(100dvh - var(--safe-top, 0px) - 8px);
   overflow-y: auto;
   /* 'backwards' (not 'both') so the finished slide-in does NOT keep overriding
      the inline drag transform via forwards-fill. */
