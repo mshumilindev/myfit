@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { ProgressBar } from '../components/ui/ProgressBar';
 import { Chip } from '../components/ui/Chip';
 import { NumberStepper } from '../components/ui/NumberStepper';
 import { Tag } from '../components/ui/Tag';
@@ -90,7 +92,7 @@ export function BlockReadyCard(p: {
   const t = useBlockStrings();
   const { spec, members } = p.block;
   return (
-    <div className="tb-card" data-testid="block-ready">
+    <Card tone="conditioning" pad="md" className="tb-stack" data-testid="block-ready">
       <div className="tb-row">
         <Icon name={FMT_ICON[spec.fmt]} />
         <div className="tb-main">
@@ -110,7 +112,7 @@ export function BlockReadyCard(p: {
       <Button variant="primary" size="lg" fullWidth icon="play" onClick={p.onStart}>
         {t.start}
       </Button>
-    </div>
+    </Card>
   );
 }
 
@@ -151,8 +153,10 @@ export function BlockTimerCard(p: {
   const pct = v.fmt === 'fortime' ? (v.capPct ?? 0) : v.pct;
   const cap = capText(t, p.block, v);
   return (
-    <div
-      className={`tb-card${rest ? ' tb-card--rest' : ''}${p.paused ? ' is-paused' : ''}`}
+    <Card
+      tone={rest ? 'rest' : 'conditioning'}
+      pad="md"
+      className={`tb-stack${rest ? ' tb-stack--rest' : ''}${p.paused ? ' is-paused' : ''}`}
       role="timer"
       aria-label={`${t.formats[spec.fmt]} ${cap}`}
     >
@@ -184,7 +188,7 @@ export function BlockTimerCard(p: {
           ))}
         </div>
       ) : (
-        <progress className="tb-track" max={100} value={pct} aria-hidden="true" />
+        <ProgressBar value={pct} tone={rest ? 'rest' : 'conditioning'} aria-hidden="true" />
       )}
       <Members members={members} onInfo={p.onInfo} />
       {(v.fmt === 'amrap' || v.fmt === 'fortime') && (
@@ -204,7 +208,7 @@ export function BlockTimerCard(p: {
           {t.finish}
         </Button>
       )}
-    </div>
+    </Card>
   );
 }
 
@@ -212,7 +216,12 @@ export function BlockTimerCard(p: {
 export function BlockEndedBar(p: { block: WorkoutBlock; capHit: boolean; onLog: () => void }) {
   const t = useBlockStrings();
   return (
-    <div className="tb-card tb-card--done" data-testid="block-ended">
+    <Card
+      tone="conditioning"
+      pad="md"
+      className="tb-stack tb-stack--tight"
+      data-testid="block-ended"
+    >
       <div className="tb-row">
         <Icon name="check" />
         <div className="tb-main">
@@ -225,7 +234,7 @@ export function BlockEndedBar(p: { block: WorkoutBlock; capHit: boolean; onLog: 
           {t.logResult}
         </Button>
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -258,7 +267,7 @@ export function BlockResultCard(p: {
     patch({ actuals: Object.keys(a).length ? a : undefined });
   };
   return (
-    <div className="tb-card tb-result" data-testid="block-result">
+    <Card tone="conditioning" pad="md" className="tb-stack" data-testid="block-result">
       <div className="tb-row">
         <FormatTag fmt={spec.fmt} />
         <span className="tb-t">{t.result}</span>
@@ -363,7 +372,7 @@ export function BlockResultCard(p: {
           )}
         </div>
       )}
-    </div>
+    </Card>
   );
 }
 
@@ -381,7 +390,12 @@ export function BlockLoggedRow(p: {
   const t = useBlockStrings();
   const { spec, result } = p.block;
   return (
-    <div className="tb-card tb-card--done" data-testid="block-logged">
+    <Card
+      tone="conditioning"
+      pad="md"
+      className="tb-stack tb-stack--tight"
+      data-testid="block-logged"
+    >
       <div className="tb-row">
         <FormatTag fmt={spec.fmt} />
         <div className="tb-main">
@@ -409,7 +423,7 @@ export function BlockLoggedRow(p: {
           />
         )}
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -431,12 +445,14 @@ export function PlanBlocks({
   return (
     <ul className="tb-plan" data-testid="plan-blocks">
       {blocks.map((b) => (
-        <li key={b.id} className="tb-plan-row">
-          <FormatTag fmt={b.spec.fmt} />
-          <div className="tb-main">
-            <div className="tb-t">{specLong(t, b.spec)}</div>
-            <div className="tb-sub">{membersLine(b.members)}</div>
-          </div>
+        <li key={b.id}>
+          <Card tone="conditioning" pad="sm" className="tb-plan-row">
+            <FormatTag fmt={b.spec.fmt} />
+            <div className="tb-main">
+              <div className="tb-t">{specLong(t, b.spec)}</div>
+              <div className="tb-sub">{membersLine(b.members)}</div>
+            </div>
+          </Card>
         </li>
       ))}
     </ul>

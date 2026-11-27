@@ -1,3 +1,4 @@
+import { plural } from '../i18n/coachPlural';
 import type { TimeBlocksStrings } from './strings.types';
 
 export const lt: TimeBlocksStrings = {
@@ -19,7 +20,8 @@ export const lt: TimeBlocksStrings = {
   addExercise: 'Pridėti pratimą',
   conditioning: 'Kondicija',
   conditioningNote: 'Neįskaičiuota į raumenų serijas.',
-  conditioningLine: (b, m, r) => `${b} blokų · ${m} min · ${r} raundų`,
+  conditioningLine: (b, m, r) =>
+    `${plural('lt', b, { one: '{n} blokas', few: '{n} blokai', many: '{n} bloko', other: '{n} blokų' })} · ${m} min · ${plural('lt', r, { one: '{n} ratas', few: '{n} ratai', many: '{n} rato', other: '{n} ratų' })}`,
   blockWord: 'Blokas',
   blockReadyTitle: 'Pratimai blokui',
   blockReadyNote:
@@ -66,7 +68,8 @@ export const lt: TimeBlocksStrings = {
   less: 'Mažiau',
   more: 'Daugiau',
   actualsNote: 'Palik kaip yra, ir programa viską laikys atlikta.',
-  summaryRounds: (rounds: number, extra: number) => `${rounds} ratų${extra ? ` + ${extra}` : ''}`,
+  summaryRounds: (rounds: number, extra: number) =>
+    `${plural('lt', rounds, { one: '{n} ratas', few: '{n} ratai', many: '{n} rato', other: '{n} ratų' })}${extra ? ` + ${extra}` : ''}`,
   newBlock: 'Naujas laiko blokas',
   editBlock: 'Keisti laiko bloką',
   format: 'Formatas',
@@ -96,7 +99,8 @@ export const lt: TimeBlocksStrings = {
   timeBlockRow: 'Laiko blokas…',
   exerciseInfo: 'Pratimo informacija',
   minN: (m) => `${m} min.`,
-  targetN: (n) => `tikslas: ${n} ratų`,
+  targetN: (n) =>
+    `tikslas: ${plural('lt', n, { one: '{n} ratas', few: '{n} ratai', many: '{n} rato', other: '{n} ratų' })}`,
   capN: (m) => `riba ${m} min.`,
   everyN: (s, n) => `kas ${s} s × ${n}`,
   movedIntoBlock: (n) => `${n} perkeltas į bloką`,
@@ -122,7 +126,8 @@ export const et: TimeBlocksStrings = {
   addExercise: 'Lisa harjutus',
   conditioning: 'Konditsioneerimine',
   conditioningNote: 'Ei lähe lihaste seeriatesse.',
-  conditioningLine: (b, m, r) => `${b} plokki · ${m} min · ${r} vooru`,
+  conditioningLine: (b, m, r) =>
+    `${plural('et', b, { one: '{n} plokk', other: '{n} plokki' })} · ${m} min · ${plural('et', r, { one: '{n} voor', other: '{n} vooru' })}`,
   blockWord: 'Plokk',
   blockReadyTitle: 'Plokiks sobivad harjutused',
   blockReadyNote: 'Ainult liigutused, mis sobivad ajaplokki. Oma liigutusi saab lisada nime järgi.',
@@ -168,7 +173,8 @@ export const et: TimeBlocksStrings = {
   less: 'Vähem',
   more: 'Rohkem',
   actualsNote: 'Jäta nii ja rakendus loeb kõik tehtuks.',
-  summaryRounds: (rounds: number, extra: number) => `${rounds} ringi${extra ? ` + ${extra}` : ''}`,
+  summaryRounds: (rounds: number, extra: number) =>
+    `${plural('et', rounds, { one: '{n} ring', other: '{n} ringi' })}${extra ? ` + ${extra}` : ''}`,
   newBlock: 'Uus ajaplokk',
   editBlock: 'Muuda ajaplokki',
   format: 'Formaat',
@@ -198,7 +204,7 @@ export const et: TimeBlocksStrings = {
   timeBlockRow: 'Ajaplokk…',
   exerciseInfo: 'Harjutuse info',
   minN: (m) => `${m} min`,
-  targetN: (n) => `siht: ${n} ringi`,
+  targetN: (n) => `siht: ${plural('et', n, { one: '{n} ring', other: '{n} ringi' })}`,
   capN: (m) => `piir ${m} min`,
   everyN: (s, n) => `iga ${s} s × ${n}`,
   movedIntoBlock: (n) => `${n} liigutati plokki`,

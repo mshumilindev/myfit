@@ -1,20 +1,16 @@
 /* Time blocks (Advanced training): the block card in a session, the clock, the result and the builder. Tokens only. */
-.tb-card {
+/* Layout only: the surface, border, radius and padding come from the kit Card (tone conditioning / rest). */
+.tb-stack {
   --tb-c: var(--color-conditioning);
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--s-12);
   min-width: 0;
-  box-sizing: border-box;
-  padding: var(--s-16);
-  border-radius: var(--r-12);
-  background: color-mix(in srgb, var(--tb-c) 12%, var(--color-surface));
-  border: var(--bw-1) solid color-mix(in srgb, var(--tb-c) 38%, transparent);
 }
-.tb-card--rest {
+.tb-stack--rest {
   --tb-c: var(--color-rest);
 }
-.tb-card--done {
+.tb-stack--tight {
   gap: var(--s-8);
 }
 .tb-row {
@@ -31,6 +27,8 @@
 .tb-main {
   flex: 1;
   min-width: 0;
+  display: grid;
+  gap: var(--s-4);
 }
 .tb-t {
   font-size: var(--fs-18);
@@ -51,7 +49,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-top: var(--s-4);
 }
 .tb-cap b {
   color: var(--tb-c);
@@ -59,24 +56,6 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   margin-right: var(--s-4);
-}
-.tb-track {
-  appearance: none;
-  border: 0;
-  width: 100%;
-  height: var(--s-6);
-  border-radius: var(--r-pill);
-  overflow: hidden;
-  background: color-mix(in srgb, var(--tb-c) 18%, transparent);
-}
-.tb-track::-webkit-progress-bar {
-  background: transparent;
-}
-.tb-track::-webkit-progress-value {
-  background: var(--tb-c);
-}
-.tb-track::-moz-progress-bar {
-  background: var(--tb-c);
 }
 .tb-ticks {
   display: flex;
@@ -252,9 +231,6 @@
   display: flex;
   align-items: flex-start;
   gap: var(--s-12);
-  padding: var(--s-12);
-  border-radius: var(--r-12);
-  background: color-mix(in srgb, var(--color-conditioning) 12%, var(--color-surface));
 }
 .tb-pick-head {
   display: flex;

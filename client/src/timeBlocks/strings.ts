@@ -1,4 +1,5 @@
 import type { LocaleId } from '../i18n';
+import { plural } from '../i18n/coachPlural';
 import type { TimeBlocksStrings } from './strings.types';
 
 const en: TimeBlocksStrings = {
@@ -20,7 +21,8 @@ const en: TimeBlocksStrings = {
   addExercise: 'Add exercise',
   conditioning: 'Conditioning',
   conditioningNote: 'Not counted in muscle sets.',
-  conditioningLine: (b, m, r) => `${b} blocks · ${m} min · ${r} rounds`,
+  conditioningLine: (b, m, r) =>
+    `${plural('en', b, { one: '{n} block', other: '{n} blocks' })} · ${m} min · ${plural('en', r, { one: '{n} round', other: '{n} rounds' })}`,
   blockWord: 'Block',
   blockReadyTitle: 'Block-ready exercises',
   blockReadyNote: 'Only moves that work in a timed block. Your own moves can be added by name.',
@@ -62,11 +64,12 @@ const en: TimeBlocksStrings = {
   actuallyDid: 'What you actually did',
   optional: 'Optional',
   asPlanned: 'As planned',
-  plannedReps: (n: number) => `planned ${n} reps`,
+  plannedReps: (n: number) => `planned ${plural('en', n, { one: '{n} rep', other: '{n} reps' })}`,
   less: 'Less',
   more: 'More',
   actualsNote: 'Leave it as is and the app counts everything as done.',
-  summaryRounds: (rounds: number, extra: number) => `${rounds} rounds${extra ? ` + ${extra}` : ''}`,
+  summaryRounds: (rounds: number, extra: number) =>
+    `${plural('en', rounds, { one: '{n} round', other: '{n} rounds' })}${extra ? ` + ${extra}` : ''}`,
   newBlock: 'New time block',
   editBlock: 'Edit time block',
   format: 'Format',
@@ -96,7 +99,7 @@ const en: TimeBlocksStrings = {
   timeBlockRow: 'Time block…',
   exerciseInfo: 'Exercise details',
   minN: (m) => `${m} min`,
-  targetN: (n) => `target ${n} rounds`,
+  targetN: (n) => `target ${plural('en', n, { one: '{n} round', other: '{n} rounds' })}`,
   capN: (m) => `cap ${m} min`,
   everyN: (s, n) => `every ${s} s × ${n}`,
   movedIntoBlock: (n) => `${n} moved into the block`,
@@ -122,7 +125,8 @@ const uk: TimeBlocksStrings = {
   addExercise: 'Додати вправу',
   conditioning: 'Кондиціонування',
   conditioningNote: 'Не входить у підходи по м’язах.',
-  conditioningLine: (b, m, r) => `${b} блоків · ${m} min · ${r} раундів`,
+  conditioningLine: (b, m, r) =>
+    `${plural('uk', b, { one: '{n} блок', few: '{n} блоки', many: '{n} блоків', other: '{n} блока' })} · ${m} хв · ${plural('uk', r, { one: '{n} раунд', few: '{n} раунди', many: '{n} раундів', other: '{n} раунда' })}`,
   blockWord: 'Блок',
   blockReadyTitle: 'Вправи для блоку',
   blockReadyNote: 'Лише рухи, що працюють у блоці на час. Свої рухи можна додати за назвою.',
@@ -164,12 +168,13 @@ const uk: TimeBlocksStrings = {
   actuallyDid: 'Що ти зробив насправді',
   optional: 'Необовʼязково',
   asPlanned: 'Як заплановано',
-  plannedReps: (n: number) => `заплановано ${n} повторень`,
+  plannedReps: (n: number) =>
+    `заплановано ${plural('uk', n, { one: '{n} повторення', few: '{n} повторення', many: '{n} повторень', other: '{n} повторення' })}`,
   less: 'Менше',
   more: 'Більше',
   actualsNote: 'Залиш як є, і застосунок порахує все виконаним.',
   summaryRounds: (rounds: number, extra: number) =>
-    `${rounds} раундів${extra ? ` + ${extra}` : ''}`,
+    `${plural('uk', rounds, { one: '{n} раунд', few: '{n} раунди', many: '{n} раундів', other: '{n} раунда' })}${extra ? ` + ${extra}` : ''}`,
   newBlock: 'Новий часовий блок',
   editBlock: 'Змінити часовий блок',
   format: 'Формат',
@@ -199,7 +204,8 @@ const uk: TimeBlocksStrings = {
   timeBlockRow: 'Часовий блок…',
   exerciseInfo: 'Про вправу',
   minN: (m) => `${m} хв`,
-  targetN: (n) => `ціль: ${n} раундів`,
+  targetN: (n) =>
+    `ціль: ${plural('uk', n, { one: '{n} раунд', few: '{n} раунди', many: '{n} раундів', other: '{n} раунда' })}`,
   capN: (m) => `ліміт ${m} хв`,
   everyN: (s, n) => `кожні ${s} с × ${n}`,
   movedIntoBlock: (n) => `${n} перенесено в блок`,
@@ -225,7 +231,8 @@ const pl: TimeBlocksStrings = {
   addExercise: 'Dodaj ćwiczenie',
   conditioning: 'Kondycja',
   conditioningNote: 'Nie liczone do serii mięśni.',
-  conditioningLine: (b, m, r) => `${b} bloków · ${m} min · ${r} rund`,
+  conditioningLine: (b, m, r) =>
+    `${plural('pl', b, { one: '{n} blok', few: '{n} bloki', many: '{n} bloków', other: '{n} bloku' })} · ${m} min · ${plural('pl', r, { one: '{n} runda', few: '{n} rundy', many: '{n} rund', other: '{n} rundy' })}`,
   blockWord: 'Blok',
   blockReadyTitle: 'Ćwiczenia do bloku',
   blockReadyNote: 'Tylko ruchy, które działają w bloku na czas. Własne ruchy dodasz po nazwie.',
@@ -271,7 +278,8 @@ const pl: TimeBlocksStrings = {
   less: 'Mniej',
   more: 'Więcej',
   actualsNote: 'Zostaw bez zmian, a aplikacja policzy wszystko jako wykonane.',
-  summaryRounds: (rounds: number, extra: number) => `${rounds} rund${extra ? ` + ${extra}` : ''}`,
+  summaryRounds: (rounds: number, extra: number) =>
+    `${plural('pl', rounds, { one: '{n} runda', few: '{n} rundy', many: '{n} rund', other: '{n} rundy' })}${extra ? ` + ${extra}` : ''}`,
   newBlock: 'Nowy blok czasowy',
   editBlock: 'Edytuj blok czasowy',
   format: 'Format',
@@ -300,7 +308,8 @@ const pl: TimeBlocksStrings = {
   timeBlockRow: 'Blok czasowy…',
   exerciseInfo: 'Szczegóły ćwiczenia',
   minN: (m) => `${m} min`,
-  targetN: (n) => `cel: ${n} rund`,
+  targetN: (n) =>
+    `cel: ${plural('pl', n, { one: '{n} runda', few: '{n} rundy', many: '{n} rund', other: '{n} rundy' })}`,
   capN: (m) => `limit ${m} min`,
   everyN: (s, n) => `co ${s} s × ${n}`,
   movedIntoBlock: (n) => `${n} przeniesione do bloku`,
