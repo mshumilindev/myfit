@@ -7,10 +7,6 @@ import type { ErrorKind } from '../../functions/src/clientErrorPure';
 const THROTTLE_MS = 60_000;
 const lastSent = new Map<ErrorKind, number>();
 
-export function resetErrorReportThrottle(): void {
-  lastSent.clear();
-}
-
 type Send = (payload: Record<string, unknown>) => Promise<void>;
 const lazySend: Send = (payload) =>
   import('./errorReportTransport').then((m) => m.sendErrorReport(payload));
