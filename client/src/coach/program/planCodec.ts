@@ -213,7 +213,8 @@ export async function openVersion(
  * everything that is the per-client trainer layer: targets (weight, RPE, rest, cue), warm-up weights and planned
  * activities. Those stay sealed in the version / plan and reach the member through the `ProgramLayer`. What remains
  * is the structure the trainer typed: day names, exercise names, sets, reps, equipment, groups, target muscles.
- * Starts as `draft` so nothing treats it as live; the publish function flips it to `active` in the same transaction as
+ * Time blocks (SPO-608) are NOT stripped: like day names and exercise names they are open day structure (R68, ADR 011), with
+ * no free text (`sanitizeProgramBlocks`). Starts as `draft` so nothing treats it as live; the publish function flips it to `active` in the same transaction as
  * the assignment. Pure and idempotent: the same program always yields the same document.
  */
 export function runnableProgram(

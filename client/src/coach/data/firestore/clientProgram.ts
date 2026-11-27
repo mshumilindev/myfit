@@ -55,7 +55,8 @@ export function layerFromVersion(p: {
 /**
  * The runnable program (`programs/prg-{client}-{n}`, plaintext, template level) with the sealed trainer layer put back,
  * IN MEMORY ONLY: per item id the target weight, RPE, rest and cue plus the warm-up weights, and the planned
- * activities and time blocks. Items the layer does not know stay as they are; layer items the runnable program does not hold are
+ * activities, and a block list when the layer holds one (the time blocks themselves are open day structure, see
+ * `runnableProgram`). Items the layer does not know stay as they are; layer items the runnable program does not hold are
  * ignored. Nothing here is written anywhere (the localStorage cache of the assignment keeps the stripped form).
  */
 export function applyProgramLayer<
@@ -84,7 +85,8 @@ export function applyProgramLayer<
     ...p,
     items,
     ...(lp.activities?.length ? { activities: lp.activities } : {}),
-    // The trainer's time blocks (SPO-608) ride on the sealed layer like the planned activities; `blockV` is the writer marker.
+    // Time blocks (SPO-608): the open structure of the day (R68, ADR 011) already sits in `programs/prg-*`; a block list that the sealed layer
+    // carries replaces it in memory. `blockV` is the writer marker.
     ...(lp.blocks?.length ? { blocks: lp.blocks, blockV: 1 as const } : {}),
   };
 }

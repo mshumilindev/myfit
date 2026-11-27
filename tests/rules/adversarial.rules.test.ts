@@ -867,6 +867,66 @@ c(
   { authorId: T, status: 'active', blockV: 1 },
   withBlocks,
 );
+c(
+  'J34',
+  'blocks over the cap (29 > 4 a day over 7 days) are refused',
+  'update',
+  'programs/prg-client1-1',
+  au(T, 'trainer'),
+  false,
+  {
+    authorId: T,
+    status: 'active',
+    blockV: 1,
+    blocks: Array.from({ length: 29 }, (_, i) => ({ id: `b${i}` })),
+  },
+  withBlocks,
+);
+c(
+  'J35',
+  'blocks that are not a list are refused',
+  'update',
+  'programs/prg-client1-1',
+  au(T, 'trainer'),
+  false,
+  { authorId: T, status: 'active', blockV: 1, blocks: 'x'.repeat(2000) },
+  withBlocks,
+);
+c(
+  'J36',
+  'blocks at the cap (28) are accepted',
+  'update',
+  'programs/prg-client1-1',
+  au(T, 'trainer'),
+  true,
+  {
+    authorId: T,
+    status: 'active',
+    blockV: 1,
+    blocks: Array.from({ length: 28 }, (_, i) => ({ id: `b${i}` })),
+  },
+  withBlocks,
+);
+c(
+  'J37',
+  'blockV 2 (unknown marker) is refused',
+  'update',
+  'programs/prg-client1-1',
+  au(T, 'trainer'),
+  false,
+  { authorId: T, status: 'active', blockV: 2, blocks: [{ id: 'b1' }] },
+  withBlocks,
+);
+c(
+  'J38',
+  'blocks written without blockV over a program that has blocks are refused',
+  'update',
+  'programs/prg-client1-1',
+  au(T, 'trainer'),
+  false,
+  { authorId: T, status: 'active', blocks: [{ id: 'b1' }] },
+  withBlocks,
+);
 // misc
 c('K01', 'anyone reads coachKeys (directory)', 'get', `coachKeys/${T}`, au(M), true);
 c('K02', 'signed-out read coachKeys', 'get', `coachKeys/${T}`, null, false);

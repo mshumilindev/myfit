@@ -242,6 +242,12 @@ service cloud.firestore {
         || (request.resource.data.get('blockV', -1) in [0, 1]
           && (request.resource.data.blockV == 0 || 'blocks' in request.resource.data));
     }
+    // Time blocks (SPO-608): `blocks` is a list of at most 4 blocks a day over 7 days (the client caps the same
+    // numbers in `sanitizeProgramBlocks`); the rule keeps an arbitrarily large or mistyped value out of the document.
+    function blocksShapeOk() {
+      return !('blocks' in request.resource.data)
+        || (request.resource.data.blocks is list && request.resource.data.blocks.size() <= 28);
+    }
     function prgOk(pid) {
       return !pid.matches('prg-.*')
         || (prgClient(pid) != '' && isActiveCoachOf(prgClient(pid)));
@@ -1003,13 +1009,14 @@ service cloud.firestore {
         )
       );
       allow create: if isSignedIn() && request.resource.data.authorId == uid() && prgOk(programId)
-        && catalogIdOk(programId) && catalogOriginOk(programId);
+        && catalogIdOk(programId) && catalogOriginOk(programId) && blocksShapeOk();
       allow update: if isSignedIn()
         && resource.data.authorId == uid()
         && request.resource.data.authorId == uid()
         && prgOk(programId)
         && keepsCycle()
         && keepsBlocks()
+        && blocksShapeOk()
         && keepsOrigin();
       allow delete: if isSignedIn() && resource.data.authorId == uid() && prgOk(programId);
     }
