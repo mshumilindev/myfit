@@ -112,14 +112,26 @@ beforeEach(() => {
 });
 
 describe('setProgramStatus (member, active)', () => {
-  it("a catalog start archives the member's own active program and takes the assignment", async () => {
+  it("a catalog start keeps the member's own active program active (owner 27.11) and takes the assignment", async () => {
     put('programs/prg-old', prog('prg-old', 'm1', 'active'));
     put('assignments/m1', { memberId: 'm1', programId: 'prg-old', assignedBy: 'm1', startedAt: 5 });
     put('programs/tl-m1-x', prog('tl-m1-x', 'm1', 'draft'));
     await call('m1', 'tl-m1-x');
-    expect(get('programs/prg-old')?.status).toBe('archived');
+    expect(get('programs/prg-old')?.status).toBe('active');
     expect(get('programs/tl-m1-x')?.status).toBe('active');
     expect(get('assignments/m1')).toMatchObject({ programId: 'tl-m1-x', assignedBy: 'm1' });
+  });
+
+  it('a member activating their own program keeps the other own program active and archives only a replaced catalog one', async () => {
+    put('programs/prg-a', prog('prg-a', 'm1', 'active'));
+    put('programs/tl-m1-x', prog('tl-m1-x', 'm1', 'active'));
+    put('assignments/m1', { memberId: 'm1', programId: 'tl-m1-x', assignedBy: 'm1', startedAt: 5 });
+    put('programs/prg-b', prog('prg-b', 'm1', 'draft'));
+    await call('m1', 'prg-b');
+    expect(get('programs/prg-a')?.status).toBe('active');
+    expect(get('programs/tl-m1-x')?.status).toBe('archived');
+    expect(get('programs/prg-b')?.status).toBe('active');
+    expect(get('assignments/m1')).toMatchObject({ programId: 'prg-b' });
   });
 
   it("a catalog start never replaces the trainer's active program and changes nothing", async () => {
@@ -171,13 +183,13 @@ describe('setProgramStatus (member, active)', () => {
 
 describe('setProgramStatus (trainer and admin, catalog start)', () => {
   it.each(['trainer', 'admin'])(
-    'a %s starting a catalog program takes their own assignment and archives their other active one',
+    'a %s starting a catalog program takes their own assignment and keeps their other active program active',
     async (role) => {
       put('users/x1', { role });
       put('programs/prg-old', prog('prg-old', 'x1', 'active'));
       put('programs/tl-x1-y', prog('tl-x1-y', 'x1', 'draft'));
       await call('x1', 'tl-x1-y');
-      expect(get('programs/prg-old')?.status).toBe('archived');
+      expect(get('programs/prg-old')?.status).toBe('active');
       expect(get('programs/tl-x1-y')?.status).toBe('active');
       expect(get('assignments/x1')).toMatchObject({ programId: 'tl-x1-y', assignedBy: 'x1' });
     },

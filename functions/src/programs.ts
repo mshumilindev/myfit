@@ -128,7 +128,7 @@ export const setProgramStatus = onCall(async (req) => {
   const now = Date.now();
   // Members always; a trainer or admin starting a catalog program (`tl-` id) gets the same transaction: their own assignment.
   if ((me.role === 'member' || id.startsWith('tl-')) && status === 'active') {
-    // One transaction: the trainer's-program check, the archive of the member's other active programs and the new
+    // One transaction: the trainer's-program check, the archive of a replaced catalog program and the new
     // assignment must see the same state, or two quick starts could both pass the check.
     await db.runTransaction(async (tx) => {
       const asgRef = db.collection('assignments').doc(uid);
@@ -165,9 +165,11 @@ export const setProgramStatus = onCall(async (req) => {
       });
       if (plan === 'noop') return;
       if (plan === 'blocked') throw new HttpsError('failed-precondition', 'trainer-program');
-      // At most one active self-authored program (AC-PROG-05).
+      // Owner decision 27.11: programs the person wrote stay active when another replaces them, so none gets lost in the
+      // archive (the assignment says which one is theirs now). Only a replaced catalog program (`tl-`, never written by them) is archived.
       for (const d of others.docs)
-        if (d.id !== id) tx.update(d.ref, { status: 'archived', updatedAt: now });
+        if (d.id !== id && d.id.startsWith('tl-'))
+          tx.update(d.ref, { status: 'archived', updatedAt: now });
       tx.set(asgRef, { memberId: uid, programId: id, assignedBy: uid, startedAt: now });
       tx.update(db.collection('programs').doc(id), { status, updatedAt: now });
     });
