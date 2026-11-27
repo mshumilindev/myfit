@@ -22,4 +22,5 @@ description: Use only when the user explicitly says "cpd" — commit, push and d
    - Нотатки релізу: `node scripts/release-notes.mjs vX.Y.Z <від-тег>` (чернетка; тег ставимо лише за `releases.md`).
 8. **Хвіст (сам, без нагадування):** `node scripts/wf.mjs status`; `blocked` з `needs=access` чи без `--reason` — перевір, зніми `wf unblock`, закрий `wf done --evidence`; закрий пункт у task-списку.
 9. **Linear:** задачі, де всі AC закриті й перевірені наживо → Deployed; решта лишається як є.
+   - Після `Deployed to prod` і лише після нього: видали гілку задачі (`ready-for-cpd/SPO-N` локально й `origin`, без force); дашборд розробки (SPO-639 W18) сам закриє її таб.
 10. **Звіт:** що задеплоєно (коміти), результат CI, що перевірено наживо; якщо щось не пройшло — прямо що саме.
