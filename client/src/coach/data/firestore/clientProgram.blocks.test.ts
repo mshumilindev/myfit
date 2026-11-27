@@ -37,3 +37,18 @@ describe('the trainer layer carries time blocks (SPO-608, phase 2)', () => {
     expect(empty).not.toHaveProperty('blocks');
   });
 });
+
+describe('the trainer program document keeps its blocks as day structure (SPO-608, phase 2)', () => {
+  it('runnableProgram keeps blocks with the writer marker, and marks 0 when there are none', async () => {
+    const { runnableProgram } = await import('../../program/planCodec');
+    const { freshProgram } = await import('../../../views/programs/model');
+    const base = freshProgram('t1', 'Plan');
+    const meta = { id: 'prg-c-1', authorId: 't1', updatedAt: 1 };
+    const withBlocks = runnableProgram({ ...base, blocks: [BLOCK] } as never, meta);
+    expect(withBlocks.blocks).toEqual([BLOCK]);
+    expect(withBlocks.blockV).toBe(1);
+    const none = runnableProgram(base, meta);
+    expect(none.blockV).toBe(0);
+    expect(none.blocks).toBeUndefined();
+  });
+});
