@@ -334,6 +334,20 @@ describe('wf stop hook decision (WF-C)', () => {
   ])('lets the turn end: %s', (_n, state) => {
     expect(decideStop({ state, mtimeMs: now, now }).block).toBe(false);
   });
+  it('blocks on a tool-liftable (access) or reason-less blocker, lets a justified one end the turn', () => {
+    const mk = (extra: object) =>
+      st([{ id: 'a', status: 'blocked', ...extra } as { id: string; status: string }]);
+    const d = decideStop({ state: mk({ needs: 'access', reason: 'x' }), mtimeMs: now, now });
+    expect(d.block).toBe(true);
+    expect(d.reason).toContain('wf unblock a');
+    expect(decideStop({ state: mk({ needs: 'legal', reason: '' }), mtimeMs: now, now }).block).toBe(
+      true,
+    );
+    expect(
+      decideStop({ state: mk({ needs: 'legal', reason: 'потрібен юрист' }), mtimeMs: now, now })
+        .block,
+    ).toBe(false);
+  });
   it('never traps: stop_hook_active, stale state, missing state', () => {
     const open = st([{ id: 'a', status: 'todo' }]);
     expect(

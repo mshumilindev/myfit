@@ -13,6 +13,19 @@ export function decideStop({ input = {}, state, mtimeMs, now = Date.now() }) {
   if (typeof mtimeMs === 'number' && now - mtimeMs > FRESH_MS)
     return { block: false, reason: 'stale state' };
   const open = state.items.filter((i) => i.status === 'todo' || i.status === 'doing');
+  // A blocker only the tools can lift (`access`) or one with no stated reason is not a real wait for the owner
+  // (CLAUDE.md «Без підтверджень»): re-check it, lift it and finish the item before the turn may end.
+  const weak = state.items.filter(
+    (i) =>
+      i.status === 'blocked' &&
+      (i.needs === 'access' || (i.needs && !String(i.reason ?? '').trim())),
+  );
+  if (open.length === 0 && weak.length > 0) {
+    return {
+      block: true,
+      reason: `wf: пункт ${weak[0].id} заблокований без вагомої причини (needs=${weak[0].needs}). Перевір, чи блокер ще актуальний: якщо його можна зняти інструментами, зроби wf unblock ${weak[0].id} і виконай пункт до доказу; справжній блокер (незворотне, юридичне, недоступний доступ) познач з --reason.`,
+    };
+  }
   if (open.length === 0) return { block: false, reason: 'nothing open' };
   const next = open.find((i) => i.status === 'doing') ?? open[0];
   return {

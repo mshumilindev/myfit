@@ -18,5 +18,6 @@ description: Use only when the user explicitly says "cpd" — commit, push and d
    - **Маркер версії згод (SPO-533):** після деплою `recordConsent` має існувати анотований тег `recordConsent-deployed/<UTC-час>` з повідомленням `consentRecordsPure sha256: <sha256 файлу functions/src/consentRecordsPure.ts на задеплоєному коміті>`; workflow `Deploy functions` ставить його сам. Деплой з Мака вручну — поставити тег так само (`git tag -a … -m "consentRecordsPure sha256: $(shasum -a 256 functions/src/consentRecordsPure.ts | cut -d' ' -f1)" <sha> && git push origin <тег>`). Workflow `Deploy hosting` падає, якщо хеш цього файлу в збірці інший (клієнт слав би версії, яких сервер ще не знає → 400 stale-version); обхід `skip_consent_guard` лише свідомо.
    - **Порядок:** `firestore.rules`/`firestore.indexes.json` → functions (пакетами) → hosting. Hosting: workflow `Deploy hosting` (`target: test` = spotter-64c3b.web.app, потім `prod` = myspotter.fit, прод за environment `production`).
 7. **Перевірка наживо (read-only):** відкрий застосунок, пройди змінені екрани, консоль без помилок; логи функцій без нових помилок.
-8. **Linear:** задачі, де всі AC закриті й перевірені наживо → Deployed; решта лишається як є.
-9. **Звіт:** що задеплоєно (коміти), результат CI, що перевірено наживо; якщо щось не пройшло — прямо що саме.
+8. **Хвіст (сам, без нагадування):** `node scripts/wf.mjs status`; `blocked` з `needs=access` чи без `--reason` — перевір, зніми `wf unblock`, закрий `wf done --evidence`; закрий пункт у task-списку.
+9. **Linear:** задачі, де всі AC закриті й перевірені наживо → Deployed; решта лишається як є.
+10. **Звіт:** що задеплоєно (коміти), результат CI, що перевірено наживо; якщо щось не пройшло — прямо що саме.
