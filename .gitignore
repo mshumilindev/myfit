@@ -90,3 +90,6 @@ desktop/release/
 
 # Local workflow state (SPO-639, wf CLI)
 .claude/state/
+
+# локальні секрети й налаштування Claude (ключ LINEAR_API_KEY тощо), не комітити
+.claude/settings.local.json
