@@ -212,3 +212,40 @@ describe('recorder end to end', () => {
     expect(readJournalDirs([join(work, 'kill/state/journal')]).entries.length).toBe(60);
   }, 60000);
 });
+
+describe('degradation block and cpd freshness', () => {
+  it('blocks a degraded recorder at most once per session', async () => {
+    const { decideDegraded } = await import('../scripts/lib/wf-stop.mjs');
+    const d = ['немає рекордера для: Stop'];
+    expect(decideDegraded({ input: { session_id: 'a' }, degraded: d }).block).toBe(true);
+    expect(decideDegraded({ input: { session_id: 'a' }, degraded: d, warnedSid: 'a' }).block).toBe(
+      false,
+    );
+    expect(
+      decideDegraded({ input: { session_id: 'a', stop_hook_active: true }, degraded: d }).block,
+    ).toBe(false);
+    expect(decideDegraded({ input: { session_id: 'b' }, degraded: d, warnedSid: 'a' }).block).toBe(
+      true,
+    );
+    expect(decideDegraded({ input: {}, degraded: [] }).block).toBe(false);
+  });
+  it('judges shard freshness by event time', async () => {
+    const { captureFreshness, renderPreflight } = await import('../scripts/lib/cpd-preflight.mjs');
+    expect(captureFreshness({ journalTs: undefined, shardTs: 1 }).stale).toBe(false);
+    expect(captureFreshness({ journalTs: 10 * 60000, shardTs: undefined }).stale).toBe(true);
+    expect(captureFreshness({ journalTs: 10 * 60000, shardTs: 9 * 60000 }).stale).toBe(false);
+    const f = captureFreshness({ journalTs: 20 * 60000, shardTs: 1000 });
+    expect(f.stale).toBe(true);
+    expect(renderPreflight({ branches: [], unpushed: 0, dirty: 0, capture: f })).toContain(
+      'шарди запису застарілі',
+    );
+  });
+  it('the real stop hook stays silent and exits 0 on a clean state', () => {
+    const r = spawnSync(process.execPath, [join(ROOT, 'scripts/wf-stop-hook.mjs')], {
+      input: JSON.stringify({ session_id: 'z' }),
+      encoding: 'utf8',
+      env: { ...process.env, WF_STATE_DIR: join(work, 'nostate') },
+    });
+    expect(r.status).toBe(0);
+  });
+});

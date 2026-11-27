@@ -25,13 +25,15 @@ describe('recorder is registered for every event (SPO-639 W23)', () => {
       expect(cmd).not.toMatch(/\bbash\b/);
     }
   });
-  it('no older hook script writes the journal inline', () => {
+  it('no older hook script writes the journal inline (the stop hook may only read it)', () => {
     for (const f of [
       'scripts/wf-stop-hook.mjs',
       'scripts/wf-context-hook.mjs',
       '.claude/hooks/stop-guards.sh',
     ]) {
-      expect(readFileSync(join(ROOT, f), 'utf8')).not.toMatch(/journal/i);
+      expect(readFileSync(join(ROOT, f), 'utf8')).not.toMatch(
+        /appendEntry|noteError|appendFile|buildEntry/,
+      );
     }
   });
 });
@@ -44,6 +46,8 @@ describe('guard-bash records each block as a rule id only', () => {
       env: {
         ...process.env,
         WF_STATE_DIR: work,
+        TMPDIR: join(work, 'tmp'),
+        HOME: join(work, 'home'),
         DASH_ROOT: join(work, 'dash'),
         CLAUDE_PROJECT_DIR: ROOT,
       },

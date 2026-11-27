@@ -33,3 +33,18 @@ export function decideStop({ input = {}, state, mtimeMs, now = Date.now() }) {
     reason: `wf: задача ${state.task.id} має ${open.length} відкритих пунктів без блокера. Далі: ${next.id}. Не завершуй хід: виконай пункт до доказу (wf done --evidence), а блокери збери одним пакетом (wf block).`,
   };
 }
+
+/**
+ * Capture degradation (SPO-639 W21 L8): the recorder is not registered or keeps failing. Blocks the stop at most once per
+ * session (`warnedSid` is the session already told), so a broken recorder can never trap a chat.
+ */
+export function decideDegraded({ input = {}, degraded = [], warnedSid = null }) {
+  if (!degraded.length || input.stop_hook_active) return { block: false };
+  const sid = typeof input.session_id === 'string' ? input.session_id : 'unknown';
+  if (warnedSid === sid) return { block: false };
+  return {
+    block: true,
+    sid,
+    reason: `ЗАПИС ЗАХВОРІВ: ${degraded.join('; ')}. Виправ це першим (docs/specs/SPO-639-W21-capture-reliability.md); повторно цей блок не показується.`,
+  };
+}

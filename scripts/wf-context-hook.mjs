@@ -29,7 +29,10 @@ try {
   }
   if (/\bcpd\b/i.test(prompt)) {
     console.log(
-      execFileSync('node', [join(root, 'scripts/cpd-preflight.mjs')], { encoding: 'utf8' }).trim(),
+      execFileSync('node', [join(root, 'scripts/cpd-preflight.mjs')], {
+        encoding: 'utf8',
+        timeout: 8000,
+      }).trim(),
     );
   }
 } catch {

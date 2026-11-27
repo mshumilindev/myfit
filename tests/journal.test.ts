@@ -153,6 +153,8 @@ describe('recorder CLI is fail-open and silent', () => {
       env: {
         ...process.env,
         WF_STATE_DIR: join(work, 'cli'),
+        TMPDIR: join(work, 'tmp'),
+        HOME: join(work, 'home'),
         DASH_ROOT: join(work, 'dash'),
         ...env,
       },
