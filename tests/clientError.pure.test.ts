@@ -39,7 +39,7 @@ describe('client error report sanitising (SPO-639 G1)', () => {
       route: '/u/x?token=abcdefghijklmnopqrstuvwxyz',
       locale: 'zz9',
     });
-    expect(r?.route).toBe('/u/x');
+    expect(r?.route).toBe('/u/:x');
     expect(r?.locale).toBe('xx');
   });
   it('never keeps unknown fields such as uid or email', () => {
@@ -53,5 +53,37 @@ describe('client error report sanitising (SPO-639 G1)', () => {
       'route',
       'stack',
     ]);
+  });
+});
+
+describe('hardening after independent review (SPO-639 G4)', () => {
+  it('does not blow up CPU on hostile repeated input', () => {
+    const t = Date.now();
+    maskStack('a.'.repeat(2000));
+    maskText('a.'.repeat(2000), 120);
+    expect(Date.now() - t).toBeLessThan(200);
+  });
+  it('drops origins, and non-identifier function names, from stack frames', () => {
+    const s = maskStack(
+      'Error: x\n    at https://spotter.app/assets/index-abc.js:3:4\n    at user ivan@mail.com (a.js:1:1)',
+    );
+    expect(s).not.toMatch(/spotter\.app|ivan|@/);
+    expect(s).toContain('index-abc.js');
+  });
+  it('masks quoted text, braces, phone-like numbers, tlds-less emails and doc paths', () => {
+    const out = maskText(
+      'bad JSON {"note":"my knee hurts"} users/AbC/workouts/w1 +380 50 123 45 67 ivan@mail ivan [at] mail.com',
+      400,
+    );
+    expect(out).not.toMatch(/knee|AbC|380|123|ivan|@|mail\./);
+  });
+  it('keeps only a safe route shape and a version-like build', () => {
+    const r = sanitizeReport({
+      ...base,
+      route: '/coach/client/maria-ivanenko/notes',
+      build: 'my knee hurts!',
+    });
+    expect(r?.route).toBe('/coach/:x/:x/:x');
+    expect(r?.build).toBe('unknown');
   });
 });

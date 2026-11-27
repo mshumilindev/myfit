@@ -6,7 +6,7 @@
 
 Варіант A: клієнт надсилає знеособлений звіт callable-функції `reportClientError`, функція пише структурований запис у Google Cloud Logging (Error Reporting підхоплює). Без нового процесора (Firebase/GCP уже використовується), без SDK трекера в клієнті.
 
-Що в звіті (мінімум): `kind` (render|unhandledrejection|error|chunk), `message` без значень (обрізане до 200 символів, числа й email/URL-параметри замасковані), `stack` лише імена файлів/функцій без аргументів, `build` (версія), `locale`, `route` без параметрів, `online`. Без uid, email, IP (функція не пише `req.rawRequest.ip`), без вмісту сховища.
+Що в звіті (мінімум): `kind` (render|unhandledrejection|error|chunk), `message` без значень (обрізане до 200 символів, числа й email/URL-параметри замасковані), `stack` лише імена файлів/функцій без аргументів, `build` (версія), `locale`, `route` без параметрів, `online`. Обробник не читає uid і IP й не пише їх, але звіт не «анонімний повністю»: платформні request-логи (IP, user agent) і токени auth/App Check, які шле SDK, існують; у політиці це писати чесно. Маскування message — best effort (імена у вільному тексті не ловляться), тому для не-`Error` значень message не надсилається. Функція вимагає App Check (`ENFORCE_APPCHECK`), дедуплікує однакові звіти за хвилину.
 
 Точка входу на клієнті: `installCrashRecovery()` у `client/src/appCrash.tsx` (вже ловить `error`, `unhandledrejection`, `vite:preloadError`) + `AppCrashBoundary.componentDidCatch`. Відправка: черга в пам'яті, ≤1 звіт/хв/тип, офлайн = відкинути (інваріант 2: не блокує роботу).
 

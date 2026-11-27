@@ -24,7 +24,8 @@ export function reportClientError(
     const err = error as { message?: unknown; stack?: unknown } | undefined;
     const payload = {
       kind,
-      message: String(err?.message ?? error ?? ''),
+      // Only real Error objects carry a message: a thrown string or object may hold user text.
+      message: error instanceof Error ? error.message : '',
       stack: String(err?.stack ?? ''),
       build: String(import.meta.env.VITE_APP_VERSION ?? 'dev'),
       locale: (document.documentElement.lang || 'en').slice(0, 2),
