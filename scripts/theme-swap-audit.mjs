@@ -56,7 +56,10 @@ const ids = shard(allIds, partSpec);
 const collect = (mark) => {
   const root = document.querySelector('#storybook-root') ?? document.body;
   const px = (v) => parseFloat(v) || 0;
-  const all = mark ? [...root.querySelectorAll('*')] : [...root.querySelectorAll('[data-swap-i]')];
+  // Store-kit surfaces (.sk-root, e.g. the Train like a pro banner inside a Programs page) have their own token model (ADR 015), like the store- stories above.
+  const all = mark
+    ? [...root.querySelectorAll('*')].filter((e) => !e.closest('.sk-root'))
+    : [...root.querySelectorAll('[data-swap-i]')];
   return all.map((el, n) => {
     if (mark) el.dataset.swapI = String(n);
     const cs = getComputedStyle(el);
