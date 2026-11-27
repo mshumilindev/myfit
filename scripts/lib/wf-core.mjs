@@ -155,11 +155,21 @@ export function toJournalEntry(event) {
 }
 
 /** git-status-like view, at most 12 lines. */
+const KIND_RANK = { ac: 0, step: 1, extra: 2 };
+
+/** Queue order: acceptance criteria first, then steps, then extras; stable inside a kind (SPO-639 W11). */
+export function orderTodo(items) {
+  return items
+    .map((item, i) => ({ item, i }))
+    .sort((a, b) => (KIND_RANK[a.item.kind] ?? 1) - (KIND_RANK[b.item.kind] ?? 1) || a.i - b.i)
+    .map((x) => x.item);
+}
+
 export function renderStatus(state) {
   if (!state.task) return 'wf: немає активної задачі (wf start <id>)';
   const { done, total, pct, left } = progress(state);
   const doing = state.items.filter((i) => i.status === 'doing');
-  const todo = state.items.filter((i) => i.status === 'todo');
+  const todo = orderTodo(state.items.filter((i) => i.status === 'todo'));
   const blocked = state.items.filter((i) => i.status === 'blocked');
   const withEvidence = state.items.filter((i) => i.status === 'done' && i.evidence).length;
   const line = (label, list) => `${label}${list.map((i) => i.id).join(', ') || '—'}`;

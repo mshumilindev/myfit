@@ -1,0 +1,17 @@
+# SPO-639 W11: nightly read-only report of stale branches and work waiting for `cpd`.
+name: nightly hygiene
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  branches:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: node scripts/nightly-hygiene.mjs >> "$GITHUB_STEP_SUMMARY"
