@@ -2,7 +2,7 @@
  * SPO-639 (WF-A): `wf` core + CLI. Contracts: done needs evidence, journal never holds text/evidence,
  * status stays ≤12 lines, stall hints change of approach (never stop).
  */
-import { mkdtempSync, readFileSync } from 'node:fs';
+import { mkdtempSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -127,5 +127,63 @@ describe('wf CLI', () => {
     expect(run(['status'], { dir }).out).toMatch(/немає активної задачі/);
     expect(run(['nope'], { dir }).code).toBe(2);
     expect(run(['start'], { dir }).code).toBe(2);
+  });
+});
+
+describe('wf hardening (verifier findings)', () => {
+  const fresh = () => mkdtempSync(join(tmpdir(), 'wf-'));
+
+  it('rejects ids that are not short identifiers (no free text in the journal)', () => {
+    for (const bad of [' ', 'has space', 'x'.repeat(41), 'Іван Петренко']) {
+      expect(() => validateEvent({ type: 'add', ts: T, item: bad, kind: 'ac' })).toThrow(/id/);
+    }
+    expect(() => validateEvent({ type: 'start', ts: T, task: 'a b' })).toThrow(/id/);
+    expect(() => validateEvent({ type: 'add', ts: T, item: 'A.1-x_2', kind: 'ac' })).not.toThrow();
+  });
+
+  it('refuses invalid transitions', () => {
+    let s = withItems();
+    s = reduce(s, { type: 'done', ts: T, item: 'a', evidence: 'x' });
+    expect(() => reduce(s, { type: 'doing', ts: T, item: 'a' })).toThrow(/transition/);
+    expect(() => reduce(s, { type: 'unblock', ts: T, item: 'a' })).toThrow(/transition/);
+    s = reduce(s, { type: 'block', ts: T, item: 'b', needs: 'cpd' });
+    expect(() => reduce(s, { type: 'done', ts: T, item: 'b', evidence: 'x' })).toThrow(
+      /transition/,
+    );
+    expect(() => reduce(withItems(), { type: 'unblock', ts: T, item: 'c' })).toThrow(/transition/);
+  });
+
+  it('corrupt or wrongly shaped state is a clean rejection, not a crash', () => {
+    for (const body of ['{bad', 'null', '{"task":{"id":"T"},"items":"x"}', '{}']) {
+      const dir = fresh();
+      writeFileSync(join(dir, 'wf.json'), body);
+      for (const argv of [['status'], ['add', 'X']]) {
+        const r = run(argv, { dir, now: T });
+        expect(r.code).toBe(2);
+        expect(r.out).toMatch(/стан пошкоджено/);
+      }
+    }
+  });
+
+  it('start over an unfinished task needs --force', () => {
+    const dir = fresh();
+    run(['start', 'SPO-1'], { dir, now: T });
+    run(['add', 'a'], { dir, now: T });
+    expect(run(['start', 'SPO-2'], { dir, now: T }).code).toBe(2);
+    expect(run(['start', 'SPO-2', '--force'], { dir, now: T }).code).toBe(0);
+    expect(run(['start', 'SPO-3'], { dir, now: T }).code).toBe(0); // nothing open: fine
+  });
+
+  it('accepts values that start with dashes via --flag=value', () => {
+    const dir = fresh();
+    run(['start', 'S'], { dir, now: T });
+    run(['add', 'a'], { dir, now: T });
+    expect(run(['done', 'a', '--evidence=--abc'], { dir, now: T }).code).toBe(0);
+  });
+
+  it('writes the state atomically (no temp file left behind)', () => {
+    const dir = fresh();
+    run(['start', 'S'], { dir, now: T });
+    expect(readdirSync(dir).sort()).toEqual(['wf-events.jsonl', 'wf.json']);
   });
 });

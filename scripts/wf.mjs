@@ -14,10 +14,17 @@
  * State: .claude/state/wf.json (gitignored); journal: .claude/state/wf-events.jsonl (ids/categories/time only).
  * WF_STATE_DIR overrides the directory (tests). Exit codes: 0 ok, 2 rejected input, 1 unexpected error.
  */
-import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  writeFileSync,
+} from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { emptyState, reduce, renderStatus, toJournalEntry } from './lib/wf-core.mjs';
+import { emptyState, isValidState, reduce, renderStatus, toJournalEntry } from './lib/wf-core.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -26,7 +33,9 @@ export function parseArgs(argv) {
   const flags = {};
   for (let i = 0; i < argv.length; i += 1) {
     const a = argv[i];
-    if (a.startsWith('--')) {
+    if (a.startsWith('--') && a.includes('=')) {
+      flags[a.slice(2, a.indexOf('='))] = a.slice(a.indexOf('=') + 1);
+    } else if (a.startsWith('--')) {
       flags[a.slice(2)] =
         argv[i + 1] !== undefined && !argv[i + 1].startsWith('--') ? argv[(i += 1)] : true;
     } else positional.push(a);
@@ -79,15 +88,35 @@ export function run(
   const [cmd, ...restArgs] = argv;
   const stateFile = join(dir, 'wf.json');
   const journal = join(dir, 'wf-events.jsonl');
-  const state = existsSync(stateFile) ? JSON.parse(readFileSync(stateFile, 'utf8')) : emptyState();
+  let state = emptyState();
+  if (existsSync(stateFile)) {
+    try {
+      state = JSON.parse(readFileSync(stateFile, 'utf8'));
+    } catch {
+      state = null;
+    }
+    if (!isValidState(state)) {
+      return { code: 2, out: `wf: стан пошкоджено (${stateFile}) — виправте або видаліть файл` };
+    }
+  }
   if (cmd === 'status' || cmd === undefined) return { code: 0, out: renderStatus(state) };
-  const event = buildEvent(cmd, parseArgs(restArgs), now);
+  const args = parseArgs(restArgs);
+  const event = buildEvent(cmd, args, now);
   if (!event) return { code: 2, out: `wf: невідома команда: ${cmd}` };
   try {
-    if (event.type === 'start' && !event.task) throw new Error('start needs a task id');
+    if (event.type === 'start' && !args.flags.force && state.task) {
+      const open = state.items.filter((i) => i.status !== 'done').length;
+      if (open > 0) {
+        throw new Error(
+          `задача ${state.task.id} має ${open} незакритих пунктів; start --force замінить її`,
+        );
+      }
+    }
     const next = reduce(state, event);
     mkdirSync(dir, { recursive: true });
-    writeFileSync(stateFile, `${JSON.stringify(next, null, 2)}\n`);
+    const tmp = `${stateFile}.${process.pid}.tmp`;
+    writeFileSync(tmp, `${JSON.stringify(next, null, 2)}\n`);
+    renameSync(tmp, stateFile);
     appendFileSync(journal, `${JSON.stringify(toJournalEntry(event))}\n`);
     return { code: 0, out: renderStatus(next) };
   } catch (e) {

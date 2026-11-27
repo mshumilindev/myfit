@@ -8,6 +8,8 @@ export const KINDS = ['ac', 'step', 'extra'];
 export const NEEDS = ['design', 'cpd', 'decision', 'access'];
 const EVENT_TYPES = ['start', 'add', 'doing', 'done', 'block', 'unblock', 'heartbeat'];
 /** Heartbeats in a row without a new `done` before status asks to change approach (never to stop). */
+/** Ids are identifiers only, so the journal can never hold free text or personal data. */
+export const ID_RE = /^[A-Za-z0-9._-]{1,40}$/;
 export const STALL_AFTER = 5;
 
 export function emptyState() {
@@ -23,8 +25,14 @@ export function validateEvent(event) {
     throw new Error('add needs a valid kind');
   if (event.type === 'block' && !NEEDS.includes(event.needs))
     throw new Error('block needs a valid category');
-  if (['add', 'doing', 'done', 'block', 'unblock'].includes(event.type) && !event.item) {
-    throw new Error(`${event.type} needs an item id`);
+  if (
+    ['add', 'doing', 'done', 'block', 'unblock'].includes(event.type) &&
+    !ID_RE.test(event.item ?? '')
+  ) {
+    throw new Error(`${event.type} needs an item id (A-Z a-z 0-9 . _ -, up to 40 chars)`);
+  }
+  if (event.type === 'start' && !ID_RE.test(event.task ?? '')) {
+    throw new Error('start needs a task id (A-Z a-z 0-9 . _ -, up to 40 chars)');
   }
   if (event.type === 'done' && !String(event.evidence ?? '').trim()) {
     throw new Error('done needs evidence (command, file or link)');
@@ -36,6 +44,22 @@ function findItem(state, id) {
   const item = state.items.find((i) => i.id === id);
   if (!item) throw new Error(`unknown item: ${id}`);
   return item;
+}
+
+function assertFrom(item, allowed, type) {
+  if (!allowed.includes(item.status)) {
+    throw new Error(`invalid transition: ${type} on ${item.id} (${item.status})`);
+  }
+}
+
+/** Shape check for a state loaded from disk. */
+export function isValidState(state) {
+  return Boolean(
+    state &&
+    typeof state === 'object' &&
+    Array.isArray(state.items) &&
+    (state.task === null || (state.task && typeof state.task.id === 'string')),
+  );
 }
 
 /** Pure: returns a new state; never mutates the input. */
@@ -54,11 +78,15 @@ export function reduce(state, event) {
         throw new Error(`item exists: ${event.item}`);
       next.items.push({ id: event.item, text: event.text ?? '', kind: event.kind, status: 'todo' });
       return next;
-    case 'doing':
-      findItem(next, event.item).status = 'doing';
+    case 'doing': {
+      const item = findItem(next, event.item);
+      assertFrom(item, ['todo', 'doing', 'blocked'], event.type);
+      item.status = 'doing';
       return next;
+    }
     case 'done': {
       const item = findItem(next, event.item);
+      assertFrom(item, ['todo', 'doing'], event.type);
       item.status = 'done';
       item.evidence = event.evidence;
       next.stall = 0;
@@ -66,6 +94,7 @@ export function reduce(state, event) {
     }
     case 'block': {
       const item = findItem(next, event.item);
+      assertFrom(item, ['todo', 'doing', 'blocked'], event.type);
       item.status = 'blocked';
       item.needs = event.needs;
       item.reason = event.reason ?? '';
@@ -73,6 +102,7 @@ export function reduce(state, event) {
     }
     case 'unblock': {
       const item = findItem(next, event.item);
+      assertFrom(item, ['blocked'], event.type);
       item.status = 'todo';
       delete item.needs;
       delete item.reason;
