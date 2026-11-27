@@ -192,6 +192,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build -w client
+      # Bundle budget ratchet (SPO-639 W2): the initial and total gzip JS may only shrink (bundle-budget.json).
+      - run: node scripts/check-bundle-budget.mjs
       # The built client is shared with `client-e2e` (SPO-370): one build per run, not one per job.
       - uses: actions/upload-artifact@v4
         with:
