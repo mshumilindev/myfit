@@ -70,6 +70,9 @@ export const LEGAL_CHANGELOG: readonly LegalChangelogEntry[] = [
   // SPO-639 G: anonymous crash reports (error type, masked message, function and file names, app version, language, online flag)
   // go to Google Cloud Logging for 30 days; no account identifier. New data category.
   { doc: 'policy', version: '2026-11-27', kind: 'material', bullets: ['category'] },
+  // SPO-608: the Policy now says that training programs (names, days, exercises, sets, repetitions, timed blocks; for own programs
+  // targets and notes) are stored readable (ADR 011, owner decision 27.10, SPO-372). Existing processing, wording only: editorial.
+  { doc: 'policy', version: '2026-11-28', kind: 'editorial', bullets: [] },
 ];
 
 /** Entries of a document after `from` (exclusive) up to `to` (inclusive). */
