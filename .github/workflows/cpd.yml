@@ -1,0 +1,90 @@
+# SPO-639 W5: one click for the hosting part of `cpd`.
+#   1) wait for CI on the SHA to finish green (stops here if it is red);
+#   2) deploy to test (started at once, in parallel with CI, prod never starts before CI is green);
+#   3) deploy to prod after CI is green AND test succeeded.
+# Functions/rules are NOT here: they go in batches of <=10 with a >=60 s pause (SPO-351, .claude/skills/cpd/SKILL.md).
+name: cpd (hosting)
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: 'Commit to ship (default: head of main)'
+        type: string
+        default: ''
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: cpd-hosting
+  cancel-in-progress: false
+
+env:
+  GH_TOKEN: ${{ github.token }}
+  REPO: ${{ github.repository }}
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.sha.outputs.sha }}
+    steps:
+      - id: sha
+        run: |
+          sha="${{ github.event.inputs.sha }}"
+          [ -z "$sha" ] && sha=$(gh api "repos/$REPO/commits/main" --jq .sha)
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+  ci:
+    name: CI is green on the SHA
+    needs: resolve
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - run: |
+          sha="${{ needs.resolve.outputs.sha }}"
+          for i in $(seq 1 120); do
+            row=$(gh api "repos/$REPO/actions/workflows/ci.yml/runs?head_sha=$sha" --jq '.workflow_runs[0]|"\(.status) \(.conclusion)"')
+            echo "CI $sha: $row"
+            case "$row" in
+              "completed success") exit 0 ;;
+              completed*) echo "::error::CI is not green for $sha ($row)"; exit 1 ;;
+            esac
+            sleep 20
+          done
+          echo "::error::CI did not finish in time"; exit 1
+
+  test:
+    name: Deploy hosting to test
+    needs: resolve
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - run: |
+          before=$(gh api "repos/$REPO/actions/workflows/deploy-hosting.yml/runs?per_page=1" --jq '.workflow_runs[0].id // 0')
+          gh api -X POST "repos/$REPO/actions/workflows/deploy-hosting.yml/dispatches" -f ref=main -f 'inputs[target]=test'
+          for i in $(seq 1 30); do
+            id=$(gh api "repos/$REPO/actions/workflows/deploy-hosting.yml/runs?per_page=1" --jq '.workflow_runs[0].id')
+            [ "$id" != "$before" ] && break
+            sleep 5
+          done
+          [ "$id" = "$before" ] && { echo "::error::deploy run did not appear"; exit 1; }
+          gh run watch "$id" --repo "$REPO" --exit-status
+
+  prod:
+    name: Deploy hosting to prod
+    needs: [resolve, ci, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - run: |
+          before=$(gh api "repos/$REPO/actions/workflows/deploy-hosting.yml/runs?per_page=1" --jq '.workflow_runs[0].id // 0')
+          gh api -X POST "repos/$REPO/actions/workflows/deploy-hosting.yml/dispatches" -f ref=main -f 'inputs[target]=prod'
+          for i in $(seq 1 30); do
+            id=$(gh api "repos/$REPO/actions/workflows/deploy-hosting.yml/runs?per_page=1" --jq '.workflow_runs[0].id')
+            [ "$id" != "$before" ] && break
+            sleep 5
+          done
+          [ "$id" = "$before" ] && { echo "::error::deploy run did not appear"; exit 1; }
+          gh run watch "$id" --repo "$REPO" --exit-status
