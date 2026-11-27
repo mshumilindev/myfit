@@ -150,7 +150,12 @@ describe('recorder CLI is fail-open and silent', () => {
     spawnSync(process.execPath, [join(ROOT, 'scripts/journal-hook.mjs'), event], {
       input: stdin,
       encoding: 'utf8',
-      env: { ...process.env, WF_STATE_DIR: join(work, 'cli'), ...env },
+      env: {
+        ...process.env,
+        WF_STATE_DIR: join(work, 'cli'),
+        DASH_ROOT: join(work, 'dash'),
+        ...env,
+      },
     });
   it('exits 0 with empty stdout on garbage input and still records', () => {
     for (const ev of ['PreToolUse', 'PostToolUse', 'Stop', 'Notification']) {

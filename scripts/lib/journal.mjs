@@ -3,7 +3,7 @@
  * Stored fields are a whitelist of ids, enums, numbers and short tokens: no tool inputs, prompts, messages,
  * paths or commands (R23). One line per event, one file per session, written with a single O_APPEND write.
  */
-import { appendFileSync, mkdirSync, readdirSync, readFileSync } from 'node:fs';
+import { appendFileSync, mkdirSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -183,4 +183,35 @@ export function checkRegistration(settings) {
   }
   const disabled = settings.some((s) => s && s.disableAllHooks === true);
   return { missing, badMatcher, disabled, ok: !missing.length && !badMatcher.length && !disabled };
+}
+
+/** Size of this session's journal file in a directory (0 when absent): used to roll up roughly every 4 KB. */
+export function journalSize(dir, sid) {
+  try {
+    return statSync(join(dir, `${sid}.ndjson`)).size;
+  } catch {
+    return 0;
+  }
+}
+
+/** Capture errors recorded since `sinceTs` across the candidate directories (each line is {v, ts, kind}). */
+export function countErrors(dirs, sinceTs) {
+  let n = 0;
+  for (const dir of dirs) {
+    let text;
+    try {
+      text = readFileSync(join(dir, 'capture-errors.ndjson'), 'utf8');
+    } catch {
+      continue;
+    }
+    for (const line of text.split('\n')) {
+      try {
+        const o = JSON.parse(line);
+        if (o && typeof o.ts === 'number' && o.ts >= sinceTs) n += 1;
+      } catch {
+        /* skip a broken line */
+      }
+    }
+  }
+  return n;
 }

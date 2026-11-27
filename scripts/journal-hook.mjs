@@ -11,12 +11,17 @@ import {
   appendEntry,
   buildEntry,
   checkRegistration,
+  countErrors,
   journalDirs,
+  journalSize,
   noteError,
+  readJournalDirs,
 } from './lib/journal.mjs';
+import { buildShard, loadTranscript, reconcile, writeShard } from './lib/capture-rollup.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const EVENT = process.argv[2] ?? '';
+const SHARD_ROOT = process.env.DASH_ROOT ?? ROOT;
 let warn = '';
 try {
   const stateDir = process.env.WF_STATE_DIR ?? join(ROOT, '.claude/state');
@@ -43,9 +48,32 @@ try {
     /* wf state is optional */
   }
   ctx.cat = process.env.JOURNAL_CAT;
-  const res = appendEntry(buildEntry(event, input, ctx), dirs);
+  const entry = buildEntry(event, input, ctx);
+  const sizeBefore = journalSize(dirs[0], entry.sid);
+  const res = appendEntry(entry, dirs);
   if (!res.ok) noteError('write-failed', dirs);
   else if (res.failed.length) noteError('primary-dir-failed', dirs);
+
+  // roll up on turn end, compaction, session end and about every 4 KB, so a killed container still leaves a shard
+  const crossed =
+    res.ok && Math.floor(journalSize(res.dir, entry.sid) / 4096) > Math.floor(sizeBefore / 4096);
+  if (res.ok && (['Stop', 'PreCompact', 'SessionEnd'].includes(event) || crossed)) {
+    try {
+      const j = readJournalDirs(dirs);
+      const mine = j.entries.filter((e) => e.sid === entry.sid);
+      const { transcript, settled } = loadTranscript(input.transcript_path);
+      const recon = reconcile(mine, transcript, { settled });
+      const shard = buildShard([...mine, ...recon.backfill], recon, {
+        sid: entry.sid,
+        bad: j.bad,
+        errors: countErrors(dirs, Date.now() - 86400000),
+      });
+      const w = writeShard(SHARD_ROOT, shard);
+      if (!w.ok) noteError('shard-invalid', dirs);
+    } catch {
+      noteError('rollup-failed', dirs);
+    }
+  }
 
   if (event === 'SessionStart') {
     const read = (p) => {

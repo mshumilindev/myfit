@@ -41,7 +41,12 @@ describe('guard-bash records each block as a rule id only', () => {
     spawnSync('bash', [join(ROOT, '.claude/hooks/guard-bash.sh')], {
       input: JSON.stringify({ session_id: 'gb', tool_name: 'Bash', tool_input: { command } }),
       encoding: 'utf8',
-      env: { ...process.env, WF_STATE_DIR: work, CLAUDE_PROJECT_DIR: ROOT },
+      env: {
+        ...process.env,
+        WF_STATE_DIR: work,
+        DASH_ROOT: join(work, 'dash'),
+        CLAUDE_PROJECT_DIR: ROOT,
+      },
     });
   it.each([
     ['git commit --no-verify -m x', 'no-verify'],

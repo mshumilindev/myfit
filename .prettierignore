@@ -33,3 +33,6 @@ patch-cov/
 
 # Згенеровані з дизайн-борду (SPO-378)
 client/src/components/halloween*.generated.*
+
+# SPO-639: шарди дашборда генерує скрипт, формат фіксований
+docs/reviews/dash/
