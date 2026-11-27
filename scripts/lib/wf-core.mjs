@@ -52,13 +52,20 @@ function assertFrom(item, allowed, type) {
   }
 }
 
-/** Shape check for a state loaded from disk. */
+const STATUSES = ['todo', 'doing', 'done', 'blocked'];
+
+/** Shape check for a state loaded from disk (deep: every item must be well formed). */
 export function isValidState(state) {
-  return Boolean(
-    state &&
-    typeof state === 'object' &&
-    Array.isArray(state.items) &&
-    (state.task === null || (state.task && typeof state.task.id === 'string')),
+  if (!state || typeof state !== 'object' || !Array.isArray(state.items)) return false;
+  if (state.task !== null && !(state.task && typeof state.task.id === 'string')) return false;
+  if (state.stall !== undefined && !Number.isInteger(state.stall)) return false;
+  return state.items.every(
+    (i) =>
+      i &&
+      typeof i === 'object' &&
+      typeof i.id === 'string' &&
+      ID_RE.test(i.id) &&
+      STATUSES.includes(i.status),
   );
 }
 
@@ -152,5 +159,5 @@ export function renderStatus(state) {
   if ((state.stall ?? 0) >= STALL_AFTER) {
     out.push('! довго без прогресу — змінити підхід (spike/рефлексія), не зупинятись');
   }
-  return out.slice(0, 12).join('\n');
+  return out.join('\n');
 }

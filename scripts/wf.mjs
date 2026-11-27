@@ -16,15 +16,53 @@
  */
 import {
   appendFileSync,
+  closeSync,
   existsSync,
   mkdirSync,
+  openSync,
   readFileSync,
   renameSync,
+  statSync,
+  unlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { emptyState, isValidState, reduce, renderStatus, toJournalEntry } from './lib/wf-core.mjs';
+
+const BOOLEAN_FLAGS = new Set(['force']);
+const sleep = (ms) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+
+/** Cross-process lock (O_EXCL lockfile) so parallel `wf` calls never lose updates; stale locks expire. */
+function withLock(dir, fn) {
+  mkdirSync(dir, { recursive: true });
+  const lock = join(dir, 'wf.lock');
+  const deadline = Date.now() + 5000;
+  for (;;) {
+    try {
+      closeSync(openSync(lock, 'wx'));
+      break;
+    } catch (e) {
+      if (e.code !== 'EEXIST') throw e;
+      try {
+        if (Date.now() - statSync(lock).mtimeMs > 10000) unlinkSync(lock);
+      } catch {
+        /* released meanwhile */
+      }
+      if (Date.now() > deadline) throw new Error('wf.lock зайнятий — повторіть', { cause: e });
+      sleep(10);
+    }
+  }
+  try {
+    return fn();
+  } finally {
+    try {
+      unlinkSync(lock);
+    } catch {
+      /* already gone */
+    }
+  }
+}
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -33,7 +71,9 @@ export function parseArgs(argv) {
   const flags = {};
   for (let i = 0; i < argv.length; i += 1) {
     const a = argv[i];
-    if (a.startsWith('--') && a.includes('=')) {
+    if (a.startsWith('--') && BOOLEAN_FLAGS.has(a.slice(2))) {
+      flags[a.slice(2)] = true;
+    } else if (a.startsWith('--') && a.includes('=')) {
       flags[a.slice(2, a.indexOf('='))] = a.slice(a.indexOf('=') + 1);
     } else if (a.startsWith('--')) {
       flags[a.slice(2)] =
@@ -54,7 +94,7 @@ export function buildEvent(cmd, { positional, flags }, now = Date.now()) {
         ts: now,
         item: first,
         kind: flags.kind ?? 'step',
-        text: flags.text ?? '',
+        text: typeof flags.text === 'string' ? flags.text : '',
       };
     case 'doing':
     case 'unblock':
@@ -72,7 +112,7 @@ export function buildEvent(cmd, { positional, flags }, now = Date.now()) {
         ts: now,
         item: first,
         needs: flags.needs,
-        reason: flags.reason ?? '',
+        reason: typeof flags.reason === 'string' ? flags.reason : '',
       };
     case 'heartbeat':
       return { type: 'heartbeat', ts: now };
@@ -81,44 +121,60 @@ export function buildEvent(cmd, { positional, flags }, now = Date.now()) {
   }
 }
 
+function load(stateFile) {
+  if (!existsSync(stateFile)) return emptyState();
+  let state;
+  try {
+    state = JSON.parse(readFileSync(stateFile, 'utf8'));
+  } catch {
+    state = null;
+  }
+  return isValidState(state) ? state : null;
+}
+
+function apply(dir, event, args) {
+  const stateFile = join(dir, 'wf.json');
+  const state = load(stateFile);
+  if (!state)
+    return { code: 2, out: `wf: стан пошкоджено (${stateFile}) — виправте або видаліть файл` };
+  if (event.type !== 'start' && !state.task) {
+    return { code: 2, out: 'wf: немає активної задачі (wf start <id>)' };
+  }
+  if (event.type === 'start' && !args.flags.force && state.task) {
+    const open = state.items.filter((i) => i.status !== 'done').length;
+    if (open > 0) {
+      throw new Error(
+        `задача ${state.task.id} має ${open} незакритих пунктів; start --force замінить її`,
+      );
+    }
+  }
+  const next = reduce(state, event);
+  const tmp = `${stateFile}.${process.pid}.tmp`;
+  writeFileSync(tmp, `${JSON.stringify(next, null, 2)}\n`);
+  renameSync(tmp, stateFile);
+  appendFileSync(join(dir, 'wf-events.jsonl'), `${JSON.stringify(toJournalEntry(event))}\n`);
+  return { code: 0, out: renderStatus(next) };
+}
+
 export function run(
   argv,
   { dir = process.env.WF_STATE_DIR ?? join(ROOT, '.claude/state'), now = Date.now() } = {},
 ) {
   const [cmd, ...restArgs] = argv;
-  const stateFile = join(dir, 'wf.json');
-  const journal = join(dir, 'wf-events.jsonl');
-  let state = emptyState();
-  if (existsSync(stateFile)) {
-    try {
-      state = JSON.parse(readFileSync(stateFile, 'utf8'));
-    } catch {
-      state = null;
-    }
-    if (!isValidState(state)) {
-      return { code: 2, out: `wf: стан пошкоджено (${stateFile}) — виправте або видаліть файл` };
-    }
+  if (cmd === 'status' || cmd === undefined) {
+    const state = load(join(dir, 'wf.json'));
+    return state
+      ? { code: 0, out: renderStatus(state) }
+      : {
+          code: 2,
+          out: `wf: стан пошкоджено (${join(dir, 'wf.json')}) — виправте або видаліть файл`,
+        };
   }
-  if (cmd === 'status' || cmd === undefined) return { code: 0, out: renderStatus(state) };
   const args = parseArgs(restArgs);
   const event = buildEvent(cmd, args, now);
   if (!event) return { code: 2, out: `wf: невідома команда: ${cmd}` };
   try {
-    if (event.type === 'start' && !args.flags.force && state.task) {
-      const open = state.items.filter((i) => i.status !== 'done').length;
-      if (open > 0) {
-        throw new Error(
-          `задача ${state.task.id} має ${open} незакритих пунктів; start --force замінить її`,
-        );
-      }
-    }
-    const next = reduce(state, event);
-    mkdirSync(dir, { recursive: true });
-    const tmp = `${stateFile}.${process.pid}.tmp`;
-    writeFileSync(tmp, `${JSON.stringify(next, null, 2)}\n`);
-    renameSync(tmp, stateFile);
-    appendFileSync(journal, `${JSON.stringify(toJournalEntry(event))}\n`);
-    return { code: 0, out: renderStatus(next) };
+    return withLock(dir, () => apply(dir, event, args));
   } catch (e) {
     return { code: 2, out: `wf: ${e.message}` };
   }

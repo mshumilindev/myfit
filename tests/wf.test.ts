@@ -3,7 +3,9 @@
  * status stays ≤12 lines, stall hints change of approach (never stop).
  */
 import { mkdtempSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { execFile } from 'node:child_process';
 import { tmpdir } from 'node:os';
+import { promisify } from 'node:util';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 // @ts-expect-error — plain .mjs without type declarations
@@ -185,5 +187,63 @@ describe('wf hardening (verifier findings)', () => {
     const dir = fresh();
     run(['start', 'S'], { dir, now: T });
     expect(readdirSync(dir).sort()).toEqual(['wf-events.jsonl', 'wf.json']);
+  });
+});
+
+describe('wf hardening, round 2', () => {
+  const fresh = () => mkdtempSync(join(tmpdir(), 'wf-'));
+
+  it('deeply invalid state files are rejected cleanly', () => {
+    const bodies = [
+      '{"task":{"id":"T"},"items":[null]}',
+      '{"task":{"id":"T"},"items":[1,"x"]}',
+      '{"task":{"id":"T"},"items":[{"id":"a","status":"weird"}]}',
+      '{"task":{"id":"T"},"items":[],"stall":"zz"}',
+    ];
+    for (const body of bodies) {
+      const dir = fresh();
+      writeFileSync(join(dir, 'wf.json'), body);
+      expect(run(['status'], { dir, now: T }).code).toBe(2);
+      expect(run(['add', 'x'], { dir, now: T }).code).toBe(2);
+    }
+  });
+
+  it('mutating commands need an active task and write nothing otherwise', () => {
+    const dir = fresh();
+    for (const argv of [['add', 'q'], ['heartbeat'], ['doing', 'q']]) {
+      expect(run(argv, { dir, now: T }).code).toBe(2);
+    }
+    expect(readdirSync(dir)).toEqual([]);
+  });
+
+  it('flags without a value never become booleans in the state; --force may precede the id', () => {
+    const dir = fresh();
+    run(['start', 'S'], { dir, now: T });
+    run(['add', 'a', '--text'], { dir, now: T });
+    expect(JSON.parse(readFileSync(join(dir, 'wf.json'), 'utf8')).items[0].text).toBe('');
+    run(['add', 'b'], { dir, now: T });
+    expect(run(['start', '--force', 'OTHER'], { dir, now: T }).code).toBe(0);
+  });
+
+  it('parallel invocations lose no updates (state and journal agree)', async () => {
+    const dir = fresh();
+    run(['start', 'S'], { dir, now: T });
+    const cli = join(__dirname, '..', 'scripts', 'wf.mjs');
+    const exec = promisify(execFile);
+    await Promise.all(
+      Array.from({ length: 12 }, (_, i) =>
+        exec('node', [cli, 'add', `i${i}`], { env: { ...process.env, WF_STATE_DIR: dir } }),
+      ),
+    );
+    const items = JSON.parse(readFileSync(join(dir, 'wf.json'), 'utf8')).items;
+    expect(items).toHaveLength(12);
+    expect(readFileSync(join(dir, 'wf-events.jsonl'), 'utf8').trim().split('\n')).toHaveLength(13);
+    expect(readdirSync(dir).sort()).toEqual(['wf-events.jsonl', 'wf.json']);
+  }, 30000);
+
+  it('stall hint says to change approach and never to stop', () => {
+    let s = withItems();
+    for (let i = 0; i < STALL_AFTER; i += 1) s = reduce(s, { type: 'heartbeat', ts: T });
+    expect(renderStatus(s)).toContain('не зупинятись');
   });
 });
