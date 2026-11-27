@@ -67,6 +67,9 @@ export const LEGAL_CHANGELOG: readonly LegalChangelogEntry[] = [
   // SPO-552 Planner: reminders are a convenience and not a guarantee, and are not to be relied on for medication or safety
   // ({{ЮРИСТ}} confirms that this is a material change of the terms).
   { doc: 'terms', version: '2026-11-12', kind: 'material', bullets: ['terms'] },
+  // SPO-639 G: anonymous crash reports (error type, masked message, function and file names, app version, language, online flag)
+  // go to Google Cloud Logging for 30 days; no account identifier. New data category.
+  { doc: 'policy', version: '2026-11-27', kind: 'material', bullets: ['category'] },
 ];
 
 /** Entries of a document after `from` (exclusive) up to `to` (inclusive). */
