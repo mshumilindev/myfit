@@ -49,6 +49,10 @@ export default tseslint.config(
     },
   },
   {
+    files: ['dev-dashboard/ui/**/*.js'],
+    languageOptions: { ecmaVersion: 2022, sourceType: 'module', globals: { ...globals.browser } },
+  },
+  {
     files: [
       'desktop/src/**/*.ts',
       'functions/src/**/*.ts',

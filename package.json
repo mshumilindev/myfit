@@ -21,7 +21,7 @@
     "audit:drawer-stack": "node scripts/drawer-stack-audit.mjs",
     "audit:pixels": "node scripts/pixel-diff.mjs",
     "theme:new": "node scripts/theme-new.mjs",
-    "dev": "npm run dev -w client",
+    "dev": "node scripts/dev-all.mjs",
     "build": "npm run build -w client && npm run build -w desktop",
     "tray": "npm run start -w desktop",
     "typecheck": "npm run typecheck -w client && npm run typecheck -w desktop && npm run typecheck -w dev-dashboard",
@@ -52,7 +52,8 @@
     "lint:css": "node scripts/stylelint-ratchet.mjs",
     "deps:check": "depcruise client/src --config .dependency-cruiser.cjs --ignore-known .dependency-cruiser-known-violations.json",
     "deps:baseline": "depcruise client/src --config .dependency-cruiser.cjs --output-type baseline > .dependency-cruiser-known-violations.json",
-    "metrics:stability": "node scripts/stability-metrics.mjs"
+    "metrics:stability": "node scripts/stability-metrics.mjs",
+    "dev:console": "node dev-dashboard/server/main.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -1,3 +1,4 @@
+import { spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { request } from 'node:http';
 import { join, resolve } from 'node:path';
@@ -237,4 +238,64 @@ describe('selectBranchesToDelete', () => {
       }),
     ).toEqual([]);
   });
+});
+
+describe('tab closing (B7)', () => {
+  it('closes only when deployed AND no ready branch is left', async () => {
+    // @ts-expect-error plain ESM without types
+    const { isClosed, readClosed } = await import('../dev-dashboard/server/collector.mjs');
+    const closed = new Set(['SPO-1']);
+    expect(isClosed({ id: 'SPO-1', closed, hasReadyBranch: false })).toBe(true);
+    expect(isClosed({ id: 'SPO-1', closed, hasReadyBranch: true })).toBe(false);
+    expect(isClosed({ id: 'SPO-2', closed, hasReadyBranch: false })).toBe(false);
+    expect(readClosed(join(work, 'nothing')).size).toBe(0);
+  });
+  it('dash-close writes a valid list the collector drops tasks by, and rejects junk ids', () => {
+    const state = join(work, 'closestate');
+    const run = (id: string) =>
+      spawnSync(process.execPath, [join(ROOT, 'scripts/dash-close.mjs'), id], {
+        encoding: 'utf8',
+        env: { ...process.env, WF_STATE_DIR: state },
+      });
+    expect(run('../etc').status).toBe(2);
+    expect(run('SPO-639').status).toBe(0);
+    expect(run('SPO-639').status).toBe(0); // idempotent
+    const root = join(work, 'closeroot');
+    mkdirSync(join(root, 'docs'), { recursive: true });
+    const snap = collect({
+      root,
+      stateDir: state,
+      git: (...a: string[]) => (a.includes('--no-merged') ? 'SPO-639-x\nSPO-640-y' : ''),
+    });
+    expect(snap.tasks.map((t: { id: string }) => t.id)).toEqual(['SPO-640']);
+  });
+});
+
+describe('dev-all runner (B6)', () => {
+  it('stops everything when the client dies, keeps the client when the console dies', async () => {
+    // @ts-expect-error plain ESM without types
+    const { runAll, childSpecs } = await import('../scripts/dev-all.mjs');
+    expect(childSpecs().map((c: { name: string }) => c.name)).toEqual(['client', 'dev-console']);
+    expect(childSpecs()[0].args).toContain('--strictPort');
+    const node = (code: string) => ({ cmd: process.execPath, args: ['-e', code] });
+    const logs: string[] = [];
+    const sleeper = 'setTimeout(()=>{},30000)';
+    const code1 = await runAll(
+      [
+        { name: 'client', ...node('process.exit(3)'), essential: true },
+        { name: 'dev-console', ...node(sleeper), essential: false },
+      ],
+      { log: (s: string) => logs.push(s) },
+    );
+    expect(code1).toBe(3); // client died → console was terminated, no hang
+    const code2 = await runAll(
+      [
+        { name: 'client', ...node('setTimeout(()=>process.exit(0),700)'), essential: true },
+        { name: 'dev-console', ...node('process.exit(1)'), essential: false },
+      ],
+      { log: (s: string) => logs.push(s) },
+    );
+    expect(code2).toBe(0);
+    expect(logs.join('\n')).toContain('the client keeps running');
+  }, 20000);
 });

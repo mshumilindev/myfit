@@ -86,6 +86,31 @@ function mergeShards(shards) {
   return sum;
 }
 
+/**
+ * Tasks marked Deployed to prod (`scripts/dash-close.mjs SPO-N`, run by the cpd step after the branch is deleted).
+ * @param {string} root @param {string} [stateDir] @returns {Set<string>}
+ */
+export function readClosed(root, stateDir) {
+  try {
+    const o = JSON.parse(
+      readFileSync(join(stateDir ?? join(root, '.claude/state'), 'deployed-prod.json'), 'utf8'),
+    );
+    return new Set(
+      Array.isArray(o.tasks)
+        ? o.tasks.filter((/** @type {any} */ x) => typeof x === 'string' && TASK_RE.test(x))
+        : [],
+    );
+  } catch {
+    return new Set();
+  }
+}
+
+/** A tab closes only when the task is Deployed to prod AND no ready-for-cpd branch is left (spec B7). */
+/** @param {{ id: string, closed: Set<string>, hasReadyBranch: boolean }} o */
+export function isClosed({ id, closed, hasReadyBranch }) {
+  return closed.has(id) && !hasReadyBranch;
+}
+
 /** @param {string} root @param {string} [stateDir] @returns {any} */
 function readWf(root, stateDir) {
   try {
@@ -133,29 +158,35 @@ export function collect({ root, stateDir, git, now = Date.now() }) {
   }
   for (const t of unmerged) ids.add(t);
 
-  const tasks = [...ids].sort().map((id) => {
-    const isWf = wf?.task?.id === id;
-    const items = isWf && Array.isArray(wf.items) ? wf.items : [];
-    const counts = Object.fromEntries(
-      STATUSES.map((s) => [s, items.filter((/** @type {any} */ i) => i.status === s).length]),
-    );
-    const done = counts.done;
-    const branch = [...ready.keys()].find((n) => taskOfBranch(n) === id) ?? null;
-    return {
-      id,
-      source: isWf ? 'wf' : branch ? 'ready' : 'branch',
-      plan: {
-        total: items.length,
-        ...counts,
-        pct: items.length ? Math.round((done / items.length) * 100) : 0,
-      },
-      blocked: items
-        .filter((/** @type {any} */ i) => i.status === 'blocked')
-        .map((/** @type {any} */ i) => ({ id: i.id, needs: i.needs })),
-      branch,
-      capture: mergeShards(shardsOf(root, id)),
-    };
-  });
+  const closed = readClosed(root, stateDir);
+  const hasReady = (/** @type {string} */ id) =>
+    [...ready.keys()].some((n) => taskOfBranch(n) === id);
+  const tasks = [...ids]
+    .filter((id) => !isClosed({ id, closed, hasReadyBranch: hasReady(id) }))
+    .sort()
+    .map((id) => {
+      const isWf = wf?.task?.id === id;
+      const items = isWf && Array.isArray(wf.items) ? wf.items : [];
+      const counts = Object.fromEntries(
+        STATUSES.map((s) => [s, items.filter((/** @type {any} */ i) => i.status === s).length]),
+      );
+      const done = counts.done;
+      const branch = [...ready.keys()].find((n) => taskOfBranch(n) === id) ?? null;
+      return {
+        id,
+        source: isWf ? 'wf' : branch ? 'ready' : 'branch',
+        plan: {
+          total: items.length,
+          ...counts,
+          pct: items.length ? Math.round((done / items.length) * 100) : 0,
+        },
+        blocked: items
+          .filter((/** @type {any} */ i) => i.status === 'blocked')
+          .map((/** @type {any} */ i) => ({ id: i.id, needs: i.needs })),
+        branch,
+        capture: mergeShards(shardsOf(root, id)),
+      };
+    });
   return { v: SNAPSHOT_V, generatedAt: now, tasks, readyBranches: [...ready.keys()].sort() };
 }
 
