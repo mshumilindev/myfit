@@ -111,6 +111,84 @@ export function isClosed({ id, closed, hasReadyBranch }) {
   return closed.has(id) && !hasReadyBranch;
 }
 
+/** @param {string} s */
+const kindOfDoc = (s) =>
+  /spike/i.test(s)
+    ? 'spike'
+    : /risk/i.test(s)
+      ? 'risk'
+      : /plan/i.test(s)
+        ? 'plan'
+        : /design|canvas/i.test(s)
+          ? 'design'
+          : /closeout/i.test(s)
+            ? 'closeout'
+            : /spec|W\d+/i.test(s)
+              ? 'spec'
+              : 'doc';
+
+/** Documents of a task under docs/specs and docs/plans (names only, no content). @param {string} root @param {string} id */
+export function docsOf(root, id) {
+  const out = [];
+  for (const dir of ['docs/specs', 'docs/plans']) {
+    let files;
+    try {
+      files = readdirSync(join(root, dir));
+    } catch {
+      continue;
+    }
+    for (const f of files.sort()) {
+      if (!f.endsWith('.md') || !f.startsWith(`${id}-`)) continue;
+      out.push({
+        name: f.replace(/\.md$/, '').slice(0, 70),
+        kind: kindOfDoc(f),
+        dir: dir.slice(5),
+      });
+    }
+  }
+  return out;
+}
+
+/** Risk register counts from `| R<n> |` rows of the task's risk docs: impact H/M/L as marked in the table. @param {string} root @param {string} id */
+export function risksOf(root, id) {
+  const sum = { total: 0, high: 0, medium: 0, low: 0 };
+  let files;
+  try {
+    files = readdirSync(join(root, 'docs/plans')).filter(
+      (f) => f.startsWith(`${id}-`) && /risk/i.test(f),
+    );
+  } catch {
+    return sum;
+  }
+  const seen = new Set();
+  for (const f of files) {
+    for (const line of readFileSync(join(root, 'docs/plans', f), 'utf8').split('\n')) {
+      const m = /^\|\s*(R\d+)\s*\|(.*)$/.exec(line);
+      if (!m || seen.has(m[1])) continue;
+      seen.add(m[1]);
+      sum.total += 1;
+      const cells = m[2].split('|').map((c) => c.replace(/\*/g, '').trim());
+      const impact = cells[2];
+      if (impact === 'H') sum.high += 1;
+      else if (impact === 'M') sum.medium += 1;
+      else sum.low += 1;
+    }
+  }
+  return sum;
+}
+
+/** Rule files in .claude/rules (names only). @param {string} root */
+export function rulesOf(root) {
+  try {
+    return readdirSync(join(root, '.claude/rules'))
+      .filter((f) => f.endsWith('.md'))
+      .map((f) => f.replace(/\.md$/, ''))
+      .sort();
+  } catch {
+    return [];
+  }
+}
+
 /** @param {string} root @param {string} [stateDir] @returns {any} */
 function readWf(root, stateDir) {
   try {
@@ -180,6 +258,14 @@ export function collect({ root, stateDir, git, now = Date.now() }) {
           ...counts,
           pct: items.length ? Math.round((done / items.length) * 100) : 0,
         },
+        items: items.map((/** @type {any} */ i) => ({
+          id: String(i.id).slice(0, 20),
+          status: i.status,
+          kind: i.kind,
+          text: String(i.text ?? '').slice(0, 70),
+        })),
+        docs: docsOf(root, id),
+        risks: risksOf(root, id),
         blocked: items
           .filter((/** @type {any} */ i) => i.status === 'blocked')
           .map((/** @type {any} */ i) => ({ id: i.id, needs: i.needs })),
@@ -187,11 +273,17 @@ export function collect({ root, stateDir, git, now = Date.now() }) {
         capture: mergeShards(shardsOf(root, id)),
       };
     });
-  return { v: SNAPSHOT_V, generatedAt: now, tasks, readyBranches: [...ready.keys()].sort() };
+  return {
+    v: SNAPSHOT_V,
+    generatedAt: now,
+    tasks,
+    readyBranches: [...ready.keys()].sort(),
+    rules: rulesOf(root),
+  };
 }
 
 const SECRET_LIKE =
-  /(ghp_|github_pat_|sk-[A-Za-z0-9]|lin_api_|AIza|xox[abp]-|[A-Za-z0-9+/_-]{32,})/;
+  /(\bghp_|\bgithub_pat_|\bsk-[A-Za-z0-9]{8,}|\blin_api_|\bAIza|\bxox[abp]-|[A-Za-z0-9+/_]{32,})/;
 const EMAIL_LIKE = /\S+@\S+\.\S+/;
 
 /** Returns a list of problems; empty = safe to serve/commit. Every string must be short and free of token/email shapes. */

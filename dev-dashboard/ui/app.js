@@ -111,6 +111,7 @@ function render() {
           state.tab = tab;
           render();
         },
+        snap,
       ),
     ];
 

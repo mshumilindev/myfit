@@ -166,6 +166,10 @@ describe('collector', () => {
     const t = snap.tasks[0];
     expect(t.plan).toMatchObject({ total: 4, done: 1, blocked: 1, todo: 1, doing: 1, pct: 25 });
     expect(t.blocked).toEqual([{ id: 'B', needs: 'cpd' }]);
+    expect(t.items).toHaveLength(4);
+    expect(t.docs).toEqual([]);
+    expect(t.risks.total).toBe(0);
+    expect(snap.rules).toEqual([]);
     expect(t.capture).toMatchObject({
       sessions: 1,
       prompts: 3,
@@ -195,6 +199,12 @@ describe('collector', () => {
     expect(validateSnapshot({ ...base, x: 'z'.repeat(81) }).length).toBeGreaterThan(0);
     expect(validateSnapshot({ ...base, tasks: [{ id: 'bad' }] }).length).toBeGreaterThan(0);
     expect(validateSnapshot({ v: 2, tasks: [] })).toContain('$.v: unknown schema version');
+    expect(
+      validateSnapshot({ ...base, rules: ['risk-assessment', 'sk-' + 'a'.repeat(10)] }).length,
+    ).toBe(1); // a real key shape, not the word risk-assessment
+    expect(
+      validateSnapshot({ ...base, docs: ['SPO-639-G-error-monitoring-spike-with-long-name'] }),
+    ).toEqual([]); // kebab-case names are not tokens
     expect(validateSnapshot(base)).toEqual([]);
   });
   it('taskOfBranch', () => {
@@ -298,4 +308,32 @@ describe('dev-all runner (B6)', () => {
     expect(code2).toBe(0);
     expect(logs.join('\n')).toContain('the client keeps running');
   }, 20000);
+});
+
+describe('task data for the tabs (W18)', () => {
+  it('reads documents, risk impact counts, plan items and rule names without content', async () => {
+    // @ts-expect-error plain ESM without types
+    const { docsOf, risksOf, rulesOf } = await import('../dev-dashboard/server/collector.mjs');
+    const root = join(work, 'tabs');
+    mkdirSync(join(root, 'docs/plans'), { recursive: true });
+    mkdirSync(join(root, 'docs/specs'), { recursive: true });
+    mkdirSync(join(root, '.claude/rules'), { recursive: true });
+    writeFileSync(join(root, 'docs/specs/SPO-9-spike.md'), 'x');
+    writeFileSync(join(root, 'docs/plans/SPO-9-dev-plan.md'), 'x');
+    writeFileSync(join(root, 'docs/plans/SPO-10-other.md'), 'x');
+    writeFileSync(
+      join(root, 'docs/plans/SPO-9-risk.md'),
+      '| R1 | a | L | **H** | m |\n| R2 | b | M | M | m |\n| R3 | c | M | L | m |\n| R1 | dup | L | H | m |\n',
+    );
+    writeFileSync(join(root, '.claude/rules/tests.md'), 'x');
+    expect(docsOf(root, 'SPO-9').map((d: { kind: string }) => d.kind)).toEqual([
+      'spike',
+      'plan',
+      'risk',
+    ]);
+    expect(docsOf(root, 'SPO-9')).toHaveLength(3);
+    expect(risksOf(root, 'SPO-9')).toEqual({ total: 3, high: 1, medium: 1, low: 1 });
+    expect(rulesOf(root)).toEqual(['tests']);
+    expect(risksOf(root, 'SPO-77')).toEqual({ total: 0, high: 0, medium: 0, low: 0 });
+  });
 });

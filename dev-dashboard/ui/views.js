@@ -176,8 +176,29 @@ function plan(t) {
         parts.map(([k]) => h('span', null, `${k} ${t.plan[k]}`)),
       ),
     ),
-    t.source === 'wf'
-      ? note('Item texts and evidence arrive from the wf state in a later step; counts are live.')
+    t.items.length
+      ? card(
+          'Items',
+          `${t.items.length}`,
+          h(
+            'div',
+            { class: 'tbl' },
+            t.items.map((i) =>
+              h(
+                'div',
+                { class: 'row', style: 'grid-template-columns:28px 60px minmax(0,1fr) 80px' },
+                h('span', { class: 'chk' + (i.status === 'done' ? ' on' : '') }),
+                h('span', { class: 't-id' }, i.id),
+                h('span', { class: 't-m' }, i.text),
+                h(
+                  'span',
+                  { class: `pill ${{ done: 'l', blocked: 'p', doing: 'w' }[i.status] ?? 'c'}` },
+                  i.status,
+                ),
+              ),
+            ),
+          ),
+        )
       : note('This task is not the active wf task, so only the branch is known.'),
   ];
 }
@@ -212,24 +233,78 @@ function pauses(t) {
   ];
 }
 
+function docs(t) {
+  if (!t.docs.length)
+    return [
+      card(
+        'Spike → Plan',
+        null,
+        note('No spike, design, risk or plan documents found for this task.'),
+      ),
+    ];
+  return [
+    card(
+      'Spike → Plan',
+      `${t.docs.length} documents`,
+      h(
+        'div',
+        { class: 'tbl' },
+        t.docs.map((d) =>
+          h(
+            'div',
+            { class: 'row', style: 'grid-template-columns:90px minmax(0,1fr) 70px' },
+            h('span', { class: 'pill n' }, d.kind),
+            h('span', { class: 't-mono' }, d.name),
+            h('span', { class: 't-m' }, d.dir),
+          ),
+        ),
+      ),
+    ),
+  ];
+}
+
+function risks(t) {
+  const r = t.risks;
+  if (!r.total) return [card('Risks', null, note('No risk register found for this task.'))];
+  return [
+    h(
+      'div',
+      { class: 'kpis' },
+      kpi('Risks', String(r.total), 'in the register'),
+      kpi('High impact', String(r.high), 'need a proof'),
+      kpi('Medium', String(r.medium), 'impact'),
+      kpi('Low', String(r.low), 'impact'),
+    ),
+    note('Open versus closed is tracked in the close-out document, not parsed here yet.'),
+  ];
+}
+
+function rules(snap) {
+  return [
+    card(
+      'Rules & DoD',
+      `${snap.rules.length} rule files`,
+      h(
+        'div',
+        { class: 'steps' },
+        snap.rules.map((r) => h('span', { class: 'step done' }, r)),
+      ),
+    ),
+  ];
+}
+
 const PENDING = {
-  docs: [
-    'Spike → Plan',
-    'Spike, design, risk and plan documents are listed here once the collector reads docs/specs and docs/plans.',
-  ],
   runs: [
     'Runs',
     'Command runs per task need the journal fields to be extended; not collected yet.',
   ],
   ci: ['CI', 'CI status needs the GitHub API; it arrives with the cpd workflow integration.'],
   quality: ['Quality', 'Gate results (lint, typecheck, tests) are not collected yet.'],
-  risks: ['Risks', 'The risk register is read from docs/plans/SPO-N-*-risk.md in a later step.'],
-  rules: ['Rules & DoD', 'Rule coverage is read from CLAUDE.md and .claude/rules in a later step.'],
   linearsync: ['Linear sync', 'Needs a Linear API key on the owner machine (wf item B).'],
   release: ['Release', 'Release state follows Linear status and the deployed marker (wf item B).'],
 };
 
-export function taskView(t, tab, selectTab) {
+export function taskView(t, tab, selectTab, snap) {
   const body =
     tab === 'overview'
       ? overview(t)
@@ -237,7 +312,13 @@ export function taskView(t, tab, selectTab) {
         ? plan(t)
         : tab === 'pauses'
           ? pauses(t)
-          : [card(PENDING[tab][0], 'not collected yet', note(PENDING[tab][1]))];
+          : tab === 'docs'
+            ? docs(t)
+            : tab === 'risks'
+              ? risks(t)
+              : tab === 'rules'
+                ? rules(snap)
+                : [card(PENDING[tab][0], 'not collected yet', note(PENDING[tab][1]))];
   return [
     h(
       'div',
