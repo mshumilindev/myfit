@@ -366,11 +366,73 @@ function runs(t) {
   ];
 }
 
+function ci(snap) {
+  if (!snap.ci.length)
+    return [
+      card(
+        'CI',
+        'main',
+        note(
+          'No CI data: the GitHub CLI (gh) is not available on this machine or has no access. Install and sign in to gh to see runs here.',
+        ),
+      ),
+    ];
+  return [
+    card(
+      'CI · main',
+      `${snap.ci.length} latest runs`,
+      h(
+        'div',
+        { class: 'tbl' },
+        snap.ci.map((r) =>
+          h(
+            'div',
+            { class: 'row', style: 'grid-template-columns:minmax(0,1fr) 90px 80px 70px' },
+            h('span', { class: 't-m' }, r.name),
+            h(
+              'span',
+              {
+                class:
+                  'pill ' + (r.status === 'success' ? 'l' : r.status === 'failure' ? 's' : 'c'),
+              },
+              r.status,
+            ),
+            h('span', { class: 't-mono' }, r.sha),
+            h(
+              'span',
+              { class: 't-m' },
+              r.sec === null ? '' : `${Math.floor(r.sec / 60)}m ${r.sec % 60}s`,
+            ),
+          ),
+        ),
+      ),
+    ),
+  ];
+}
+
+function release(snap, t) {
+  const waiting = t.source === 'ready';
+  return [
+    h(
+      'div',
+      { class: 'kpis' },
+      kpi('Unpushed commits', String(snap.release.unpushed), 'on main, waiting for cpd'),
+      kpi('Branch', waiting ? 'ready' : 'none', t.branch ?? 'no ready-for-cpd branch'),
+      kpi(
+        'Deployed to prod',
+        snap.release.deployed.includes(t.id) ? 'yes' : 'no',
+        'marked by dash-close',
+      ),
+    ),
+    note(
+      'Linear status and release notes need the Linear key (wf item B); nothing is pushed or deployed without the owner saying cpd.',
+    ),
+  ];
+}
+
 const PENDING = {
-  ci: ['CI', 'CI status needs the GitHub API; it arrives with the cpd workflow integration.'],
   quality: ['Quality', 'Gate results (lint, typecheck, tests) are not collected yet.'],
   linearsync: ['Linear sync', 'Needs a Linear API key on the owner machine (wf item B).'],
-  release: ['Release', 'Release state follows Linear status and the deployed marker (wf item B).'],
 };
 
 export function taskView(t, tab, selectTab, snap) {
@@ -385,11 +447,15 @@ export function taskView(t, tab, selectTab, snap) {
             ? docs(t)
             : tab === 'runs'
               ? runs(t)
-              : tab === 'risks'
-                ? risks(t)
-                : tab === 'rules'
-                  ? rules(snap)
-                  : [card(PENDING[tab][0], 'not collected yet', note(PENDING[tab][1]))];
+              : tab === 'ci'
+                ? ci(snap)
+                : tab === 'release'
+                  ? release(snap, t)
+                  : tab === 'risks'
+                    ? risks(t)
+                    : tab === 'rules'
+                      ? rules(snap)
+                      : [card(PENDING[tab][0], 'not collected yet', note(PENDING[tab][1]))];
   return [
     h(
       'div',

@@ -338,3 +338,45 @@ describe('task data for the tabs (W18)', () => {
     expect(risksOf(root, 'SPO-77')).toEqual({ total: 0, high: 0, medium: 0, low: 0 });
   });
 });
+
+describe('CI and release data (W31)', () => {
+  it('maps gh runs, and a missing or broken gh gives an empty list, never an error', async () => {
+    // @ts-expect-error plain ESM without types
+    const { ciRuns } = await import('../dev-dashboard/server/collector.mjs');
+    const ok = JSON.stringify({
+      workflow_runs: [
+        {
+          name: 'CI',
+          conclusion: 'success',
+          head_sha: 'abcdef1234',
+          run_started_at: '2026-11-28T00:00:00Z',
+          updated_at: '2026-11-28T00:02:41Z',
+        },
+        { name: 'Deploy', status: 'in_progress', head_sha: '1234567890' },
+      ],
+    });
+    const runs = ciRuns(() => ok);
+    expect(runs[0]).toEqual({ name: 'CI', status: 'success', sha: 'abcdef1', sec: 161 });
+    expect(runs[1]).toMatchObject({ status: 'in_progress', sec: null });
+    expect(
+      ciRuns(() => {
+        throw new Error('no gh');
+      }),
+    ).toEqual([]);
+    expect(ciRuns(() => 'not json')).toEqual([]);
+    expect(ciRuns(() => '{}')).toEqual([]);
+  });
+  it('snapshot carries ci and release and still validates', () => {
+    const snap = collect({
+      root: join(work, 'repo'),
+      git: (...a: string[]) => (a[0] === 'rev-list' ? '7' : ''),
+      gh: () =>
+        JSON.stringify({
+          workflow_runs: [{ name: 'CI', conclusion: 'failure', head_sha: 'abcdef1' }],
+        }),
+    });
+    expect(snap.release.unpushed).toBe(7);
+    expect(snap.ci[0].status).toBe('failure');
+    expect(validateSnapshot(snap)).toEqual([]);
+  });
+});

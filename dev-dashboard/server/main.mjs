@@ -18,11 +18,25 @@ const git = (...a) =>
     timeout: 8000,
   }).trim();
 
+/** gh is optional; results are cached for a minute so polling never hammers the API. */
+let ghCache = { at: 0, out: '' };
+const gh = (/** @type {string} */ path) => {
+  if (Date.now() - ghCache.at < 60000) return ghCache.out;
+  const out = execFileSync('gh', ['api', path], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'ignore'],
+    timeout: 8000,
+  });
+  ghCache = { at: Date.now(), out };
+  return out;
+};
+
 const server = createDashServer({
   uiRoot: join(HERE, '../ui'),
   port: PORT,
   collect: () => {
-    const snap = collect({ root: ROOT, git });
+    const snap = collect({ root: ROOT, git, gh });
     const problems = validateSnapshot(snap);
     return problems.length
       ? { v: snap.v, error: 'snapshot-rejected', problems: problems.slice(0, 5) }

@@ -207,9 +207,32 @@ function readWf(root, stateDir) {
 }
 
 /**
- * @param {{ root: string, stateDir?: string, git: (...args: string[]) => string, now?: number }} o
+ * Latest CI runs of main via an injected `gh api` runner (optional: no gh or no network = empty list, never an error).
+ * @param {(path: string) => string} gh
  */
-export function collect({ root, stateDir, git, now = Date.now() }) {
+export function ciRuns(gh) {
+  try {
+    const o = JSON.parse(gh('repos/mshumilindev/myfit/actions/runs?branch=main&per_page=8'));
+    return (Array.isArray(o.workflow_runs) ? o.workflow_runs : [])
+      .slice(0, 8)
+      .map((/** @type {any} */ r) => {
+        const ms = Date.parse(r.updated_at) - Date.parse(r.run_started_at);
+        return {
+          name: String(r.name ?? '').slice(0, 40),
+          status: String(r.conclusion ?? r.status ?? 'unknown').slice(0, 20),
+          sha: String(r.head_sha ?? '').slice(0, 7),
+          sec: Number.isFinite(ms) ? Math.max(0, Math.round(ms / 1000)) : null,
+        };
+      });
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * @param {{ root: string, stateDir?: string, git: (...args: string[]) => string, gh?: (path: string) => string, now?: number }} o
+ */
+export function collect({ root, stateDir, git, gh, now = Date.now() }) {
   /** @param {...string} a */
   const safeGit = (...a) => {
     try {
@@ -284,6 +307,11 @@ export function collect({ root, stateDir, git, now = Date.now() }) {
     generatedAt: now,
     tasks,
     readyBranches: [...ready.keys()].sort(),
+    ci: gh ? ciRuns(gh) : [],
+    release: {
+      unpushed: Number(safeGit('rev-list', '--count', 'origin/main..HEAD')) || 0,
+      deployed: [...closed].sort(),
+    },
     rules: rulesOf(root),
   };
 }
