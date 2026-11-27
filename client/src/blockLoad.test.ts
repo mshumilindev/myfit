@@ -6,9 +6,10 @@ import {
   BLOCK_SECONDS_PER_SET,
   blockMuscleLoad,
 } from './blockLoad';
-import { acuteCap, muscleFatigue } from './fatigue';
-import { muscleReadiness } from './recovery';
-import { muscleSetsInWorkout, workoutSets, workoutVolumeKg } from './store';
+import { acuteCap, acuteFatigueScore, muscleFatigue } from './fatigue';
+import { muscleReadiness, RECOVERY_DAYS } from './recovery';
+import { LANDMARKS } from './volume';
+import { muscleSetsInWorkout, SECONDARY_SET_WEIGHT, workoutSets, workoutVolumeKg } from './store';
 import { recentLoadSets } from './loadWindow';
 import { weeklyMuscleSets } from './volume';
 import type { WorkoutBlock } from './timeBlocks/model';
@@ -160,6 +161,60 @@ describe('fatigue and readiness read blocks; volume does not', () => {
     expect(quads(two).acuteDays ?? 0).toBeGreaterThanOrEqual(quads(solo).acuteDays ?? 0);
     expect(quads(two).score).toBeGreaterThan(quads(solo).score);
     expect(acuteCap(3, 12)).toBeGreaterThan(0);
+  });
+
+  it('the acute dose is the exact sum of the lift and the block of that session', () => {
+    // 3 working sets of squat + a block worth 6 × 10 / 10 × 0.5 = 3 equivalent sets on quads = dose 6
+    const blockSets = (6 * 10) / BLOCK_REPS_PER_SET;
+    const blockDose = blockSets * BLOCK_LOAD_WEIGHT;
+    const mixed = [
+      session(
+        0.1,
+        [lift('Barbell Squat', 3)],
+        [
+          blk({
+            members: [{ name: 'Goblet Squat', reps: '10' }],
+            result: { rounds: 6, savedAt: 1 },
+          }),
+        ],
+      ),
+    ];
+    const lm = new Map([['quads' as const, LANDMARKS.quads]]);
+    const f = muscleFatigue(mixed, NOW, lm).get('quads')!;
+    const expected = acuteFatigueScore(
+      0.1,
+      3 + blockDose,
+      RECOVERY_DAYS.quads ?? 2,
+      LANDMARKS.quads.mav,
+      NOW,
+    );
+    // the acute term is the one that sets the score here, and it reads dose = lift + block, not the block alone
+    expect(f.score).toBeCloseTo(expected, 9);
+    const blockOnly = acuteFatigueScore(
+      0.1,
+      blockDose,
+      RECOVERY_DAYS.quads ?? 2,
+      LANDMARKS.quads.mav,
+      NOW,
+    );
+    expect(expected).not.toBeCloseTo(blockOnly, 3);
+  });
+
+  it('secondary muscles of a block load readiness at the secondary weight', () => {
+    const w = session(1, [], [blk()]); // 8 rounds × 5 pullups: lats primary 2, biceps secondary 2
+    const load = blockMuscleLoad(w);
+    const sec = load.get('biceps')!.secondary;
+    expect(sec).toBeGreaterThan(0);
+    const r = muscleReadiness([w], NOW);
+    expect(r.get('lats')!.lastDose).toBeCloseTo(load.get('lats')!.primary, 6);
+    expect(r.get('biceps')!.lastDose).toBeCloseTo(sec * SECONDARY_SET_WEIGHT, 6);
+    // and the lift dose of the same session adds to the secondary one
+    const both = session(1, [lift('Barbell Row', 3)], [blk()]);
+    const bothDose = muscleReadiness([both], NOW).get('biceps')!.lastDose;
+    const liftOnly = muscleReadiness([session(1, [lift('Barbell Row', 3)])], NOW).get(
+      'biceps',
+    )!.lastDose;
+    expect(bothDose).toBeCloseTo(liftOnly + sec * SECONDARY_SET_WEIGHT, 6);
   });
 
   it('volume, load window, sets and tonnage are untouched by blocks', () => {

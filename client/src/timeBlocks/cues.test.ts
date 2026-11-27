@@ -39,6 +39,11 @@ describe('running-block cues', () => {
     expect(blockCue(31, 30, HEADS_UP_MIN_BLOCK_SEC - 1)).toBeNull();
     expect(blockCue(31, 30, HEADS_UP_MIN_BLOCK_SEC)).toBe('heads-up');
   });
+  it('gives no heads-up when the 30 s line was already crossed', () => {
+    expect(blockCue(30, 29, cap)).toBeNull(); // prev already at 30: the cue fired on the tick before
+    expect(blockCue(20, 15, cap)).toBeNull();
+    expect(blockCue(10, 5, cap)).toBeNull();
+  });
   it('beeps on 3-2-1 and a final tone at zero', () => {
     expect([3, 2, 1].map((n) => blockCue(n + 1, n, cap))).toEqual(['last', 'last', 'last']);
     expect(blockCue(1, 0, cap)).toBe('end');

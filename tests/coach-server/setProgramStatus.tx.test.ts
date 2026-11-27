@@ -2,7 +2,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 type Doc = Record<string, unknown>;
-const h = vi.hoisted(() => ({ store: new Map<string, Doc>() }));
+const h = vi.hoisted(() => ({
+  store: new Map<string, Doc>(),
+  /** A program path deleted right as the transaction starts (a race with the pre-read). */
+  vanishInTx: null as string | null,
+}));
 
 vi.mock('../../functions/src/aggregates', () => ({ listUserWorkouts: async () => [] }));
 vi.mock('../../functions/src/programCycle', () => ({ plannedFor: () => [] }));
@@ -55,6 +59,7 @@ vi.mock('../../functions/src/lib', () => {
       };
     },
     runTransaction: async (fn: (tx: unknown) => Promise<unknown>) => {
+      if (h.vanishInTx) h.store.delete(h.vanishInTx);
       const before = new Map([...h.store].map(([k, v]) => [k, structuredClone(v)]));
       const writes: Array<() => Promise<void>> = [];
       const tx = {
@@ -107,6 +112,7 @@ const get = (path: string) => h.store.get(path);
 
 beforeEach(() => {
   h.store.clear();
+  h.vanishInTx = null;
   put('users/m1', { role: 'member', trainerId: 't1' });
   put('users/t1', { role: 'trainer' });
 });
@@ -248,6 +254,21 @@ describe('setProgramStatus (trainer and admin, catalog start)', () => {
     expect(get('assignments/x1')).toMatchObject({ programId: 'prg-own' });
     // the gone catalog program is not re-created by an update of a missing document
     expect(get('programs/tl-x1-gone')).toBeUndefined();
+  });
+
+  it('a program deleted between the pre-read and the transaction moves nothing (the catalog start is not archived)', async () => {
+    put('users/x1', { role: 'trainer' });
+    put('programs/tl-x1-y', prog('tl-x1-y', 'x1', 'active'));
+    put('assignments/x1', { memberId: 'x1', programId: 'tl-x1-y', assignedBy: 'x1', startedAt: 5 });
+    put('programs/prg-own', prog('prg-own', 'x1', 'draft'));
+    h.vanishInTx = 'programs/prg-own';
+    await expect(call('x1', 'prg-own')).resolves.toBeDefined();
+    expect(get('programs/tl-x1-y')?.status).toBe('active');
+    expect(get('assignments/x1')).toMatchObject({
+      programId: 'tl-x1-y',
+      assignedBy: 'x1',
+      startedAt: 5,
+    });
   });
 
   it('a malformed assignment does not lock the trainer out', async () => {

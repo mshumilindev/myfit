@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   blockCapSec,
+  blockOrder,
   blockRemainSec,
   blockView,
   elapsedMs,
@@ -10,6 +11,7 @@ import {
   startRun,
   validateSpec,
   type BlockSpec,
+  type WorkoutBlock,
 } from './model';
 
 const amrap: BlockSpec = { fmt: 'amrap', capSec: 720 };
@@ -101,5 +103,20 @@ describe('block clock view', () => {
   });
   it('negative elapsed (clock skew) reads as the start', () => {
     expect(blockView(amrap, -5)).toMatchObject({ remainSec: 720 });
+  });
+});
+
+describe('blockOrder', () => {
+  const at = (id: string, position: number): WorkoutBlock => ({
+    id,
+    spec: amrap,
+    members: [],
+    position,
+  });
+  it('sorts by position among the exercises and does not mutate its input', () => {
+    const input = [at('c', 2.5), at('a', -0.5), at('d', 5.5), at('b', 0.5)];
+    const ids = input.map((b) => b.id);
+    expect(blockOrder(input).map((b) => b.id)).toEqual(['a', 'b', 'c', 'd']);
+    expect(input.map((b) => b.id)).toEqual(ids);
   });
 });
