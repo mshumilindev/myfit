@@ -7,6 +7,7 @@ description: Use only when the user explicitly says "cpd" — commit, push and d
 
 Запускай **лише на явне прохання**. Закінчується тільки коли все успішно.
 
+0. **Preflight (обов'язково, SPO-639):** `node scripts/cpd-preflight.mjs`. Кожна гілка `ready-for-cpd/*` (локальна чи на origin) або йде в цей cpd (rebase на `origin/main`, деплой разом), або вже в main і прибирається після деплою. `cpd` не завершений, поки є гілка з «ВКЛЮЧИ». Хук `wf-context-hook` показує цей список сам, коли власник пише `cpd`.
 1. **Ізоляція:** стан репо (`git status`). Чужі незакомічені зміни (інший чат) не чіпай. Якщо дерево брудне й `pre-push` його не пропустить — працюй у окремому `git worktree` від `HEAD`, переноси лише свої файли, пуш звідти. Додавай файли явно, не `git add -A`.
 2. **Гейт локально:** `npm run lint`, `format:check`, `typecheck`, `test:coverage`, `npm run build -w client`; для UI — аудити геометрії по змінених сторі; для rules — `npm run test:rules`. Червоне виправ, не обходь (`--no-verify` заборонено).
 3. **Commit:** українською, одна ціль на коміт, з номерами задач (`Фікс SPO-…`); без позасферних файлів (секрети, `.firebaserc` чужі правки, lockfile без причини).

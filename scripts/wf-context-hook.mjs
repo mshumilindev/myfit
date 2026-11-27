@@ -3,6 +3,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 import { isValidState, renderStatus } from './lib/wf-core.mjs';
 
 try {
@@ -17,6 +18,18 @@ try {
   } else {
     console.log(
       '[wf] немає активної задачі: для цього запиту спершу `node scripts/wf.mjs start <ID>` і `wf add` по пунктах плану, потім роби до доказу.',
+    );
+  }
+  // owner said "cpd": show every ready-for-cpd branch so none is forgotten (SPO-639)
+  let prompt = '';
+  try {
+    prompt = JSON.parse(readFileSync(0, 'utf8')).prompt ?? '';
+  } catch {
+    /* no stdin payload (SessionStart) */
+  }
+  if (/\bcpd\b/i.test(prompt)) {
+    console.log(
+      execFileSync('node', [join(root, 'scripts/cpd-preflight.mjs')], { encoding: 'utf8' }).trim(),
     );
   }
 } catch {
