@@ -42,7 +42,7 @@ describe('the trainer program document keeps its blocks as day structure (SPO-60
   it('runnableProgram keeps blocks with the writer marker, and marks 0 when there are none', async () => {
     const { runnableProgram } = await import('../../program/planCodec');
     const { freshProgram } = await import('../../../views/programs/model');
-    const base = freshProgram('t1', 'Plan');
+    const base = freshProgram('Plan');
     const meta = { id: 'prg-c-1', authorId: 't1', updatedAt: 1 };
     const withBlocks = runnableProgram({ ...base, blocks: [BLOCK] } as never, meta);
     expect(withBlocks.blocks).toEqual([BLOCK]);
