@@ -179,24 +179,19 @@ describe('fatigue and readiness read blocks; volume does not', () => {
         ],
       ),
     ];
-    const lm = new Map([['quads' as const, LANDMARKS.quads]]);
+    const quads = LANDMARKS.quads!;
+    const lm = new Map([['quads' as const, quads]]);
     const f = muscleFatigue(mixed, NOW, lm).get('quads')!;
     const expected = acuteFatigueScore(
       0.1,
       3 + blockDose,
       RECOVERY_DAYS.quads ?? 2,
-      LANDMARKS.quads.mav,
+      quads.mav,
       NOW,
     );
     // the acute term is the one that sets the score here, and it reads dose = lift + block, not the block alone
     expect(f.score).toBeCloseTo(expected, 9);
-    const blockOnly = acuteFatigueScore(
-      0.1,
-      blockDose,
-      RECOVERY_DAYS.quads ?? 2,
-      LANDMARKS.quads.mav,
-      NOW,
-    );
+    const blockOnly = acuteFatigueScore(0.1, blockDose, RECOVERY_DAYS.quads ?? 2, quads.mav, NOW);
     expect(expected).not.toBeCloseTo(blockOnly, 3);
   });
 
