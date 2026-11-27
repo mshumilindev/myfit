@@ -13,6 +13,7 @@ import { fatigueSetCount } from './stimulus';
 import { deloadMult, readinessMult } from './calcMods';
 import { computeReadinessWith, RECOVERY_DAYS } from './recoveryMath';
 import type { MuscleGroup } from './data/exercises';
+import { blockMuscleLoad } from './blockLoad';
 
 const DAY = 24 * 3600 * 1000;
 
@@ -33,6 +34,8 @@ const NO_DIRECT_CEILING = 0.5;
 interface WeekSplit {
   primary: number;
   secondary: number;
+  /** Equivalent sets from logged Time blocks (SPO-608): load for the fatigue score, never direct work. */
+  cond: number;
 }
 
 /** Trailing-week sets per muscle, split into direct (primary) vs stabilizer
@@ -45,7 +48,7 @@ function weeklyFatigueSplit(
   const since = now - days * DAY;
   const out = new Map<MuscleGroup, WeekSplit>();
   const add = (m: MuscleGroup, key: keyof WeekSplit, v: number): void => {
-    const cur = out.get(m) ?? { primary: 0, secondary: 0 };
+    const cur = out.get(m) ?? { primary: 0, secondary: 0, cond: 0 };
     cur[key] += v;
     out.set(m, cur);
   };
@@ -60,6 +63,10 @@ function weeklyFatigueSplit(
       if (primary) add(primary, 'primary', n);
       for (const s of secondary) if (s !== primary) add(s, 'secondary', n);
     }
+    // Logged blocks load the muscles too, but are not direct work: they raise the load term only (the stall bump and the
+    // "no direct sets can't be fried" ceiling keep reading strength sets).
+    for (const [m, l] of blockMuscleLoad(w))
+      add(m, 'cond', l.primary + l.secondary * FATIGUE_SECONDARY_WEIGHT);
   }
   return out;
 }
@@ -121,6 +128,8 @@ function lastDirectSessions(
       const { primary } = resolveMuscles(e);
       if (primary) doses.set(primary, (doses.get(primary) ?? 0) + fatigueSetCount(e.sets));
     }
+    // A logged block adds to the dose of the SAME session (one dose per session, not two).
+    for (const [m, l] of blockMuscleLoad(w)) doses.set(m, (doses.get(m) ?? 0) + l.primary);
     for (const [m, dose] of doses) {
       // The latest session that passes the minimum: a couple of warm-up sets today
       // must not hide yesterday's real work.
@@ -206,11 +215,11 @@ export function muscleFatigue(
     // Personalised ceiling when available (so a tolerant athlete reads less
     // fatigued at the same volume, and a deload holds off) — else the default.
     const lm = landmarks?.get(m) ?? (LANDMARKS[m] as Landmark);
-    const wk = split.get(m) ?? { primary: 0, secondary: 0 };
+    const wk = split.get(m) ?? { primary: 0, secondary: 0, cond: 0 };
     // Display set count stays consistent with the volume read (secondary 0.5);
     // the fatigue SCORE weights stabilizer work less (secondary 1/3).
     const sets = wk.primary + wk.secondary * 0.5;
-    const fatSets = wk.primary + wk.secondary * FATIGUE_SECONDARY_WEIGHT;
+    const fatSets = wk.primary + wk.secondary * FATIGUE_SECONDARY_WEIGHT + wk.cond;
     const volComp = clamp((fatSets / lm.mrv - 0.7) / 0.45, 0, 1);
     const isSt = stalled.has(m);
     let score = clamp(volComp * 0.75 + (isSt && wk.primary > 0 ? 0.4 : 0), 0, 1);
@@ -228,8 +237,9 @@ export function muscleFatigue(
     // ("High, 0 of 16 sets this week"). Now the bump needs direct sets in the
     // window (above), and a muscle with no sets at all carries no load -> fresh.
     // The stall itself stays visible through `stalled`; it just isn't fatigue.
-    const weeklyFinal = sets <= 0 ? 0 : weeklyScore;
-    if (sets <= 0) score = 0;
+    const carriesLoad = sets + wk.cond > 0;
+    const weeklyFinal = carriesLoad ? weeklyScore : 0;
+    if (!carriesLoad) score = 0;
     const level = levelOf(score);
     const weeklyLevel = levelOf(weeklyFinal);
     out.set(m, {

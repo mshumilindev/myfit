@@ -9,7 +9,8 @@
  * Pure over the finished-workout history. Feeds the readiness coach and sharpens
  * the deload nudge (a muscle long past its window shouldn't read as fatigued).
  */
-import { muscleSetsInWorkout } from './store';
+import { muscleSetsInWorkout, SECONDARY_SET_WEIGHT } from './store';
+import { blockMuscleLoad } from './blockLoad';
 import { calendarDaysBetween } from './detraining';
 import { LANDMARKS, VOLUME_MUSCLES, type Landmark } from './volume';
 import { RECOVERY_DAYS } from './loadWindow';
@@ -61,6 +62,20 @@ export function computeReadiness(
 }
 
 /**
+ * What one session asked of each muscle for READINESS: its strength sets plus what its logged Time blocks added (SPO-608), in one
+ * dose per session. Without blocks it is exactly the strength map. Volume reads never use this.
+ */
+function sessionDose(w: Workout): Map<MuscleGroup, number> {
+  const strength = muscleSetsInWorkout(w);
+  const blocks = blockMuscleLoad(w);
+  if (blocks.size === 0) return strength;
+  const out = new Map(strength);
+  for (const [m, l] of blocks)
+    out.set(m, (out.get(m) ?? 0) + l.primary + l.secondary * SECONDARY_SET_WEIGHT);
+  return out;
+}
+
+/**
  * Per-muscle readiness right now. `recoveryBoost` (0..1, e.g. from logged
  * recovery activities) lifts every readiness a touch — sleep/sauna/mobility
  * bring a muscle back sooner. Returns every landmarked muscle.
@@ -82,7 +97,7 @@ export function muscleReadiness(
   const last = new Map<MuscleGroup, { daysSince: number; dose: number }>();
   for (const w of recent) {
     const days = (now - w.startedAt) / DAY;
-    for (const [m, sets] of muscleSetsInWorkout(w)) {
+    for (const [m, sets] of sessionDose(w)) {
       if (sets <= 0 || last.has(m)) continue;
       last.set(m, { daysSince: days, dose: sets });
     }
