@@ -177,7 +177,8 @@
   height: auto;
   /* The same room `.sheet-full` has: a drawer is compact while its content fits that, full only when it does not. A smaller cap left a
      band (content between the cap and the full height) where the drawer went full with empty space under the content (Start drawer, SPO-608). */
-  max-height: calc(100dvh - var(--safe-top, 0px) - 8px);
+  --sheet-room: calc(100dvh - var(--safe-top, 0px) - 8px);
+  max-height: var(--sheet-room);
   overflow-y: auto;
   /* 'backwards' (not 'both') so the finished slide-in does NOT keep overriding
      the inline drag transform via forwards-fill. */
@@ -195,7 +196,7 @@
 }
 /* Expanded to (near) full screen via a grabber drag-up. */
 .sheet.sheet-full {
-  height: calc(100dvh - var(--safe-top, 0px) - 8px);
+  height: var(--sheet-room);
   max-height: none;
 }
 /* Slide out before the parent unmounts — the inline transform:translateY(100%)

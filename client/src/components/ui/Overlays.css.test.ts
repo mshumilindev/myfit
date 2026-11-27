@@ -12,7 +12,7 @@ describe('sheet height room', () => {
   it('compact cap equals the full-height room, so there is no band where a drawer is full with empty space', () => {
     const cap = /max-height:\s*([^;]+);/.exec(block('\n.sheet'))?.[1];
     const full = /height:\s*([^;]+);/.exec(block('.sheet.sheet-full'))?.[1];
-    expect(cap).toBeTruthy();
-    expect(cap).toBe(full);
+    expect(cap).toBe('var(--sheet-room)');
+    expect(full).toBe('var(--sheet-room)');
   });
 });

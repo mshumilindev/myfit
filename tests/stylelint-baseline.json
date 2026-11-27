@@ -157,7 +157,7 @@
     },
     "client/src/components/ui/Overlays.css": {
       "declaration-no-important": 3,
-      "declaration-property-unit-disallowed-list": 16,
+      "declaration-property-unit-disallowed-list": 13,
       "media-feature-name-value-allowed-list": 6
     },
     "client/src/components/ui/PinToggle.css": {
