@@ -1,0 +1,20 @@
+{
+  "Burpee": {
+    "uk": "Берпі",
+    "pl": "Burpees",
+    "lt": "Berpiai",
+    "et": "Burpee"
+  },
+  "Wall Ball": {
+    "uk": "Кидок м'яча в стіну (Wall Ball)",
+    "pl": "Wall Ball (rzut piłką w ścianę)",
+    "lt": "Kamuolio metimas į sieną (Wall Ball)",
+    "et": "Palliviskamine seinale (Wall Ball)"
+  },
+  "Toes To Bar": {
+    "uk": "Носки до перекладини",
+    "pl": "Toes to Bar (palce do drążka)",
+    "lt": "Pirštų kėlimas iki skersinio",
+    "et": "Varbad kangi külge"
+  }
+}

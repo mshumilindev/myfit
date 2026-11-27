@@ -1,0 +1,14 @@
+{
+  "Burpee": {
+    "m": "reps",
+    "l": "bodyweight"
+  },
+  "Wall_Ball": {
+    "m": "reps",
+    "l": "weight"
+  },
+  "Toes_To_Bar": {
+    "m": "reps",
+    "l": "bodyweight"
+  }
+}

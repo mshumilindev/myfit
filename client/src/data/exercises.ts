@@ -9,6 +9,8 @@ import { LOCALES, LOCALE_IDS } from '../i18n';
 import LOC_NAMES from './exerciseNames.generated.json';
 import IMAGE_OVERRIDES_RAW from './exerciseImageOverrides.json';
 import RICH_RAW from './exercises.rich.json';
+import EXTRA_RICH_RAW from './exercises.extra.json';
+import EXTRA_NAMES from './exercises.extra.names.json';
 import SUBREGIONS_RAW from './subregionTags.json';
 import type { EquipmentId } from './equipment';
 import type { ExerciseSubRegions, FocusMuscle } from './subregions';
@@ -82,10 +84,13 @@ const DB_ROWS = DB_RAW as DbRow[];
  * file (or a revert) falls straight back to them.
  */
 const IMAGE_OVERRIDES = IMAGE_OVERRIDES_RAW as Record<string, string[] | undefined>;
-const RICH_EXERCISES = (RICH_RAW as RichExercise[]).map((e) => {
-  const images = IMAGE_OVERRIDES[e.id];
-  return images && images.length ? { ...e, images } : e;
-});
+/** Curated moves added on top of the free-exercise-db import (kept apart so a rebuild of the import never drops them). */
+const RICH_EXERCISES = [...(RICH_RAW as RichExercise[]), ...(EXTRA_RICH_RAW as RichExercise[])].map(
+  (e) => {
+    const images = IMAGE_OVERRIDES[e.id];
+    return images && images.length ? { ...e, images } : e;
+  },
+);
 
 const RICH_BY_ID = new Map<string, RichExercise>(RICH_EXERCISES.map((e) => [e.id, e]));
 const RICH_BY_NAME = new Map<string, RichExercise>(
@@ -290,8 +295,14 @@ let INSTRUCTIONS: Record<string, string[]> | null = null;
 export async function loadExerciseInstructions(id: string | null | undefined): Promise<string[]> {
   if (!id) return [];
   if (!INSTRUCTIONS) {
-    const mod = await import('./exercises.instructions.json');
-    INSTRUCTIONS = (mod.default ?? mod) as Record<string, string[]>;
+    const [mod, extra] = await Promise.all([
+      import('./exercises.instructions.json'),
+      import('./exercises.extra.instructions.json'),
+    ]);
+    INSTRUCTIONS = {
+      ...((mod.default ?? mod) as Record<string, string[]>),
+      ...((extra.default ?? extra) as Record<string, string[]>),
+    };
   }
   return INSTRUCTIONS[id] ?? [];
 }
@@ -434,7 +445,10 @@ export function muscleInfoByName(name: string): MuscleInfo | null {
  * groups and equipment localized into every locale — so a query in any language
  * matches regardless of the active locale. Memoized (all-locale, so stable).
  */
-const LOC_NAME_MAP = LOC_NAMES as Record<string, Partial<Record<string, string>>>;
+const LOC_NAME_MAP = { ...LOC_NAMES, ...EXTRA_NAMES } as Record<
+  string,
+  Partial<Record<string, string>>
+>;
 const CATALOG_HAYSTACK = new Map<string, string>();
 export function localizedCatalogNames(englishName: string): string[] {
   const tr = LOC_NAME_MAP[englishName];

@@ -12,6 +12,8 @@ export const BLOCK_GROUPS: readonly BlockGroup[] = [
 ];
 
 const BODYWEIGHT = [
+  'Burpee',
+  'Toes To Bar',
   'Pullups',
   'Chin-Up',
   'Pushups',
@@ -94,6 +96,7 @@ const MACHINES = [
   'Prowler Sprint',
 ];
 const THROWS = [
+  'Wall Ball',
   'Overhead Slam',
   'One-Arm Medicine Ball Slam',
   'Medicine Ball Chest Pass',

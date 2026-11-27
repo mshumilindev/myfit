@@ -1,0 +1,69 @@
+[
+  {
+    "id": "Burpee",
+    "name": "Burpee",
+    "force": "push",
+    "level": "intermediate",
+    "mechanic": "compound",
+    "category": "plyometrics",
+    "equipment": "body",
+    "primaryMuscles": [
+      "quads"
+    ],
+    "secondaryMuscles": [
+      "chest",
+      "shoulders",
+      "triceps",
+      "core",
+      "glutes",
+      "hamstrings"
+    ],
+    "images": [
+      "/exercise-img/Burpee/0.webp",
+      "/exercise-img/Burpee/1.webp"
+    ]
+  },
+  {
+    "id": "Wall_Ball",
+    "name": "Wall Ball",
+    "force": "push",
+    "level": "intermediate",
+    "mechanic": "compound",
+    "category": "strength",
+    "equipment": "medicineBall",
+    "primaryMuscles": [
+      "quads"
+    ],
+    "secondaryMuscles": [
+      "glutes",
+      "shoulders",
+      "triceps",
+      "core"
+    ],
+    "images": [
+      "/exercise-img/Wall_Ball/0.webp",
+      "/exercise-img/Wall_Ball/1.webp"
+    ]
+  },
+  {
+    "id": "Toes_To_Bar",
+    "name": "Toes To Bar",
+    "force": "pull",
+    "level": "expert",
+    "mechanic": "compound",
+    "category": "strength",
+    "equipment": "body",
+    "primaryMuscles": [
+      "core"
+    ],
+    "secondaryMuscles": [
+      "lats",
+      "forearms",
+      "shoulders"
+    ],
+    "images": [
+      "/exercise-img/Toes_To_Bar/0.webp",
+      "/exercise-img/Toes_To_Bar/1.webp"
+    ]
+  }
+]

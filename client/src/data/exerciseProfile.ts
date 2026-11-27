@@ -14,6 +14,7 @@
  * reinterpreted.
  */
 import PROFILES_RAW from './exerciseProfiles.json';
+import EXTRA_PROFILES_RAW from './exercises.extra.profiles.json';
 import { richExerciseByName } from './exercises';
 
 export type ExerciseMeasure = 'reps' | 'hold' | 'time' | 'distance';
@@ -24,7 +25,7 @@ export interface ExerciseProfile {
   l: ExerciseLoad;
 }
 
-const PROFILES = PROFILES_RAW as Record<string, ExerciseProfile>;
+const PROFILES = { ...PROFILES_RAW, ...EXTRA_PROFILES_RAW } as Record<string, ExerciseProfile>;
 
 const REPS_WEIGHT: ExerciseProfile = { m: 'reps', l: 'weight' };
 

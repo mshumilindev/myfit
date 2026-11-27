@@ -25,6 +25,8 @@ import {
   type CustomExercise,
 } from './exercises';
 
+import EXTRA_RICH from './exercises.extra.json';
+
 const BENCH = 'Barbell Bench Press - Medium Grip';
 
 function custom(over: Partial<CustomExercise> = {}): CustomExercise {
@@ -49,7 +51,8 @@ afterEach(() => {
 
 describe('built-in catalog', () => {
   it('exposes one entry per rich record, with the English name in all five slots', () => {
-    expect(BUILT_IN_CATALOG).toHaveLength(RICH.length);
+    // the import plus the curated moves kept beside it (exercises.extra.json)
+    expect(BUILT_IN_CATALOG).toHaveLength(RICH.length + EXTRA_RICH.length);
     const bench = BUILT_IN_CATALOG.find((e) => e.id === 'Barbell_Bench_Press_-_Medium_Grip')!;
     expect(bench).toEqual({
       id: 'Barbell_Bench_Press_-_Medium_Grip',
@@ -449,6 +452,7 @@ describe('with synthetic source data', () => {
   }): Promise<Mod> {
     vi.resetModules();
     vi.doMock('./exercises.rich.json', () => ({ default: opts.rich }));
+    vi.doMock('./exercises.extra.json', () => ({ default: [] })); // synthetic worlds start from the import alone
     vi.doMock('./exercises.db.json', () => ({ default: opts.db ?? [] }));
     vi.doMock('./subregionTags.json', () => ({ default: opts.sub ?? {} }));
     vi.doMock('./exerciseImageOverrides.json', () => ({ default: opts.overrides ?? {} }));

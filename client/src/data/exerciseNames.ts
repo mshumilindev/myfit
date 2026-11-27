@@ -7,11 +7,12 @@
  * overrides). Regenerate that script rather than hand-editing the JSON.
  */
 import RAW from './exerciseNames.generated.json';
+import EXTRA from './exercises.extra.names.json';
 import { canonicalExerciseName } from './exercises';
 import type { LocaleId } from '../i18n';
 
 type Tr = Partial<Record<Exclude<LocaleId, 'en'>, string>>;
-const MAP = RAW as Record<string, Tr>;
+const MAP = { ...RAW, ...EXTRA } as Record<string, Tr>;
 const NON_EN: Exclude<LocaleId, 'en'>[] = ['uk', 'pl', 'lt', 'et'];
 
 /** The localized name for a locale, or null when none exists / locale is en. */
