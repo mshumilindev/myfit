@@ -428,7 +428,7 @@ export const addonStoreLt: typeof addonStoreEn = {
     circuit: { name: 'Ratas', desc: 'Ratai per pratimų grupę su ratų skaitikliu.' },
     'time-blocks': {
       name: 'Laiko blokai',
-      desc: 'AMRAP, EMOM, į laiką ir intervalų blokai su laikmačiu, 5 sekundžių atskaita ir garso signalais.',
+      desc: 'AMRAP, EMOM, į laiką ir intervalų blokai treniruotei ar programos dienai: laikmatis, 5 sekundžių atskaita, garso signalai, raundų skaitiklis ir rezultatas.',
     },
     effort: {
       name: 'RPE / RIR',

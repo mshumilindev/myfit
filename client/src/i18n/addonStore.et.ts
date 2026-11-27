@@ -430,7 +430,7 @@ export const addonStoreEt: typeof addonStoreEn = {
     circuit: { name: 'Ringtreening', desc: 'Ringid harjutuste grupi peale, ringide loenduriga.' },
     'time-blocks': {
       name: 'Ajablokid',
-      desc: 'AMRAP-, EMOM-, ajale- ja intervallblokid taimeri, 5-sekundilise loenduse ja helisignaalidega.',
+      desc: 'AMRAP-, EMOM-, ajale- ja intervallblokid treeningule või programmi päevale: taimer, 5-sekundiline loendus, helisignaalid, voorude loendur ja tulemus.',
     },
     effort: { name: 'RPE / RIR', desc: 'Hinda, kui raske seeria oli, ja vaata äpi hinnangut.' },
     'set-types': { name: 'Seeriatüübid', desc: 'Dropid, pöörddropid ja raskusega hoidmised.' },

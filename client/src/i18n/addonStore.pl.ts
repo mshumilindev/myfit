@@ -427,7 +427,7 @@ export const addonStorePl: typeof addonStoreEn = {
     circuit: { name: 'Obwód', desc: 'Rundy po grupie ćwiczeń z licznikiem rund.' },
     'time-blocks': {
       name: 'Bloki czasowe',
-      desc: 'Bloki AMRAP, EMOM, na czas i interwałowe z zegarem, 5-sekundowym odliczaniem i sygnałami dźwiękowymi.',
+      desc: 'Bloki AMRAP, EMOM, na czas i interwałowe do sesji lub dnia programu: zegar, 5-sekundowe odliczanie, sygnały dźwiękowe, licznik rund i wynik.',
     },
     effort: {
       name: 'RPE / RIR',

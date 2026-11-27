@@ -432,7 +432,7 @@ export const addonStoreEn = {
     circuit: { name: 'Circuit', desc: 'Rounds over a group of exercises, with a round counter.' },
     'time-blocks': {
       name: 'Time blocks',
-      desc: 'AMRAP, EMOM, For time and interval blocks with a clock, a 5-second countdown and sound cues.',
+      desc: 'AMRAP, EMOM, For time and interval blocks for a session or a program day: clock, 5-second countdown, sound cues, round counter and a result.',
     },
     effort: { name: 'RPE / RIR', desc: 'Rate how hard a set felt; see the app’s estimate.' },
     'set-types': { name: 'Set types', desc: 'Drop sets, reverse drops and weighted holds.' },
