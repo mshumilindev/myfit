@@ -76,6 +76,18 @@ describe('blockMuscleLoad: what a logged block asks of a muscle', () => {
     );
   });
 
+  it('pins the conversion constants and reads minutes as 60 seconds', () => {
+    expect([BLOCK_REPS_PER_SET, BLOCK_SECONDS_PER_SET, BLOCK_LOAD_WEIGHT]).toEqual([10, 40, 0.5]);
+    for (const reps of ['1 min', '1m', '60 s']) {
+      const b = blk({
+        members: [{ name: 'Pullups', reps }],
+        result: { rounds: 2, savedAt: 1 },
+      });
+      // 2 rounds × 60 s = 120 s -> 3 hard sets -> 1.5 at the block weight
+      expect(blockMuscleLoad({ blocks: [b] }).get('lats')!.primary, reps).toBeCloseTo(1.5, 6);
+    }
+  });
+
   it('counts only a block with a saved result, a known move, and only while the module is installed', () => {
     expect(blockMuscleLoad({ blocks: [blk({ result: undefined })] }).size).toBe(0);
     expect(blockMuscleLoad({ blocks: [] }).size).toBe(0);

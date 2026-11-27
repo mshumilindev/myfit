@@ -246,6 +246,8 @@ describe('setProgramStatus (trainer and admin, catalog start)', () => {
     await call('x1', 'prg-own');
     expect(get('programs/prg-own')?.status).toBe('active');
     expect(get('assignments/x1')).toMatchObject({ programId: 'prg-own' });
+    // the gone catalog program is not re-created by an update of a missing document
+    expect(get('programs/tl-x1-gone')).toBeUndefined();
   });
 
   it('a malformed assignment does not lock the trainer out', async () => {
