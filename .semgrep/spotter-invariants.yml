@@ -1,0 +1,43 @@
+# SPO-639: Spotter invariant 1 (user input is written to Firestore only sealed). A NEW file that calls
+# setDoc/addDoc/updateDoc directly must go through prepareWrite/sealDoc/sealOrThrow instead.
+# The files below are the existing call sites (ratchet: the list only shrinks; new files are blocked).
+rules:
+  - id: spotter-direct-firestore-write
+    languages: [typescript]
+    severity: ERROR
+    message: >-
+      Direct Firestore write in a new file. User-entered data must be sealed (prepareWrite / sealDoc / sealOrThrow);
+      route the write through an existing store or add the file to the reviewed allowlist in .semgrep/spotter-invariants.yml.
+    patterns:
+      - pattern-either:
+          - pattern: setDoc(...)
+          - pattern: addDoc(...)
+          - pattern: updateDoc(...)
+    paths:
+      include:
+        - client/src
+      exclude:
+        - '*.test.ts'
+        - '*.test.tsx'
+        - '*.stories.tsx'
+        - client/src/App.tsx
+        - client/src/atlas/chatSyncPorts.ts
+        - client/src/atlas/schedule.ts
+        - client/src/coach/chat/port.ts
+        - client/src/coach/client/data/chatPort.ts
+        - client/src/coach/data/firestore/firebaseFs.ts
+        - client/src/components/AvatarUploader.tsx
+        - client/src/data/flags.ts
+        - client/src/data/programActivities.ts
+        - client/src/nutrition/store.ts
+        - client/src/periodization/maxesSync.ts
+        - client/src/planner/sync.ts
+        - client/src/push.ts
+        - client/src/store.ts
+        - client/src/storeMeta.ts
+        - client/src/tools/programEditor/stories/HostPair.tsx
+        - client/src/tools/programEditor/stories/demoHost.tsx
+        - client/src/trainLikeAPro/startProgram.ts
+        - client/src/vaultIO.ts
+        - client/src/views/ProfileView.tsx
+        - client/src/views/programs/ProgramPage.tsx

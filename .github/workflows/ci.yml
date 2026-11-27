@@ -210,7 +210,7 @@ jobs:
           python-version: '3.12'
       - run: pip install semgrep==1.181.0
       - name: Scan client and functions
-        run: semgrep scan --config p/javascript --config p/typescript --config p/react --config p/secrets --metrics=off --json --output semgrep.json client/src functions/src scripts || true
+        run: semgrep scan --config p/javascript --config p/typescript --config p/react --config p/secrets --config .semgrep/spotter-invariants.yml --metrics=off --json --output semgrep.json client/src functions/src scripts || true
       - name: Report findings
         run: node scripts/semgrep-annotate.mjs semgrep.json
 
