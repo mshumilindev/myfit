@@ -4,6 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { collect, validateSnapshot } from './collector.mjs';
+import { linearOf, loadKey } from './linear.mjs';
 import { createDashServer } from './server.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -19,24 +20,40 @@ const git = (...a) =>
   }).trim();
 
 /** gh is optional; results are cached for a minute so polling never hammers the API. */
-let ghCache = { at: 0, out: '' };
+/** @type {Map<string, { at: number, out: string }>} */
+const ghCache = new Map();
 const gh = (/** @type {string} */ path) => {
-  if (Date.now() - ghCache.at < 60000) return ghCache.out;
+  const hit = ghCache.get(path);
+  if (hit && Date.now() - hit.at < 60000) return hit.out;
   const out = execFileSync('gh', ['api', path], {
     cwd: ROOT,
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'ignore'],
     timeout: 8000,
   });
-  ghCache = { at: Date.now(), out };
+  ghCache.set(path, { at: Date.now(), out });
   return out;
 };
+
+/** Linear status of the tasks in flight, refreshed at most once a minute in the background (never blocks a poll). */
+let linearCache = { at: 0, data: {} };
+let linearBusy = false;
+function refreshLinear(/** @type {string[]} */ ids) {
+  if (linearBusy || Date.now() - linearCache.at < 60000 || !ids.length) return;
+  linearBusy = true;
+  linearOf({ key: loadKey(ROOT), ids })
+    .then((data) => (linearCache = { at: Date.now(), data }))
+    .catch(() => {})
+    .finally(() => (linearBusy = false));
+}
 
 const server = createDashServer({
   uiRoot: join(HERE, '../ui'),
   port: PORT,
   collect: () => {
-    const snap = collect({ root: ROOT, git, gh });
+    const first = collect({ root: ROOT, git, gh });
+    refreshLinear(first.tasks.map((/** @type {{ id: string }} */ x) => x.id));
+    const snap = collect({ root: ROOT, git, gh, linear: linearCache.data });
     const problems = validateSnapshot(snap);
     return problems.length
       ? { v: snap.v, error: 'snapshot-rejected', problems: problems.slice(0, 5) }

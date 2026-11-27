@@ -380,3 +380,107 @@ describe('CI and release data (W31)', () => {
     expect(validateSnapshot(snap)).toEqual([]);
   });
 });
+
+describe('Linear status (W30)', () => {
+  it('finds the key in env or in the local settings, never anywhere else', async () => {
+    // @ts-expect-error plain ESM without types
+    const { loadKey } = await import('../dev-dashboard/server/linear.mjs');
+    const root = join(work, 'lin');
+    mkdirSync(join(root, '.claude'), { recursive: true });
+    expect(loadKey(root, {})).toBeNull();
+    expect(loadKey(root, { LINEAR_API_KEY: 'k1' })).toBe('k1');
+    writeFileSync(
+      join(root, '.claude/settings.local.json'),
+      JSON.stringify({ env: { LINEAR_API_KEY: 'k2' } }),
+    );
+    expect(loadKey(root, {})).toBe('k2');
+    writeFileSync(join(root, '.claude/settings.local.json'), '{broken');
+    expect(loadKey(root, {})).toBeNull();
+  });
+  it('maps state and last progress comment; failures give nothing; the key never leaks', async () => {
+    // @ts-expect-error plain ESM without types
+    const { linearOf } = await import('../dev-dashboard/server/linear.mjs');
+    const now = Date.parse('2026-11-28T01:00:00Z');
+    const ok = async (_u: unknown, init: { headers: Record<string, string> }) => {
+      expect(init.headers.Authorization).toBe('SECRETKEY');
+      return {
+        ok: true,
+        json: async () => ({
+          data: {
+            issue: {
+              state: { name: 'In Progress' },
+              comments: {
+                nodes: [
+                  { body: 'x', updatedAt: '2026-11-28T00:00:00Z' },
+                  { body: '<!-- wf-progress -->\nreport', updatedAt: '2026-11-28T00:50:00Z' },
+                ],
+              },
+            },
+          },
+        }),
+      };
+    };
+    const res = await linearOf({ key: 'SECRETKEY', ids: ['SPO-639'], fetchImpl: ok, now });
+    expect(res).toEqual({ 'SPO-639': { state: 'In Progress', syncedSecAgo: 600 } });
+    expect(JSON.stringify(res)).not.toContain('SECRETKEY');
+    expect(await linearOf({ key: null, ids: ['SPO-1'], fetchImpl: ok })).toEqual({});
+    expect(
+      await linearOf({ key: 'k', ids: ['SPO-1'], fetchImpl: async () => ({ ok: false }) as never }),
+    ).toEqual({});
+    expect(
+      await linearOf({
+        key: 'k',
+        ids: ['SPO-1'],
+        fetchImpl: async () => {
+          throw new Error('net');
+        },
+      }),
+    ).toEqual({});
+    expect(
+      await linearOf({
+        key: 'k',
+        ids: ['SPO-1'],
+        fetchImpl: async () =>
+          ({ ok: true, json: async () => ({ data: { issue: null } }) }) as never,
+      }),
+    ).toEqual({});
+  });
+});
+
+describe('CI jobs as quality gates', () => {
+  it('reads the jobs of the newest CI run; any failure gives an empty list', async () => {
+    // @ts-expect-error plain ESM without types
+    const { ciJobs } = await import('../dev-dashboard/server/collector.mjs');
+    const gh = (p: string) =>
+      p.includes('/jobs')
+        ? JSON.stringify({
+            jobs: [
+              {
+                name: 'quality',
+                conclusion: 'success',
+                started_at: '2026-11-28T00:00:00Z',
+                completed_at: '2026-11-28T00:01:30Z',
+              },
+              { name: 'layout', status: 'in_progress' },
+            ],
+          })
+        : JSON.stringify({
+            workflow_runs: [
+              { id: 1, name: 'Deploy' },
+              { id: 42, name: 'CI' },
+            ],
+          });
+    expect(ciJobs(gh)).toEqual([
+      { name: 'quality', status: 'success', sec: 90 },
+      { name: 'layout', status: 'in_progress', sec: null },
+    ]);
+    expect(
+      ciJobs(() => {
+        throw new Error('x');
+      }),
+    ).toEqual([]);
+    expect(ciJobs(() => JSON.stringify({ workflow_runs: [{ id: 1, name: 'Deploy' }] }))).toEqual(
+      [],
+    );
+  });
+});

@@ -430,10 +430,81 @@ function release(snap, t) {
   ];
 }
 
-const PENDING = {
-  quality: ['Quality', 'Gate results (lint, typecheck, tests) are not collected yet.'],
-  linearsync: ['Linear sync', 'Needs a Linear API key on the owner machine (wf item B).'],
-};
+function linearsync(t) {
+  if (!t.linear)
+    return [
+      card(
+        'Linear sync',
+        null,
+        note(
+          'No Linear data yet. It loads within a minute when a Linear key is present on this machine (environment or .claude/settings.local.json).',
+        ),
+      ),
+    ];
+  const s = t.linear.syncedSecAgo;
+  return [
+    h(
+      'div',
+      { class: 'kpis' },
+      kpi('Linear status', t.linear.state, 'as seen now'),
+      kpi('Progress comment', s === null ? 'none' : ago(s * 1000), 'last wf sync'),
+      kpi('Open in Linear', '↗', 'issue page'),
+    ),
+    h(
+      'p',
+      { class: 'empty-note' },
+      h(
+        'a',
+        { href: `https://linear.app/issue/${t.id}`, target: '_blank', rel: 'noreferrer' },
+        `Open ${t.id} in Linear`,
+      ),
+    ),
+  ];
+}
+
+function quality(snap) {
+  if (!snap.jobs.length)
+    return [
+      card(
+        'Quality',
+        'latest CI on main',
+        note('No gate data: needs the GitHub CLI (gh) on this machine.'),
+      ),
+    ];
+  const bad = snap.jobs.filter((j) => j.status !== 'success' && j.status !== 'skipped').length;
+  return [
+    card(
+      'Quality gates',
+      `${snap.jobs.length} jobs · ${bad} not green`,
+      h(
+        'div',
+        { class: 'tbl' },
+        snap.jobs.map((j) =>
+          h(
+            'div',
+            { class: 'row', style: 'grid-template-columns:minmax(0,1fr) 100px 80px' },
+            h('span', { class: 't-m' }, j.name),
+            h(
+              'span',
+              {
+                class:
+                  'pill ' + (j.status === 'success' ? 'l' : j.status === 'failure' ? 's' : 'c'),
+              },
+              j.status,
+            ),
+            h(
+              'span',
+              { class: 't-m' },
+              j.sec === null ? '' : `${Math.floor(j.sec / 60)}m ${j.sec % 60}s`,
+            ),
+          ),
+        ),
+      ),
+    ),
+  ];
+}
+
+const PENDING = {};
 
 export function taskView(t, tab, selectTab, snap) {
   const body =
@@ -447,15 +518,19 @@ export function taskView(t, tab, selectTab, snap) {
             ? docs(t)
             : tab === 'runs'
               ? runs(t)
-              : tab === 'ci'
-                ? ci(snap)
-                : tab === 'release'
-                  ? release(snap, t)
-                  : tab === 'risks'
-                    ? risks(t)
-                    : tab === 'rules'
-                      ? rules(snap)
-                      : [card(PENDING[tab][0], 'not collected yet', note(PENDING[tab][1]))];
+              : tab === 'quality'
+                ? quality(snap)
+                : tab === 'linearsync'
+                  ? linearsync(t)
+                  : tab === 'ci'
+                    ? ci(snap)
+                    : tab === 'release'
+                      ? release(snap, t)
+                      : tab === 'risks'
+                        ? risks(t)
+                        : tab === 'rules'
+                          ? rules(snap)
+                          : [card(PENDING[tab][0], 'not collected yet', note(PENDING[tab][1]))];
   return [
     h(
       'div',

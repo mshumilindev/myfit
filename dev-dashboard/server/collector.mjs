@@ -230,9 +230,36 @@ export function ciRuns(gh) {
 }
 
 /**
- * @param {{ root: string, stateDir?: string, git: (...args: string[]) => string, gh?: (path: string) => string, now?: number }} o
+ * Jobs of the newest CI run on main (quality gates as CI sees them). Fail-soft like ciRuns.
+ * @param {(path: string) => string} gh
  */
-export function collect({ root, stateDir, git, gh, now = Date.now() }) {
+export function ciJobs(gh) {
+  try {
+    const runs =
+      JSON.parse(gh('repos/mshumilindev/myfit/actions/runs?branch=main&per_page=8'))
+        .workflow_runs ?? [];
+    const run = runs.find((/** @type {any} */ r) => r.name === 'CI');
+    if (!run) return [];
+    const jobs =
+      JSON.parse(gh(`repos/mshumilindev/myfit/actions/runs/${Number(run.id)}/jobs?per_page=30`))
+        .jobs ?? [];
+    return jobs.slice(0, 30).map((/** @type {any} */ j) => {
+      const ms = Date.parse(j.completed_at) - Date.parse(j.started_at);
+      return {
+        name: String(j.name ?? '').slice(0, 40),
+        status: String(j.conclusion ?? j.status ?? 'unknown').slice(0, 20),
+        sec: Number.isFinite(ms) ? Math.max(0, Math.round(ms / 1000)) : null,
+      };
+    });
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * @param {{ root: string, stateDir?: string, git: (...args: string[]) => string, gh?: (path: string) => string, linear?: Record<string, { state: string, syncedSecAgo: number | null }>, now?: number }} o
+ */
+export function collect({ root, stateDir, git, gh, linear = {}, now = Date.now() }) {
   /** @param {...string} a */
   const safeGit = (...a) => {
     try {
@@ -293,6 +320,7 @@ export function collect({ root, stateDir, git, gh, now = Date.now() }) {
           kind: i.kind,
           text: String(i.text ?? '').slice(0, 70),
         })),
+        linear: linear[id] ?? null,
         docs: docsOf(root, id),
         risks: risksOf(root, id),
         blocked: items
@@ -308,6 +336,7 @@ export function collect({ root, stateDir, git, gh, now = Date.now() }) {
     tasks,
     readyBranches: [...ready.keys()].sort(),
     ci: gh ? ciRuns(gh) : [],
+    jobs: gh ? ciJobs(gh) : [],
     release: {
       unpushed: Number(safeGit('rev-list', '--count', 'origin/main..HEAD')) || 0,
       deployed: [...closed].sort(),
