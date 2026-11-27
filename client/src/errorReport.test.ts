@@ -24,7 +24,6 @@ describe('reportClientError (SPO-639 G2)', () => {
       'locale',
       'message',
       'online',
-      'route',
       'stack',
     ]);
   });

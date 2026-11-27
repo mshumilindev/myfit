@@ -12,7 +12,6 @@ export interface ClientErrorReport {
   stack: string;
   build: string;
   locale: string;
-  route: string;
   online: boolean;
 }
 
@@ -48,40 +47,48 @@ export function maskText(text: unknown, max: number): string {
     .slice(0, max);
 }
 
-/** Linear-time stack masking: per line keep a safe function name and the file's base name; origins and paths are dropped. */
+/** `file.js:12:5` (line and column are required, so a bare word that happens to end in .js is never taken for a frame). */
+const FILE_AT_RE = /^(.*?)(?::\d+){1,2}$/;
+
+/** Base name of a `url:line:col` token, or '' when it is not one. Linear: no nested quantifiers. */
+function frameFile(token: string): string {
+  if (!/:\d+(?::\d+)?$/.test(token)) return '';
+  const base = (FILE_AT_RE.exec(token)?.[1] ?? '').split('/').pop() ?? '';
+  return FILE_EXT_RE.test(base) && SAFE_NAME_RE.test(base.replace(/-/g, '_')) ? base : '';
+}
+
+/**
+ * Linear-time stack masking. Only real engine frames are kept: V8 `at fn (url:line:col)` / `at url:line:col`, and Firefox/Safari
+ * `fn@url:line:col`. Anything else (the message lines of a stack, free text) is dropped. A frame keeps a safe function name and the
+ * file's base name; origins and paths never leave.
+ */
 export function maskStack(stack: unknown): string {
   const lines = String(stack ?? '')
     .slice(0, MAX_LINES * MAX_LINE)
     .split('\n')
     .slice(0, MAX_LINES);
   const out: string[] = [];
-  for (const line of lines) {
-    const tokens = line
-      .slice(0, MAX_LINE)
-      .split(/[\s()@]+/)
-      .filter(Boolean);
-    if (tokens[0] === 'at') tokens.shift();
-    let file = '';
-    for (let i = tokens.length - 1; i >= 0 && !file; i -= 1) {
-      const base =
-        tokens[i]
-          .replace(/(?::\d+)+$/, '')
-          .split('/')
-          .pop() ?? '';
-      if (FILE_EXT_RE.test(base) && SAFE_NAME_RE.test(base.replace(/-/g, '_'))) file = base;
-    }
+  for (const raw of lines) {
+    const line = raw.trim().slice(0, MAX_LINE);
+    let fn = '';
+    let loc: string;
+    if (line.startsWith('at ')) {
+      const rest = line.slice(3);
+      const open = rest.lastIndexOf('(');
+      if (open >= 0 && rest.endsWith(')')) {
+        fn = rest.slice(0, open).trim();
+        loc = rest.slice(open + 1, -1);
+      } else loc = rest;
+    } else if (line.includes('@')) {
+      const at = line.indexOf('@');
+      fn = line.slice(0, at);
+      loc = line.slice(at + 1);
+    } else continue;
+    const file = frameFile(loc.split(/\s+/).pop() ?? '');
     if (!file) continue;
-    const first = tokens[0] ?? '';
-    const fn = SAFE_NAME_RE.test(first) && !FILE_EXT_RE.test(first) ? first : '<anon>';
-    out.push(`${fn} ${file}`);
+    out.push(`${SAFE_NAME_RE.test(fn) ? fn : '<anon>'} ${file}`);
   }
   return out.join('\n').slice(0, MAX_STACK);
-}
-
-/** Only the known top-level segment of a route survives; ids, names and anything else become `:x`. */
-function maskRoute(route: string): string {
-  const parts = route.split('/').filter(Boolean).slice(0, 4);
-  return `/${parts.map((p, i) => (i === 0 && /^[a-z-]{1,20}$/.test(p) ? p : ':x')).join('/')}`;
 }
 
 /** Returns a clean report, or null when the payload is not a valid report (never throws). */
@@ -90,14 +97,12 @@ export function sanitizeReport(raw: unknown): ClientErrorReport | null {
   if (JSON.stringify(raw).length > MAX_BODY_BYTES) return null;
   const r = raw as Record<string, unknown>;
   if (!ERROR_KINDS.includes(r.kind as ErrorKind)) return null;
-  const route = String(r.route ?? '').split(/[?#]/)[0];
   return {
     kind: r.kind as ErrorKind,
     message: maskText(r.message, MAX_MESSAGE),
     stack: maskStack(r.stack),
     build: /^[\w.+-]{1,40}$/.test(String(r.build)) ? String(r.build) : 'unknown',
     locale: /^[a-z]{2}$/.test(String(r.locale)) ? String(r.locale) : 'xx',
-    route: maskRoute(route),
     online: r.online === true,
   };
 }

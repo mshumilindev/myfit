@@ -33,15 +33,6 @@ describe('client error report sanitising (SPO-639 G1)', () => {
     expect(sanitizeReport({ ...base, kind: 'weird' })).toBeNull();
     expect(sanitizeReport({ ...base, message: 'a'.repeat(5000) })).toBeNull();
   });
-  it('drops query and hash from the route and normalises locale', () => {
-    const r = sanitizeReport({
-      ...base,
-      route: '/u/x?token=abcdefghijklmnopqrstuvwxyz',
-      locale: 'zz9',
-    });
-    expect(r?.route).toBe('/u/:x');
-    expect(r?.locale).toBe('xx');
-  });
   it('never keeps unknown fields such as uid or email', () => {
     const r = sanitizeReport({ ...base, uid: 'u1', email: 'a@b.co' });
     expect(Object.keys(r ?? {}).sort()).toEqual([
@@ -50,7 +41,6 @@ describe('client error report sanitising (SPO-639 G1)', () => {
       'locale',
       'message',
       'online',
-      'route',
       'stack',
     ]);
   });
@@ -77,13 +67,22 @@ describe('hardening after independent review (SPO-639 G4)', () => {
     );
     expect(out).not.toMatch(/knee|AbC|380|123|ivan|@|mail\./);
   });
-  it('keeps only a safe route shape and a version-like build', () => {
-    const r = sanitizeReport({
-      ...base,
-      route: '/coach/client/maria-ivanenko/notes',
-      build: 'my knee hurts!',
-    });
-    expect(r?.route).toBe('/coach/:x/:x/:x');
-    expect(r?.build).toBe('unknown');
+  it('accepts only a version-like build', () => {
+    expect(sanitizeReport({ ...base, build: 'my knee hurts!' })?.build).toBe('unknown');
+    expect(sanitizeReport({ ...base, build: '1.2.3-rc.1' })?.build).toBe('1.2.3-rc.1');
+  });
+});
+
+describe('stack lines must be real engine frames (SPO-639 G4 round 2)', () => {
+  it('drops free text that merely ends in a file name', () => {
+    expect(maskStack('x\nMaria main.js')).toBe('');
+    expect(maskStack('Ivan Petrov foo.js')).toBe('');
+    expect(maskStack('Error: my\nnote\nPetrov_Ivan.ts')).toBe('');
+    expect(maskStack('weight_80kg_bench ivan_petrov.js')).toBe('');
+  });
+  it('keeps V8 and Firefox/Safari frames', () => {
+    expect(maskStack('    at run (https://a.io/assets/app-1.js:3:4)')).toBe('run app-1.js');
+    expect(maskStack('    at https://a.io/assets/app-1.js:3:4')).toBe('<anon> app-1.js');
+    expect(maskStack('run@https://a.io/assets/app-1.js:3:4')).toBe('run app-1.js');
   });
 });

@@ -7,6 +7,15 @@ import type { ErrorKind } from '../../functions/src/clientErrorPure';
 const THROTTLE_MS = 60_000;
 const lastSent = new Map<ErrorKind, number>();
 
+function isEngineError(e: unknown): e is Error {
+  return (
+    e instanceof TypeError ||
+    e instanceof ReferenceError ||
+    e instanceof RangeError ||
+    e instanceof SyntaxError
+  );
+}
+
 type Send = (payload: Record<string, unknown>) => Promise<void>;
 const lazySend: Send = (payload) =>
   import('./errorReportTransport').then((m) => m.sendErrorReport(payload));
@@ -24,12 +33,12 @@ export function reportClientError(
     const err = error as { message?: unknown; stack?: unknown } | undefined;
     const payload = {
       kind,
-      // Only real Error objects carry a message: a thrown string or object may hold user text.
-      message: error instanceof Error ? error.message : '',
+      // Only messages the JS engine itself writes (TypeError, ReferenceError, RangeError, SyntaxError) are sent: text the app or
+      // a user put into `new Error(...)`, or a thrown string, may hold personal data.
+      message: isEngineError(error) ? error.message : '',
       stack: String(err?.stack ?? ''),
       build: String(import.meta.env.VITE_APP_VERSION ?? 'dev'),
       locale: (document.documentElement.lang || 'en').slice(0, 2),
-      route: window.location.pathname,
       online: true,
     };
     send(payload).catch(() => undefined);
