@@ -27,3 +27,14 @@ describe('wf enforcement layers', () => {
     expect(md).toContain('Без підтверджень і без «чекаю на тебе»');
   });
 });
+
+describe('wf context hook', () => {
+  it('tells a session without a task to start one', async () => {
+    const { execFileSync } = await import('node:child_process');
+    const out = execFileSync('node', ['scripts/wf-context-hook.mjs'], {
+      env: { ...process.env, WF_STATE_DIR: '/nonexistent-wf-dir' },
+      encoding: 'utf8',
+    });
+    expect(out).toContain('wf.mjs start');
+  });
+});

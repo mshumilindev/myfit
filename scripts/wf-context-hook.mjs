@@ -8,9 +8,16 @@ import { isValidState, renderStatus } from './lib/wf-core.mjs';
 try {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
   const file = join(process.env.WF_STATE_DIR ?? join(root, '.claude/state'), 'wf.json');
-  if (existsSync(file)) {
-    const state = JSON.parse(readFileSync(file, 'utf8'));
-    if (isValidState(state) && state.task) console.log(`[wf]\n${renderStatus(state)}`);
+  const state = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : null;
+  if (state && isValidState(state) && state.task) {
+    console.log(`[wf]\n${renderStatus(state)}`);
+    console.log(
+      'Новий запит власника посеред роботи = `wf add`, а не зупинка. Не питай підтверджень; блокер лише cpd/access/legal/irreversible/design.',
+    );
+  } else {
+    console.log(
+      '[wf] немає активної задачі: для цього запиту спершу `node scripts/wf.mjs start <ID>` і `wf add` по пунктах плану, потім роби до доказу.',
+    );
   }
 } catch {
   /* a broken hook must never trap a session */
