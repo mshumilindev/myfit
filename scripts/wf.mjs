@@ -45,7 +45,12 @@ function withLock(dir, fn) {
     } catch (e) {
       if (e.code !== 'EEXIST') throw e;
       try {
-        if (Date.now() - statSync(lock).mtimeMs > 10000) unlinkSync(lock);
+        if (Date.now() - statSync(lock).mtimeMs > 10000) {
+          // rename first: only one process can take a stale lock away, a fresh lock is never removed by mistake
+          const stale = `${lock}.stale.${process.pid}`;
+          renameSync(lock, stale);
+          unlinkSync(stale);
+        }
       } catch {
         /* released meanwhile */
       }

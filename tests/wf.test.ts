@@ -247,3 +247,19 @@ describe('wf hardening, round 2', () => {
     expect(renderStatus(s)).toContain('не зупинятись');
   });
 });
+
+describe('wf hardening, round 3', () => {
+  it('rejects negative stall, duplicate ids, bad task id and blocked item without a category', () => {
+    const bodies = [
+      '{"task":{"id":"T"},"items":[],"stall":-5}',
+      '{"task":{"id":"T"},"items":[{"id":"a","status":"todo"},{"id":"a","status":"todo"}]}',
+      '{"task":{"id":"bad id"},"items":[]}',
+      '{"task":{"id":"T"},"items":[{"id":"a","status":"blocked"}]}',
+    ];
+    for (const body of bodies) {
+      const dir = mkdtempSync(join(tmpdir(), 'wf-'));
+      writeFileSync(join(dir, 'wf.json'), body);
+      expect(run(['status'], { dir, now: T }).code).toBe(2);
+    }
+  });
+});

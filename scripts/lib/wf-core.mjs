@@ -57,15 +57,18 @@ const STATUSES = ['todo', 'doing', 'done', 'blocked'];
 /** Shape check for a state loaded from disk (deep: every item must be well formed). */
 export function isValidState(state) {
   if (!state || typeof state !== 'object' || !Array.isArray(state.items)) return false;
-  if (state.task !== null && !(state.task && typeof state.task.id === 'string')) return false;
-  if (state.stall !== undefined && !Number.isInteger(state.stall)) return false;
+  if (state.task !== null && !(state.task && ID_RE.test(String(state.task.id)))) return false;
+  if (state.stall !== undefined && !(Number.isInteger(state.stall) && state.stall >= 0))
+    return false;
+  if (new Set(state.items.map((i) => i?.id)).size !== state.items.length) return false;
   return state.items.every(
     (i) =>
       i &&
       typeof i === 'object' &&
       typeof i.id === 'string' &&
       ID_RE.test(i.id) &&
-      STATUSES.includes(i.status),
+      STATUSES.includes(i.status) &&
+      (i.status !== 'blocked' || NEEDS.includes(i.needs)),
   );
 }
 
