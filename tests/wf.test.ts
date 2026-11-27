@@ -20,6 +20,8 @@ import {
 } from '../scripts/lib/wf-core.mjs';
 // @ts-expect-error — plain .mjs without type declarations
 import { run } from '../scripts/wf.mjs';
+// @ts-expect-error — plain .mjs without type declarations
+import { decideStop, FRESH_MS } from '../scripts/lib/wf-stop.mjs';
 
 const T = 1_000;
 const started = () => reduce(emptyState(), { type: 'start', ts: T, task: 'SPO-1', title: 'x' });
@@ -291,5 +293,53 @@ describe('wf verify gate (SPO-642, D+)', () => {
     run(['start', 'S'], { dir, now: T });
     run(['add', 'a'], { dir, now: T });
     expect(run(['done', 'a', '--evidence', 'x'], { dir, now: T }).code).toBe(0);
+  });
+});
+
+describe('wf stop hook decision (WF-C)', () => {
+  const now = 10_000_000_000;
+  const st = (items: { id: string; status: string }[]) => ({ task: { id: 'SPO-1' }, items });
+  it('blocks while open items without blocker exist and names the next one', () => {
+    const d = decideStop({
+      state: st([
+        { id: 'a', status: 'done' },
+        { id: 'b', status: 'todo' },
+      ]),
+      mtimeMs: now,
+      now,
+    });
+    expect(d.block).toBe(true);
+    expect(d.reason).toContain('b');
+  });
+  it('prefers the item in progress as next', () => {
+    const d = decideStop({
+      state: st([
+        { id: 'a', status: 'todo' },
+        { id: 'b', status: 'doing' },
+      ]),
+      mtimeMs: now,
+      now,
+    });
+    expect(d.reason).toContain('Далі: b');
+  });
+  it.each([
+    [
+      'nothing open',
+      st([
+        { id: 'a', status: 'done' },
+        { id: 'b', status: 'blocked' },
+      ]),
+    ],
+    ['no task', { task: null, items: [] }],
+  ])('lets the turn end: %s', (_n, state) => {
+    expect(decideStop({ state, mtimeMs: now, now }).block).toBe(false);
+  });
+  it('never traps: stop_hook_active, stale state, missing state', () => {
+    const open = st([{ id: 'a', status: 'todo' }]);
+    expect(
+      decideStop({ input: { stop_hook_active: true }, state: open, mtimeMs: now, now }).block,
+    ).toBe(false);
+    expect(decideStop({ state: open, mtimeMs: now - FRESH_MS - 1, now }).block).toBe(false);
+    expect(decideStop({ state: undefined, now }).block).toBe(false);
   });
 });
