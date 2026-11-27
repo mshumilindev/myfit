@@ -429,8 +429,8 @@ export const addonStoreEt: typeof addonStoreEn = {
     supersets: { name: 'Superseeriad', desc: 'Tee kaks või enam harjutust üksteise järel.' },
     circuit: { name: 'Ringtreening', desc: 'Ringid harjutuste grupi peale, ringide loenduriga.' },
     'time-blocks': {
-      name: 'Ajablokid',
-      desc: 'AMRAP-, EMOM-, ajale- ja intervallblokid treeningule või programmi päevale: taimer, 5-sekundiline loendus, helisignaalid, voorude loendur ja tulemus.',
+      name: 'Ajaplokid',
+      desc: 'AMRAP-, EMOM-, ajale- ja intervallplokid treeningule või programmi päevale: taimer, 5-sekundiline loendus, helisignaalid, voorude loendur ja tulemus.',
     },
     effort: { name: 'RPE / RIR', desc: 'Hinda, kui raske seeria oli, ja vaata äpi hinnangut.' },
     'set-types': { name: 'Seeriatüübid', desc: 'Dropid, pöörddropid ja raskusega hoidmised.' },

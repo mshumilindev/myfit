@@ -2619,7 +2619,7 @@ export const et: Strings = {
   optsOtherSettings: 'Muud seaded',
   optsGroupManage: 'Haldus',
   advNudgeName: 'Edasijõudnud treening',
-  advNudgeDesc: 'Periodiseerimine, ajablokid, valmisolek',
+  advNudgeDesc: 'Periodiseerimine, ajaplokid, valmisolek',
   advNudgeAdd: 'Lisa',
   optsExerciseValue: 'Asendus, superseeria…',
   optsSessionValue: 'Ringtreening, jõusaal…',
