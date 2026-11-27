@@ -191,6 +191,37 @@ describe('setProgramStatus (trainer and admin, catalog start)', () => {
     expect(get('assignments/x1')).toBeUndefined();
   });
 
+  it.each(['trainer', 'admin'])(
+    'a %s activating their own ordinary program after a catalog start takes the assignment back and leaves the rest of the library alone',
+    async (role) => {
+      put('users/x1', { role });
+      put('programs/tl-x1-y', prog('tl-x1-y', 'x1', 'active'));
+      put('assignments/x1', {
+        memberId: 'x1',
+        programId: 'tl-x1-y',
+        assignedBy: 'x1',
+        startedAt: 5,
+      });
+      put('programs/prg-own', prog('prg-own', 'x1', 'draft'));
+      put('programs/prg-lib', prog('prg-lib', 'x1', 'active'));
+      await call('x1', 'prg-own');
+      expect(get('programs/prg-own')?.status).toBe('active');
+      expect(get('programs/tl-x1-y')?.status).toBe('archived');
+      expect(get('programs/prg-lib')?.status).toBe('active');
+      expect(get('assignments/x1')).toMatchObject({ programId: 'prg-own', assignedBy: 'x1' });
+    },
+  );
+
+  it("a trainer's assignment that is not their own catalog start is left as it is", async () => {
+    put('users/x1', { role: 'trainer' });
+    put('programs/prg-a', prog('prg-a', 'x1', 'active'));
+    put('assignments/x1', { memberId: 'x1', programId: 'prg-a', assignedBy: 'x1', startedAt: 5 });
+    put('programs/prg-own', prog('prg-own', 'x1', 'draft'));
+    await call('x1', 'prg-own');
+    expect(get('programs/prg-own')?.status).toBe('active');
+    expect(get('assignments/x1')).toMatchObject({ programId: 'prg-a' });
+  });
+
   it("archiving the started catalog program drops the trainer's own assignment", async () => {
     put('users/x1', { role: 'trainer' });
     put('programs/tl-x1-y', prog('tl-x1-y', 'x1', 'active'));

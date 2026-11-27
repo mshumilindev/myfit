@@ -1,6 +1,10 @@
 /** SPO-307 (R15, R16): what happens when a member activates their own program. */
 import { describe, expect, it } from 'vitest';
-import { planActivation, type ActivationInput } from '../../functions/src/programActivation';
+import {
+  planActivation,
+  replacesOwnCatalogAssignment,
+  type ActivationInput,
+} from '../../functions/src/programActivation';
 
 const base: ActivationInput = {
   uid: 'm1',
@@ -77,5 +81,21 @@ describe('planActivation', () => {
     expect(planActivation(held({ assignerRole: null }))).toBe('apply'); // assigner gone
     expect(planActivation(held({ trainerId: 't2' }))).toBe('apply'); // no longer their trainer
     expect(planActivation(held({ trainerId: null }))).toBe('apply');
+  });
+});
+
+describe('replacesOwnCatalogAssignment', () => {
+  const own = { programId: 'tl-u-x', assignedBy: 'u' };
+  it('own catalog start + an ordinary program: replaces', () => {
+    expect(replacesOwnCatalogAssignment(own, 'u', 'prg-1')).toBe(true);
+  });
+  it("no assignment, someone else's assignment, an ordinary assignment, the same or another catalog program: leaves it", () => {
+    expect(replacesOwnCatalogAssignment(null, 'u', 'prg-1')).toBe(false);
+    expect(replacesOwnCatalogAssignment({ ...own, assignedBy: 't' }, 'u', 'prg-1')).toBe(false);
+    expect(
+      replacesOwnCatalogAssignment({ programId: 'prg-a', assignedBy: 'u' }, 'u', 'prg-1'),
+    ).toBe(false);
+    expect(replacesOwnCatalogAssignment(own, 'u', 'tl-u-x')).toBe(false);
+    expect(replacesOwnCatalogAssignment(own, 'u', 'tl-u-y')).toBe(false);
   });
 });

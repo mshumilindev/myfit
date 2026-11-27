@@ -39,3 +39,23 @@ export function planActivation(i: ActivationInput): ActivationPlan {
     return 'blocked';
   return 'apply';
 }
+
+/**
+ * A trainer or admin has no "active program" of their own except through an assignment, which only a catalog start (or
+ * "assign to myself") creates. When their current assignment is their OWN catalog start (`tl-` id, assigned by themselves),
+ * activating one of their ordinary programs must take the assignment back, or "My program" keeps showing the catalog one.
+ * Any other assignment (made by someone else, or an ordinary program they assigned to themselves) is left as it is.
+ */
+export function replacesOwnCatalogAssignment(
+  assignment: { programId: string; assignedBy: string } | null,
+  uid: string,
+  programId: string,
+): boolean {
+  return (
+    !!assignment &&
+    assignment.assignedBy === uid &&
+    assignment.programId.startsWith('tl-') &&
+    assignment.programId !== programId &&
+    !programId.startsWith('tl-')
+  );
+}

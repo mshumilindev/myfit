@@ -20,7 +20,7 @@ import {
 } from './lib';
 import { listUserWorkouts } from './aggregates';
 import { plannedFor } from './programCycle';
-import { planActivation } from './programActivation';
+import { planActivation, replacesOwnCatalogAssignment } from './programActivation';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -172,6 +172,34 @@ export const setProgramStatus = onCall(async (req) => {
       tx.update(db.collection('programs').doc(id), { status, updatedAt: now });
     });
     return { ok: true };
+  }
+  if (status === 'active') {
+    // Trainer / admin, ordinary program: only when their current assignment is their own catalog start does it move
+    // (the rest of their library is never archived here, unlike for a member).
+    const moved = await db.runTransaction(async (tx) => {
+      const asgRef = db.collection('assignments').doc(uid);
+      const asgSnap = await tx.get(asgRef);
+      const asg = asgSnap.exists ? (asgSnap.data() as AssignmentDoc) : null;
+      if (
+        !asg ||
+        !replacesOwnCatalogAssignment(
+          typeof asg.programId === 'string' && typeof asg.assignedBy === 'string'
+            ? { programId: asg.programId, assignedBy: asg.assignedBy }
+            : null,
+          uid,
+          id,
+        )
+      )
+        return false;
+      tx.update(db.collection('programs').doc(asg.programId), {
+        status: 'archived',
+        updatedAt: now,
+      });
+      tx.set(asgRef, { memberId: uid, programId: id, assignedBy: uid, startedAt: now });
+      tx.update(db.collection('programs').doc(id), { status, updatedAt: now });
+      return true;
+    });
+    if (moved) return { ok: true };
   }
   const batch = db.batch();
   if (me.role === 'member' || id.startsWith('tl-')) {
