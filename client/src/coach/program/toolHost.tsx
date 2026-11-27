@@ -11,6 +11,7 @@ import { warmupUsesWeight } from '../../warmupLog';
 import { useT } from '../../i18n';
 import { usePeriodizationHost } from '../../periodizationRt';
 import { useEffortHost } from '../../effortRt';
+import { useTimeBlocksHost } from '../../timeBlocksRt';
 import { usePgT } from '../../i18n/coachProgram';
 import type { LibraryDay, ProgramEditorHost } from '../../tools/programEditor';
 import { weekOrder, useWeekStartDay } from '../../weekStart';
@@ -33,6 +34,7 @@ export function useCoachEditorHost({
   const order = useMemo(() => weekOrder(start), [start]);
   const periodization = usePeriodizationHost();
   const effort = useEffortHost();
+  const timeBlocks = useTimeBlocksHost();
   return useMemo(
     () => ({
       mode: 'coach',
@@ -51,9 +53,14 @@ export function useCoachEditorHost({
       warmupWeighted: warmupUsesWeight,
       library,
       checkContext: { restrictions: restrictionKey ? restrictionKey.split('|') : [] },
-      slots: { muscleMap: MusclePickerMap, ...periodization?.editorSlots, ...effort?.editorSlots },
+      slots: {
+        muscleMap: MusclePickerMap,
+        ...periodization?.editorSlots,
+        ...effort?.editorSlots,
+        ...(timeBlocks?.DayBlocks ? { dayBlocks: timeBlocks.DayBlocks } : {}),
+      },
       ...periodization?.editorCheck,
     }),
-    [p, t, library, restrictionKey, order, periodization, effort],
+    [p, t, library, restrictionKey, order, periodization, effort, timeBlocks],
   );
 }

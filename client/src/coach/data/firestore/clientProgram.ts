@@ -55,13 +55,14 @@ export function layerFromVersion(p: {
 /**
  * The runnable program (`programs/prg-{client}-{n}`, plaintext, template level) with the sealed trainer layer put back,
  * IN MEMORY ONLY: per item id the target weight, RPE, rest and cue plus the warm-up weights, and the planned
- * activities. Items the layer does not know stay as they are; layer items the runnable program does not hold are
+ * activities and time blocks. Items the layer does not know stay as they are; layer items the runnable program does not hold are
  * ignored. Nothing here is written anywhere (the localStorage cache of the assignment keeps the stripped form).
  */
 export function applyProgramLayer<
   P extends {
     items: ReadonlyArray<{ id: string }>;
     activities?: unknown;
+    blocks?: unknown;
   },
 >(p: P, layer: Pick<ProgramLayer, 'program'> | null | undefined): P {
   const lp = layer?.program;
@@ -79,7 +80,13 @@ export function applyProgramLayer<
       ...(l.warmupItems?.length ? { warmupItems: l.warmupItems } : {}),
     };
   });
-  return { ...p, items, ...(lp.activities?.length ? { activities: lp.activities } : {}) };
+  return {
+    ...p,
+    items,
+    ...(lp.activities?.length ? { activities: lp.activities } : {}),
+    // The trainer's time blocks (SPO-608) ride on the sealed layer like the planned activities; `blockV` is the writer marker.
+    ...(lp.blocks?.length ? { blocks: lp.blocks, blockV: 1 as const } : {}),
+  };
 }
 
 /** The "Program updated" notice is the open trace of a new version: unread and for this version = not acknowledged. */

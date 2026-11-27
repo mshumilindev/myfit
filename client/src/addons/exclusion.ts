@@ -115,6 +115,8 @@ export const EXCLUSION: Readonly<Record<string, Exclusion>> = {
       'views/TodayView.tsx',
       'views/ProgressView.tsx',
       'views/programs/selfEditor.tsx',
+      'blockLoad.ts',
+      'coach/program/toolHost.tsx',
     ],
     names: ['timeBlocksAvailable', 'useTimeBlocksOn', 'useTimeBlocksHost'],
   },
