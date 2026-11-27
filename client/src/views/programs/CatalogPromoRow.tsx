@@ -3,6 +3,7 @@ import { isAddonAllowed, useEnabledAddons } from '../../addons/enabledSet';
 import { addonById } from '../../addons/manifest';
 import { useAddonStoreT } from '../../i18n/addonStore';
 import { storeHash } from '../../addonStore/storeRoute';
+import { StoreSurface } from '../../addonStore/StoreSurface';
 import { TileOf, kindBadge } from '../../addonStore/storeItems';
 import { SkBtn, SkCard, SkRow } from '../../store-kit';
 import { setHash } from '../../route';
@@ -22,11 +23,8 @@ export function CatalogPromoRow() {
   if (installed || !m || !isAddonAllowed(ID, getRole())) return null;
   const item = st.items[ID];
   const open = () => setHash(storeHash('item', ID));
-  // The store's own surface: its colours follow the app's light / dark mode (like the set-options nudge).
-  const root = typeof document === 'undefined' ? null : document.documentElement;
-  const dark = root ? root.dataset.mode !== 'light' || root.dataset.sleep === 'night' : true;
   return (
-    <section className={`sk-root ${dark ? 'sk-dark' : 'sk-light'}`}>
+    <StoreSurface>
       <SkCard pad>
         <SkRow
           noBorder
@@ -42,6 +40,6 @@ export function CatalogPromoRow() {
           onOpen={open}
         />
       </SkCard>
-    </section>
+    </StoreSurface>
   );
 }

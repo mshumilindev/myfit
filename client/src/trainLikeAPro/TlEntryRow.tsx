@@ -1,4 +1,5 @@
 import { SkCard, SkIcon, SkRow } from '../store-kit';
+import { StoreSurface } from '../addonStore/StoreSurface';
 import { TileOf } from '../addonStore/storeItems';
 import { useAddonStoreT } from '../i18n/addonStore';
 import { addonById } from '../addons/manifest';
@@ -14,10 +15,8 @@ export function TlEntryRow({ onOpen }: { onOpen: () => void }) {
   const { st } = useAddonStoreT();
   const s = STRINGS[locale];
   const m = addonById('train-like-a-pro');
-  const root = typeof document === 'undefined' ? null : document.documentElement;
-  const dark = root ? root.dataset.mode !== 'light' || root.dataset.sleep === 'night' : true;
   return (
-    <section className={`sk-root ${dark ? 'sk-dark' : 'sk-light'}`}>
+    <StoreSurface>
       <SkCard pad>
         <SkRow
           noBorder
@@ -28,6 +27,6 @@ export function TlEntryRow({ onOpen }: { onOpen: () => void }) {
           onOpen={onOpen}
         />
       </SkCard>
-    </section>
+    </StoreSurface>
   );
 }

@@ -1,4 +1,5 @@
 import { SkBtn, SkRow, SkTile } from '../store-kit';
+import { StoreSurface } from '../addonStore/StoreSurface';
 import { iconUrl } from '../addonStore/storeItems';
 import { useT } from '../i18n';
 
@@ -9,10 +10,8 @@ import { useT } from '../i18n';
  */
 export function AdvancedNudge({ onOpen }: { onOpen: () => void }) {
   const { t } = useT();
-  const root = typeof document === 'undefined' ? null : document.documentElement;
-  const dark = root ? root.dataset.mode !== 'light' || root.dataset.sleep === 'night' : true;
   return (
-    <div className={`sk-root ${dark ? 'sk-dark' : 'sk-light'} opts-nudge`}>
+    <StoreSurface className="opts-nudge">
       <SkRow
         noBorder
         tile={<SkTile letter="A" tone={3} size={40} image={iconUrl('advanced-training')} />}
@@ -25,6 +24,6 @@ export function AdvancedNudge({ onOpen }: { onOpen: () => void }) {
         }
         onOpen={onOpen}
       />
-    </div>
+    </StoreSurface>
   );
 }
