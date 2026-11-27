@@ -5,7 +5,8 @@
  */
 
 export const KINDS = ['ac', 'step', 'extra'];
-export const NEEDS = ['design', 'cpd', 'decision', 'access'];
+/** Why an item may wait for the owner. No generic "decision": the owner's rule is that Claude decides and goes on. */
+export const NEEDS = ['design', 'cpd', 'access', 'legal', 'irreversible'];
 const EVENT_TYPES = ['start', 'add', 'doing', 'done', 'block', 'unblock', 'heartbeat'];
 /** Heartbeats in a row without a new `done` before status asks to change approach (never to stop). */
 /** Ids are identifiers only, so the journal can never hold free text or personal data. */
@@ -171,6 +172,10 @@ export function renderStatus(state) {
       : 'чекає на мене: —',
     `доказів: ${withEvidence}/${done} · без прогресу: ${state.stall ?? 0}`,
   ];
+  if (todo.length + doing.length > 0) {
+    const next = (doing[0] ?? todo[0]).id;
+    out.push(`ДІЯ: роби ${next} зараз; не завершуй хід і не питай дозволу (wf done --evidence)`);
+  }
   if ((state.stall ?? 0) >= STALL_AFTER) {
     out.push('! довго без прогресу — змінити підхід (spike/рефлексія), не зупинятись');
   }

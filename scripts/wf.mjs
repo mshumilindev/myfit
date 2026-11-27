@@ -6,7 +6,7 @@
  *   node scripts/wf.mjs add <item> [--kind ac|step|extra] [--text "…"] [--verify]
  *   node scripts/wf.mjs doing <item>
  *   node scripts/wf.mjs done <item> --evidence "<command|file|link>" [--verdict verify.json]
- *   node scripts/wf.mjs block <item> --needs design|cpd|decision|access [--reason "…"]
+ *   node scripts/wf.mjs block <item> --needs design|cpd|access|legal|irreversible [--reason "…"]
  *   node scripts/wf.mjs unblock <item>
  *   node scripts/wf.mjs heartbeat
  *   node scripts/wf.mjs status
