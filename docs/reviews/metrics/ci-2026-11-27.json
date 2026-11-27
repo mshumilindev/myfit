@@ -1,0 +1,31 @@
+{
+  "date": "2026-11-27",
+  "ci": {
+    "runs": 29,
+    "medianMin": 10.1,
+    "p90Min": 14.5,
+    "redPct": 34
+  },
+  "slowestJobs": [
+    {
+      "name": "Client e2e (console errors, offline start, session pictures, Coach smoke)",
+      "medianSec": 421
+    },
+    {
+      "name": "Layout shard 0",
+      "medianSec": 351
+    },
+    {
+      "name": "Layout shard 3",
+      "medianSec": 328
+    },
+    {
+      "name": "Layout shard 8",
+      "medianSec": 325
+    },
+    {
+      "name": "Layout shard 1",
+      "medianSec": 311
+    }
+  ]
+}

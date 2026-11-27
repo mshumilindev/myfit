@@ -1,0 +1,26 @@
+# SPO-639 W6: weekly snapshot of CI speed/stability (read-only), kept as an artifact for the weekly review.
+name: Metrics
+on:
+  schedule:
+    - cron: '43 5 * * 1'
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+jobs:
+  ci-metrics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/collect-ci-metrics.mjs --out metrics
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ci-metrics
+          path: metrics
+          retention-days: 90
