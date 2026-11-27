@@ -87,3 +87,6 @@ client/dist-e2e*/
 
 # Electron shell build output (DMG)
 desktop/release/
+
+# Local workflow state (SPO-639, wf CLI)
+.claude/state/
