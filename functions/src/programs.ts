@@ -236,9 +236,10 @@ export const assignProgram = onCall(async (req) => {
   const sw = Math.max(1, Math.min(p.weeks === 0 ? 52 : p.weeks, Number(startWeek) || 1));
   const startedAt = Date.now() - (sw - 1) * 7 * DAY_MS;
   // One transaction: the member's own active programs, the assignment and the program status move together.
-  // The assigned program becomes THE active one: the member's own other active programs are archived (as in
-  // `setProgramStatus`). A trainer assigning to themselves keeps their library as it is, and the trainer's own
-  // programs (including the one replaced here, which may be assigned to other clients) are never touched.
+  // The assigned program takes the assignment. Only a catalog program (`tl-`) it replaces is archived; the member's
+  // own programs stay active so nothing they made is lost (owner 27.11, as in `setProgramStatus`). A trainer assigning
+  // to themselves keeps their library as it is, and the trainer's own programs (including the one replaced here,
+  // which may be assigned to other clients) are never touched.
   const prior = await db.runTransaction(async (tx) => {
     const asgRef = db.collection('assignments').doc(memberId);
     const priorSnap = await tx.get(asgRef);
@@ -254,7 +255,8 @@ export const assignProgram = onCall(async (req) => {
     const now = Date.now();
     if (own)
       for (const d of own.docs)
-        if (d.id !== p.id) tx.update(d.ref, { status: 'archived', updatedAt: now });
+        if (d.id !== p.id && d.id.startsWith('tl-'))
+          tx.update(d.ref, { status: 'archived', updatedAt: now });
     tx.set(asgRef, {
       memberId,
       programId: p.id,

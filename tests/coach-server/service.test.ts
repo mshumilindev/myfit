@@ -1272,12 +1272,21 @@ describe('publishPlanVersion (R-BE-PRG-9)', () => {
     await publishPlanVersion(ctx(), trainer, { clientId: 'c1', n: 4 });
     expect(await kv.get('assignments/c1')).toMatchObject({ programId: 'p4', startedAt: T0 + 5000 });
   });
-  it("archives the member's own other active programs and leaves everyone else's alone (SPO-307 R25)", async () => {
+  // Owner decision 27.11 (SPO-608): the member's own programs are never archived by a trainer's publish (R25 changed);
+  // only a catalog program (`tl-`) the published one replaces is archived.
+  it("keeps the member's own active programs, archives a replaced catalog one and leaves everyone else's alone", async () => {
     await kv.set('programs/own', { id: 'own', authorId: 'c1', status: 'active', items: [] });
+    await kv.set('programs/tl-c1-x', {
+      id: 'tl-c1-x',
+      authorId: 'c1',
+      status: 'active',
+      items: [],
+    });
     await kv.set('programs/other', { id: 'other', authorId: 'c2', status: 'active', items: [] });
     await kv.set('programs/p1', { id: 'p1', authorId: 't1', status: 'active', items: [] });
     await publishPlanVersion(ctx(), trainer, { clientId: 'c1', n: 2 });
-    expect(await kv.get('programs/own')).toMatchObject({ status: 'archived' });
+    expect(await kv.get('programs/own')).toMatchObject({ status: 'active' });
+    expect(await kv.get('programs/tl-c1-x')).toMatchObject({ status: 'archived' });
     expect(await kv.get('programs/other')).toMatchObject({ status: 'active' });
     expect(await kv.get('programs/p1')).toMatchObject({ status: 'active' });
     expect(await kv.get('programs/p2')).toMatchObject({ status: 'active' });

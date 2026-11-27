@@ -1686,14 +1686,15 @@ export async function publishPlanVersion(ctx: Ctx, actor: Actor, body: Record<st
     // Program becomes runnable and the member's assignment moves to it in this same transaction (as `assignProgram`
     // does for a plain program). A continuing plan keeps `startedAt` so adherence does not restart at every version.
     await kv.merge(`programs/${programId}`, { status: 'active', updatedAt: now });
-    // The published program is the member's one active program: their own other active ones are archived (SPO-307 R25).
+    // The published program takes the assignment. Only a catalog program (`tl-`) it replaces is archived; the member's own
+    // programs stay active so nothing they made is lost (owner 27.11, as in `setProgramStatus` and `assignProgram`).
     for (const o of await kv.list('programs', {
       where: [
         ['authorId', '==', clientId],
         ['status', '==', 'active'],
       ],
     }))
-      if (o.id !== programId)
+      if (o.id !== programId && String(o.id).startsWith('tl-'))
         await kv.merge(`programs/${o.id}`, { status: 'archived', updatedAt: now });
     const asg = await kv.get(`assignments/${clientId}`);
     const continuing =

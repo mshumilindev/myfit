@@ -116,12 +116,12 @@ beforeEach(() => {
   put('programs/prg-t', prog('prg-t', 't1', 'draft'));
 });
 
-describe('assignProgram (R25: the assigned program is the one active program)', () => {
-  it("archives the member's own active programs and takes the assignment", async () => {
+describe('assignProgram (R25: the assigned program takes the assignment; own programs stay active)', () => {
+  it("keeps the member's own active programs, archives the replaced catalog one and takes the assignment", async () => {
     put('programs/own', prog('own', 'm1', 'active'));
     put('programs/tl-m1-x', prog('tl-m1-x', 'm1', 'active'));
     await assign('t1', 'prg-t', 'm1');
-    expect(get('programs/own')?.status).toBe('archived');
+    expect(get('programs/own')?.status).toBe('active');
     expect(get('programs/tl-m1-x')?.status).toBe('archived');
     expect(get('programs/prg-t')?.status).toBe('active');
     expect(get('assignments/m1')).toMatchObject({ programId: 'prg-t', assignedBy: 't1' });
@@ -156,7 +156,7 @@ describe('assignProgram (R25: the assigned program is the one active program)', 
     put('programs/own', prog('own', 'm1', 'active'));
     await assign('t1', 'prg-t', 'm1');
     await assign('t1', 'prg-t', 'm1');
-    expect(get('programs/own')?.status).toBe('archived');
+    expect(get('programs/own')?.status).toBe('active');
     expect(get('programs/prg-t')?.status).toBe('active');
   });
 });
