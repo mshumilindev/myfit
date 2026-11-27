@@ -14,7 +14,7 @@ describe('CatalogPromoRow (Programs, add-on not installed)', () => {
 
   it('shows the store-kit banner; Add and the title open the add-on page in the store', () => {
     const { container } = render(<CatalogPromoRow />);
-    expect(container.querySelector('.sk-root .sk-btile')).not.toBeNull();
+    expect(container.querySelector('.sk-root .sk-card')).not.toBeNull();
     expect(container.querySelector('img')?.getAttribute('src')).toContain('train-like-a-pro');
     fireEvent.click(screen.getByRole('button', { name: 'Add' }));
     expect(currentHash()).toBe('#/store/item/train-like-a-pro');
