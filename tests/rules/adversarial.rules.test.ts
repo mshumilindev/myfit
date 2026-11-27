@@ -820,7 +820,12 @@ c(
 );
 // time blocks (SPO-608): a client that predates `blockV` must not be able to drop stored blocks
 const withBlocks = (d: Db) => {
-  d['programs/prg-client1-1'] = { authorId: T, status: 'active', blockV: 1, blocks: [{ id: 'b1' }] };
+  d['programs/prg-client1-1'] = {
+    authorId: T,
+    status: 'active',
+    blockV: 1,
+    blocks: [{ id: 'b1' }],
+  };
 };
 c(
   'J30',

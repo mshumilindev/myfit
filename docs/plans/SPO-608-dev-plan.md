@@ -4,35 +4,35 @@
 
 ## 0. Рішення по відкритих питаннях (best practices)
 
-| № | Питання | Рішення | Чому |
-| --- | --- | --- | --- |
-| D1 | Що бачить тренер про результат блоку | Лише читання, у Workouts › розгорнута сесія клієнта (картка `Recap`). На Overview блок рахується як сесія, нової картки немає | Не вводимо нових екранів і категорій; результат блоку = частина запису сесії (нова згода не потрібна) |
-| D2 | Cancel/Log на drill-екранах Exercise/Session | Немає: лише Back, Delete, nudge | Дії Cancel/Log належать сету; на drill-екрані нічого не редагується «чернеткою», кожна дія застосовується одразу |
-| D3 | Довжина підписів типів сету у 5 локалях | Короткі W, WU, Drop, RD, SD з `aria-label` і підказкою; довжини перевіряє `audit:stories` + `i18n:check`, матрицю не скорочуємо | Інваріант 5 і ADR 004 |
-| D4 | `blockV` | Варіант A: rules блокують запис старим клієнтом (як `cycleV`) | Дані тренера не стираємо мовчки (SPO-606 п. 7.1) |
-| D5 | Skip в Effort | Немає клітинки Skip; повторний тап по обраному RPE знімає значення; 6–10 + F в сітці | Корінь: 7 рівних колонок `.se-rpe:has(.rpe-f)` |
-| D6 | Plate stack | Малюнок дисків виводиться з ваги й грифа, не статичний; рядок лише для штангових (як зараз `isBarbell`) | Без нових даних про диски залу |
-| D7 | Виняток nudge-рядка | Рядок «Advanced training» у базовому застосунку — свідомий виняток із `addons.md` (10.11, «без підказок встановити») за прямим рішенням власника | Записати в `addons.md` |
-| D8 | Store-kit у шторці застосунку | Дозволено лише для nudge-рядка (`SkRow`), у темному режимі `sk-dark` мапиться на режим застосунку | Інакше новий примітив кіту |
+| №   | Питання                                      | Рішення                                                                                                                                          | Чому                                                                                                             |
+| --- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| D1  | Що бачить тренер про результат блоку         | Лише читання, у Workouts › розгорнута сесія клієнта (картка `Recap`). На Overview блок рахується як сесія, нової картки немає                    | Не вводимо нових екранів і категорій; результат блоку = частина запису сесії (нова згода не потрібна)            |
+| D2  | Cancel/Log на drill-екранах Exercise/Session | Немає: лише Back, Delete, nudge                                                                                                                  | Дії Cancel/Log належать сету; на drill-екрані нічого не редагується «чернеткою», кожна дія застосовується одразу |
+| D3  | Довжина підписів типів сету у 5 локалях      | Короткі W, WU, Drop, RD, SD з `aria-label` і підказкою; довжини перевіряє `audit:stories` + `i18n:check`, матрицю не скорочуємо                  | Інваріант 5 і ADR 004                                                                                            |
+| D4  | `blockV`                                     | Варіант A: rules блокують запис старим клієнтом (як `cycleV`)                                                                                    | Дані тренера не стираємо мовчки (SPO-606 п. 7.1)                                                                 |
+| D5  | Skip в Effort                                | Немає клітинки Skip; повторний тап по обраному RPE знімає значення; 6–10 + F в сітці                                                             | Корінь: 7 рівних колонок `.se-rpe:has(.rpe-f)`                                                                   |
+| D6  | Plate stack                                  | Малюнок дисків виводиться з ваги й грифа, не статичний; рядок лише для штангових (як зараз `isBarbell`)                                          | Без нових даних про диски залу                                                                                   |
+| D7  | Виняток nudge-рядка                          | Рядок «Advanced training» у базовому застосунку — свідомий виняток із `addons.md` (10.11, «без підказок встановити») за прямим рішенням власника | Записати в `addons.md`                                                                                           |
+| D8  | Store-kit у шторці застосунку                | Дозволено лише для nudge-рядка (`SkRow`), у темному режимі `sk-dark` мапиться на режим застосунку                                                | Інакше новий примітив кіту                                                                                       |
 
 ## 1. Інвентар зачепленого (rg 27.11)
 
-| Місце | Як зачеплене | Хто читає далі | Ризик | Що перевірить |
-| --- | --- | --- | --- | --- |
-| `views/SessionView.tsx` (`opts-sheet`, `SetEditorSheet`, `renderExerciseOptions/SessionOptions`) | Прибираємо `Segmented` табів; Other settings усередині More; drill-екрани Exercise/Session; Set type компактний; plate row | `SessionView.{options,more,circuit,dismiss}.cases.test.tsx`, `tests/ui.test.tsx`, `components/HoldWatchSet.cases.test.tsx` | High | Оновлені cases-тести, e2e, скріни 390/1280 |
-| `styles.css` `.opts-*` (34 правила), `.se-rpe*` (8), `redesign.css` | Нові класи шторки, сітка RPE без Skip | Лише SessionView (rg: клас не вживається поза ним) | Medium | `audit:stories`, візуальний прогін 5 локалей |
-| `setTypeOf(s)` (45 файлів: store, setMath, volume/втома, Today, Atlas, periodization, playbook, challenges) | **Не змінюємо** значення й семантику; змінюється лише UI вибору | Усі споживачі | Low (інваріант 8) | Існуючі `store.test`, `setTypesApi.test`, `warmupLog.test` зелені без змін |
-| `setSDShort` / підписи типів (`i18n/*.ts`, `SessionView.tsx:2390`, `TraineeSessionView.tsx:44`) | Додаємо W/WU/Drop/RD короткі ключі | `TraineeSessionView.cases.test.tsx:174` (порядок підписів) | Medium | `i18n:check`, оновлений assert (не послаблений) |
-| `components/PlateSheet.tsx` + рядок plates | Рядок у More лишається, малюнок дисків динамічний | `PlateSheet.cases.test.tsx` | Low | Тест плит |
-| UI-кіт: `Segmented`, `ListRow`, `BackButton`, `Banner` | Використовуємо як є; нові примітиви: згортна група (More/Other settings), `PinnedHeader` шторки (за потреби), `BlockBuilder/BlockCard/BlockTimer/BlockReady/BlockResult/BlockActuals` (SPO-610–615) | 82 файли імпортують Segmented/ListRow/BackButton | High (shared kit) | `tests/kit-guard.test.ts`, `hygiene-ratchet`, stories, `docs/UI-KIT.md` |
-| Store-kit `SkRow` у шторці (addonStore) | Використання поза стором | `addonStore/*` | Medium | Дев-мапа dark, скрін dark |
-| Аддони: `addons/manifest.ts`, `exclusion.ts`, `featureGates.ts`, `useAddonRuntime.ts` | Модуль `time-blocks` ще не існує (rg) → запис у маніфест, exclusion, gate | `exclusion.contract.test`, `boundary.contract.test` | High | Контрактні тести |
-| `restTimer.ts` + 6 споживачів, `volume.ts`, `recovery.ts`, `picker.ts`, `sessionBuilder.ts`, `challenges.ts`, Today widgets, `SessionMuscleMap` | Читають conditioning лише через одну обгортку на джерелі | Today/Atlas | High (формули) | Golden-значення без модуля = ±0 |
-| `programs/modelTypes.ts` `ProgramItem` (+`block`, `repScheme`), `programCsv.ts`, `trainLikeAPro/entryToProgram.ts` | Необовʼязкові поля | Редактор, сторінка програми, Start, CSV | Medium | Тест «старі програми валідні» |
-| `firestore.rules` (`cycleV` аналог `blockV`) | D4 | Старий клієнт | High (rules) | `npm run test:rules` |
-| `coach/*` Workouts history, `TraineeSessionView.tsx` | Read-only `Recap` | Тренер | Medium | Coach e2e (`e2e:coach`), `TraineeSessionView.cases.test` |
-| Реєстр даних R68, `dataRegistry`, `addonExport`, `deviceWipe`, `recursiveDelete` | Результат блоку | DSAR, видалення | Medium | guard-тест повноти, тест каскаду |
-| `docs/UI-KIT.md`, `addons.md` (виняток D7), `docs/compliance/data-registry.md` | Записи | — | Low | `kit-guard` |
+| Місце                                                                                                                                           | Як зачеплене                                                                                                                                                                                        | Хто читає далі                                                                                                             | Ризик             | Що перевірить                                                              |
+| ----------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------- | -------------------------------------------------------------------------- |
+| `views/SessionView.tsx` (`opts-sheet`, `SetEditorSheet`, `renderExerciseOptions/SessionOptions`)                                                | Прибираємо `Segmented` табів; Other settings усередині More; drill-екрани Exercise/Session; Set type компактний; plate row                                                                          | `SessionView.{options,more,circuit,dismiss}.cases.test.tsx`, `tests/ui.test.tsx`, `components/HoldWatchSet.cases.test.tsx` | High              | Оновлені cases-тести, e2e, скріни 390/1280                                 |
+| `styles.css` `.opts-*` (34 правила), `.se-rpe*` (8), `redesign.css`                                                                             | Нові класи шторки, сітка RPE без Skip                                                                                                                                                               | Лише SessionView (rg: клас не вживається поза ним)                                                                         | Medium            | `audit:stories`, візуальний прогін 5 локалей                               |
+| `setTypeOf(s)` (45 файлів: store, setMath, volume/втома, Today, Atlas, periodization, playbook, challenges)                                     | **Не змінюємо** значення й семантику; змінюється лише UI вибору                                                                                                                                     | Усі споживачі                                                                                                              | Low (інваріант 8) | Існуючі `store.test`, `setTypesApi.test`, `warmupLog.test` зелені без змін |
+| `setSDShort` / підписи типів (`i18n/*.ts`, `SessionView.tsx:2390`, `TraineeSessionView.tsx:44`)                                                 | Додаємо W/WU/Drop/RD короткі ключі                                                                                                                                                                  | `TraineeSessionView.cases.test.tsx:174` (порядок підписів)                                                                 | Medium            | `i18n:check`, оновлений assert (не послаблений)                            |
+| `components/PlateSheet.tsx` + рядок plates                                                                                                      | Рядок у More лишається, малюнок дисків динамічний                                                                                                                                                   | `PlateSheet.cases.test.tsx`                                                                                                | Low               | Тест плит                                                                  |
+| UI-кіт: `Segmented`, `ListRow`, `BackButton`, `Banner`                                                                                          | Використовуємо як є; нові примітиви: згортна група (More/Other settings), `PinnedHeader` шторки (за потреби), `BlockBuilder/BlockCard/BlockTimer/BlockReady/BlockResult/BlockActuals` (SPO-610–615) | 82 файли імпортують Segmented/ListRow/BackButton                                                                           | High (shared kit) | `tests/kit-guard.test.ts`, `hygiene-ratchet`, stories, `docs/UI-KIT.md`    |
+| Store-kit `SkRow` у шторці (addonStore)                                                                                                         | Використання поза стором                                                                                                                                                                            | `addonStore/*`                                                                                                             | Medium            | Дев-мапа dark, скрін dark                                                  |
+| Аддони: `addons/manifest.ts`, `exclusion.ts`, `featureGates.ts`, `useAddonRuntime.ts`                                                           | Модуль `time-blocks` ще не існує (rg) → запис у маніфест, exclusion, gate                                                                                                                           | `exclusion.contract.test`, `boundary.contract.test`                                                                        | High              | Контрактні тести                                                           |
+| `restTimer.ts` + 6 споживачів, `volume.ts`, `recovery.ts`, `picker.ts`, `sessionBuilder.ts`, `challenges.ts`, Today widgets, `SessionMuscleMap` | Читають conditioning лише через одну обгортку на джерелі                                                                                                                                            | Today/Atlas                                                                                                                | High (формули)    | Golden-значення без модуля = ±0                                            |
+| `programs/modelTypes.ts` `ProgramItem` (+`block`, `repScheme`), `programCsv.ts`, `trainLikeAPro/entryToProgram.ts`                              | Необовʼязкові поля                                                                                                                                                                                  | Редактор, сторінка програми, Start, CSV                                                                                    | Medium            | Тест «старі програми валідні»                                              |
+| `firestore.rules` (`cycleV` аналог `blockV`)                                                                                                    | D4                                                                                                                                                                                                  | Старий клієнт                                                                                                              | High (rules)      | `npm run test:rules`                                                       |
+| `coach/*` Workouts history, `TraineeSessionView.tsx`                                                                                            | Read-only `Recap`                                                                                                                                                                                   | Тренер                                                                                                                     | Medium            | Coach e2e (`e2e:coach`), `TraineeSessionView.cases.test`                   |
+| Реєстр даних R68, `dataRegistry`, `addonExport`, `deviceWipe`, `recursiveDelete`                                                                | Результат блоку                                                                                                                                                                                     | DSAR, видалення                                                                                                            | Medium            | guard-тест повноти, тест каскаду                                           |
+| `docs/UI-KIT.md`, `addons.md` (виняток D7), `docs/compliance/data-registry.md`                                                                  | Записи                                                                                                                                                                                              | —                                                                                                                          | Low               | `kit-guard`                                                                |
 
 ## 2. Чекліст категорій
 
@@ -48,23 +48,23 @@
 
 ## 3. Реєстр ризиків
 
-| № | Ризик | P | I | Мітигація | Як виявимо |
-| --- | --- | --- | --- | --- | --- |
-| R1 | Прибрання табів ламає наявні cases-тести й e2e (шлях до Exercise/Session) | H | M | Оновити тести під нову навігацію, нічого не скіпати; додати тест «усі колишні дії досяжні» | `SessionView.*.cases.test`, `tests/ui.test.tsx`, `test:e2e` |
-| R2 | Скрита дія: функція, яка була на вкладці, стає недосяжною | M | H | Таблиця «колишня дія → нове місце» у плані (п. 5), тест по кожній | Тест-матриця |
-| R3 | Зміна Set type UI змінює `setTypeOf`/обсяг/втому | L | H | Не чіпати модель; тести golden без змін | `store.test`, `setTypesApi.test`, Atlas/Today тести |
-| R4 | Skip-фікс: повторний тап очищає RPE; авто-оцінка (~RPE) | M | M | Тест: тап на обране = null, збереження без RPE, авто-підказка | Новий тест + 5 локалей скрін |
-| R5 | Довгі підписи (uk/pl/lt/et) ламають сітку RPE/чіпів/рядків | H | M | Короткі ключі + `aria-label`; аудит геометрії | `audit:stories` по змінених сторі, 5 локалей |
-| R6 | Store-kit у шторці: стилі/dark не збігаються з застосунком | M | M | `sk-dark` ↔ режим застосунку; один компонент `NudgeRow` | Скріни світла/темна/нічна |
-| R7 | Нові kit-примітиви дублюють наявне | M | M | Спершу `rg`, перевикористання; запис у UI-KIT.md | `kit-guard`, `hygiene-ratchet` |
-| R8 | Plate stack показує неправильні диски | M | L | Виведення з ваги/грифа; unit-тест | Тест розкладу |
-| R9 | `blockV`/rules: старий клієнт стирає block | M | H | Варіант A + rules-тест | `test:rules` |
-| R10 | Conditioning просочується у LANDMARKS/втому/Today при вимкненому модулі | M | H | Одна обгортка на джерелі; golden ±0 | Тести виключення (`exclusion.contract`, тести споживачів) |
-| R11 | Модуль у ядрі імпортується не динамічно (межа) | L | M | Лише `useAddonRuntime` | `boundary.contract.test` |
-| R12 | Порушення `addons.md` (nudge) у розрахункових екранах | L | M | Лише базовий застосунок, у шторці сету, рішення D7 записано | Ревʼю + скрін аддон встановлено/ні |
-| R13 | Тренер бачить блок без модуля | M | L | Показ як вправи по порядку | Coach тест/скрін |
-| R14 | Експорт/видалення не покривають R68 | M | M | Реєстр, `dataRegistry`, каскад | guard-тести |
-| R15 | Час CI/pre-push виріс | M | L | Нові сторі шардуються; заміри | Лог CI |
+| №   | Ризик                                                                     | P   | I   | Мітигація                                                                                  | Як виявимо                                                  |
+| --- | ------------------------------------------------------------------------- | --- | --- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------- |
+| R1  | Прибрання табів ламає наявні cases-тести й e2e (шлях до Exercise/Session) | H   | M   | Оновити тести під нову навігацію, нічого не скіпати; додати тест «усі колишні дії досяжні» | `SessionView.*.cases.test`, `tests/ui.test.tsx`, `test:e2e` |
+| R2  | Скрита дія: функція, яка була на вкладці, стає недосяжною                 | M   | H   | Таблиця «колишня дія → нове місце» у плані (п. 5), тест по кожній                          | Тест-матриця                                                |
+| R3  | Зміна Set type UI змінює `setTypeOf`/обсяг/втому                          | L   | H   | Не чіпати модель; тести golden без змін                                                    | `store.test`, `setTypesApi.test`, Atlas/Today тести         |
+| R4  | Skip-фікс: повторний тап очищає RPE; авто-оцінка (~RPE)                   | M   | M   | Тест: тап на обране = null, збереження без RPE, авто-підказка                              | Новий тест + 5 локалей скрін                                |
+| R5  | Довгі підписи (uk/pl/lt/et) ламають сітку RPE/чіпів/рядків                | H   | M   | Короткі ключі + `aria-label`; аудит геометрії                                              | `audit:stories` по змінених сторі, 5 локалей                |
+| R6  | Store-kit у шторці: стилі/dark не збігаються з застосунком                | M   | M   | `sk-dark` ↔ режим застосунку; один компонент `NudgeRow`                                    | Скріни світла/темна/нічна                                   |
+| R7  | Нові kit-примітиви дублюють наявне                                        | M   | M   | Спершу `rg`, перевикористання; запис у UI-KIT.md                                           | `kit-guard`, `hygiene-ratchet`                              |
+| R8  | Plate stack показує неправильні диски                                     | M   | L   | Виведення з ваги/грифа; unit-тест                                                          | Тест розкладу                                               |
+| R9  | `blockV`/rules: старий клієнт стирає block                                | M   | H   | Варіант A + rules-тест                                                                     | `test:rules`                                                |
+| R10 | Conditioning просочується у LANDMARKS/втому/Today при вимкненому модулі   | M   | H   | Одна обгортка на джерелі; golden ±0                                                        | Тести виключення (`exclusion.contract`, тести споживачів)   |
+| R11 | Модуль у ядрі імпортується не динамічно (межа)                            | L   | M   | Лише `useAddonRuntime`                                                                     | `boundary.contract.test`                                    |
+| R12 | Порушення `addons.md` (nudge) у розрахункових екранах                     | L   | M   | Лише базовий застосунок, у шторці сету, рішення D7 записано                                | Ревʼю + скрін аддон встановлено/ні                          |
+| R13 | Тренер бачить блок без модуля                                             | M   | L   | Показ як вправи по порядку                                                                 | Coach тест/скрін                                            |
+| R14 | Експорт/видалення не покривають R68                                       | M   | M   | Реєстр, `dataRegistry`, каскад                                                             | guard-тести                                                 |
+| R15 | Час CI/pre-push виріс                                                     | M   | L   | Нові сторі шардуються; заміри                                                              | Лог CI                                                      |
 
 ## 4. План регресії
 
@@ -75,20 +75,20 @@
 
 ## 5. Трасування (дизайн → задача → AC)
 
-| Дизайн (дошка) | Задача | Код | AC |
-| --- | --- | --- | --- |
+| Дизайн (дошка)                                                 | Задача                | Код                                        | AC                             |
+| -------------------------------------------------------------- | --------------------- | ------------------------------------------ | ------------------------------ |
 | M9/D9 This set (без табів), pinned header/Cancel-Log/сепаратор | SPO-613 (Set options) | `SessionView.tsx` opts-sheet, `styles.css` | AC-S1: усі колишні дії досяжні |
-| M9/D9 More + Other settings | SPO-613 | згортна група (kit) | AC-S2 |
-| M9/D9 Exercise/Session drill (Back) | SPO-613 | `renderExerciseOptions/SessionOptions` | AC-S3 |
-| M7/M8 Effort без Skip | SPO-613 | `.se-rpe` | AC-S4 |
-| Set type компактний (W/WU/Drop/RD/SD) | SPO-613 | i18n 5 локалей | AC-S5 |
-| Plates рядок + малюнок дисків | SPO-613 | PlateSheet, `PlatesLine` | AC-S6 |
-| M10/D10 dark | SPO-613 | `sk-dark` мапа | AC-S7 |
-| Builder AMRAP/EMOM/forTime/інтервали (M5/D5) | SPO-610/611 | `timeBlocks/` | AC-B1 |
-| Exercise→block flow (M6/D6) | SPO-611 | | AC-B2 |
-| Блокова сесія: таймер/Ready/Result (M11) | SPO-612/614 | | AC-B3 |
-| Trainer Workouts Recap (M11) | SPO-615 | `coach/*` | AC-B4 |
-| Nudge «Advanced training» | SPO-613 | | AC-S8 |
+| M9/D9 More + Other settings                                    | SPO-613               | згортна група (kit)                        | AC-S2                          |
+| M9/D9 Exercise/Session drill (Back)                            | SPO-613               | `renderExerciseOptions/SessionOptions`     | AC-S3                          |
+| M7/M8 Effort без Skip                                          | SPO-613               | `.se-rpe`                                  | AC-S4                          |
+| Set type компактний (W/WU/Drop/RD/SD)                          | SPO-613               | i18n 5 локалей                             | AC-S5                          |
+| Plates рядок + малюнок дисків                                  | SPO-613               | PlateSheet, `PlatesLine`                   | AC-S6                          |
+| M10/D10 dark                                                   | SPO-613               | `sk-dark` мапа                             | AC-S7                          |
+| Builder AMRAP/EMOM/forTime/інтервали (M5/D5)                   | SPO-610/611           | `timeBlocks/`                              | AC-B1                          |
+| Exercise→block flow (M6/D6)                                    | SPO-611               |                                            | AC-B2                          |
+| Блокова сесія: таймер/Ready/Result (M11)                       | SPO-612/614           |                                            | AC-B3                          |
+| Trainer Workouts Recap (M11)                                   | SPO-615               | `coach/*`                                  | AC-B4                          |
+| Nudge «Advanced training»                                      | SPO-613               |                                            | AC-S8                          |
 
 Кожен рядок плану = одиниця прогресу (14 одиниць у цьому плані).
 
@@ -117,6 +117,7 @@ Unit: Skip-очищення, plate-розклад, `blockV`, гейт без м�
 Незалежне ревʼю знайшло прогалини; усі прийняті, місця додано до інвентарю. R68 вільний (rg по `data-registry.md`: останній R67).
 
 **Додаткові зачеплені місця.**
+
 - Коуч-кодек програм: `coach/program/planCodec.ts:243` (`cycleV`), `views/programs/model.ts:99,366`; dataLoss/parity-контракти `coach/data/firestore/{dataLoss.program,dataLoss.shared,dataLoss.editor,parity}.test.ts`, `parity/programGen.ts`, `coach/program/__fixtures__/fixtures.ts`, `AssignmentCard.cycle.test.ts`, `coach/client/Client.stories.tsx`. Потрібен round-trip тест `block` через `sealOrThrow/openSealed`.
 - Rules-тести: `tests/rules/adversarial.rules.test.ts:768-809` (5 сценаріїв `cycleV`) → той самий набір для `blockV` + комбінація `blockV`+`cycleV` (`firestore.rules:229-235`).
 - Тести/скрипти шторки: `tests/ui.test.tsx:847,857,1068,1084`, `SessionView.options.cases.test.tsx:122-123` (`.opts-title/.opts-sub`), `scripts/visual-qa.mjs:1310,1324`, `stories/chronic/flow.tsx:515`, e2e `session-images`, `offline-session`, `edge-back-swipe`, `layout-shift-screens`, `locale-screens`, `docs/design/brass-glass/src/fidelity/P04.md`.
@@ -138,6 +139,7 @@ Unit: Skip-очищення, plate-розклад, `blockV`, гейт без м�
 Слова власника: «5 секунд перед початком після натискання на Start відлік зворотній на весь екран. оверлей і цифри з анімацією класною якоюсь. і звуки… звук відліку і звук якийсь далі ще може попередження перед фіналом».
 
 **Рішення (best practices, власник делегував відкриті питання):**
+
 - Після Start у `BlockReady` повноекранний оверлей: цифри 5→1, на 0 «GO», далі таймер блоку. Анімація: числівник входить з масштабу ≈1.4→1 із затуханням, кільце-пульс на кожну секунду; `prefers-reduced-motion` — лише fade без масштабу. Тап «Skip» і Back/Esc скасовують старт (нічого не пишемо). `aria-live="assertive"` читає «5, 4, 3, 2, 1, Go».
 - Відлік рахується від часової мітки (`startAt = now + 5 с`), а не від інтервалу: екран заблоковано або вкладка у фоні — час блоку не зсувається (як `restTimer`). Wake lock з Start.
 - Звуки без нових ассетів і процесорів: WebAudio-синтез у тому ж контексті, що `restTimer.ts` (`primeRestAudio()` викликається в тапі Start — жест користувача, потрібен iOS). Тик щомиті відліку (тони вищають на 3-2-1), довший тон на GO, «попередження перед фіналом» = подвійний тон за 10 с до кінця AMRAP/forTime-капа, тики 3-2-1 і довгий тон наприкінці; EMOM/інтервали: 3-2-1 перед кожною хвилиною/фазою, різні тони для Work і Rest. Haptic через `haptics.ts` (`tick`, `double`, `success`).
@@ -148,11 +150,13 @@ Unit: Skip-очищення, plate-розклад, `blockV`, гейт без м�
 ## 13. Хід розробки: зміни скоупу й close-out (26.11.2026)
 
 **Реалізовано (докази: vitest `src/timeBlocks` 35+ тестів, SessionView-набір 76 файлів/483 тести, kit-guard, hygiene, stylelint-ratchet, depcruise, tsc, eslint):**
+
 - Модель `Workout.blocks` (запечатується з сесією, `blocksSeal.test.ts` доводить R18/R68), чисті операції `blockOps`, годинник із міток часу.
 - UI: Ready / Timer / Ended / Result (+ actuals) / Logged, білдер з класикою (Cindy, Fran, EMOM 10, Tabata), відлік 5-4-3-2-1, звукові сигнали й вібрація, видалення через `ConfirmDialog`.
 - Інтеграція: один `<TimeBlocks/>` у `SessionView` (host-слот, `useTimeBlocksHost`); без встановленого модуля нічого не видно, дані лишаються. Сесія з одного залогованого блоку завершується.
 
 **Скоуп відносно плану (оновлено 27.11 за затвердженими дизайнами):**
+
 1. Блок є кроком фокус-потоку (сегмент прогресу, Next, назва на кнопці) і картою в повному списку; вправа переноситься в блок з Undo; рядки учасників із фото й ⓘ.
 2. Блоки рівня програми зроблено: `Program.blocks` + маркер `blockV` + правило `keepsBlocks` у `firestore.rules`; слот `dayBlocks` у редакторі програм (власна програма), рядки блоків у плані Today, копіювання блоків дня в сесію при старті дня. Тренерське призначення блоків (planCodec/ProgramLayer/версії) = Фаза 2, питання власнику.
 3. Плитка «Time block» у Start-дровері і пункт «Time block» у пікері відкривають білдер. Режим пікера «Block-ready exercises» (каталог придатних вправ, чіпи категорій) ще не зроблено.
