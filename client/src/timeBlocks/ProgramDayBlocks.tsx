@@ -80,18 +80,20 @@ export function ProgramDayBlocks({ doc, day, readOnly, edit }: DayBlocksSlotProp
                 icon={<IconTile icon={FMT_ICON[b.spec.fmt]} tone="conditioning" size={40} />}
                 label={`${t.formats[b.spec.fmt]} · ${specLong(t, b.spec as BlockSpec)}`}
                 sub={membersLine(b.members)}
-                chevron={!readOnly}
-                onClick={readOnly ? undefined : () => setMode({ kind: 'edit', id: b.id })}
                 trailing={
                   readOnly ? undefined : (
-                    <IconButton
-                      icon="trash"
-                      label={t.deleteBlock}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setMode({ kind: 'delete', id: b.id });
-                      }}
-                    />
+                    <>
+                      <IconButton
+                        icon="sliders"
+                        label={t.edit}
+                        onClick={() => setMode({ kind: 'edit', id: b.id })}
+                      />
+                      <IconButton
+                        icon="trash"
+                        label={t.deleteBlock}
+                        onClick={() => setMode({ kind: 'delete', id: b.id })}
+                      />
+                    </>
                   )
                 }
               />

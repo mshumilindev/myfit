@@ -47,6 +47,19 @@ describe('time blocks of a program day', () => {
     expect(container.querySelector('[data-testid="program-blocks"]')).toBeNull();
   });
 
+  it('has no button inside a button (edit and delete are siblings of the row, not nested in it)', () => {
+    const { container } = render(<Harness start={withOne()} />);
+    expect(container.querySelector('button button')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Delete block' })).toBeTruthy();
+  });
+
+  it('opens the block for editing from the Edit button', async () => {
+    render(<Harness start={withOne()} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    expect(await screen.findByRole('button', { name: /Save|Add block/ })).toBeTruthy();
+  });
+
   it('removes a block after a confirmation', async () => {
     render(<Harness start={withOne()} />);
     await userEvent.click(screen.getByRole('button', { name: 'Delete block' }));
