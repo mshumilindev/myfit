@@ -49,3 +49,5 @@ export * from './passwordReset';
 export * from './accountDeletion';
 // Trainer <-> client calls: signalling only, no media, no recording (SPO-22 / SPO-440).
 export { callStart, callAnswer, callActive, callEnd, callIce, callTurn } from './calls';
+// Anonymous client crash reports (SPO-639 G).
+export * from './clientError';
