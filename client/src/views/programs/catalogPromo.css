@@ -1,0 +1,7 @@
+/* Programs banner for "Train like a pro" (SPO-608): layout of the icon + Add row inside the store kit's tile. */
+.cpr-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sk-sp-5);
+}
