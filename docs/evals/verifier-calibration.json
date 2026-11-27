@@ -1,0 +1,65 @@
+{
+  "note": "Baseline hashes taken 27.11.2026. Changing an agent prompt changes its hash: the test then fails until the agent is recalibrated on a seeded defect and the hash/result are updated here. Seeded-defect details for the rest were recorded only in docs/reviews/2026-W48.md (8/10 calibrated).",
+  "agents": {
+    "verify-ac": {
+      "hash": "091bdb6725328fde1783a957067905f9673877c2464ce962d8446cb080d0b85a",
+      "seeded": "seeded defect, details in docs/reviews/2026-W48.md",
+      "result": "FAIL (as recorded in the W48 review)",
+      "calibrated": "D1, 27.11"
+    },
+    "verify-browser": {
+      "hash": "2d3ddbd258ca7a16eac181cb4fb0ba0d8baa3d3f7e712b1f69a24f4ca4ec0d7c",
+      "seeded": "lt signIn emptied (commit 8e32885a in a scratch clone)",
+      "result": "FAIL",
+      "calibrated": "D2, 27.11"
+    },
+    "verify-i18n": {
+      "hash": "78bc9ff6d8b142ef39e75b9da54ab703a274bdb6a944a6dc83e14547d57ab464",
+      "seeded": "seeded defect, details in docs/reviews/2026-W48.md",
+      "result": "FAIL (as recorded in the W48 review)",
+      "calibrated": "D1, 27.11"
+    },
+    "verify-performance": {
+      "hash": "b19016bb5f8a5b67a29a619fce98de78598bd172991407e7b2ffb2ce1f8783f5",
+      "seeded": "seeded performance regression",
+      "result": "FAIL",
+      "calibrated": "D1, 27.11"
+    },
+    "verify-regressions": {
+      "hash": "a60542c15004a726f762a2b2ac9dc79cbbd829a3dab2ceedf6f55da186921d29",
+      "seeded": "seeded regression",
+      "result": "FAIL",
+      "calibrated": "D1, 27.11"
+    },
+    "verify-release": {
+      "hash": "f737d83cff37c0ae3bc14e2f5a8ed091c1a88abffcc2685433aeceb6ba74eb19",
+      "seeded": "negative: run 45930894257 with 5 failed axe jobs on bdd040b9 → FAIL; positive: CI 45932054283 + deploys on 5b43efc0 → PASS (live site CANNOT_VERIFY)",
+      "result": "FAIL+PASS",
+      "calibrated": "D2, 27.11"
+    },
+    "verify-scope": {
+      "hash": "2d951c7f1fc0b697be3d3b8c32d1983a5b1e342664145f082579623d9380eac0",
+      "seeded": "seeded defect, details in docs/reviews/2026-W48.md",
+      "result": "FAIL (as recorded in the W48 review)",
+      "calibrated": "D1, 27.11"
+    },
+    "verify-security": {
+      "hash": "ff98ae03f6ab4d7ee977e0e6636f0e4ee0ff6fd094795f7b44414c65958c9b14",
+      "seeded": "seeded defect, details in docs/reviews/2026-W48.md",
+      "result": "FAIL (as recorded in the W48 review)",
+      "calibrated": "D1, 27.11"
+    },
+    "verify-tests": {
+      "hash": "2f5e3895027c3afcc16951f498da13225f76831932ea2ffa989d5c68be1d43ec",
+      "seeded": "seeded defect, details in docs/reviews/2026-W48.md",
+      "result": "FAIL (as recorded in the W48 review)",
+      "calibrated": "D1, 27.11"
+    },
+    "verify-ui-kit": {
+      "hash": "2aeb654f47a0140452246253158e5b741c424ac2c6531ff16f19be56fb476828",
+      "seeded": "seeded defect, details in docs/reviews/2026-W48.md",
+      "result": "FAIL (as recorded in the W48 review)",
+      "calibrated": "D1, 27.11"
+    }
+  }
+}
