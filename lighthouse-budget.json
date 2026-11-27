@@ -1,0 +1,11 @@
+{
+  "performanceFloor": 0.25,
+  "baseline": {
+    "performance": 0.28,
+    "lcpSeconds": 12.2,
+    "tbtMs": 2370,
+    "cls": 0.014,
+    "measured": "2026-11-27",
+    "profile": "mobile, simulated throttling, CI-like CPU"
+  }
+}

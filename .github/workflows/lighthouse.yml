@@ -1,0 +1,32 @@
+# SPO-639 W3: nightly Lighthouse on the built client (not on every push: keeps CI within its budget, ADR 004).
+name: Lighthouse
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+jobs:
+  lighthouse:
+    name: Lighthouse (mobile performance floor)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w client
+      - name: Serve the build and run Lighthouse
+        run: |
+          (cd client && npx vite preview --port 4179 --strictPort > /tmp/preview.log 2>&1 &)
+          npx wait-on http://localhost:4179/ --timeout 60000
+          npx -y lighthouse@12.6.1 http://localhost:4179/ --only-categories=performance \
+            --chrome-flags="--headless --no-sandbox" --output=json --output-path=./lh.json --quiet
+      - run: node scripts/check-lighthouse.mjs lh.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-report
+          path: lh.json
+          retention-days: 14
