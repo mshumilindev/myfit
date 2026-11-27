@@ -7,6 +7,7 @@ import {
 } from '../addons/featureGates';
 import { fatigueHost, fatigueSource } from '../fatigueApi';
 import { useSleepsForCalc } from '../addons/useSleeps';
+import { useTimeBlocksHost } from '../timeBlocksRt';
 import { weekStartOf as trainingWeekStart } from '../weekStart';
 import { Button, IconButton } from '../components/ui/Button';
 import { Chip } from '../components/ui/Chip';
@@ -139,6 +140,7 @@ export function ProgressView({
   ];
   // The period every Progress tab reads (the "This week" button in the top bar).
   const [range, setRange] = useState<ProgRange>({ key: 'week' });
+  const timeBlocksH = useTimeBlocksHost();
   const [rangeSheet, setRangeSheet] = useState(false);
   // Mobile: list<->map choice + the "all controls" sheet, driven by the pill.
   const [mapView, setMapView] = useState(false);
@@ -641,6 +643,9 @@ export function ProgressView({
           )}
           {seg === 'muscle' && renderMuscleRows(showDesktopDetail)}
           {seg === 'muscle' && range.key === 'week' && muscleNote}
+          {seg === 'volume' && timeBlocksH?.Conditioning && (
+            <timeBlocksH.Conditioning workouts={rangeWorkouts} />
+          )}
           {seg === 'volume' && (
             <VolumePanel
               finished={volFinished}

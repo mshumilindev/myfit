@@ -1,4 +1,5 @@
 import type { LocaleId } from '../i18n';
+import type { BlockGroup } from './blockCatalog';
 import type { BlockFormat } from './model';
 
 /** Words of the time-block screens. The module's own words live in its chunk, not in the core i18n (add-on boundary). */
@@ -14,6 +15,16 @@ export interface TimeBlocksStrings {
   edit: string;
   start: string;
   addExercise: string;
+  conditioning: string;
+  conditioningNote: string;
+  conditioningLine: (blocks: number, min: number, rounds: number) => string;
+  blockWord: string;
+  blockReadyTitle: string;
+  blockReadyNote: string;
+  catAll: string;
+  addedWord: string;
+  addByName: (name: string) => string;
+  cats: Record<BlockGroup, string>;
   paused: string;
   pause: string;
   resume: string;
@@ -98,6 +109,23 @@ const en: TimeBlocksStrings = {
   edit: 'Edit',
   start: 'Start',
   addExercise: 'Add exercise',
+  conditioning: 'Conditioning',
+  conditioningNote: 'Not counted in muscle sets.',
+  conditioningLine: (b, m, r) => `${b} blocks · ${m} min · ${r} rounds`,
+  blockWord: 'Block',
+  blockReadyTitle: 'Block-ready exercises',
+  blockReadyNote: 'Only moves that work in a timed block. Your own moves can be added by name.',
+  catAll: 'All',
+  addedWord: 'Added',
+  addByName: (n) => `Add “${n}”`,
+  cats: {
+    bodyweight: 'Bodyweight',
+    kettlebell: 'Kettlebell',
+    barbell: 'Barbell',
+    machines: 'Machines',
+    dumbbell: 'Dumbbell',
+    throws: 'Throws & carries',
+  },
   paused: 'Paused',
   pause: 'Pause',
   resume: 'Resume',
@@ -183,6 +211,23 @@ const uk: TimeBlocksStrings = {
   edit: 'Змінити',
   start: 'Старт',
   addExercise: 'Додати вправу',
+  conditioning: 'Кондиціонування',
+  conditioningNote: 'Не входить у підходи по м’язах.',
+  conditioningLine: (b, m, r) => `${b} блоків · ${m} min · ${r} раундів`,
+  blockWord: 'Блок',
+  blockReadyTitle: 'Вправи для блоку',
+  blockReadyNote: 'Лише рухи, що працюють у блоці на час. Свої рухи можна додати за назвою.',
+  catAll: 'Усі',
+  addedWord: 'Додано',
+  addByName: (n) => `Додати «${n}»`,
+  cats: {
+    dumbbell: 'Гантелі',
+    throws: 'Кидки й перенесення',
+    bodyweight: 'Власна вага',
+    kettlebell: 'Гиря',
+    barbell: 'Штанга',
+    machines: 'Тренажери',
+  },
   paused: 'Пауза',
   pause: 'Пауза',
   resume: 'Далі',
@@ -269,6 +314,23 @@ const pl: TimeBlocksStrings = {
   edit: 'Edytuj',
   start: 'Start',
   addExercise: 'Dodaj ćwiczenie',
+  conditioning: 'Kondycja',
+  conditioningNote: 'Nie liczone do serii mięśni.',
+  conditioningLine: (b, m, r) => `${b} bloków · ${m} min · ${r} rund`,
+  blockWord: 'Blok',
+  blockReadyTitle: 'Ćwiczenia do bloku',
+  blockReadyNote: 'Tylko ruchy, które działają w bloku na czas. Własne ruchy dodasz po nazwie.',
+  catAll: 'Wszystkie',
+  addedWord: 'Dodano',
+  addByName: (n) => `Dodaj „${n}”`,
+  cats: {
+    bodyweight: 'Masa ciała',
+    kettlebell: 'Kettlebell',
+    barbell: 'Sztanga',
+    machines: 'Maszyny',
+    dumbbell: 'Hantle',
+    throws: 'Rzuty i noszenie',
+  },
   paused: 'Pauza',
   pause: 'Pauza',
   resume: 'Wznów',
@@ -353,6 +415,24 @@ const lt: TimeBlocksStrings = {
   edit: 'Keisti',
   start: 'Pradėti',
   addExercise: 'Pridėti pratimą',
+  conditioning: 'Kondicija',
+  conditioningNote: 'Neįskaičiuota į raumenų serijas.',
+  conditioningLine: (b, m, r) => `${b} blokų · ${m} min · ${r} raundų`,
+  blockWord: 'Blokas',
+  blockReadyTitle: 'Pratimai blokui',
+  blockReadyNote:
+    'Tik judesiai, tinkantys laiko blokui. Savo judesius galima pridėti pagal pavadinimą.',
+  catAll: 'Visi',
+  addedWord: 'Pridėta',
+  addByName: (n) => `Pridėti „${n}“`,
+  cats: {
+    bodyweight: 'Savo svoris',
+    kettlebell: 'Svarstis',
+    barbell: 'Štanga',
+    machines: 'Treniruokliai',
+    dumbbell: 'Hanteliai',
+    throws: 'Metimai ir nešimas',
+  },
   paused: 'Pauzė',
   pause: 'Pauzė',
   resume: 'Tęsti',
@@ -438,6 +518,23 @@ const et: TimeBlocksStrings = {
   edit: 'Muuda',
   start: 'Start',
   addExercise: 'Lisa harjutus',
+  conditioning: 'Konditsioneerimine',
+  conditioningNote: 'Ei lähe lihaste seeriatesse.',
+  conditioningLine: (b, m, r) => `${b} plokki · ${m} min · ${r} vooru`,
+  blockWord: 'Plokk',
+  blockReadyTitle: 'Plokiks sobivad harjutused',
+  blockReadyNote: 'Ainult liigutused, mis sobivad ajaplokki. Oma liigutusi saab lisada nime järgi.',
+  catAll: 'Kõik',
+  addedWord: 'Lisatud',
+  addByName: (n) => `Lisa „${n}”`,
+  cats: {
+    bodyweight: 'Oma kaal',
+    kettlebell: 'Kettlebell',
+    barbell: 'Kang',
+    machines: 'Trenažöörid',
+    dumbbell: 'Hantlid',
+    throws: 'Visked ja kandmine',
+  },
   paused: 'Paus',
   pause: 'Paus',
   resume: 'Jätka',

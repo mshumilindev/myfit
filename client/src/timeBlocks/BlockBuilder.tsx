@@ -70,7 +70,7 @@ export interface BlockBuilderProps {
   onSave: (spec: BlockSpec, members: BlockMember[]) => void;
   onClose: () => void;
   /** Open the exercise picker; it calls back with a name. */
-  onPickExercise: (add: (name: string) => void) => void;
+  onPickExercise: (add: (name: string) => void, ctx: { spec: BlockSpec; names: string[] }) => void;
 }
 
 /** ONE drawer to make a block: format · classics · the numbers that format needs · exercises. Nothing is saved until Add block. */
@@ -251,7 +251,12 @@ export function BlockBuilder(p: BlockBuilderProps) {
               size="md"
               icon="plus"
               fullWidth
-              onClick={() => p.onPickExercise((name) => setMembers((ms) => [...ms, { name }]))}
+              onClick={() =>
+                p.onPickExercise((name) => setMembers((ms) => [...ms, { name }]), {
+                  spec,
+                  names: members.map((m) => m.name),
+                })
+              }
             >
               {t.addExercise}
             </Button>

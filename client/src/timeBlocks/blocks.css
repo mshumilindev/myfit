@@ -256,3 +256,37 @@
   border-radius: var(--r-12);
   background: color-mix(in srgb, var(--color-conditioning) 12%, var(--color-surface));
 }
+.tb-pick-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-8);
+}
+.tb-pick-list {
+  display: grid;
+  gap: var(--s-8);
+}
+.tb-pick-note {
+  margin: 0;
+}
+
+.tb-cond {
+  display: grid;
+  gap: var(--s-8);
+  padding: var(--s-16);
+  border-radius: var(--r-16);
+  background: color-mix(in srgb, var(--color-conditioning) 12%, var(--color-surface));
+  border: var(--bw-1) solid color-mix(in srgb, var(--color-conditioning) 38%, transparent);
+}
+.tb-cond-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-4);
+  justify-self: start;
+  font-weight: 700;
+  color: var(--color-conditioning);
+}
+.tb-cond-line {
+  font-size: var(--fs-18);
+  font-weight: 700;
+}

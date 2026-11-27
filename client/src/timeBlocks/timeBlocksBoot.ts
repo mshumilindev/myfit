@@ -10,11 +10,13 @@ import { BlockRecap } from './BlockRecap';
 import { ProgramDayBlocks } from './ProgramDayBlocks';
 import { specTitle } from './specText';
 import { PlanBlocks, RowLabel } from './BlockUi';
+import { Conditioning } from './Conditioning';
 
 provide(timeBlocksHost, {
   Countdown: BlockCountdownRun,
   Blocks: SessionBlocks,
   Recap: BlockRecap,
+  Conditioning,
   RowLabel,
   DayBlocks: ProgramDayBlocks,
   PlanBlocks,

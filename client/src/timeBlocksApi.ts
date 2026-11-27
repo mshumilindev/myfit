@@ -49,6 +49,8 @@ export interface TimeBlocksHost {
   stepLabel: ((b: WorkoutBlock) => string) | null;
   /** The "Time block…" row label (a component: it follows the language) of the exercise options, in the current language. */
   RowLabel: ComponentType | null;
+  /** Progress › Volume: what the logged blocks of these sessions add up to (nothing when there are none). */
+  Conditioning: ComponentType<{ workouts: readonly Workout[] }> | null;
   /** Read-only list of a finished session's blocks (the trainer's view of a client's session). */
   Recap: ComponentType<{ workout: Workout }> | null;
 }
@@ -57,6 +59,7 @@ export const timeBlocksHost: TimeBlocksHost = {
   Countdown: null,
   Blocks: null,
   Recap: null,
+  Conditioning: null,
   DayBlocks: null,
   PlanBlocks: null,
   stepLabel: null,
