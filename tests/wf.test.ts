@@ -343,3 +343,48 @@ describe('wf stop hook decision (WF-C)', () => {
     expect(decideStop({ state: undefined, now }).block).toBe(false);
   });
 });
+
+describe('wf verify gate, mutation-survivor guards', () => {
+  const setup = () => {
+    const dir = mkdtempSync(join(tmpdir(), 'wf-'));
+    run(['start', 'S'], { dir, now: T });
+    run(['add', '--verify', 'a'], { dir, now: T }); // flag BEFORE the id must not swallow it
+    return dir;
+  };
+
+  it('--verify before the id still adds the item with the gate on', () => {
+    const dir = setup();
+    const state = JSON.parse(readFileSync(join(dir, 'wf.json'), 'utf8'));
+    expect(state.items.map((i: { id: string; verify?: boolean }) => [i.id, i.verify])).toEqual([
+      ['a', true],
+    ]);
+  });
+
+  it.each([
+    ['missing file', () => '/definitely/not/here.json'],
+    [
+      'broken JSON',
+      (dir: string) => {
+        const f = join(dir, 'broken.json');
+        writeFileSync(f, '{nope');
+        return f;
+      },
+    ],
+  ])('open verify item stays open with %s (not an invalid-transition fluke)', (_n, make) => {
+    const dir = setup();
+    const r = run(['done', 'a', '--evidence', 'x', '--verdict', make(dir)], { dir, now: T });
+    expect(r.code).toBe(2);
+    expect(r.out).toMatch(/PASS/);
+    const state = JSON.parse(readFileSync(join(dir, 'wf.json'), 'utf8'));
+    expect(state.items[0].status).toBe('todo');
+  });
+
+  it('state with a non-boolean verify flag is rejected', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'wf-'));
+    writeFileSync(
+      join(dir, 'wf.json'),
+      '{"task":{"id":"T"},"items":[{"id":"a","status":"todo","verify":"x"}]}',
+    );
+    expect(run(['status'], { dir, now: T }).code).toBe(2);
+  });
+});
