@@ -2,6 +2,7 @@ import { Component, useEffect, useState, type ErrorInfo, type ReactNode } from '
 import { resetApp, updateNow, type UpdateResult } from './pwaUpdate';
 import './appCrash.css';
 import { Button } from './components/ui/Button';
+import { reportClientError } from './errorReport';
 
 /**
  * The app-wide safety net. It must work when the app itself is broken, so it does not use the i18n store, the kit or
@@ -93,14 +94,17 @@ export function installCrashRecovery(): void {
   // Not `preventDefault()`: that makes Vite's preload wrapper resolve the dynamic import with `undefined`, and every
   // `.then((m) => ({ default: m.Screen }))` then throws "Cannot read properties of undefined" (SPO-428). Left alone,
   // the import rejects with the real error, the boundary shows its screen and `recover()` reloads or updates.
-  window.addEventListener('vite:preloadError', () => {
+  window.addEventListener('vite:preloadError', (e) => {
+    reportClientError('chunk', (e as { payload?: unknown }).payload);
     void recover();
   });
   window.addEventListener('unhandledrejection', (e) => {
     const msg = String((e.reason as Error | undefined)?.message ?? e.reason ?? '');
+    reportClientError('unhandledrejection', e.reason);
     if (CHUNK_ERROR.test(msg)) void recover();
   });
   window.addEventListener('error', (e) => {
+    reportClientError('error', e.error ?? e.message);
     if (CHUNK_ERROR.test(e.message ?? '')) void recover();
   });
 }
@@ -140,6 +144,7 @@ export class AppCrashBoundary extends Component<{ children: ReactNode }, { error
   }
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('app crashed', error, info.componentStack);
+    reportClientError('render', error);
   }
   render() {
     return this.state.error ? <CrashScreen /> : this.props.children;
