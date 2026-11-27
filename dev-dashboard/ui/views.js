@@ -293,11 +293,80 @@ function rules(snap) {
   ];
 }
 
+function runs(t) {
+  const c = t.capture;
+  const tools = Object.entries(c.byTool).sort((a, b) => b[1] - a[1]);
+  if (!tools.length)
+    return [
+      card(
+        'Runs',
+        null,
+        note(
+          'No tool calls recorded yet. They appear once the recorder hooks have run in a session.',
+        ),
+      ),
+    ];
+  const max = tools[0][1];
+  const hours = Object.entries(c.byHour)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .slice(-24);
+  const hmax = Math.max(1, ...hours.map((x) => x[1]));
+  return [
+    h(
+      'div',
+      { class: 'grid2' },
+      card(
+        'Tool calls',
+        `${c.tools} total`,
+        h(
+          'div',
+          { class: 'tbl' },
+          tools
+            .slice(0, 12)
+            .map(([name, n]) =>
+              h(
+                'div',
+                { class: 'row', style: 'grid-template-columns:130px minmax(0,1fr) 60px' },
+                h('span', { class: 't-id' }, name),
+                h(
+                  'span',
+                  { class: 'meter' },
+                  h('i', { style: `width:${Math.round((n / max) * 100)}%;background:var(--ind)` }),
+                ),
+                h('span', { class: 't-m' }, String(n)),
+              ),
+            ),
+        ),
+      ),
+      card(
+        'Activity by hour',
+        'last 24 active hours',
+        h(
+          'div',
+          { class: 'hist' },
+          hours.map(([hour, n]) =>
+            h('i', {
+              title: `${hour}:00 · ${n}`,
+              style: `height:${Math.max(6, Math.round((n / hmax) * 100))}%;background:var(--lime)`,
+            }),
+          ),
+        ),
+        h(
+          'div',
+          { class: 'hl' },
+          h('span', null, hours[0] ? hours[0][0].slice(5, 13).replace('T', ' ') : ''),
+          h(
+            'span',
+            null,
+            hours.length ? hours[hours.length - 1][0].slice(5, 13).replace('T', ' ') : '',
+          ),
+        ),
+      ),
+    ),
+  ];
+}
+
 const PENDING = {
-  runs: [
-    'Runs',
-    'Command runs per task need the journal fields to be extended; not collected yet.',
-  ],
   ci: ['CI', 'CI status needs the GitHub API; it arrives with the cpd workflow integration.'],
   quality: ['Quality', 'Gate results (lint, typecheck, tests) are not collected yet.'],
   linearsync: ['Linear sync', 'Needs a Linear API key on the owner machine (wf item B).'],
@@ -314,11 +383,13 @@ export function taskView(t, tab, selectTab, snap) {
           ? pauses(t)
           : tab === 'docs'
             ? docs(t)
-            : tab === 'risks'
-              ? risks(t)
-              : tab === 'rules'
-                ? rules(snap)
-                : [card(PENDING[tab][0], 'not collected yet', note(PENDING[tab][1]))];
+            : tab === 'runs'
+              ? runs(t)
+              : tab === 'risks'
+                ? risks(t)
+                : tab === 'rules'
+                  ? rules(snap)
+                  : [card(PENDING[tab][0], 'not collected yet', note(PENDING[tab][1]))];
   return [
     h(
       'div',

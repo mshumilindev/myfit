@@ -69,12 +69,18 @@ function mergeShards(shards) {
     tools: 0,
     compactions: 0,
     lastTs: null,
+    byTool: /** @type {Record<string, number>} */ ({}),
+    byHour: /** @type {Record<string, number>} */ ({}),
   };
   for (const s of shards) {
     sum.prompts += s.turns?.prompts ?? 0;
     sum.stops += s.turns?.stops ?? 0;
     sum.unforced += s.turns?.unforced ?? 0;
     sum.nudges += s.turns?.nudges ?? 0;
+    for (const [name, n] of Object.entries(s.counts?.tools ?? {}))
+      if (typeof n === 'number') sum.byTool[name] = (sum.byTool[name] ?? 0) + n;
+    for (const [hour, n] of Object.entries(s.counts?.byHour ?? {}))
+      if (typeof n === 'number') sum.byHour[hour] = (sum.byHour[hour] ?? 0) + n;
     sum.tools += Object.values(s.counts?.tools ?? {}).reduce(
       (a, b) => a + (typeof b === 'number' ? b : 0),
       0,

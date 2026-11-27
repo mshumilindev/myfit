@@ -166,6 +166,7 @@ describe('collector', () => {
     const t = snap.tasks[0];
     expect(t.plan).toMatchObject({ total: 4, done: 1, blocked: 1, todo: 1, doing: 1, pct: 25 });
     expect(t.blocked).toEqual([{ id: 'B', needs: 'cpd' }]);
+    expect(t.capture.byTool).toEqual({ Bash: 4, Read: 1 });
     expect(t.items).toHaveLength(4);
     expect(t.docs).toEqual([]);
     expect(t.risks.total).toBe(0);
