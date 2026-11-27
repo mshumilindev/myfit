@@ -27,7 +27,7 @@ export function CatalogPromoRow() {
   const dark = root ? root.dataset.mode !== 'light' || root.dataset.sleep === 'night' : true;
   return (
     <section className={`sk-root ${dark ? 'sk-dark' : 'sk-light'}`}>
-      <SkCard>
+      <SkCard pad>
         <SkRow
           noBorder
           tile={<TileOf st={st} m={m} size={64} animated />}
