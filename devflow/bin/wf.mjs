@@ -6,6 +6,8 @@
  *   node scripts/wf.mjs add <item> [--kind ac|step|extra] [--text "…"] [--verify]
  *   node scripts/wf.mjs doing <item>
  *   node scripts/wf.mjs done <item> --evidence "<command|file|link>" [--verdict verify.json]
+ *   node scripts/wf.mjs also <task> [title]   start another task; the current one is parked, the band shows both
+ *   node scripts/wf.mjs switch <task>        make a parked task the active one
  *   node scripts/wf.mjs skip <item> --reason "why it was skipped"   (shown on hover in the band)
  *   node scripts/wf.mjs block <item> --needs design|cpd|access|legal|irreversible [--reason "…"]
  *   node scripts/wf.mjs unblock <item>
@@ -112,7 +114,9 @@ export function buildEvent(cmd, { positional, flags }, now = Date.now()) {
   const [first, ...rest] = positional;
   switch (cmd) {
     case 'start':
-      return { type: 'start', ts: now, task: first, title: rest.join(' ') };
+    case 'also':
+    case 'switch':
+      return { type: cmd, ts: now, task: first, title: rest.join(' ') };
     case 'add':
       return {
         type: 'add',
@@ -171,7 +175,7 @@ function apply(dir, event, args) {
   const state = load(stateFile);
   if (!state)
     return { code: 2, out: `wf: стан пошкоджено (${stateFile}) — виправте або видаліть файл` };
-  if (event.type !== 'start' && !state.task) {
+  if (!['start', 'also'].includes(event.type) && !state.task) {
     return { code: 2, out: 'wf: немає активної задачі (wf start <id>)' };
   }
   if (event.type === 'start' && !args.flags.force && state.task) {

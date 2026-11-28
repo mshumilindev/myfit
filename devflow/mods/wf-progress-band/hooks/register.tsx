@@ -1,6 +1,6 @@
 import { atom, read, update } from 'claude-code';
 import type { Register } from 'claude-code';
-import type { Block, Snap } from '../types';
+import type { Block, Snap, TaskSnap } from '../types';
 
 const snap = atom({ plugin: 'wf-progress-band', key: 'snap' } as const, null);
 
@@ -14,7 +14,7 @@ const VOCAB = {
   now: 'Now',
   idle: 'Idle',
   complete: 'All done',
-  noState: 'No wf state found',
+  noTask: 'No task yet',
   noReason: 'No reason recorded',
   noText: 'No description',
   needs: 'Waiting on',
@@ -33,7 +33,7 @@ const STATE_FILES = ['.claude/state/wf.json', '.devflow/mirror/wf.json'];
 
 type Item = { id: string; text?: string; status: string; reason?: string; needs?: string };
 
-function summarize(items: Item[], task: string): Snap {
+function summarize(items: Item[], task: string, active: boolean): TaskSnap {
   const count = (s: string) => items.filter((i) => i.status === s).length;
   const total = items.length;
   const done = count('done');
@@ -48,6 +48,7 @@ function summarize(items: Item[], task: string): Snap {
         : (i.reason ?? ''),
   }));
   return {
+    active,
     task,
     pct: Math.round((done / Math.max(1, total)) * 100),
     done,
@@ -58,23 +59,47 @@ function summarize(items: Item[], task: string): Snap {
     todo: count('todo'),
     current: current ? `${current.id} ${current.text ?? ''}`.trim() : null,
     blocks,
-    error: null,
   };
 }
 
-const failed = (error: string): Snap => ({
-  task: '?',
-  pct: 0,
-  done: 0,
-  total: 0,
-  doing: 0,
-  blocked: 0,
-  skipped: 0,
-  todo: 0,
-  current: null,
-  blocks: [],
-  error,
-});
+const empty = (): Snap => ({ tasks: [], note: VOCAB.noTask });
+
+const SQUARE: Record<string, string> = {
+  done: '🟩',
+  doing: '🟦',
+  blocked: '🟥',
+  skipped: '🟨',
+  todo: '⬜',
+};
+
+// The status line is plain text, so it carries the same blocks as emoji squares.
+function statusText(s: Snap): string {
+  if (s.tasks.length === 0) return VOCAB.noTask;
+  return s.tasks
+    .map((t) =>
+      t.active
+        ? `${t.task} ${t.blocks.map((b) => SQUARE[b.status]).join('')} ${t.pct}% ${t.done}/${t.total}`
+        : `${t.task} ${t.pct}%`,
+    )
+    .join(' │ ');
+}
+
+type Wf = {
+  task?: { id: string } | null;
+  items?: Item[];
+  parked?: { task: { id: string }; items?: Item[] }[];
+};
+
+function fromWf(wf: Wf): Snap {
+  const tasks: TaskSnap[] = [];
+  if (wf.task) tasks.push(summarize(wf.items ?? [], wf.task.id, true));
+  for (const p of wf.parked ?? []) {
+    const t = summarize(p.items ?? [], p.task.id, false);
+    // A parked task that is finished leaves the band; a parked task with open work stays.
+    if (t.pct < 100) tasks.push(t);
+  }
+  return tasks.length ? { tasks, note: null } : empty();
+}
 
 export const register: Register = (on) => {
   on('session.start', ($, e, next) => {
@@ -82,22 +107,24 @@ export const register: Register = (on) => {
       for (const file of STATE_FILES) {
         try {
           const wf = JSON.parse(await $.fs.read(file));
-          await update($, snap, () => summarize(wf.items ?? [], wf.task?.id ?? '?'));
+          const snapshot = fromWf(wf);
+          await update($, snap, () => snapshot);
+          $.ui.status(statusText(snapshot));
           return;
         } catch {
           // try the next location
         }
       }
-      await update($, snap, () => failed(VOCAB.noState));
+      await update($, snap, () => empty());
+      $.ui.status(statusText(empty()));
     };
     void refresh();
     $.clock.every(2000, refresh);
     return next(e);
   });
 
-  on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
-    const s = (await read($, snap)) as Snap | null;
-    if (s === null) return next(e);
+  on('ui.render', { component: 'AbovePrompt' }, async ($, e) => {
+    const s = ((await read($, snap)) as Snap | null) ?? empty();
     const { Box, Text } = $.ui.resolve(e);
     const status = (k: string, n: number) =>
       n > 0 ? (
@@ -105,49 +132,64 @@ export const register: Register = (on) => {
           ■ {n} {VOCAB[k as keyof typeof VOCAB]}
         </Text>
       ) : null;
+    if (s.tasks.length === 0) {
+      return <Text dimColor>{s.note ?? VOCAB.noTask}</Text>;
+    }
     return (
       <Box flexDirection="column">
-        <Box gap={2} flexWrap="wrap">
-          <Text bold>{s.task}</Text>
-          <Text bold color={s.blocked > 0 ? COLOR.blocked : COLOR.done}>
-            {s.pct}%
-          </Text>
-          <Text dimColor>
-            {s.done}/{s.total} {VOCAB.done.toLowerCase()}
-          </Text>
-          {status('doing', s.doing)}
-          {status('blocked', s.blocked)}
-          {status('skipped', s.skipped)}
-          {s.error ? <Text color={COLOR.blocked}>{s.error}</Text> : null}
-        </Box>
-        <Box flexWrap="wrap">
-          {s.blocks.map((b) => (
-            <Box key={`b-${b.id}`}>
-              <Text color={COLOR[b.status]}>{b.status === 'todo' ? '▢' : '■'}</Text>
-              <Box
-                position="absolute"
-                top={-4}
-                left={0}
-                display="none"
-                hover={{ display: 'flex' }}
-                flexDirection="column"
-                borderStyle="round"
-                paddingX={1}
-              >
-                <Text bold color={COLOR[b.status]}>
-                  {b.id} · {VOCAB[b.status as keyof typeof VOCAB]}
-                </Text>
-                <Text>{b.text || VOCAB.noText}</Text>
-                {b.status === 'blocked' || b.status === 'skipped' ? (
-                  <Text color={COLOR[b.status]}>{b.why || VOCAB.noReason}</Text>
-                ) : null}
-              </Box>
+        {s.tasks.map((t) => (
+          <Box key={`t-${t.task}`} flexDirection="column">
+            <Box gap={2} flexWrap="wrap">
+              <Text bold dimColor={!t.active}>
+                {t.active ? '▶ ' : '  '}
+                {t.task}
+              </Text>
+              <Text bold color={t.blocked > 0 ? COLOR.blocked : COLOR.done}>
+                {t.pct}%
+              </Text>
+              <Text dimColor>
+                {t.done}/{t.total} {VOCAB.done.toLowerCase()}
+              </Text>
+              {status('doing', t.doing)}
+              {status('blocked', t.blocked)}
+              {status('skipped', t.skipped)}
             </Box>
-          ))}
-        </Box>
-        <Text dimColor wrap="truncate-end">
-          {s.current ? `${VOCAB.now}: ${s.current}` : s.pct === 100 ? VOCAB.complete : VOCAB.idle}
-        </Text>
+            <Box flexWrap="wrap">
+              {t.blocks.map((b) => (
+                <Box key={`b-${t.task}-${b.id}`}>
+                  <Text color={COLOR[b.status]}>{b.status === 'todo' ? '▢' : '■'}</Text>
+                  <Box
+                    position="absolute"
+                    top={-4}
+                    left={0}
+                    display="none"
+                    hover={{ display: 'flex' }}
+                    flexDirection="column"
+                    borderStyle="round"
+                    paddingX={1}
+                  >
+                    <Text bold color={COLOR[b.status]}>
+                      {b.id} · {VOCAB[b.status as keyof typeof VOCAB]}
+                    </Text>
+                    <Text>{b.text || VOCAB.noText}</Text>
+                    {b.status === 'blocked' || b.status === 'skipped' ? (
+                      <Text color={COLOR[b.status]}>{b.why || VOCAB.noReason}</Text>
+                    ) : null}
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+            {t.active ? (
+              <Text dimColor wrap="truncate-end">
+                {t.current
+                  ? `${VOCAB.now}: ${t.current}`
+                  : t.pct === 100
+                    ? VOCAB.complete
+                    : VOCAB.idle}
+              </Text>
+            ) : null}
+          </Box>
+        ))}
       </Box>
     );
   });

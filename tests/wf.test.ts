@@ -69,6 +69,20 @@ describe('wf-core', () => {
     expect(progress(k).done).toBe(0);
   });
 
+  it('also parks the current task and switch brings it back; nothing is lost', () => {
+    let s = withItems();
+    s = reduce(s, { type: 'also', ts: T, task: 'SPO-2', title: 'second' });
+    expect(s.task.id).toBe('SPO-2');
+    expect(s.items).toHaveLength(0);
+    expect(s.parked.map((p: { task: { id: string } }) => p.task.id)).toEqual(['SPO-1']);
+    expect(() => reduce(s, { type: 'also', ts: T, task: 'SPO-1' })).toThrow(/exists/);
+    s = reduce(s, { type: 'switch', ts: T, task: 'SPO-1' });
+    expect(s.task.id).toBe('SPO-1');
+    expect(s.items).toHaveLength(3);
+    expect(s.parked.map((p: { task: { id: string } }) => p.task.id)).toEqual(['SPO-2']);
+    expect(() => reduce(s, { type: 'switch', ts: T, task: 'NOPE' })).toThrow(/no parked/);
+  });
+
   it('rejects unknown items, duplicates and bad categories', () => {
     expect(() => reduce(withItems(), { type: 'doing', ts: T, item: 'zzz' })).toThrow(
       /unknown item/,

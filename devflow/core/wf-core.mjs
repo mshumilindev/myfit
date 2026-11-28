@@ -7,14 +7,25 @@
 export const KINDS = ['ac', 'step', 'extra'];
 /** Why an item may wait for the owner. No generic "decision": the owner's rule is that Claude decides and goes on. */
 export const NEEDS = ['design', 'cpd', 'access', 'legal', 'irreversible'];
-const EVENT_TYPES = ['start', 'add', 'doing', 'done', 'block', 'unblock', 'skip', 'heartbeat'];
+const EVENT_TYPES = [
+  'start',
+  'add',
+  'doing',
+  'done',
+  'block',
+  'unblock',
+  'skip',
+  'also',
+  'switch',
+  'heartbeat',
+];
 /** Heartbeats in a row without a new `done` before status asks to change approach (never to stop). */
 /** Ids are identifiers only, so the journal can never hold free text or personal data. */
 export const ID_RE = /^[A-Za-z0-9._-]{1,40}$/;
 export const STALL_AFTER = 5;
 
 export function emptyState() {
-  return { task: null, items: [], stall: 0 };
+  return { task: null, items: [], stall: 0, parked: [] };
 }
 
 /** Throws on malformed input; returns the event so callers can chain. */
@@ -34,7 +45,7 @@ export function validateEvent(event) {
   }
   if (event.type === 'skip' && !String(event.reason ?? '').trim())
     throw new Error('skip needs a reason (shown to the owner on hover)');
-  if (event.type === 'start' && !ID_RE.test(event.task ?? '')) {
+  if (['start', 'also', 'switch'].includes(event.type) && !ID_RE.test(event.task ?? '')) {
     throw new Error('start needs a task id (A-Z a-z 0-9 . _ -, up to 40 chars)');
   }
   if (event.type === 'done' && !String(event.evidence ?? '').trim()) {
@@ -64,6 +75,14 @@ export function isValidState(state) {
   if (state.stall !== undefined && !(Number.isInteger(state.stall) && state.stall >= 0))
     return false;
   if (new Set(state.items.map((i) => i?.id)).size !== state.items.length) return false;
+  if (
+    state.parked !== undefined &&
+    !(
+      Array.isArray(state.parked) &&
+      state.parked.every((p) => p && ID_RE.test(String(p.task?.id)) && Array.isArray(p.items))
+    )
+  )
+    return false;
   return state.items.every(
     (i) =>
       i &&
@@ -86,7 +105,32 @@ export function reduce(state, event) {
         task: { id: event.task, title: event.title ?? '', ts: event.ts },
         items: [],
         stall: 0,
+        parked: state.parked ?? [],
       };
+    case 'also': {
+      // Parallel or sequential work in one chat: the current task is parked, never lost.
+      const parked = [...(state.parked ?? [])];
+      if (state.task) {
+        if (state.task.id === event.task || parked.some((p) => p.task.id === event.task))
+          throw new Error(`task exists: ${event.task}`);
+        parked.push({ task: state.task, items: state.items, stall: state.stall ?? 0 });
+      }
+      return {
+        task: { id: event.task, title: event.title ?? '', ts: event.ts },
+        items: [],
+        stall: 0,
+        parked,
+      };
+    }
+    case 'switch': {
+      const parked = [...(state.parked ?? [])];
+      const at = parked.findIndex((p) => p.task.id === event.task);
+      if (at < 0) throw new Error(`no parked task: ${event.task}`);
+      const [target] = parked.splice(at, 1);
+      if (state.task)
+        parked.push({ task: state.task, items: state.items, stall: state.stall ?? 0 });
+      return { task: target.task, items: target.items, stall: target.stall ?? 0, parked };
+    }
     case 'add':
       if (next.items.some((i) => i.id === event.item))
         throw new Error(`item exists: ${event.item}`);

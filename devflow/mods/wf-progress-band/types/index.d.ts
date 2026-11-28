@@ -9,7 +9,8 @@ export type Block = {
   status: string;
   why: string;
 };
-export type Snap = {
+export type TaskSnap = {
+  active: boolean;
   task: string;
   pct: number;
   done: number;
@@ -20,5 +21,8 @@ export type Snap = {
   todo: number;
   current: string | null;
   blocks: Block[];
-  error: string | null;
+};
+export type Snap = {
+  tasks: TaskSnap[];
+  note: string | null;
 };
