@@ -128,35 +128,55 @@ func color(_ s: String) -> NSColor {
 }
 // Dashboard: start the local server first when it is not running, then open it.
 func dashboardPort(_ u: URL) -> String { String(u.port ?? 5174) }
-func dashboardProjectDir() -> String? {
+func dashboardProjectDirs() -> [String] {
     let home = NSHomeDirectory()
     let fm = FileManager.default
     let marker = "/devflow/dashboard/server/main.mjs"
-    var cands: [String] = []
+    var found: [String] = []
     if let saved = try? String(contentsOfFile: home + "/.devflow/project-dir", encoding: .utf8) {
-        cands.append(saved.trimmingCharacters(in: .whitespacesAndNewlines))
+        let d = saved.trimmingCharacters(in: .whitespacesAndNewlines)
+        if fm.fileExists(atPath: d + marker) { found.append(d) }
     }
-    if let hit = cands.first(where: { fm.fileExists(atPath: $0 + marker) }) { return hit }
     // Search nested folders of the usual project roots (depth <= 6), skipping dependencies and VCS data.
     let roots = ["Desktop", "Documents", "Developer", "Projects", "Work", "dev", "code", "src", "repos", "GitHub", "git"].map { home + "/" + $0 }
     let skip: Set<String> = ["node_modules", ".git", "Library", ".Trash", "dist", "build", ".next", "venv"]
     for root in roots where fm.fileExists(atPath: root) {
         guard let en = fm.enumerator(at: URL(fileURLWithPath: root), includingPropertiesForKeys: [.isDirectoryKey], options: [.skipsPackageDescendants]) else { continue }
         for case let url as URL in en {
-            if skip.contains(url.lastPathComponent) { en.skipDescendants(); continue }
-            if en.level > 6 { en.skipDescendants(); continue }
+            if skip.contains(url.lastPathComponent) || en.level > 6 { en.skipDescendants(); continue }
             if url.lastPathComponent == "devflow" {
                 let proj = url.deletingLastPathComponent().path
-                if fm.fileExists(atPath: proj + marker) {
-                    try? fm.createDirectory(atPath: home + "/.devflow", withIntermediateDirectories: true)
-                    try? (proj + "\n").write(toFile: home + "/.devflow/project-dir", atomically: true, encoding: .utf8)
-                    return proj
-                }
+                if fm.fileExists(atPath: proj + marker), !found.contains(proj) { found.append(proj) }
             }
         }
     }
-    return nil
+    // Newest server file first: the freshest checkout is the most likely to work.
+    func stamp(_ d: String) -> Date { ((try? fm.attributesOfItem(atPath: d + marker))?[.modificationDate] as? Date) ?? .distantPast }
+    return found.sorted { stamp($0) > stamp($1) }
 }
+
+func nodeCandidates() -> [String] {
+    let home = NSHomeDirectory()
+    let fm = FileManager.default
+    var out: [String] = []
+    let probe = Process()
+    probe.executableURL = URL(fileURLWithPath: "/bin/zsh")
+    probe.arguments = ["-lic", "command -v node"]
+    let pipe = Pipe()
+    probe.standardOutput = pipe
+    probe.standardError = Pipe()
+    if (try? probe.run()) != nil {
+        let d = pipe.fileHandleForReading.readDataToEndOfFile()
+        probe.waitUntilExit()
+        if let t = String(data: d, encoding: .utf8)?.split(separator: "\n").last { out.append(String(t).trimmingCharacters(in: .whitespaces)) }
+    }
+    out += ["/opt/homebrew/bin/node", "/usr/local/bin/node", home + "/.volta/bin/node", "/usr/bin/node"]
+    let nvm = home + "/.nvm/versions/node"
+    if let vs = try? fm.contentsOfDirectory(atPath: nvm) { out += vs.sorted(by: >).map { nvm + "/" + $0 + "/bin/node" } }
+    var seen = Set<String>()
+    return out.filter { fm.isExecutableFile(atPath: $0) && seen.insert($0).inserted }
+}
+
 func lastLogLine() -> String {
     let t = (try? String(contentsOfFile: NSHomeDirectory() + "/.devflow/dashboard.log", encoding: .utf8)) ?? ""
     return t.split(separator: "\n").last.map { String($0.prefix(70)) } ?? ""
@@ -168,23 +188,37 @@ func openDashboard(_ u: URL, _ say: @escaping (String) -> Void, _ prog: @escapin
         let up = { runTool("/usr/bin/nc", ["-z", "127.0.0.1", port]) == 0 }
         DispatchQueue.main.async { prog("Checking the dashboard\u{2026}", 0.1) }
         if !up() && (u.host == "localhost" || u.host == "127.0.0.1") {
-            DispatchQueue.main.async { prog("Looking for the project\u{2026}", 0.25) }
-            guard let dir = dashboardProjectDir() else {
+            DispatchQueue.main.async { prog("Looking for the project\u{2026}", 0.2) }
+            let dirs = dashboardProjectDirs()
+            if dirs.isEmpty {
                 DispatchQueue.main.async { say("Dashboard project not found under Desktop/Documents/Developer/Projects/Work") }
                 return
             }
-            DispatchQueue.main.async { prog("Starting the server\u{2026}", 0.45) }
-            _ = runTool("/bin/zsh", ["-lic", "mkdir -p ~/.devflow; cd '\(dir)' && (CLAUDE_PROJECT_DIR='\(dir)' nohup node devflow/dashboard/server/main.mjs > ~/.devflow/dashboard.log 2>&1 &)"])
-            var tries = 0
-            while !up() && tries < 30 {
-                Thread.sleep(forTimeInterval: 0.5)
-                tries += 1
-                let p = 0.45 + 0.5 * CGFloat(tries) / 30
-                DispatchQueue.main.async { prog("Waiting for the server\u{2026}", p) }
+            let nodes = nodeCandidates()
+            if nodes.isEmpty {
+                DispatchQueue.main.async { say("Node.js not found (install it or add it to the shell PATH)") }
+                return
             }
-            if !up() {
-                let why = lastLogLine()
-                DispatchQueue.main.async { say(why.isEmpty ? "Dashboard did not start (no log output)" : "Dashboard failed: " + why) }
+            var lastWhy = ""
+            var started = false
+            let total = CGFloat(dirs.count * nodes.count)
+            var attempt: CGFloat = 0
+            outer: for dir in dirs {
+                for node in nodes {
+                    attempt += 1
+                    let base = 0.3 + 0.65 * (attempt - 1) / total
+                    DispatchQueue.main.async { prog("Starting (\(URL(fileURLWithPath: dir).lastPathComponent))\u{2026}", base) }
+                    _ = runTool("/bin/zsh", ["-lic", "mkdir -p ~/.devflow; cd '\(dir)' && (CLAUDE_PROJECT_DIR='\(dir)' nohup '\(node)' devflow/dashboard/server/main.mjs > ~/.devflow/dashboard.log 2>&1 &)"])
+                    var tries = 0
+                    while !up() && tries < 8 { Thread.sleep(forTimeInterval: 0.5); tries += 1 }
+                    if up() { started = true; break outer }
+                    lastWhy = lastLogLine()
+                    _ = runTool("/usr/bin/pkill", ["-f", "devflow/dashboard/server/main.mjs"])
+                }
+            }
+            if !started {
+                let why = lastWhy
+                DispatchQueue.main.async { say(why.isEmpty ? "Dashboard did not start after \(Int(total)) attempts (no log output)" : "Dashboard failed: " + why) }
                 return
             }
         }
