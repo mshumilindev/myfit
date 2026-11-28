@@ -21,6 +21,7 @@ export type TaskSnap = {
   todo: number;
   current: string | null;
   blocks: Block[];
+  eta: string | null;
 };
 export type Snap = {
   tasks: TaskSnap[];
