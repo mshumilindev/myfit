@@ -64,16 +64,23 @@ func loadSnapshot() -> Snapshot {
 // ---- Self-update: the wf-state branch carries widget/ProgressWidget.swift and widget/VERSION (sha256).
 let widgetDir = NSString(string: "~/.devflow/widget").expandingTildeInPath
 var failedVersion = ""
+var updateStatus = "checking for updates"
+var runningVersion = ""
 var lastUpdateCheck = Date.distantPast
 
+var lastToolError = ""
 func runTool(_ path: String, _ args: [String]) -> Int32 {
     let p = Process()
     p.executableURL = URL(fileURLWithPath: path)
     p.arguments = args
     p.standardOutput = Pipe()
-    p.standardError = Pipe()
-    do { try p.run() } catch { return -1 }
+    let err = Pipe()
+    p.standardError = err
+    do { try p.run() } catch { lastToolError = "cannot run \(path)"; return -1 }
+    let d = err.fileHandleForReading.readDataToEndOfFile()
     p.waitUntilExit()
+    let t = String(data: d, encoding: .utf8) ?? ""
+    lastToolError = t.split(separator: "\n").first(where: { $0.contains("error") }).map(String.init) ?? String(t.prefix(160))
     return p.terminationStatus
 }
 
@@ -83,7 +90,11 @@ func checkForUpdate() {
     let latest = git(["show", "FETCH_HEAD:widget/VERSION"]).trimmingCharacters(in: .whitespacesAndNewlines)
     let installed = ((try? String(contentsOfFile: widgetDir + "/installed-version", encoding: .utf8)) ?? "")
         .trimmingCharacters(in: .whitespacesAndNewlines)
-    if latest.isEmpty || latest == installed || latest == failedVersion { return }
+    runningVersion = String(installed.prefix(7))
+    if latest.isEmpty { updateStatus = "update check failed (no data)"; return }
+    if latest == installed { updateStatus = "up to date"; return }
+    if latest == failedVersion { return }
+    updateStatus = "updating to \(latest.prefix(7))\u{2026}"
     let source = git(["show", "FETCH_HEAD:widget/ProgressWidget.swift"])
     if source.isEmpty { return }
     try? FileManager.default.createDirectory(atPath: widgetDir, withIntermediateDirectories: true)
@@ -92,9 +103,9 @@ func checkForUpdate() {
     do { try source.write(toFile: srcPath, atomically: true, encoding: .utf8) } catch { return }
     try? FileManager.default.removeItem(atPath: binNew)
     guard runTool("/usr/bin/swiftc", ["-O", srcPath, "-o", binNew]) == 0,
-          let exe = Bundle.main.executablePath else { failedVersion = latest; return }
+          let exe = Bundle.main.executablePath else { failedVersion = latest; updateStatus = "update \(latest.prefix(7)) failed: " + lastToolError; return }
     try? FileManager.default.removeItem(atPath: exe)
-    do { try FileManager.default.moveItem(atPath: binNew, toPath: exe) } catch { failedVersion = latest; return }
+    do { try FileManager.default.moveItem(atPath: binNew, toPath: exe) } catch { failedVersion = latest; updateStatus = "update \(latest.prefix(7)) failed: could not replace the app"; return }
     try? (latest + "\n").write(toFile: widgetDir + "/installed-version", atomically: true, encoding: .utf8)
     exit(0) // launchd (KeepAlive) starts the new build
 }
@@ -353,6 +364,8 @@ final class WidgetView: NSView {
             if draw { text(toast, pad, y, 11, true, 0.9, true, c: color("done")) }
             y += 20
         }
+        text("v\(runningVersion) \u{00B7} \(updateStatus)", pad, y + 2, 9.5, false, 0.4, draw)
+        y += 16
         return y + 8
     }
 
