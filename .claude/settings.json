@@ -119,7 +119,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "[ \"$(uname)\" = Darwin ] && open -g -a Progress >/dev/null 2>&1 || true",
+            "command": "[ \"$(uname)\" = Darwin ] && { [ -d \"$HOME/Applications/Progress Widget.app\" ] && open -g -a \"Progress Widget\" || (nohup bash \"$CLAUDE_PROJECT_DIR/devflow/native/install-widget.sh\" >/dev/null 2>&1 &); } >/dev/null 2>&1 || true",
             "timeout": 5
           }
         ]
