@@ -113,9 +113,9 @@ func checkForUpdate() {
 var darkTheme: Bool = (UserDefaults.standard.object(forKey: "devflow.dark") as? Bool) ?? true
 func ink() -> NSColor { darkTheme ? NSColor.white : NSColor(calibratedRed: 0.15, green: 0.12, blue: 0.22, alpha: 1) }
 func ov(_ a: CGFloat) -> NSColor { ink().withAlphaComponent(a) }
-func panelBg() -> NSColor { darkTheme ? NSColor(calibratedRed: 0.10, green: 0.04, blue: 0.22, alpha: 0.98) : NSColor(calibratedRed: 1.0, green: 0.98, blue: 0.94, alpha: 0.98) }
+func panelBg() -> NSColor { darkTheme ? NSColor(calibratedRed: 0.17, green: 0.02, blue: 0.36, alpha: 0.99) : NSColor(calibratedRed: 1.0, green: 0.98, blue: 0.94, alpha: 0.98) }
 func accent() -> NSColor { darkTheme ? NSColor(calibratedRed: 0.66, green: 0.42, blue: 1.0, alpha: 1) : NSColor(calibratedRed: 0.90, green: 0.58, blue: 0.10, alpha: 1) }
-func tipBg() -> NSColor { darkTheme ? NSColor(calibratedRed: 0.20, green: 0.11, blue: 0.38, alpha: 1) : NSColor.white }
+func tipBg() -> NSColor { darkTheme ? NSColor(calibratedRed: 0.27, green: 0.07, blue: 0.52, alpha: 1) : NSColor.white }
 
 func color(_ s: String) -> NSColor {
     switch s {
@@ -126,6 +126,39 @@ func color(_ s: String) -> NSColor {
     default: return NSColor(calibratedWhite: 0.38, alpha: 1)
     }
 }
+// Dashboard: start the local server first when it is not running, then open it.
+func dashboardPort(_ u: URL) -> String { String(u.port ?? 5174) }
+func dashboardProjectDir() -> String? {
+    let home = NSHomeDirectory()
+    var cands: [String] = []
+    if let saved = try? String(contentsOfFile: home + "/.devflow/project-dir", encoding: .utf8) {
+        cands.append(saved.trimmingCharacters(in: .whitespacesAndNewlines))
+    }
+    cands += [home + "/Desktop/Work/training/gym-tracker", home + "/Desktop/Work/training"]
+    return cands.first { FileManager.default.fileExists(atPath: $0 + "/devflow/dashboard/server/main.mjs") }
+}
+func openDashboard(_ u: URL, _ say: @escaping (String) -> Void) {
+    DispatchQueue.global().async {
+        let port = dashboardPort(u)
+        let up = { runTool("/usr/bin/nc", ["-z", "127.0.0.1", port]) == 0 }
+        if !up() && (u.host == "localhost" || u.host == "127.0.0.1") {
+            guard let dir = dashboardProjectDir() else {
+                DispatchQueue.main.async { say("Dashboard project folder not found (~/.devflow/project-dir)") }
+                return
+            }
+            DispatchQueue.main.async { say("Starting the dashboard\u{2026}") }
+            _ = runTool("/bin/zsh", ["-lc", "cd '\(dir)' && (nohup node devflow/dashboard/server/main.mjs > ~/.devflow/dashboard.log 2>&1 &)"])
+            var tries = 0
+            while !up() && tries < 20 { Thread.sleep(forTimeInterval: 0.5); tries += 1 }
+            if !up() {
+                DispatchQueue.main.async { say("Dashboard did not start (see ~/.devflow/dashboard.log)") }
+                return
+            }
+        }
+        DispatchQueue.main.async { say(""); NSWorkspace.shared.open(u) }
+    }
+}
+
 func activateClaude() {
     if let app = NSWorkspace.shared.runningApplications.first(where: { $0.localizedName == "Claude" }) {
         app.activate(options: [])
@@ -243,7 +276,9 @@ final class WidgetView: NSView {
         _ = pill("Pipeline", x, y, active: tab == 3, draw) { self.tab = 3; self.onChange() }
         let dash = snap.dashboard
         pill("Dashboard \u{2197}", 0, y, active: false, right: w - pad, draw) {
-            if let u = URL(string: dash), !dash.isEmpty { NSWorkspace.shared.open(u) }
+            if let u = URL(string: dash), !dash.isEmpty {
+                openDashboard(u) { msg in self.toast = msg; self.onChange() }
+            }
         }
         y += 34
 
