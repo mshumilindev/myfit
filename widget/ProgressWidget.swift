@@ -157,25 +157,38 @@ func dashboardProjectDir() -> String? {
     }
     return nil
 }
-func openDashboard(_ u: URL, _ say: @escaping (String) -> Void) {
+func lastLogLine() -> String {
+    let t = (try? String(contentsOfFile: NSHomeDirectory() + "/.devflow/dashboard.log", encoding: .utf8)) ?? ""
+    return t.split(separator: "\n").last.map { String($0.prefix(70)) } ?? ""
+}
+
+func openDashboard(_ u: URL, _ say: @escaping (String) -> Void, _ prog: @escaping (String, CGFloat) -> Void) {
     DispatchQueue.global().async {
         let port = dashboardPort(u)
         let up = { runTool("/usr/bin/nc", ["-z", "127.0.0.1", port]) == 0 }
+        DispatchQueue.main.async { prog("Checking the dashboard\u{2026}", 0.1) }
         if !up() && (u.host == "localhost" || u.host == "127.0.0.1") {
+            DispatchQueue.main.async { prog("Looking for the project\u{2026}", 0.25) }
             guard let dir = dashboardProjectDir() else {
                 DispatchQueue.main.async { say("Dashboard project not found under Desktop/Documents/Developer/Projects/Work") }
                 return
             }
-            DispatchQueue.main.async { say("Starting the dashboard\u{2026}") }
-            _ = runTool("/bin/zsh", ["-lc", "cd '\(dir)' && (nohup node devflow/dashboard/server/main.mjs > ~/.devflow/dashboard.log 2>&1 &)"])
+            DispatchQueue.main.async { prog("Starting the server\u{2026}", 0.45) }
+            _ = runTool("/bin/zsh", ["-lic", "mkdir -p ~/.devflow; cd '\(dir)' && (CLAUDE_PROJECT_DIR='\(dir)' nohup node devflow/dashboard/server/main.mjs > ~/.devflow/dashboard.log 2>&1 &)"])
             var tries = 0
-            while !up() && tries < 20 { Thread.sleep(forTimeInterval: 0.5); tries += 1 }
+            while !up() && tries < 30 {
+                Thread.sleep(forTimeInterval: 0.5)
+                tries += 1
+                let p = 0.45 + 0.5 * CGFloat(tries) / 30
+                DispatchQueue.main.async { prog("Waiting for the server\u{2026}", p) }
+            }
             if !up() {
-                DispatchQueue.main.async { say("Dashboard did not start (see ~/.devflow/dashboard.log)") }
+                let why = lastLogLine()
+                DispatchQueue.main.async { say(why.isEmpty ? "Dashboard did not start (no log output)" : "Dashboard failed: " + why) }
                 return
             }
         }
-        DispatchQueue.main.async { say(""); NSWorkspace.shared.open(u) }
+        DispatchQueue.main.async { prog("Opening the dashboard", 1.0); NSWorkspace.shared.open(u) }
     }
 }
 
@@ -233,6 +246,7 @@ final class WidgetView: NSView {
     var cur: Card? { snap.cards.isEmpty ? nil : snap.cards[min(cardIdx, snap.cards.count - 1)] }
     var selected: (String, String)? = nil   // task id, item id
     var toast = ""
+    var progress: CGFloat = -1
     var copied = ""
     var showAll = false
     var showPrompts = false
@@ -279,7 +293,17 @@ final class WidgetView: NSView {
         }
         return w
     }
+    func showProgress(_ m: String, _ p: CGFloat) {
+        toast = m
+        progress = p
+        onChange()
+        if p >= 1 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { if self.progress >= 1 { self.toast = ""; self.progress = -1; self.onChange() } }
+        }
+    }
+
     func showToast(_ m: String) {
+        progress = -1
         toast = m
         onChange()
         if !m.isEmpty {
@@ -327,7 +351,7 @@ final class WidgetView: NSView {
         let dash = snap.dashboard
         pill("Dashboard \u{2197}", 0, y, active: false, right: w - pad, draw) {
             if let u = URL(string: dash), !dash.isEmpty {
-                openDashboard(u) { msg in self.showToast(msg) }
+                openDashboard(u, { msg in self.showToast(msg) }, { msg, p in self.showProgress(msg, p) })
             }
         }
         y += 34
@@ -570,10 +594,18 @@ final class WidgetView: NSView {
         NSGraphicsContext.current?.cgContext.translateBy(x: 0, y: -scrollY)
         contentHeight = render(bounds.width, true)
         if !toast.isEmpty {
-            let r = NSRect(x: 14, y: scrollY + bounds.height - 42, width: bounds.width - 28, height: 30)
+            let bh: CGFloat = progress >= 0 ? 44 : 30
+            let r = NSRect(x: 14, y: scrollY + bounds.height - bh - 12, width: bounds.width - 28, height: bh)
             accent().setFill()
             NSBezierPath(roundedRect: r, xRadius: 8, yRadius: 8).fill()
-            text(toast, 24, scrollY + bounds.height - 35, 12, true, 1, true, c: NSColor.white)
+            text(toast, 24, r.minY + 7, 12, true, 1, true, c: NSColor.white)
+            if progress >= 0 {
+                let track = NSRect(x: 24, y: r.maxY - 14, width: r.width - 20, height: 5)
+                NSColor(calibratedWhite: 1, alpha: 0.28).setFill()
+                NSBezierPath(roundedRect: track, xRadius: 2.5, yRadius: 2.5).fill()
+                NSColor.white.setFill()
+                NSBezierPath(roundedRect: NSRect(x: track.minX, y: track.minY, width: max(5, track.width * min(progress, 1)), height: 5), xRadius: 2.5, yRadius: 2.5).fill()
+            }
         }
         if hoverHit != .zero {
             ov(0.13).setFill()
