@@ -113,9 +113,9 @@ func checkForUpdate() {
 var darkTheme: Bool = (UserDefaults.standard.object(forKey: "devflow.dark") as? Bool) ?? true
 func ink() -> NSColor { darkTheme ? NSColor.white : NSColor(calibratedRed: 0.15, green: 0.12, blue: 0.22, alpha: 1) }
 func ov(_ a: CGFloat) -> NSColor { ink().withAlphaComponent(a) }
-func panelBg() -> NSColor { darkTheme ? NSColor(calibratedRed: 0.17, green: 0.02, blue: 0.36, alpha: 0.99) : NSColor(calibratedRed: 1.0, green: 0.98, blue: 0.94, alpha: 0.98) }
+func panelBg() -> NSColor { darkTheme ? NSColor(calibratedRed: 0.075, green: 0.0, blue: 0.17, alpha: 1) : NSColor(calibratedRed: 1.0, green: 0.98, blue: 0.94, alpha: 0.98) }
 func accent() -> NSColor { darkTheme ? NSColor(calibratedRed: 0.66, green: 0.42, blue: 1.0, alpha: 1) : NSColor(calibratedRed: 0.90, green: 0.58, blue: 0.10, alpha: 1) }
-func tipBg() -> NSColor { darkTheme ? NSColor(calibratedRed: 0.27, green: 0.07, blue: 0.52, alpha: 1) : NSColor.white }
+func tipBg() -> NSColor { darkTheme ? NSColor(calibratedRed: 0.17, green: 0.03, blue: 0.36, alpha: 1) : NSColor.white }
 
 func color(_ s: String) -> NSColor {
     switch s {
@@ -269,10 +269,12 @@ final class WidgetView: NSView {
         var y: CGFloat = 12
         let devN = snap.branches.filter { $0.kind == "dev" }.count + max(0, snap.cards.count - 1)
         let cpdN = snap.branches.filter { $0.kind == "cpd" }.count
+        let oldN = snap.branches.filter { $0.kind == "stale" }.count
         var x = pad
         x += pill("Tasks", x, y, active: tab == 0, draw) { self.tab = 0; self.onChange() } + 6
         x += pill("In dev (\(devN))", x, y, active: tab == 1, draw) { self.tab = 1; self.onChange() } + 6
         x += pill("cpd (\(cpdN))", x, y, active: tab == 2, draw) { self.tab = 2; self.onChange() } + 6
+        x += pill("Old (\(oldN))", x, y, active: tab == 4, draw) { self.tab = 4; self.onChange() } + 6
         _ = pill("Pipeline", x, y, active: tab == 3, draw) { self.tab = 3; self.onChange() }
         let dash = snap.dashboard
         pill("Dashboard \u{2197}", 0, y, active: false, right: w - pad, draw) {
@@ -405,8 +407,11 @@ final class WidgetView: NSView {
                     }
                 }
             }
-        } else if tab == 1 {
-            let rows = snap.branches.filter { $0.kind == "dev" }
+        } else if tab == 1 || tab == 4 {
+            let rows = snap.branches.filter { $0.kind == (tab == 1 ? "dev" : "stale") }
+            if tab == 4 {
+                y += wrapped("No commits for 7+ days. Review each one, then delete the ones that are merged or abandoned.", pad, y, w - 2 * pad, 11, 0.6, draw) + 8
+            }
             for b in rows {
                 let nm = b.name
                 let ex = "Explain git branch \(nm) to me: what it contains compared with main (commits, changed files), why it exists (linked Linear issue / wf task), the status of its tasks, and whether it is merged, deployed or still open. Read-only, change nothing."
@@ -430,12 +435,12 @@ final class WidgetView: NSView {
                 pill(copied == "del:" + nm ? "Copied \u{2713} paste in chat" : "Delete\u{2026}", pad + 8 + bw + 6, cy, active: copied == "del:" + nm, draw) { self.copyText(del, "del:" + nm) }
                 y += cardH + 10
             }
-            for c in snap.cards.dropFirst() {
+            for c in (tab == 1 ? Array(snap.cards.dropFirst()) : []) {
                 text("\(c.task) \u{00B7} \(c.source)", pad, y, 12, true, 0.95, draw)
                 text("\(c.pct)%  \(c.done)/\(c.total)", 0, y + 1, 11, false, 0.6, draw, right: w - pad)
                 y += 26
             }
-            if rows.isEmpty && snap.cards.count < 2 { text("No other work in progress", pad, y, 12, false, 0.6, draw); y += 24 }
+            if rows.isEmpty && (tab == 4 || snap.cards.count < 2) { text(tab == 4 ? "No old branches" : "No other work in progress", pad, y, 12, false, 0.6, draw); y += 24 }
         } else if tab == 3 {
             var stages: [(String, String, String)] = []
             let devDone = snap.cards.first.map { $0.done == $0.total } ?? false
@@ -565,12 +570,12 @@ final class WidgetView: NSView {
 }
 
 final class App: NSObject {
-    let width: CGFloat = 400
+    let width: CGFloat = 470
     let view = WidgetView()
     let panel: NSPanel
 
     override init() {
-        panel = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 400, height: 120),
+        panel = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 470, height: 120),
                         styleMask: [.borderless, .nonactivatingPanel],
                         backing: .buffered, defer: false)
         super.init()

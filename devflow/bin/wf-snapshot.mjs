@@ -147,6 +147,12 @@ export function stageOf(i) {
   return 'Development';
 }
 
+/** A work branch with no commits for a week is not "in development": it is an old branch to review and delete. */
+export function kindByAge(date, now = Date.now()) {
+  const t = Date.parse(date);
+  return Number.isFinite(t) && now - t > 7 * 86400000 ? 'stale' : 'dev';
+}
+
 /** Local branches that matter: ready-for-cpd/* (waiting for cpd), current/other work branches, and unpushed commits on main. */
 export function branchesOf(root) {
   const out = [];
@@ -172,7 +178,8 @@ export function branchesOf(root) {
       continue;
     }
     if (name.startsWith('ready-for-cpd/')) out.push({ name, kind: 'cpd', ahead, subject, date });
-    else if (ahead > 0 || name === cur) out.push({ name, kind: 'dev', ahead, subject, date });
+    else if (ahead > 0 || name === cur)
+      out.push({ name, kind: name === cur ? 'dev' : kindByAge(date), ahead, subject, date });
   }
   return out;
 }
@@ -205,7 +212,9 @@ export function withRemoteBranches(root, local) {
       if (!c.ahead_by) continue;
       out.push({
         name: b.name,
-        kind: b.name.startsWith('ready-for-cpd/') ? 'cpd' : 'dev',
+        kind: b.name.startsWith('ready-for-cpd/')
+          ? 'cpd'
+          : kindByAge(c.commits?.at(-1)?.commit?.committer?.date ?? ''),
         ahead: c.ahead_by,
         subject: `${c.commits?.at(-1)?.commit?.message?.split('\n')[0] ?? ''} (on GitHub)`,
         date: c.commits?.at(-1)?.commit?.committer?.date ?? '',
