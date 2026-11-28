@@ -333,7 +333,7 @@ final class WidgetView: NSView {
     var progress: CGFloat = -1
     var copied = ""
     var showAll = false
-    var flipped = Set<String>()
+    var toggledStages = Set<String>()
     var showPrompts = false
     var scrollY: CGFloat = 0
     var contentHeight: CGFloat = 0
@@ -557,11 +557,11 @@ final class WidgetView: NSView {
                     for st in order {
                         let grp = c0.items.filter { $0.stage == st }
                         let doneN = grp.filter { $0.status == "done" }.count
-                        let isOpen = (doneN < grp.count) != flipped.contains(st)
+                        let isOpen = (doneN < grp.count) != toggledStages.contains(st)
                         let arrow = isOpen ? "\u{25BE}" : "\u{25B8}"
                         let stName = st.isEmpty ? "Other" : st
                         pill("\(arrow) \(stName)  \(doneN)/\(grp.count)", pad, y, active: isOpen, draw) {
-                            if self.flipped.contains(st) { self.flipped.remove(st) } else { self.flipped.insert(st) }
+                            if self.toggledStages.contains(st) { self.toggledStages.remove(st) } else { self.toggledStages.insert(st) }
                             self.onChange()
                         }
                         y += 30
