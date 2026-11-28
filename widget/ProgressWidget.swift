@@ -26,7 +26,7 @@ func git(_ args: [String]) -> String {
 func str(_ v: Any?) -> String { (v as? String) ?? "" }
 func num(_ v: Any?) -> Int { (v as? NSNumber)?.intValue ?? 0 }
 
-func load() -> Snapshot {
+func loadSnapshot() -> Snapshot {
     _ = git(["fetch", "-q", "origin", "wf-state"])
     let names = git(["ls-tree", "--name-only", "FETCH_HEAD", "wf/"]).split(separator: "\n")
     var snap = Snapshot()
@@ -398,7 +398,7 @@ final class App: NSObject {
 
     func refresh() {
         DispatchQueue.global().async {
-            let s = load()
+            let s = loadSnapshot()
             checkForUpdate()
             DispatchQueue.main.async {
                 self.view.snap = s
