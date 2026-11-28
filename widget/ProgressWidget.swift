@@ -1,8 +1,8 @@
 import Cocoa
 
-// devflow-widget-rev: 46
+// devflow-widget-rev: 47
 // Monotonic build number. Publishers and the self-updater never move to a lower one (stops another checkout rolling the widget back).
-let widgetRev = 46
+let widgetRev = 47
 func revOf(_ src: String) -> Int {
     guard let r = src.range(of: "devflow-widget-rev: ") else { return 0 }
     return Int(src[r.upperBound...].prefix(while: { $0.isNumber })) ?? 0
@@ -173,6 +173,9 @@ func checkForUpdate() {
     if latest.isEmpty { updateStatus = "update check failed (no data) \u{00B7} run devflow doctor"; return }
     if latest == installed { updateStatus = "up to date"; return }
     if latest == failedVersion { return }
+    // CI gate (widget-gate workflow): a build marked GATE-FAIL did not compile on macOS, so it is never installed.
+    let gate = git(["show", "refs/remotes/origin/wf-state:widget/GATE-FAIL"]).trimmingCharacters(in: .whitespacesAndNewlines)
+    if !gate.isEmpty && gate == latest { failedVersion = latest; updateStatus = "build \(latest.prefix(7)) rejected by the CI gate"; return }
     updateStatus = "updating to \(latest.prefix(7))\u{2026}"
     let source = git(["show", "refs/remotes/origin/wf-state:widget/ProgressWidget.swift"])
     if source.isEmpty { return }
