@@ -110,6 +110,15 @@ func checkForUpdate() {
     exit(0) // launchd (KeepAlive) starts the new build
 }
 
+var customAnchor: NSPoint? = {
+    guard let a = UserDefaults.standard.array(forKey: "devflow.anchor") as? [Double], a.count == 2 else { return nil }
+    return NSPoint(x: a[0], y: a[1])
+}()
+func saveAnchor(_ p: NSPoint?) {
+    customAnchor = p
+    if let p = p { UserDefaults.standard.set([Double(p.x), Double(p.y)], forKey: "devflow.anchor") }
+    else { UserDefaults.standard.removeObject(forKey: "devflow.anchor") }
+}
 var darkTheme: Bool = (UserDefaults.standard.object(forKey: "devflow.dark") as? Bool) ?? true
 func ink() -> NSColor { darkTheme ? NSColor.white : NSColor(calibratedRed: 0.15, green: 0.12, blue: 0.22, alpha: 1) }
 func ov(_ a: CGFloat) -> NSColor { ink().withAlphaComponent(a) }
@@ -617,7 +626,10 @@ final class WidgetView: NSView {
             UserDefaults.standard.set(darkTheme, forKey: "devflow.dark")
             self.onChange()
         }
-        pill(pinned ? "Unpin" : "Pin open", 0, y, active: pinned, right: w - pad - dw - 6, draw) { self.pinned.toggle(); self.onChange() }
+        let pw = pill(pinned ? "Unpin" : "Pin open", 0, y, active: pinned, right: w - pad - dw - 6, draw) { self.pinned.toggle(); self.onChange() }
+        if customAnchor != nil {
+            pill("\u{21BA} Reset position", 0, y, active: false, right: w - pad - dw - pw - 12, draw) { saveAnchor(nil); self.onChange() }
+        }
         y += 26
         return y + 8
     }
@@ -632,6 +644,26 @@ final class WidgetView: NSView {
         var p = convert(event.locationInWindow, from: nil)
         p.y += scrollY
         for h in hits.reversed() where h.rect.contains(p) { h.action(); return }
+        dragMouse = NSEvent.mouseLocation
+        dragOrigin = window?.frame.origin
+    }
+
+    var dragMouse: NSPoint?
+    var dragOrigin: NSPoint?
+    override func mouseDragged(with event: NSEvent) {
+        guard let m0 = dragMouse, let o0 = dragOrigin, let w = window else { return }
+        let m = NSEvent.mouseLocation
+        w.setFrameOrigin(NSPoint(x: o0.x + m.x - m0.x, y: o0.y + m.y - m0.y))
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        guard dragMouse != nil, let w = window else { return }
+        dragMouse = nil
+        if let o = dragOrigin, abs(w.frame.origin.x - o.x) + abs(w.frame.origin.y - o.y) > 3 {
+            saveAnchor(NSPoint(x: w.frame.maxX, y: w.frame.minY))
+            onChange()
+        }
+        dragOrigin = nil
     }
 
     override func draw(_ dirtyRect: NSRect) {
@@ -762,7 +794,14 @@ final class App: NSObject {
         view.contentHeight = total
         let h = min(total, f.height - 40)
         view.scrollY = min(view.scrollY, max(0, total - h))
-        panel.setFrame(NSRect(x: f.maxX - curW - 16, y: f.minY + 16, width: curW, height: h), display: true)
+        var ox = f.maxX - curW - 16
+        var oy = f.minY + 16
+        if let a = customAnchor {
+            let full = NSScreen.screens.reduce(f) { $0.union($1.visibleFrame) }
+            ox = min(max(full.minX, a.x - curW), full.maxX - curW)
+            oy = min(max(full.minY, a.y), full.maxY - h)
+        }
+        panel.setFrame(NSRect(x: ox, y: oy, width: curW, height: h), display: true)
         view.needsDisplay = true
     }
 
