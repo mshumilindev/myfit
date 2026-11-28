@@ -279,6 +279,14 @@ final class WidgetView: NSView {
         }
         return w
     }
+    func showToast(_ m: String) {
+        toast = m
+        onChange()
+        if !m.isEmpty {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 4) { if self.toast == m { self.toast = ""; self.onChange() } }
+        }
+    }
+
     func copyText(_ s: String, _ label: String) {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(s, forType: .string)
@@ -319,7 +327,7 @@ final class WidgetView: NSView {
         let dash = snap.dashboard
         pill("Dashboard \u{2197}", 0, y, active: false, right: w - pad, draw) {
             if let u = URL(string: dash), !dash.isEmpty {
-                openDashboard(u) { msg in self.toast = msg; self.onChange() }
+                openDashboard(u) { msg in self.showToast(msg) }
             }
         }
         y += 34
@@ -562,10 +570,10 @@ final class WidgetView: NSView {
         NSGraphicsContext.current?.cgContext.translateBy(x: 0, y: -scrollY)
         contentHeight = render(bounds.width, true)
         if !toast.isEmpty {
-            let r = NSRect(x: 14, y: scrollY + 8, width: bounds.width - 28, height: 30)
+            let r = NSRect(x: 14, y: scrollY + bounds.height - 42, width: bounds.width - 28, height: 30)
             accent().setFill()
             NSBezierPath(roundedRect: r, xRadius: 8, yRadius: 8).fill()
-            text(toast, 24, scrollY + 15, 12, true, 1, true, c: NSColor.white)
+            text(toast, 24, scrollY + bounds.height - 35, 12, true, 1, true, c: NSColor.white)
         }
         if hoverHit != .zero {
             ov(0.13).setFill()
