@@ -40,7 +40,6 @@ export default defineConfig({
       'src/legal/testSetup.ts',
       'src/addons/testSetup.ts',
       'src/themes/__mocks__/themeCssReady.ts',
-      'src/testMatchMedia.ts',
     ],
     coverage: {
       provider: 'v8',

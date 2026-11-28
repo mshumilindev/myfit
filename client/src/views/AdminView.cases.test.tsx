@@ -126,7 +126,17 @@ const REV = person({
 const ALL = [ME, TRAINER, ADA, LIVE, DORMANT, SUSP, INV, EXP, REV];
 
 let online = true;
+// jsdom has no matchMedia: the roster header reads the layout width (mobile unless a test says otherwise)
+const stubWidth = (desktop: boolean) =>
+  vi.stubGlobal('matchMedia', (q: string) => ({
+    matches: desktop,
+    media: q,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  }));
+afterEach(() => vi.unstubAllGlobals());
 beforeEach(() => {
+  stubWidth(false);
   freezeClock();
   setLocale('en');
   m.callFn.mockReset();
@@ -682,15 +692,6 @@ describe('AdminView: dialogs', () => {
 });
 
 describe('AdminView: Dev Console entry (SPO-639)', () => {
-  const stubWidth = (desktop: boolean) =>
-    vi.stubGlobal('matchMedia', (q: string) => ({
-      matches: desktop,
-      media: q,
-      addEventListener: () => {},
-      removeEventListener: () => {},
-    }));
-  afterEach(() => vi.unstubAllGlobals());
-
   it('links to the console on desktop in dev on localhost', async () => {
     stubWidth(true);
     await mount();
