@@ -302,7 +302,13 @@ final class WidgetView: NSView {
                 text(b.ahead > 0 ? "\(b.ahead) ahead" : "current", 0, y + 1, 11, false, 0.6, draw, right: w - pad)
                 y += 18
                 if !b.subject.isEmpty { y += wrapped(b.subject, pad, y, w - 2 * pad, 11, 0.6, draw) }
-                y += 10
+                y += 4
+                let nm = b.name
+                let ex = "Explain git branch \(nm) to me: what it contains compared with main (commits, changed files), why it exists (linked Linear issue / wf task), the status of its tasks, and whether it is merged, deployed or still open. Read-only, change nothing."
+                let del = "I want to delete git branch \(nm). Do NOT delete anything yet. First check and report: (1) commits not in main, (2) whether its work is merged and deployed (CI and deploy status), (3) open PRs and linked Linear issue, (4) anything unique that would be lost, (5) whether it is safe to delete. Then ask me to confirm explicitly. Only after my yes delete the local and remote branch, never with force."
+                let bw = pill("Explain in chat", pad, y, active: false, draw) { self.copyText(ex, "Explain prompt copied") }
+                _ = pill("Delete\u{2026}", pad + bw + 6, y, active: false, draw) { self.copyText(del, "Delete prompt copied") }
+                y += 34
             }
             for c in snap.cards.dropFirst() {
                 text("\(c.task) \u{00B7} \(c.source)", pad, y, 12, true, 0.95, draw)
