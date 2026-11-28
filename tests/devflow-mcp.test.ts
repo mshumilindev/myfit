@@ -15,6 +15,7 @@ describe('devflow MCP server', () => {
       'wf_doing',
       'wf_done',
       'wf_block',
+      'wf_publish',
       'wf_unblock',
     ]);
     expect(

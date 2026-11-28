@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * devflow MCP server (stdio, zero dependencies). Exposes the workflow state of the host project as tools so Claude reads
- * and changes it without shelling out by hand: wf_status, wf_bar, wf_add, wf_doing, wf_done, wf_block, wf_unblock.
+ * and changes it without shelling out by hand: wf_status, wf_bar, wf_add, wf_doing, wf_done, wf_block, wf_publish, wf_unblock; mutating tools publish the state automatically.
  * It knows nothing about the host project: every path and pattern comes from devflow.config.json (next to this
  * package) and the project root from DEVFLOW_ROOT / CLAUDE_PROJECT_DIR / cwd.
  */
@@ -30,6 +30,22 @@ const run = (cli, args) => {
     return `${err.stdout ?? ''}${err.stderr ?? ''}`.trim() || err.message;
   }
 };
+
+/** Pushes the live snapshot to the state branch so the native widget and dashboard follow every change (best effort). */
+const publish = () => {
+  if (process.env.DEVFLOW_NO_PUBLISH) return 'publish skipped';
+  try {
+    return execFileSync('node', [join(HERE, '..', 'bin', 'wf-publish.mjs')], {
+      cwd: ROOT,
+      encoding: 'utf8',
+      timeout: 30000,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    }).trim();
+  } catch (e) {
+    return `publish failed: ${/** @type {Error} */ (e).message.split('\n')[0]}`;
+  }
+};
+const MUTATING = new Set(['wf_add', 'wf_doing', 'wf_done', 'wf_block', 'wf_unblock']);
 
 const str = (description) => ({ type: 'string', description });
 /** @type {{ name: string, description: string, inputSchema: object, call: (a: any) => string }[]} */
@@ -102,6 +118,13 @@ export const TOOLS = [
       ]),
   },
   {
+    name: 'wf_publish',
+    description:
+      'Push the live state to the state branch (widget and dashboard). Mutating wf tools already do this.',
+    inputSchema: { type: 'object', properties: {} },
+    call: () => publish(),
+  },
+  {
     name: 'wf_unblock',
     description: 'Remove a block from an item.',
     inputSchema: { type: 'object', properties: { item: str('item id') }, required: ['item'] },
@@ -138,7 +161,8 @@ export function handle(msg) {
     case 'tools/call': {
       const tool = TOOLS.find((t) => t.name === msg.params?.name);
       if (!tool) return fail(-32602, 'unknown tool');
-      const text = tool.call(msg.params?.arguments ?? {});
+      let text = tool.call(msg.params?.arguments ?? {});
+      if (MUTATING.has(tool.name)) text = `${text}\n[${publish()}]`;
       return reply({ content: [{ type: 'text', text }] });
     }
     default:
