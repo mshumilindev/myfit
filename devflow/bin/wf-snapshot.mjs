@@ -150,9 +150,7 @@ export function stageOf(i) {
 /** Linear status per task id, cached in the state dir (`linear-status.json`); missing file means "unknown". */
 export function linearCache(root) {
   try {
-    return JSON.parse(
-      readFileSync(join(root, CONFIG.stateDir ?? '.claude/state', 'linear-status.json'), 'utf8'),
-    );
+    return JSON.parse(readFileSync(join(root, CONFIG.stateDir, 'linear-status.json'), 'utf8'));
   } catch {
     return {};
   }

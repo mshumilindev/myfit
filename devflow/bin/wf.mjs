@@ -8,6 +8,7 @@
  *   node scripts/wf.mjs done <item> --evidence "<command|file|link>" [--verdict verify.json]
  *   node scripts/wf.mjs also <task> [title]   start another task; the current one is parked, the band shows both
  *   node scripts/wf.mjs switch <task>        make a parked task the active one
+ *   node scripts/wf.mjs ready <TASK>         rename the work branch to ready-for-cpd/<TASK> (the cpd queue)
  *   node scripts/wf.mjs skip <item> --reason "why it was skipped"   (shown on hover in the band)
  *   node scripts/wf.mjs block <item> --needs design|cpd|access|legal|irreversible [--reason "…"]
  *   node scripts/wf.mjs unblock <item>
@@ -30,11 +31,12 @@ import {
   unlinkSync,
   writeFileSync,
 } from 'node:fs';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   emptyState,
+  ID_RE,
   isValidState,
   reduce,
   renderReport,
@@ -42,7 +44,7 @@ import {
   toJournalEntry,
 } from '../core/wf-core.mjs';
 
-const BOOLEAN_FLAGS = new Set(['force', 'verify']);
+const BOOLEAN_FLAGS = new Set(['force', 'verify', 'no-branch']);
 const sleep = (ms) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 
 /** Cross-process lock (O_EXCL lockfile) so parallel `wf` calls never lose updates; stale locks expire. */
@@ -235,7 +237,7 @@ export function run(
 /** After a state change, hand the snapshot to the publisher in the background (never blocks, never fails `wf`). */
 function publishInBackground(cmd) {
   if (process.env.WF_PUBLISH === '0' || process.env.WF_STATE_DIR) return;
-  if (['status', 'report', undefined].includes(cmd)) return;
+  if (cmd === 'report') return; // status publishes too: the chat that ran it becomes the newest source and the widget follows it
   try {
     const here = dirname(fileURLToPath(import.meta.url));
     spawn(process.execPath, [join(here, 'wf-publish.mjs')], {
@@ -247,8 +249,58 @@ function publishInBackground(cmd) {
   }
 }
 
+function git(args, cwd = ROOT) {
+  const r = spawnSync('git', args, { cwd, encoding: 'utf8' });
+  return { ok: r.status === 0, out: `${r.stdout ?? ''}`.trim() };
+}
+
+/**
+ * Branch convention, enforced here instead of in prose rules:
+ *  - `start`/`also <TASK> [title]` puts the work on `work/<TASK>-<slug>` unless HEAD is already a work branch of that task
+ *    (`--no-branch` skips it). Every task then shows up as its own "in development" branch in the widget.
+ *  - `ready <TASK>` renames the task's work branch to `ready-for-cpd/<TASK>` (the queue the owner's "cpd" ships).
+ * Best effort and never destructive: a failed git call only adds a note.
+ */
+export function branchStep(argv, cwd = ROOT) {
+  const [cmd, task, ...rest] = argv;
+  if (!['start', 'also', 'ready'].includes(cmd) || !ID_RE.test(task ?? '')) return '';
+  if (!git(['rev-parse', '--git-dir'], cwd).ok) return '';
+  const cur = git(['rev-parse', '--abbrev-ref', 'HEAD'], cwd).out;
+  if (cmd === 'ready') {
+    if (cur.startsWith('ready-for-cpd/')) return `branch: already ${cur}`;
+    if (!cur.startsWith(`work/${task}`))
+      return `branch: HEAD is ${cur}, not work/${task}-…; nothing renamed`;
+    const to = `ready-for-cpd/${task}`;
+    return git(['branch', '-m', cur, to], cwd).ok
+      ? `branch: ${cur} -> ${to}`
+      : `branch: could not rename to ${to}`;
+  }
+  if (rest.includes('--no-branch') || cur.startsWith(`work/${task}`)) return '';
+  const title = rest.filter((w) => !w.startsWith('--')).join(' ');
+  const slug =
+    title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 24) || 'dev';
+  const name = `work/${task}-${slug}`;
+  const made = git(['checkout', '-b', name], cwd);
+  return made.ok
+    ? `branch: ${name}`
+    : `branch: could not create ${name} (${made.out.slice(0, 80)})`;
+}
+
 if (process.argv[1] && basename(process.argv[1]) === 'wf.mjs') {
-  const { code, out } = run(process.argv.slice(2));
+  const argv = process.argv.slice(2);
+  const note = argv[0] === 'ready' ? branchStep(argv) : '';
+  if (argv[0] === 'ready') {
+    console.log(note);
+    publishInBackground('ready');
+    process.exit(note.includes('could not') ? 2 : 0);
+  }
+  const { code, out } = run(argv);
+  const bnote = code === 0 ? branchStep(argv) : '';
+  if (bnote) console.log(bnote);
   if (code === 0) publishInBackground(process.argv[2]);
   (code === 0 ? console.log : console.error)(out);
   process.exit(code);
