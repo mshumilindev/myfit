@@ -3513,6 +3513,7 @@ export const en = {
   adminSummary: (m: number, tr: number, p: number) =>
     `${m} members · ${tr} trainers · ${p} invites pending`,
   adminNewMember: 'New member',
+  adminDevConsole: 'Dev Console',
   adminNewTrainer: 'Add trainer',
   adminSearch: 'Search people',
   adminFilterAll: 'All',

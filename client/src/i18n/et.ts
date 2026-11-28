@@ -3464,6 +3464,7 @@ export const et: Strings = {
   adminPeople: 'Kasutajad',
   adminSummary: (m, tr, p) => `${m} liiget · ${tr} treenerit · ${p} kutset ootel`,
   adminNewMember: 'Uus liige',
+  adminDevConsole: 'Arendaja konsool',
   adminNewTrainer: 'Lisa treener',
   adminSearch: 'Otsi inimesi',
   adminFilterAll: 'Kõik',

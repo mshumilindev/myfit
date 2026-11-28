@@ -3484,6 +3484,7 @@ export const pl: Strings = {
   adminPeople: 'Użytkownicy',
   adminSummary: (m, tr, p) => `${m} członków · ${tr} trenerów · ${p} oczekujących zaproszeń`,
   adminNewMember: 'Nowy członek',
+  adminDevConsole: 'Konsola deweloperska',
   adminNewTrainer: 'Dodaj trenera',
   adminSearch: 'Szukaj osób',
   adminFilterAll: 'Wszyscy',

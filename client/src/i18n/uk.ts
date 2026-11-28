@@ -3516,6 +3516,7 @@ export const uk: Strings = {
   adminPeople: 'Користувачі',
   adminSummary: (m, tr, p) => `${m} учасників · ${tr} тренерів · ${p} запрошень чекає`,
   adminNewMember: 'Новий учасник',
+  adminDevConsole: 'Консоль розробки',
   adminNewTrainer: 'Додати тренера',
   adminSearch: 'Шукати людей',
   adminFilterAll: 'Всі',

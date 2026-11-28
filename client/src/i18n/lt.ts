@@ -3504,6 +3504,7 @@ export const lt: Strings = {
   adminPeople: 'Naudotojai',
   adminSummary: (m, tr, p) => `${m} nariai · ${tr} treneriai · ${p} laukiančių kvietimų`,
   adminNewMember: 'Naujas narys',
+  adminDevConsole: 'Kūrėjo konsolė',
   adminNewTrainer: 'Pridėti trenerį',
   adminSearch: 'Ieškoti žmonių',
   adminFilterAll: 'Visi',

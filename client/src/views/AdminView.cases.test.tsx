@@ -680,3 +680,28 @@ describe('AdminView: dialogs', () => {
     expect(screen.getByText(en.adminNoTrainerNote)).toBeTruthy();
   });
 });
+
+describe('AdminView: Dev Console entry (SPO-639)', () => {
+  const stubWidth = (desktop: boolean) =>
+    vi.stubGlobal('matchMedia', (q: string) => ({
+      matches: desktop,
+      media: q,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    }));
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('links to the console on desktop in dev on localhost', async () => {
+    stubWidth(true);
+    await mount();
+    const a = screen.getByRole('link', { name: new RegExp(en.adminDevConsole) });
+    expect(a.getAttribute('href')).toBe('http://127.0.0.1:5174');
+    expect(a.getAttribute('target')).toBe('_blank');
+  });
+
+  it('is hidden on the mobile layout', async () => {
+    stubWidth(false);
+    await mount();
+    expect(screen.queryByText(en.adminDevConsole)).toBeNull();
+  });
+});
