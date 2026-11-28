@@ -180,5 +180,9 @@
         ]
       }
     ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "node devflow/bin/wf-statusline.mjs"
   }
 }
