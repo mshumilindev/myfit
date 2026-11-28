@@ -340,6 +340,67 @@ describe('task data for the tabs (W18)', () => {
   });
 });
 
+describe('doc viewer and designs (SPO-639)', () => {
+  const ART = '6b902020-fc93-4645-bf59-70130f63262e';
+  it('reads only listed documents and finds design canvas ids in them', async () => {
+    // @ts-expect-error plain ESM without types
+    const { readDoc, designsOf, collect } = await import('../dev-dashboard/server/collector.mjs');
+    const root = join(work, 'viewer');
+    mkdirSync(join(root, 'docs/plans'), { recursive: true });
+    mkdirSync(join(root, 'docs/specs'), { recursive: true });
+    writeFileSync(
+      join(root, 'docs/plans/SPO-9-dev-plan.md'),
+      `# Plan\nCanvas https://claude.ai/artifact/${ART} and again https://claude.ai/code/artifact/${ART}`,
+    );
+    writeFileSync(join(root, 'docs/specs/SPO-10-x.md'), 'other task');
+    writeFileSync(join(root, 'secret.md'), 'nope');
+    expect(readDoc(root, 'SPO-9', 'plans', 'SPO-9-dev-plan')).toContain('# Plan');
+    expect(readDoc(root, 'SPO-9', 'plans', 'SPO-10-other')).toBeNull();
+    expect(readDoc(root, 'SPO-9', 'plans', '../../secret')).toBeNull();
+    expect(readDoc(root, 'SPO-9', 'docs', 'SPO-9-dev-plan')).toBeNull();
+    expect(readDoc(root, '../x', 'plans', 'SPO-9-dev-plan')).toBeNull();
+    expect(designsOf(root, 'SPO-9')).toEqual([{ id: ART, doc: 'SPO-9-dev-plan' }]);
+    expect(designsOf(root, 'SPO-77')).toEqual([]);
+    const snap = collect({ root, git: () => '', now: 1 });
+    expect(snap.tasks).toEqual([]);
+  });
+
+  it('serves /api/doc as text, 404 when the document is not listed', async () => {
+    const uiRoot = join(work, 'ui2');
+    mkdirSync(uiRoot, { recursive: true });
+    const port = 5600 + Math.floor(Math.random() * 300);
+    const server = createDashServer({
+      uiRoot,
+      port,
+      collect: () => ({ v: 1, tasks: [] }),
+      doc: (id, dir, name) => (id === 'SPO-9' && dir === 'plans' && name === 'a' ? '# hi' : null),
+    });
+    await new Promise<void>((r) => server.listen(port, '127.0.0.1', r));
+    const get = (path: string) =>
+      new Promise<{ status: number; body: string }>((res, rej) => {
+        const r = request(
+          { host: '127.0.0.1', port, path, headers: { host: `127.0.0.1:${port}` } },
+          (m) => {
+            let b = '';
+            m.on('data', (c) => (b += c));
+            m.on('end', () => res({ status: m.statusCode ?? 0, body: b }));
+          },
+        );
+        r.on('error', rej);
+        r.end();
+      });
+    try {
+      expect(await get('/api/doc?task=SPO-9&dir=plans&name=a')).toEqual({
+        status: 200,
+        body: '# hi',
+      });
+      expect((await get('/api/doc?task=SPO-9&dir=plans&name=b')).status).toBe(404);
+    } finally {
+      await new Promise((r) => server.close(r));
+    }
+  });
+});
+
 describe('CI and release data (W31)', () => {
   it('maps gh runs, and a missing or broken gh gives an empty list, never an error', async () => {
     // @ts-expect-error plain ESM without types

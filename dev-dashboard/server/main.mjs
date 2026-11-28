@@ -3,7 +3,7 @@
 import { execFileSync } from 'node:child_process';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { collect, validateSnapshot } from './collector.mjs';
+import { collect, readDoc, validateSnapshot } from './collector.mjs';
 import { linearOf, loadKey } from './linear.mjs';
 import { createDashServer } from './server.mjs';
 
@@ -50,6 +50,7 @@ function refreshLinear(/** @type {string[]} */ ids) {
 const server = createDashServer({
   uiRoot: join(HERE, '../ui'),
   port: PORT,
+  doc: (id, dir, name) => readDoc(ROOT, id, dir, name),
   collect: () => {
     const first = collect({ root: ROOT, git, gh });
     refreshLinear(first.tasks.map((/** @type {{ id: string }} */ x) => x.id));

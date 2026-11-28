@@ -812,3 +812,56 @@ a:hover {
   overflow: hidden;
   clip: rect(0 0 0 0);
 }
+
+/* Doc viewer (rendered Markdown of a task's spike / design / plan documents) */
+.row.is-link {
+  cursor: pointer;
+}
+.row.is-link:hover {
+  background: var(--surface-2, rgba(255, 255, 255, 0.04));
+}
+.md-h {
+  margin: 18px 0 8px;
+  font-weight: 650;
+}
+.md-p,
+.md-q {
+  margin: 8px 0;
+  line-height: 1.55;
+}
+.md-q {
+  padding-left: 12px;
+  border-left: 2px solid var(--line, rgba(255, 255, 255, 0.18));
+  opacity: 0.85;
+}
+.md-l {
+  margin: 8px 0;
+  padding-left: 22px;
+  line-height: 1.55;
+}
+.md-pre {
+  margin: 10px 0;
+  padding: 12px;
+  overflow: auto;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.28);
+  font-size: 12px;
+}
+.md-tbl {
+  margin: 10px 0;
+  overflow: auto;
+}
+.md-tbl table {
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.md-tbl th,
+.md-tbl td {
+  padding: 6px 10px;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.14));
+  text-align: left;
+  vertical-align: top;
+}
+.md-back {
+  margin-bottom: 8px;
+}

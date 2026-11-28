@@ -156,6 +156,48 @@ export function docsOf(root, id) {
   return out;
 }
 
+/**
+ * Text of one listed document (Dev Console doc viewer). Only a file that `docsOf` lists for this task can be read, so no
+ * path from the request ever reaches the file system. Null for anything else; capped so a huge file cannot flood the UI.
+ * @param {string} root @param {string} id @param {string} dir @param {string} name @returns {string | null}
+ */
+export function readDoc(root, id, dir, name) {
+  if (!TASK_RE.test(id) || (dir !== 'specs' && dir !== 'plans')) return null;
+  if (!docsOf(root, id).some((d) => d.dir === dir && d.name === name)) return null;
+  try {
+    return readFileSync(join(root, 'docs', dir, `${name}.md`), 'utf8').slice(0, 400000);
+  } catch {
+    return null;
+  }
+}
+
+const ARTIFACT_RE = /https:\/\/claude\.ai\/(?:code\/)?artifact\/([0-9a-f-]{36})/gi;
+/**
+ * Design canvases of a task: claude.ai artifact links written in its spec and plan documents (ids only; the UI builds
+ * the link). The documents are where the owner-approved canvases are recorded, so no second list is kept.
+ * @param {string} root @param {string} id @returns {{ id: string, doc: string }[]}
+ */
+export function designsOf(root, id) {
+  /** @type {{ id: string, doc: string }[]} */
+  const out = [];
+  const seen = new Set();
+  for (const d of docsOf(root, id)) {
+    let text;
+    try {
+      text = readFileSync(join(root, 'docs', d.dir, `${d.name}.md`), 'utf8');
+    } catch {
+      continue;
+    }
+    for (const m of text.matchAll(ARTIFACT_RE)) {
+      const aid = m[1].toLowerCase();
+      if (seen.has(aid)) continue;
+      seen.add(aid);
+      out.push({ id: aid, doc: d.name });
+    }
+  }
+  return out.slice(0, 20);
+}
+
 /** Risk register counts from `| R<n> |` rows of the task's risk docs: impact H/M/L as marked in the table. @param {string} root @param {string} id */
 export function risksOf(root, id) {
   const sum = { total: 0, high: 0, medium: 0, low: 0 };
@@ -323,6 +365,7 @@ export function collect({ root, stateDir, git, gh, linear = {}, now = Date.now()
         })),
         linear: linear[id] ?? null,
         docs: docsOf(root, id),
+        designs: designsOf(root, id),
         risks: risksOf(root, id),
         blocked: items
           .filter((/** @type {any} */ i) => i.status === 'blocked')

@@ -1,4 +1,5 @@
 import { ago, h } from './dom.js';
+import { renderMd } from './md.js';
 
 export const TABS = [
   ['overview', 'Overview'],
@@ -233,34 +234,124 @@ function pauses(t) {
   ];
 }
 
-function docs(t) {
-  if (!t.docs.length)
+/** The document open in the viewer (module state so the poll re-render keeps it); text is fetched once per open. */
+let openDoc = null;
+function openDocument(t, d, rerender) {
+  openDoc = { task: t.id, dir: d.dir, name: d.name, text: null, failed: false };
+  rerender();
+  const q = new URLSearchParams({ task: t.id, dir: d.dir, name: d.name });
+  fetch(`/api/doc?${q}`, { cache: 'no-store' })
+    .then((r) => (r.ok ? r.text() : Promise.reject(new Error('doc'))))
+    .then((text) => {
+      if (openDoc && openDoc.name === d.name) openDoc.text = text;
+    })
+    .catch(() => {
+      if (openDoc && openDoc.name === d.name) openDoc.failed = true;
+    })
+    .finally(rerender);
+}
+
+function docs(t, rerender) {
+  if (openDoc && openDoc.task === t.id) {
+    const o = openDoc;
     return [
+      card(
+        o.name,
+        o.dir,
+        h(
+          'button',
+          {
+            class: 'tab md-back',
+            type: 'button',
+            on: {
+              click: () => {
+                openDoc = null;
+                rerender();
+              },
+            },
+          },
+          '← All documents',
+        ),
+        o.failed
+          ? note('This document could not be read.')
+          : o.text === null
+            ? note('Loading…')
+            : h('div', { class: 'md' }, renderMd(o.text)),
+      ),
+    ];
+  }
+  const designs = t.designs ?? [];
+  const cards = [];
+  if (!t.docs.length)
+    cards.push(
       card(
         'Spike → Plan',
         null,
         note('No spike, design, risk or plan documents found for this task.'),
       ),
-    ];
-  return [
-    card(
-      'Spike → Plan',
-      `${t.docs.length} documents`,
-      h(
-        'div',
-        { class: 'tbl' },
-        t.docs.map((d) =>
-          h(
-            'div',
-            { class: 'row', style: 'grid-template-columns:90px minmax(0,1fr) 70px' },
-            h('span', { class: 'pill n' }, d.kind),
-            h('span', { class: 't-mono' }, d.name),
-            h('span', { class: 't-m' }, d.dir),
+    );
+  else
+    cards.push(
+      card(
+        'Spike → Plan',
+        `${t.docs.length} documents`,
+        h(
+          'div',
+          { class: 'tbl' },
+          t.docs.map((d) =>
+            h(
+              'div',
+              {
+                class: 'row is-link',
+                role: 'button',
+                tabindex: '0',
+                style: 'grid-template-columns:90px minmax(0,1fr) 70px',
+                on: {
+                  click: () => openDocument(t, d, rerender),
+                  keydown: (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      openDocument(t, d, rerender);
+                    }
+                  },
+                },
+              },
+              h('span', { class: 'pill n' }, d.kind),
+              h('span', { class: 't-mono' }, d.name),
+              h('span', { class: 't-m' }, d.dir),
+            ),
           ),
         ),
       ),
+    );
+  cards.push(
+    card(
+      'Designs',
+      designs.length ? `${designs.length} canvases` : null,
+      designs.length
+        ? h(
+            'div',
+            { class: 'tbl' },
+            designs.map((d) =>
+              h(
+                'a',
+                {
+                  class: 'row is-link',
+                  href: `https://claude.ai/artifact/${d.id}`,
+                  target: '_blank',
+                  rel: 'noreferrer',
+                  style: 'grid-template-columns:90px minmax(0,1fr) 70px',
+                },
+                h('span', { class: 'pill n' }, 'canvas'),
+                h('span', { class: 't-mono' }, d.id.slice(0, 8)),
+                h('span', { class: 't-m' }, 'open ↗'),
+              ),
+            ),
+          )
+        : note('No design canvas is linked in this task\u2019s spec or plan documents.'),
     ),
-  ];
+  );
+  return cards;
 }
 
 function risks(t) {
@@ -515,7 +606,7 @@ export function taskView(t, tab, selectTab, snap) {
         : tab === 'pauses'
           ? pauses(t)
           : tab === 'docs'
-            ? docs(t)
+            ? docs(t, () => selectTab('docs'))
             : tab === 'runs'
               ? runs(t)
               : tab === 'quality'

@@ -22,10 +22,10 @@ const HEADERS = {
 };
 
 /**
- * @param {{ uiRoot: string, collect: () => Promise<unknown> | unknown, port?: number }} opts
+ * @param {{ uiRoot: string, collect: () => Promise<unknown> | unknown, port?: number, doc?: (id: string, dir: string, name: string) => string | null }} opts
  * @returns {import('node:http').Server}
  */
-export function createDashServer({ uiRoot, collect, port = 5174 }) {
+export function createDashServer({ uiRoot, collect, port = 5174, doc }) {
   const root = resolve(uiRoot);
   /** @param {import('node:http').ServerResponse} res @param {number} status @param {string | Buffer} body @param {string} [type] */
   const send = (res, status, body, type = 'application/json; charset=utf-8') => {
@@ -44,6 +44,13 @@ export function createDashServer({ uiRoot, collect, port = 5174 }) {
         const path = url.split('?')[0];
         if (path === '/api/health') return send(res, 200, JSON.stringify({ ok: true }));
         if (path === '/api/snapshot') return send(res, 200, JSON.stringify(await collect()));
+        if (path === '/api/doc' && doc) {
+          const q = new URL(url, 'http://x').searchParams;
+          const text = doc(q.get('task') ?? '', q.get('dir') ?? '', q.get('name') ?? '');
+          return text === null
+            ? send(res, 404, JSON.stringify({ error: 'not-found' }))
+            : send(res, 200, text, 'text/plain; charset=utf-8');
+        }
         return send(res, 404, JSON.stringify({ error: 'not-found' }));
       }
       const rel = safeStaticPath(url);
