@@ -154,6 +154,7 @@ final class WidgetView: NSView {
     var squares: [(NSRect, Item)] = []
     var hover: Item? = nil
     var hoverRect = NSRect.zero
+    var hoverHit = NSRect.zero
     var onChange: () -> Void = {}
     override var isFlipped: Bool { true }
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
@@ -412,6 +413,10 @@ final class WidgetView: NSView {
         path.stroke()
         NSGraphicsContext.current?.cgContext.translateBy(x: 0, y: -scrollY)
         contentHeight = render(bounds.width, true)
+        if hoverHit != .zero {
+            NSColor(calibratedWhite: 1, alpha: 0.13).setFill()
+            NSBezierPath(roundedRect: hoverHit, xRadius: 6, yRadius: 6).fill()
+        }
         if let it = hover {
             var why = explain(it); if why.count > 240 { why = String(why.prefix(240)) + "\u{2026}" }
             let tw: CGFloat = 280
@@ -440,6 +445,12 @@ final class WidgetView: NSView {
     override func mouseMoved(with event: NSEvent) {
         var p = convert(event.locationInWindow, from: nil)
         p.y += scrollY
+        let over = hits.last { $0.rect.contains(p) }?.rect ?? .zero
+        if over != hoverHit {
+            hoverHit = over
+            if over == .zero { NSCursor.arrow.set() } else { NSCursor.pointingHand.set() }
+            needsDisplay = true
+        }
         let found = squares.first { $0.0.contains(p) }
         if found?.1.id != hover?.id || (found == nil) != (hover == nil) {
             hover = found?.1
@@ -449,7 +460,7 @@ final class WidgetView: NSView {
     }
 
     override func mouseExited(with event: NSEvent) {
-        if hover != nil { hover = nil; needsDisplay = true }
+        if hover != nil || hoverHit != .zero { hover = nil; hoverHit = .zero; NSCursor.arrow.set(); needsDisplay = true }
     }
 }
 
