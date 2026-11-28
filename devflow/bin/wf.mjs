@@ -27,8 +27,7 @@ import {
   unlinkSync,
   writeFileSync,
 } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { basename, join, resolve } from 'node:path';
 import {
   emptyState,
   isValidState,
@@ -36,7 +35,7 @@ import {
   renderReport,
   renderStatus,
   toJournalEntry,
-} from './lib/wf-core.mjs';
+} from '../core/wf-core.mjs';
 
 const BOOLEAN_FLAGS = new Set(['force', 'verify']);
 const sleep = (ms) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
@@ -77,7 +76,7 @@ function withLock(dir, fn) {
   }
 }
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
 export function parseArgs(argv) {
   const positional = [];
@@ -219,7 +218,7 @@ export function run(
   }
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && basename(process.argv[1]) === 'wf.mjs') {
   const { code, out } = run(process.argv.slice(2));
   (code === 0 ? console.log : console.error)(out);
   process.exit(code);

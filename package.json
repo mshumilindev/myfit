@@ -5,7 +5,7 @@
   "workspaces": [
     "client",
     "desktop",
-    "dev-dashboard"
+    "devflow/dashboard"
   ],
   "scripts": {
     "dev:client": "npm run dev -w client",
@@ -53,7 +53,7 @@
     "deps:check": "depcruise client/src --config .dependency-cruiser.cjs --ignore-known .dependency-cruiser-known-violations.json",
     "deps:baseline": "depcruise client/src --config .dependency-cruiser.cjs --output-type baseline > .dependency-cruiser-known-violations.json",
     "metrics:stability": "node scripts/stability-metrics.mjs",
-    "dev:console": "node dev-dashboard/server/main.mjs"
+    "dev:console": "node devflow/dashboard/server/main.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

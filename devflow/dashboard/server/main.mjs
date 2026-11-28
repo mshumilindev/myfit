@@ -8,7 +8,7 @@ import { linearOf, loadKey } from './linear.mjs';
 import { createDashServer } from './server.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const ROOT = resolve(HERE, '../..');
+const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 const PORT = Number(process.env.DEV_DASH_PORT ?? 5174);
 /** @param {...string} a */
 const git = (...a) =>

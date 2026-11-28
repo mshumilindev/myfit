@@ -17,6 +17,20 @@ const BASELINE: Record<string, number> = {
   'core/wf-metrics.mjs': 1,
   'core/wf-stop.mjs': 4,
   'core/wf-views.mjs': 1,
+  'bin/dash-close.mjs': 2,
+  'bin/journal-hook.mjs': 6,
+  'bin/wf-bar.mjs': 3,
+  'bin/wf-context-hook.mjs': 3,
+  'bin/wf-metrics.mjs': 3,
+  'bin/wf-stop-hook.mjs': 4,
+  'bin/wf-sync.mjs': 3,
+  'bin/wf-views.mjs': 2,
+  'bin/wf.mjs': 4,
+  'dashboard/server/collector.mjs': 16,
+  'dashboard/server/guard.mjs': 1,
+  'dashboard/server/linear.mjs': 3,
+  'dashboard/server/main.mjs': 1,
+  'dashboard/server/server.mjs': 1,
 };
 
 function files(dir: string, base = ''): string[] {

@@ -4,16 +4,16 @@ import { request } from 'node:http';
 import { join, resolve } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
 // @ts-expect-error plain ESM without types
-import { checkRequest, safeStaticPath } from '../dev-dashboard/server/guard.mjs';
+import { checkRequest, safeStaticPath } from '../devflow/dashboard/server/guard.mjs';
 // @ts-expect-error plain ESM without types
-import { createDashServer } from '../dev-dashboard/server/server.mjs';
+import { createDashServer } from '../devflow/dashboard/server/server.mjs';
 // @ts-expect-error plain ESM without types
 import {
   collect,
   selectBranchesToDelete,
   taskOfBranch,
   validateSnapshot,
-} from '../dev-dashboard/server/collector.mjs';
+} from '../devflow/dashboard/server/collector.mjs';
 
 const ROOT = resolve(__dirname, '..');
 const BASE = join(ROOT, '.claude/state');
@@ -255,7 +255,7 @@ describe('selectBranchesToDelete', () => {
 describe('tab closing (B7)', () => {
   it('closes only when deployed AND no ready branch is left', async () => {
     // @ts-expect-error plain ESM without types
-    const { isClosed, readClosed } = await import('../dev-dashboard/server/collector.mjs');
+    const { isClosed, readClosed } = await import('../devflow/dashboard/server/collector.mjs');
     const closed = new Set(['SPO-1']);
     expect(isClosed({ id: 'SPO-1', closed, hasReadyBranch: false })).toBe(true);
     expect(isClosed({ id: 'SPO-1', closed, hasReadyBranch: true })).toBe(false);
@@ -315,7 +315,7 @@ describe('dev-all runner (B6)', () => {
 describe('task data for the tabs (W18)', () => {
   it('reads documents, risk impact counts, plan items and rule names without content', async () => {
     // @ts-expect-error plain ESM without types
-    const { docsOf, risksOf, rulesOf } = await import('../dev-dashboard/server/collector.mjs');
+    const { docsOf, risksOf, rulesOf } = await import('../devflow/dashboard/server/collector.mjs');
     const root = join(work, 'tabs');
     mkdirSync(join(root, 'docs/plans'), { recursive: true });
     mkdirSync(join(root, 'docs/specs'), { recursive: true });
@@ -344,7 +344,8 @@ describe('doc viewer and designs (SPO-639)', () => {
   const ART = '6b902020-fc93-4645-bf59-70130f63262e';
   it('reads only listed documents and finds design canvas ids in them', async () => {
     // @ts-expect-error plain ESM without types
-    const { readDoc, designsOf, collect } = await import('../dev-dashboard/server/collector.mjs');
+    const { readDoc, designsOf, collect } =
+      await import('../devflow/dashboard/server/collector.mjs');
     const root = join(work, 'viewer');
     mkdirSync(join(root, 'docs/plans'), { recursive: true });
     mkdirSync(join(root, 'docs/specs'), { recursive: true });
@@ -404,11 +405,11 @@ describe('doc viewer and designs (SPO-639)', () => {
 describe('wf mirror (SPO-639)', () => {
   it('reads the mirrored wf.json when the machine has no local state', async () => {
     // @ts-expect-error plain ESM without types
-    const { collect } = await import('../dev-dashboard/server/collector.mjs');
+    const { collect } = await import('../devflow/dashboard/server/collector.mjs');
     const root = join(work, 'mirror');
-    mkdirSync(join(root, 'dev-dashboard/.mirror'), { recursive: true });
+    mkdirSync(join(root, '.devflow/mirror'), { recursive: true });
     writeFileSync(
-      join(root, 'dev-dashboard/.mirror/wf.json'),
+      join(root, '.devflow/mirror/wf.json'),
       JSON.stringify({
         task: { id: 'SPO-9' },
         items: [
@@ -425,7 +426,7 @@ describe('wf mirror (SPO-639)', () => {
 describe('CI and release data (W31)', () => {
   it('maps gh runs, and a missing or broken gh gives an empty list, never an error', async () => {
     // @ts-expect-error plain ESM without types
-    const { ciRuns } = await import('../dev-dashboard/server/collector.mjs');
+    const { ciRuns } = await import('../devflow/dashboard/server/collector.mjs');
     const ok = JSON.stringify({
       workflow_runs: [
         {
@@ -467,7 +468,7 @@ describe('CI and release data (W31)', () => {
 describe('Linear status (W30)', () => {
   it('finds the key in env or in the local settings, never anywhere else', async () => {
     // @ts-expect-error plain ESM without types
-    const { loadKey } = await import('../dev-dashboard/server/linear.mjs');
+    const { loadKey } = await import('../devflow/dashboard/server/linear.mjs');
     const root = join(work, 'lin');
     mkdirSync(join(root, '.claude'), { recursive: true });
     expect(loadKey(root, {})).toBeNull();
@@ -482,7 +483,7 @@ describe('Linear status (W30)', () => {
   });
   it('maps state and last progress comment; failures give nothing; the key never leaks', async () => {
     // @ts-expect-error plain ESM without types
-    const { linearOf } = await import('../dev-dashboard/server/linear.mjs');
+    const { linearOf } = await import('../devflow/dashboard/server/linear.mjs');
     const now = Date.parse('2026-11-28T01:00:00Z');
     const ok = async (_u: unknown, init: { headers: Record<string, string> }) => {
       expect(init.headers.Authorization).toBe('SECRETKEY');
@@ -533,7 +534,7 @@ describe('Linear status (W30)', () => {
 describe('CI jobs as quality gates', () => {
   it('reads the jobs of the newest CI run; any failure gives an empty list', async () => {
     // @ts-expect-error plain ESM without types
-    const { ciJobs } = await import('../dev-dashboard/server/collector.mjs');
+    const { ciJobs } = await import('../devflow/dashboard/server/collector.mjs');
     const gh = (p: string) =>
       p.includes('/jobs')
         ? JSON.stringify({

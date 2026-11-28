@@ -23,7 +23,7 @@ export function childSpecs() {
     {
       name: 'dev-console',
       cmd: process.execPath,
-      args: ['dev-dashboard/server/main.mjs'],
+      args: ['devflow/dashboard/server/main.mjs'],
       essential: false,
     },
   ];

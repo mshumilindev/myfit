@@ -5,12 +5,11 @@
  * Never fails a hook: a missing key or a network error prints one line and exits 0.
  */
 import { readFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join, resolve } from 'node:path';
 import { run } from './wf.mjs';
-import { syncProgress } from './lib/wf-linear.mjs';
+import { syncProgress } from '../core/wf-linear.mjs';
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 const dir = process.env.WF_STATE_DIR ?? join(ROOT, '.claude/state');
 try {
   const state = JSON.parse(readFileSync(join(dir, 'wf.json'), 'utf8'));

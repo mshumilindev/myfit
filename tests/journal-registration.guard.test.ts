@@ -27,8 +27,8 @@ describe('recorder is registered for every event (SPO-639 W23)', () => {
   });
   it('no older hook script writes the journal inline (the stop hook may only read it)', () => {
     for (const f of [
-      'scripts/wf-stop-hook.mjs',
-      'scripts/wf-context-hook.mjs',
+      'devflow/bin/wf-stop-hook.mjs',
+      'devflow/bin/wf-context-hook.mjs',
       '.claude/hooks/stop-guards.sh',
     ]) {
       expect(readFileSync(join(ROOT, f), 'utf8')).not.toMatch(

@@ -23,10 +23,10 @@ describe('Dev Console stays separate from the product (SPO-639 R1)', () => {
     for (const h of hosting) expect(h.public).toBe('client/dist');
   });
   it('the server binds loopback only and has no write routes', () => {
-    const main = readFileSync('dev-dashboard/server/main.mjs', 'utf8');
+    const main = readFileSync('devflow/dashboard/server/main.mjs', 'utf8');
     expect(main).toContain("'127.0.0.1'");
     expect(main).not.toMatch(/listen\([^)]*0\.0\.0\.0/);
-    const srv = readFileSync('dev-dashboard/server/server.mjs', 'utf8');
+    const srv = readFileSync('devflow/dashboard/server/server.mjs', 'utf8');
     expect(srv).not.toMatch(/writeFile|appendFile|unlink|rm\(/);
   });
 });

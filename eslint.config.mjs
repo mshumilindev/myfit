@@ -49,7 +49,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['dev-dashboard/ui/**/*.js'],
+    files: ['devflow/dashboard/ui/**/*.js'],
     languageOptions: { ecmaVersion: 2022, sourceType: 'module', globals: { ...globals.browser } },
   },
   {
@@ -57,7 +57,6 @@ export default tseslint.config(
       'desktop/src/**/*.ts',
       'functions/src/**/*.ts',
       'scripts/**/*.mjs',
-      'dev-dashboard/server/**/*.mjs',
       'devflow/**/*.mjs',
       'client/scripts/**/*.mjs',
     ],

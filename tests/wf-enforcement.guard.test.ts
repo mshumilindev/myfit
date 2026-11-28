@@ -39,6 +39,6 @@ describe('wf context hook', () => {
   });
   it('cpd cannot forget ready-for-cpd branches: skill step 0 and the prompt hook both run the preflight', () => {
     expect(readFileSync('.claude/skills/cpd/SKILL.md', 'utf8')).toContain('cpd-preflight.mjs');
-    expect(readFileSync('scripts/wf-context-hook.mjs', 'utf8')).toContain('cpd-preflight.mjs');
+    expect(readFileSync('devflow/bin/wf-context-hook.mjs', 'utf8')).toContain('cpd-preflight.mjs');
   });
 });

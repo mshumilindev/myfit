@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 /** SPO-639 (WF-H): print flow metrics from .claude/state/wf-events.jsonl as markdown for the weekly review. */
 import { existsSync, readFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { renderMarkdown, summarize } from './lib/wf-metrics.mjs';
+import { join, resolve } from 'node:path';
+import { renderMarkdown, summarize } from '../core/wf-metrics.mjs';
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 const file = join(process.env.WF_STATE_DIR ?? join(ROOT, '.claude/state'), 'wf-events.jsonl');
 if (!existsSync(file)) {
   console.error('wf-metrics: немає журналу подій');

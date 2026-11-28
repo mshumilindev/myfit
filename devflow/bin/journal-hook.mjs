@@ -5,8 +5,7 @@
  * capture itself is unhealthy (that stdout becomes context). Reads stdin once.
  */
 import { existsSync, readFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join, resolve } from 'node:path';
 import {
   appendEntry,
   buildEntry,
@@ -16,10 +15,10 @@ import {
   journalSize,
   noteError,
   readJournalDirs,
-} from './lib/journal.mjs';
-import { buildShard, loadTranscript, reconcile, writeShard } from './lib/capture-rollup.mjs';
+} from '../core/journal.mjs';
+import { buildShard, loadTranscript, reconcile, writeShard } from '../core/capture-rollup.mjs';
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 const EVENT = process.argv[2] ?? '';
 const SHARD_ROOT = process.env.DASH_ROOT ?? ROOT;
 let warn = '';

@@ -4,10 +4,21 @@
  * Output strings are short identifiers/counters only (no free text, no PII) and pass `validateSnapshot`.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+/** The only host-project knowledge (task pattern, repo, dirs) comes from devflow.config.json. */
+const CONFIG = JSON.parse(
+  readFileSync(
+    join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'devflow.config.json'),
+    'utf8',
+  ),
+);
+const REPO = CONFIG.repo;
+const TASK_CORE = CONFIG.taskPattern.replace(/^\^|\$$/g, '');
 
 export const SNAPSHOT_V = 1;
-const TASK_RE = /^SPO-\d{1,5}$/;
+const TASK_RE = new RegExp(CONFIG.taskPattern);
 const STATUSES = ['todo', 'doing', 'done', 'blocked'];
 const PROTECTED = /^(main|master|HEAD|origin|develop|release\/.*)$/;
 
@@ -15,7 +26,7 @@ const PROTECTED = /^(main|master|HEAD|origin|develop|release\/.*)$/;
 /** @param {string} name */
 export function taskOfBranch(name) {
   // case-insensitive: local work branches are often lower-case (`spo-608-localhost`)
-  const m = /(?:^|\/)(SPO-\d{1,5})(?:[-_/].*)?$/i.exec(String(name));
+  const m = new RegExp(`(?:^|/)(${TASK_CORE})(?:[-_/].*)?$`, 'i').exec(String(name));
   return m ? m[1].toUpperCase() : null;
 }
 
@@ -240,12 +251,9 @@ export function rulesOf(root) {
 
 /** @param {string} root @param {string} [stateDir] @returns {any} */
 function readWf(root, stateDir) {
-  // The cloud session mirrors its wf.json to dev-dashboard/.mirror (the remote tools cannot write under .claude), so
+  // The cloud session mirrors its wf.json to the mirror dir of the config (the remote tools cannot write under .claude), so
   // this machine shows the plan live; a real local state wins when both exist.
-  for (const dir of [
-    stateDir ?? join(root, '.claude/state'),
-    join(root, 'dev-dashboard/.mirror'),
-  ]) {
+  for (const dir of [stateDir ?? join(root, '.claude/state'), join(root, CONFIG.mirrorDir)]) {
     try {
       return JSON.parse(readFileSync(join(dir, 'wf.json'), 'utf8'));
     } catch {
@@ -261,7 +269,7 @@ function readWf(root, stateDir) {
  */
 export function ciRuns(gh) {
   try {
-    const o = JSON.parse(gh('repos/mshumilindev/myfit/actions/runs?branch=main&per_page=8'));
+    const o = JSON.parse(gh(`repos/${REPO}/actions/runs?branch=main&per_page=8`));
     return (Array.isArray(o.workflow_runs) ? o.workflow_runs : [])
       .slice(0, 8)
       .map((/** @type {any} */ r) => {
@@ -285,13 +293,11 @@ export function ciRuns(gh) {
 export function ciJobs(gh) {
   try {
     const runs =
-      JSON.parse(gh('repos/mshumilindev/myfit/actions/runs?branch=main&per_page=8'))
-        .workflow_runs ?? [];
+      JSON.parse(gh(`repos/${REPO}/actions/runs?branch=main&per_page=8`)).workflow_runs ?? [];
     const run = runs.find((/** @type {any} */ r) => r.name === 'CI');
     if (!run) return [];
     const jobs =
-      JSON.parse(gh(`repos/mshumilindev/myfit/actions/runs/${Number(run.id)}/jobs?per_page=30`))
-        .jobs ?? [];
+      JSON.parse(gh(`repos/${REPO}/actions/runs/${Number(run.id)}/jobs?per_page=30`)).jobs ?? [];
     return jobs.slice(0, 30).map((/** @type {any} */ j) => {
       const ms = Date.parse(j.completed_at) - Date.parse(j.started_at);
       return {

@@ -1,39 +1,33 @@
 import { atom, read, update } from 'claude-code';
 import type { Register } from 'claude-code';
 
-const line = atom({ plugin: 'wf-progress-band', key: 'line' } as const, null);
+const snap = atom({ plugin: 'wf-progress-band', key: 'snap' } as const, null);
 
-// The project whose wf.json is shown; devflow.config.json names the state dir, the default is the Claude convention.
+// The project whose wf state is shown. devflow.config.json (stateDir) names it for other projects; DEVFLOW_STATE wins.
 const STATE = '/home/claude/myfit/.claude/state/wf.json';
-const SQ: Record<string, string> = { done: '🟩', doing: '🟦', blocked: '🟥', todo: '⬜' };
-const ORDER = ['done', 'doing', 'blocked', 'todo'];
+
+const GREEN = '#3fb97a';
+const BLUE = '#4c8dff';
+const RED = '#e5534b';
+const TRACK = '#2b2f38';
 
 type Item = { id: string; text: string; status: string };
 
-function render(items: Item[], task: string): string {
-  const total = Math.max(1, items.length);
+function summarize(items: Item[], task: string) {
   const count = (s: string) => items.filter((i) => i.status === s).length;
-  const slots = 20;
-  const n: Record<string, number> = { done: 0, doing: 0, blocked: 0, todo: 0 };
-  for (const s of ORDER) n[s] = count(s) ? Math.max(1, Math.round((count(s) / total) * slots)) : 0;
-  const at = (s: string): number => n[s] ?? 0;
-  let sum = ORDER.reduce((a, s) => a + at(s), 0);
-  while (sum > slots) {
-    const big = ORDER.filter((s) => at(s) > 1).sort((a, b) => at(b) - at(a))[0];
-    if (!big) break;
-    n[big] = at(big) - 1;
-    sum--;
-  }
-  while (sum < slots) {
-    const big = ORDER.filter((s) => count(s)).sort((a, b) => count(b) - count(a))[0] ?? 'todo';
-    n[big] = at(big) + 1;
-    sum++;
-  }
-  const bar = ORDER.map((s) => (SQ[s] ?? '').repeat(at(s))).join('');
+  const total = items.length;
   const done = count('done');
-  const doing = items.find((i) => i.status === 'doing');
-  const pct = Math.round((done / total) * 100);
-  return `${task} ${bar} ${pct}% · ${done}/${items.length}${doing ? ` · ▶ ${doing.id} ${doing.text.slice(0, 40)}` : ''}`;
+  const current = items.find((i) => i.status === 'doing');
+  return {
+    task,
+    pct: Math.round((done / Math.max(1, total)) * 100),
+    done,
+    total,
+    doing: count('doing'),
+    blocked: count('blocked'),
+    todo: count('todo'),
+    current: current ? `${current.id} ${current.text}` : null,
+  };
 }
 
 export const register: Register = (on) => {
@@ -41,9 +35,9 @@ export const register: Register = (on) => {
     const refresh = async () => {
       try {
         const wf = JSON.parse(await $.fs.read(STATE));
-        await update($, line, () => render(wf.items ?? [], wf.task?.id ?? '?'));
+        await update($, snap, () => summarize(wf.items ?? [], wf.task?.id ?? '?'));
       } catch {
-        await update($, line, () => null);
+        await update($, snap, () => null);
       }
     };
     void refresh();
@@ -52,12 +46,36 @@ export const register: Register = (on) => {
   });
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
-    const text = await read($, line);
-    if (text === null) return next(e);
+    const s = await read($, snap);
+    if (s === null) return next(e);
     const { Box, Text } = $.ui.resolve(e);
+    const seg = (n: number, color: string, key: string) =>
+      n > 0 ? <Box key={key} flexGrow={n} height={1} backgroundColor={color} /> : null;
     return (
-      <Box>
-        <Text>{text}</Text>
+      <Box flexDirection="column">
+        <Box justifyContent="space-between">
+          <Box gap={1} flexShrink={0}>
+            <Text bold>{s.task}</Text>
+            <Text bold color={s.blocked > 0 ? RED : GREEN}>
+              {s.pct}%
+            </Text>
+            <Text dimColor>
+              {s.done}/{s.total}
+            </Text>
+            {s.blocked > 0 ? <Text color={RED}>■ {s.blocked}</Text> : null}
+          </Box>
+          <Box flexShrink={1} marginLeft={2}>
+            <Text dimColor wrap="truncate-end">
+              {s.current ? `▶ ${s.current}` : s.pct === 100 ? 'all done' : 'idle'}
+            </Text>
+          </Box>
+        </Box>
+        <Box height={1} gap={0}>
+          {seg(s.done, GREEN, 'done')}
+          {seg(s.doing, BLUE, 'doing')}
+          {seg(s.blocked, RED, 'blocked')}
+          {seg(s.todo, TRACK, 'todo')}
+        </Box>
       </Box>
     );
   });

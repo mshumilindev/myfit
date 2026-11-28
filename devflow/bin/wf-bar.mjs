@@ -9,7 +9,11 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import process from 'node:process';
 
-const file = join(process.env.WF_STATE_DIR ?? join(process.cwd(), '.claude/state'), 'wf.json');
+const file = join(
+  process.env.WF_STATE_DIR ??
+    join(process.env.CLAUDE_PROJECT_DIR ?? process.cwd(), '.claude/state'),
+  'wf.json',
+);
 let wf;
 try {
   wf = JSON.parse(readFileSync(file, 'utf8'));

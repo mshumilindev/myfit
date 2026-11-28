@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 /** SPO-639 (W17 B7): node scripts/dash-close.mjs SPO-N — mark a task Deployed to prod so its Dev Console tab closes. */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join, resolve } from 'node:path';
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 const id = process.argv[2] ?? '';
 if (!/^SPO-\d{1,5}$/.test(id)) {
   console.error('usage: node scripts/dash-close.mjs SPO-<number>');

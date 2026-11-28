@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 /** SPO-639 W7: node scripts/wf-views.mjs card|approvals|digest — markdown for Linear comments and the morning digest. */
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { isValidState } from './lib/wf-core.mjs';
-import { renderApprovals, renderCard, renderDigest } from './lib/wf-views.mjs';
+import { join, resolve } from 'node:path';
+import { isValidState } from '../core/wf-core.mjs';
+import { renderApprovals, renderCard, renderDigest } from '../core/wf-views.mjs';
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const root = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 const file = join(process.env.WF_STATE_DIR ?? join(root, '.claude/state'), 'wf.json');
 const state = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : null;
 if (!state || !isValidState(state) || !state.task) {

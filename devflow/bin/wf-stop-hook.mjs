@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 /** SPO-639 (WF-C): Stop hook entry. exit 2 + stderr = keep working; exit 0 = may stop. Never throws. */
 import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { decideDegraded, decideStop } from './lib/wf-stop.mjs';
-import { checkRegistration, countErrors, journalDirs } from './lib/journal.mjs';
+import { join, resolve } from 'node:path';
+import { decideDegraded, decideStop } from '../core/wf-stop.mjs';
+import { checkRegistration, countErrors, journalDirs } from '../core/journal.mjs';
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 try {
   const dir = process.env.WF_STATE_DIR ?? join(ROOT, '.claude/state');
   const file = join(dir, 'wf.json');
