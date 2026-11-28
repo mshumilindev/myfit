@@ -119,6 +119,12 @@ func color(_ s: String) -> NSColor {
     default: return NSColor(calibratedWhite: 0.38, alpha: 1)
     }
 }
+func activateClaude() {
+    if let app = NSWorkspace.shared.runningApplications.first(where: { $0.localizedName == "Claude" }) {
+        app.activate(options: [])
+    }
+}
+
 func branchDays(_ b: Branch) -> Int {
     let f = ISO8601DateFormatter()
     guard let d = f.date(from: b.date) else { return -1 }
@@ -277,7 +283,8 @@ final class WidgetView: NSView {
                 let tw = w - 2 * pad - 20
                 let h1 = wrapped(it.text, 0, 0, tw, 11.5, 0.95, false)
                 let h2 = wrapped(explain(it), 0, 0, tw, 11, 0.7, false)
-                let inner = box + 30 + h1 + 6 + h2 + 12
+                let canFinish = it.status != "done"
+                let inner = box + 30 + h1 + 6 + h2 + 12 + (canFinish ? 32 : 0)
                 if draw {
                     NSColor(calibratedWhite: 1, alpha: 0.06).setFill()
                     NSBezierPath(roundedRect: NSRect(x: pad, y: box, width: w - 2 * pad, height: inner - box), xRadius: 8, yRadius: 8).fill()
@@ -286,6 +293,15 @@ final class WidgetView: NSView {
                     text("\(it.id) \u{00B7} \(statusName(it.status))", pad + 24, box + 10, 12, true, 1, true, c: color(it.status))
                     _ = wrapped(it.text, pad + 10, box + 30, tw, 11.5, 0.95, true)
                     _ = wrapped(explain(it), pad + 10, box + 30 + h1 + 6, tw, 11, 0.7, true)
+                    if canFinish {
+                        let py = box + 30 + h1 + 6 + h2 + 8
+                        let one = "\(c.task): continue and finish \(it.id) (\(it.text)) now. State: \(statusName(it.status))\(it.why.isEmpty ? "" : ", " + it.why). Do the work, prove it with wf done --evidence, do not stop or ask until it is 100% done."
+                        let stg = it.stage.isEmpty ? "Development" : it.stage
+                        let open = c.items.filter { $0.status != "done" && ($0.stage.isEmpty ? "Development" : $0.stage) == stg }
+                        let grp = "\(c.task): continue and finish every non-green item in \(stg): " + open.map { "\($0.id) (\($0.text))" }.joined(separator: "; ") + ". Work through them one by one, prove each with wf done --evidence, add anything new to wf, and do not stop or ask until they are all done."
+                        let w1 = pill(copied == "ex:one" ? "Copied \u{2713} paste in chat" : "Finish this \u{2192} Claude", pad + 10, py, active: copied == "ex:one", true) { self.copyText(one, "ex:one"); activateClaude() }
+                        _ = pill(copied == "ex:grp" ? "Copied \u{2713} paste in chat" : "Finish all in \(stg)", pad + 10 + w1 + 6, py, active: copied == "ex:grp", true) { self.copyText(grp, "ex:grp"); activateClaude() }
+                    }
                 }
                 y = inner + 10
             }
