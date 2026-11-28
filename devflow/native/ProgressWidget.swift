@@ -10,11 +10,11 @@ struct Snapshot { var cards: [Card] = []; var branches: [Branch] = []; var promp
 // Own clone of the wf-state branch, outside protected folders (Desktop/Documents).
 let repo = NSString(string: "~/.devflow/wf-state").expandingTildeInPath
 
-func git(_ args: [String]) -> String {
+func git(_ args: [String], in dir: String? = nil) -> String {
     let p = Process()
     p.executableURL = URL(fileURLWithPath: "/usr/bin/git")
     p.arguments = args
-    p.currentDirectoryURL = URL(fileURLWithPath: repo)
+    p.currentDirectoryURL = URL(fileURLWithPath: dir ?? repo)
     let out = Pipe()
     p.standardOutput = out
     p.standardError = Pipe()
@@ -29,6 +29,28 @@ func num(_ v: Any?) -> Int { (v as? NSNumber)?.intValue ?? 0 }
 
 // Live branch list straight from GitHub (light fetch: commits only, no file contents), so branches created
 // outside the cloud session show up without waiting for a published snapshot.
+// Naming convention decides first (work/* is in development, ready-for-cpd/* waits for cpd, even with no commits yet).
+func branchKind(_ name: String, ahead: Int, when: Date) -> String {
+    if name.hasPrefix("ready-for-cpd/") { return "cpd" }
+    if name.hasPrefix("work/") { return "dev" }
+    return ahead > 0 && Date().timeIntervalSince(when) <= 7 * 86400 ? "dev" : "stale"
+}
+
+// Local branches of the project checkout (not pushed yet), when the widget knows where it is.
+func localBranches() -> [Branch] {
+    guard let dir = (try? String(contentsOfFile: NSHomeDirectory() + "/.devflow/project-dir", encoding: .utf8))?.trimmingCharacters(in: .whitespacesAndNewlines), !dir.isEmpty else { return [] }
+    let rows = git(["for-each-ref", "--format=%(refname:short)|%(committerdate:iso-strict)|%(subject)", "refs/heads"], in: dir).split(separator: "\n")
+    let iso = ISO8601DateFormatter()
+    var out: [Branch] = []
+    for r in rows {
+        let f = r.split(separator: "|", maxSplits: 2, omittingEmptySubsequences: false).map(String.init)
+        guard f.count == 3, f[0] != "main" else { continue }
+        let ahead = Int(git(["rev-list", "--count", "main.." + f[0]], in: dir).trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+        out.append(Branch(name: f[0], kind: branchKind(f[0], ahead: ahead, when: iso.date(from: f[1]) ?? .distantPast), ahead: ahead, subject: f[2], date: String(f[1].prefix(10))))
+    }
+    return out
+}
+
 var lastLive = Date.distantPast
 var liveCache: [Branch]? = nil
 func liveBranches(force: Bool) -> [Branch]? {
@@ -47,7 +69,7 @@ func liveBranches(force: Bool) -> [Branch]? {
         if name == "HEAD" || name == "wf-state" || name == "main" || name.hasPrefix("dependabot/") { continue }
         let ahead = Int(git(["rev-list", "--count", "origin/main..origin/" + name]).trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
         let when = iso.date(from: f[1]) ?? .distantPast
-        let kind = name.hasPrefix("ready-for-cpd/") ? "cpd" : (ahead > 0 && Date().timeIntervalSince(when) <= week ? "dev" : "stale")
+        let kind = branchKind(name, ahead: ahead, when: when)
         out.append(Branch(name: name, kind: kind, ahead: ahead, subject: f[2], date: String(f[1].prefix(10))))
     }
     liveCache = out
@@ -56,12 +78,12 @@ func liveBranches(force: Bool) -> [Branch]? {
 
 var forceLive = false
 func loadSnapshot() -> Snapshot {
-    _ = git(["fetch", "-q", "origin", "wf-state"])
-    let names = git(["ls-tree", "--name-only", "FETCH_HEAD", "wf/"]).split(separator: "\n")
+    _ = git(["fetch", "-q", "origin", "+refs/heads/wf-state:refs/remotes/origin/wf-state"])
+    let names = git(["ls-tree", "--name-only", "refs/remotes/origin/wf-state", "wf/"]).split(separator: "\n")
     var snap = Snapshot()
     var newest = 0.0
     for n in names {
-        let txt = git(["show", "FETCH_HEAD:" + String(n)])
+        let txt = git(["show", "refs/remotes/origin/wf-state:" + String(n)])
         guard let data = txt.data(using: .utf8),
               let o = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else { continue }
         let at = (o["updatedAt"] as? NSNumber)?.doubleValue ?? 0
@@ -91,6 +113,19 @@ func loadSnapshot() -> Snapshot {
         // A stale snapshot row whose branch no longer exists on GitHub was deleted: drop it.
         snap.branches.removeAll { $0.kind == "stale" && !liveNames.contains($0.name) }
         for b in live where !snap.branches.contains(where: { $0.name == b.name }) { snap.branches.append(b) }
+    }
+    for b in localBranches() {
+        // The naming convention wins over an older "stale" verdict; unpushed local branches are added.
+        if let i = snap.branches.firstIndex(where: { $0.name == b.name }) {
+            if b.kind != "stale" && snap.branches[i].kind == "stale" { snap.branches[i] = b }
+        } else { snap.branches.append(b) }
+    }
+    // Same rule for rows that came from the snapshot or GitHub.
+    snap.branches = snap.branches.map { (b: Branch) -> Branch in
+        if b.kind == "stale" && (b.name.hasPrefix("work/") || b.name.hasPrefix("ready-for-cpd/")) {
+            return Branch(name: b.name, kind: b.name.hasPrefix("work/") ? "dev" : "cpd", ahead: b.ahead, subject: b.subject, date: b.date)
+        }
+        return b
     }
     return snap
 }
@@ -122,7 +157,7 @@ func runTool(_ path: String, _ args: [String]) -> Int32 {
 func checkForUpdate() {
     if Date().timeIntervalSince(lastUpdateCheck) < 120 { return }
     lastUpdateCheck = Date()
-    let latest = git(["show", "FETCH_HEAD:widget/VERSION"]).trimmingCharacters(in: .whitespacesAndNewlines)
+    let latest = git(["show", "refs/remotes/origin/wf-state:widget/VERSION"]).trimmingCharacters(in: .whitespacesAndNewlines)
     let installed = ((try? String(contentsOfFile: widgetDir + "/installed-version", encoding: .utf8)) ?? "")
         .trimmingCharacters(in: .whitespacesAndNewlines)
     runningVersion = String(installed.prefix(7))
@@ -130,7 +165,7 @@ func checkForUpdate() {
     if latest == installed { updateStatus = "up to date"; return }
     if latest == failedVersion { return }
     updateStatus = "updating to \(latest.prefix(7))\u{2026}"
-    let source = git(["show", "FETCH_HEAD:widget/ProgressWidget.swift"])
+    let source = git(["show", "refs/remotes/origin/wf-state:widget/ProgressWidget.swift"])
     if source.isEmpty { return }
     try? FileManager.default.createDirectory(atPath: widgetDir, withIntermediateDirectories: true)
     let srcPath = widgetDir + "/ProgressWidget.swift"
