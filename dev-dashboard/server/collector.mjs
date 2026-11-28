@@ -14,8 +14,9 @@ const PROTECTED = /^(main|master|HEAD|origin|develop|release\/.*)$/;
 /** `ready-for-cpd/SPO-639` | `SPO-639-foo` | `feature/SPO-639` -> `SPO-639`, else null. */
 /** @param {string} name */
 export function taskOfBranch(name) {
-  const m = /(?:^|\/)(SPO-\d{1,5})(?:[-_/].*)?$/.exec(String(name));
-  return m ? m[1] : null;
+  // case-insensitive: local work branches are often lower-case (`spo-608-localhost`)
+  const m = /(?:^|\/)(SPO-\d{1,5})(?:[-_/].*)?$/i.exec(String(name));
+  return m ? m[1].toUpperCase() : null;
 }
 
 /** Deploy marker after prod: only `ready-for-cpd/*` branches whose tip is contained in a deployed SHA of the same task. */

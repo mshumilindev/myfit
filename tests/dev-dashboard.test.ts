@@ -211,6 +211,7 @@ describe('collector', () => {
   it('taskOfBranch', () => {
     expect(taskOfBranch('ready-for-cpd/SPO-639')).toBe('SPO-639');
     expect(taskOfBranch('feature/SPO-12-x')).toBe('SPO-12');
+    expect(taskOfBranch('spo-608-localhost')).toBe('SPO-608');
     expect(taskOfBranch('main')).toBeNull();
   });
 });
