@@ -161,7 +161,7 @@ func checkForUpdate() {
     let installed = ((try? String(contentsOfFile: widgetDir + "/installed-version", encoding: .utf8)) ?? "")
         .trimmingCharacters(in: .whitespacesAndNewlines)
     runningVersion = String(installed.prefix(7))
-    if latest.isEmpty { updateStatus = "update check failed (no data)"; return }
+    if latest.isEmpty { updateStatus = "update check failed (no data) \u{00B7} run devflow doctor"; return }
     if latest == installed { updateStatus = "up to date"; return }
     if latest == failedVersion { return }
     updateStatus = "updating to \(latest.prefix(7))\u{2026}"
