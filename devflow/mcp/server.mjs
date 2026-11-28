@@ -146,7 +146,7 @@ export function handle(msg) {
       return reply({
         protocolVersion: msg.params?.protocolVersion ?? '2024-11-05',
         capabilities: { tools: {} },
-        serverInfo: { name: 'devflow', version: '0.1.0' },
+        serverInfo: { name: 'devflow', version: '0.2.0' },
       });
     case 'ping':
       return reply({});

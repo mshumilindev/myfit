@@ -1,11 +1,13 @@
 {
   "name": "devflow",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Mechanical task workflow for Claude Code: wf state, live progress, a local dev dashboard and an MCP server. Project specifics live in devflow.config.json.",
   "mcpServers": {
     "devflow": {
       "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/server.mjs"]
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/mcp/server.mjs"
+      ]
     }
   },
   "hooks": "./hooks/hooks.json",
