@@ -866,7 +866,13 @@ final class App: NSObject {
         let name = (app?.localizedName ?? "").lowercased()
         let isClaude = id.contains("claude") || id.contains("anthropic") || name.contains("claude")
         let isSelf = app?.processIdentifier == ProcessInfo.processInfo.processIdentifier
-        if isClaude || isSelf { panel.orderFrontRegardless() } else { panel.orderOut(nil) }
+        // With no Claude app running at all the widget is gone, even if it was the last thing the user touched.
+        let claudeRunning: Bool = NSWorkspace.shared.runningApplications.contains { (a: NSRunningApplication) -> Bool in
+            let rid: String = (a.bundleIdentifier ?? "").lowercased()
+            let rname: String = (a.localizedName ?? "").lowercased()
+            return rid.contains("anthropic") || rid.contains("claude") || rname == "claude"
+        }
+        if claudeRunning && (isClaude || isSelf) { panel.orderFrontRegardless() } else { panel.orderOut(nil) }
     }
 
     func place() {
