@@ -433,6 +433,7 @@ final class App: NSObject {
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.hasShadow = true
+        panel.acceptsMouseMovedEvents = true
         panel.hidesOnDeactivate = false
         panel.isMovableByWindowBackground = false
         panel.contentView = view
