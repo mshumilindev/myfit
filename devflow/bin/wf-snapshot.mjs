@@ -319,6 +319,8 @@ export function buildSnapshot({
     if (t.pct < 100) tasks.push(t);
   }
   const branches = withRemoteBranches(root, branchesOf(root));
+  const cur = git(root, ['rev-parse', '--abbrev-ref', 'HEAD']) || 'main';
+  for (const t of tasks) t.branch = cur;
   let dashboardUrl = '';
   try {
     dashboardUrl =
