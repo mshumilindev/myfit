@@ -113,9 +113,9 @@ func checkForUpdate() {
 var darkTheme: Bool = (UserDefaults.standard.object(forKey: "devflow.dark") as? Bool) ?? true
 func ink() -> NSColor { darkTheme ? NSColor.white : NSColor(calibratedRed: 0.15, green: 0.12, blue: 0.22, alpha: 1) }
 func ov(_ a: CGFloat) -> NSColor { ink().withAlphaComponent(a) }
-func panelBg() -> NSColor { darkTheme ? NSColor(calibratedRed: 0.075, green: 0.0, blue: 0.17, alpha: 1) : NSColor(calibratedRed: 1.0, green: 0.98, blue: 0.94, alpha: 0.98) }
-func accent() -> NSColor { darkTheme ? NSColor(calibratedRed: 0.66, green: 0.42, blue: 1.0, alpha: 1) : NSColor(calibratedRed: 0.90, green: 0.58, blue: 0.10, alpha: 1) }
-func tipBg() -> NSColor { darkTheme ? NSColor(calibratedRed: 0.17, green: 0.03, blue: 0.36, alpha: 1) : NSColor.white }
+func panelBg() -> NSColor { darkTheme ? NSColor(calibratedRed: 0.04, green: 0.0, blue: 0.09, alpha: 1) : NSColor(calibratedRed: 1.0, green: 0.98, blue: 0.94, alpha: 0.98) }
+func accent() -> NSColor { darkTheme ? NSColor(calibratedRed: 0.46, green: 0.30, blue: 0.78, alpha: 1) : NSColor(calibratedRed: 0.90, green: 0.58, blue: 0.10, alpha: 1) }
+func tipBg() -> NSColor { darkTheme ? NSColor(calibratedRed: 0.10, green: 0.02, blue: 0.20, alpha: 1) : NSColor.white }
 
 func color(_ s: String) -> NSColor {
     switch s {
@@ -509,7 +509,7 @@ final class WidgetView: NSView {
                 y += 30
             }
         }
-        text("v\(runningVersion) \u{00B7} \(updateStatus)", pad, y + 4, 9.5, false, 0.5, draw)
+        if updateStatus.contains("failed") { text(String(updateStatus.prefix(60)), pad, y + 4, 9.5, true, 0.9, draw, c: color("blocked")) }
         let dw = pill(darkTheme ? "\u{2600} Day" : "\u{263E} Night", 0, y, active: false, right: w - pad, draw) {
             darkTheme.toggle()
             UserDefaults.standard.set(darkTheme, forKey: "devflow.dark")
