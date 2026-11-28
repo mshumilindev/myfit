@@ -130,12 +130,32 @@ func color(_ s: String) -> NSColor {
 func dashboardPort(_ u: URL) -> String { String(u.port ?? 5174) }
 func dashboardProjectDir() -> String? {
     let home = NSHomeDirectory()
+    let fm = FileManager.default
+    let marker = "/devflow/dashboard/server/main.mjs"
     var cands: [String] = []
     if let saved = try? String(contentsOfFile: home + "/.devflow/project-dir", encoding: .utf8) {
         cands.append(saved.trimmingCharacters(in: .whitespacesAndNewlines))
     }
-    cands += [home + "/Desktop/Work/training/gym-tracker", home + "/Desktop/Work/training"]
-    return cands.first { FileManager.default.fileExists(atPath: $0 + "/devflow/dashboard/server/main.mjs") }
+    if let hit = cands.first(where: { fm.fileExists(atPath: $0 + marker) }) { return hit }
+    // Search nested folders of the usual project roots (depth <= 6), skipping dependencies and VCS data.
+    let roots = ["Desktop", "Documents", "Developer", "Projects", "Work", "dev", "code", "src", "repos", "GitHub", "git"].map { home + "/" + $0 }
+    let skip: Set<String> = ["node_modules", ".git", "Library", ".Trash", "dist", "build", ".next", "venv"]
+    for root in roots where fm.fileExists(atPath: root) {
+        guard let en = fm.enumerator(at: URL(fileURLWithPath: root), includingPropertiesForKeys: [.isDirectoryKey], options: [.skipsPackageDescendants]) else { continue }
+        for case let url as URL in en {
+            if skip.contains(url.lastPathComponent) { en.skipDescendants(); continue }
+            if en.level > 6 { en.skipDescendants(); continue }
+            if url.lastPathComponent == "devflow" {
+                let proj = url.deletingLastPathComponent().path
+                if fm.fileExists(atPath: proj + marker) {
+                    try? fm.createDirectory(atPath: home + "/.devflow", withIntermediateDirectories: true)
+                    try? (proj + "\n").write(toFile: home + "/.devflow/project-dir", atomically: true, encoding: .utf8)
+                    return proj
+                }
+            }
+        }
+    }
+    return nil
 }
 func openDashboard(_ u: URL, _ say: @escaping (String) -> Void) {
     DispatchQueue.global().async {
@@ -143,7 +163,7 @@ func openDashboard(_ u: URL, _ say: @escaping (String) -> Void) {
         let up = { runTool("/usr/bin/nc", ["-z", "127.0.0.1", port]) == 0 }
         if !up() && (u.host == "localhost" || u.host == "127.0.0.1") {
             guard let dir = dashboardProjectDir() else {
-                DispatchQueue.main.async { say("Dashboard project folder not found (~/.devflow/project-dir)") }
+                DispatchQueue.main.async { say("Dashboard project not found under Desktop/Documents/Developer/Projects/Work") }
                 return
             }
             DispatchQueue.main.async { say("Starting the dashboard\u{2026}") }
