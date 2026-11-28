@@ -2,7 +2,14 @@ import { ago, h } from './dom.js';
 import { emptyState, overall, staleBanner, taskView } from './views.js';
 
 const STALE_MS = 10 * 60 * 1000;
-const state = { snap: null, error: false, lane: 'overall', tab: 'overview', fetchedAt: 0 };
+const state = {
+  brand: '',
+  snap: null,
+  error: false,
+  lane: 'overall',
+  tab: 'overview',
+  fetchedAt: 0,
+};
 
 const read = (k, d) => {
   try {
@@ -123,7 +130,7 @@ function render() {
         'header',
         { class: 'top' },
         h('div', { class: 'logo', 'aria-hidden': 'true' }, '>_'),
-        h('div', { class: 'brand' }, 'SPOTTER', h('i', null, '//'), 'DEV'),
+        h('div', { class: 'brand' }, state.brand, h('i', null, '//'), 'DEV'),
         h('span', { class: 'chip' }, 'DEV CONSOLE'),
         h('span', { class: 'grow' }),
         h('span', { class: 'chip' }, `${location.host} · read-only`),
@@ -155,6 +162,15 @@ function render() {
   document.body.style.background = theme === 'light' ? '#F3F5F8' : '#101318';
 }
 
+async function loadMeta() {
+  try {
+    const res = await fetch('/api/meta', { cache: 'no-store' });
+    if (res.ok) state.brand = (await res.json()).brand ?? '';
+  } catch {
+    /* brand is cosmetic */
+  }
+}
+
 async function poll() {
   try {
     const res = await fetch('/api/snapshot', { cache: 'no-store' });
@@ -170,5 +186,5 @@ async function poll() {
 }
 
 render();
-poll();
+loadMeta().then(poll);
 setInterval(poll, 5000);

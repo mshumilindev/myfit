@@ -11,7 +11,7 @@ const ROOT = join(__dirname, '..', 'devflow');
 const HOST_WORDS = /SPO-\d+|myfit|spotter|mshumilindev|docs\/specs|docs\/plans|\.claude\//gi;
 const BASELINE: Record<string, number> = {
   'core/capture-rollup.mjs': 1,
-  'core/journal.mjs': 3,
+  'core/journal.mjs': 1,
   'core/wf-core.mjs': 3,
   'core/wf-linear.mjs': 1,
   'core/wf-metrics.mjs': 1,

@@ -22,10 +22,10 @@ const HEADERS = {
 };
 
 /**
- * @param {{ uiRoot: string, collect: () => Promise<unknown> | unknown, port?: number, doc?: (id: string, dir: string, name: string) => string | null }} opts
+ * @param {{ uiRoot: string, collect: () => Promise<unknown> | unknown, port?: number, meta?: { brand?: string }, doc?: (id: string, dir: string, name: string) => string | null }} opts
  * @returns {import('node:http').Server}
  */
-export function createDashServer({ uiRoot, collect, port = 5174, doc }) {
+export function createDashServer({ uiRoot, collect, port = 5174, doc, meta = {} }) {
   const root = resolve(uiRoot);
   /** @param {import('node:http').ServerResponse} res @param {number} status @param {string | Buffer} body @param {string} [type] */
   const send = (res, status, body, type = 'application/json; charset=utf-8') => {
@@ -43,6 +43,7 @@ export function createDashServer({ uiRoot, collect, port = 5174, doc }) {
       if (url.startsWith('/api/')) {
         const path = url.split('?')[0];
         if (path === '/api/health') return send(res, 200, JSON.stringify({ ok: true }));
+        if (path === '/api/meta') return send(res, 200, JSON.stringify(meta));
         if (path === '/api/snapshot') return send(res, 200, JSON.stringify(await collect()));
         if (path === '/api/doc' && doc) {
           const q = new URL(url, 'http://x').searchParams;

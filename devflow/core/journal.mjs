@@ -69,7 +69,7 @@ export function buildEntry(event, input, ctx = {}) {
 
 /** Ordered candidate directories: the state dir first, then fallbacks (not durable in a cloud container, see spec). */
 export function journalDirs({ stateDir, home = homedir(), tmp = tmpdir() }) {
-  return [join(stateDir, 'journal'), join(tmp, 'spotter-journal'), join(home, '.spotter-journal')];
+  return [join(stateDir, 'journal'), join(tmp, 'devflow-journal'), join(home, '.devflow-journal')];
 }
 
 /** One O_APPEND write per line. Returns {ok, dir, failed:[dir]} and never throws. */

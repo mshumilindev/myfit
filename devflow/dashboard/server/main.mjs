@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /** SPO-639 (W17 B2): starts the Dev Console on 127.0.0.1:5174 (strict port; never falls back to another one). */
 import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { collect, readDoc, validateSnapshot } from './collector.mjs';
@@ -47,7 +48,16 @@ function refreshLinear(/** @type {string[]} */ ids) {
     .finally(() => (linearBusy = false));
 }
 
+let brand = 'DEV';
+try {
+  brand =
+    JSON.parse(readFileSync(join(ROOT, 'devflow', 'devflow.config.json'), 'utf8')).brand ?? brand;
+} catch {
+  /* config is optional */
+}
+
 const server = createDashServer({
+  meta: { brand },
   uiRoot: join(HERE, '../ui'),
   port: PORT,
   doc: (id, dir, name) => readDoc(ROOT, id, dir, name),

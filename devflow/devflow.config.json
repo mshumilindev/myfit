@@ -7,6 +7,7 @@
   "barCli": "scripts/wf-bar.mjs",
   "docsDirs": ["docs/specs", "docs/plans"],
   "dashboardPort": 5174,
+  "brand": "SPOTTER",
   "repo": "mshumilindev/myfit",
   "rulesDir": ".claude/rules",
   "dashRoot": "devflow/dashboard",
@@ -15,5 +16,5 @@
     "dir": "wf",
     "minIntervalMs": 3000
   },
-  "dashboardUrl": "https://claude.ai/artifact/EHNnG2BKNipz7UmuWkz7jT"
+  "dashboardUrl": "http://localhost:5174"
 }
