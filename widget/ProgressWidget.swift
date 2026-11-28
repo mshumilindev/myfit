@@ -5,7 +5,7 @@ struct Card { let task: String; let pct: Int; let done: Int; let total: Int; let
 struct Branch { let name: String; let kind: String; let ahead: Int; let subject: String; let date: String }
 struct Stage { let stage: String; let state: String; let detail: String; let url: String }
 struct Prompt { let label: String; let text: String }
-struct Snapshot { var cards: [Card] = []; var branches: [Branch] = []; var prompts: [Prompt] = []; var pipeline: [Stage] = []; var dashboard = "" }
+struct Snapshot { var cards: [Card] = []; var branches: [Branch] = []; var prompts: [Prompt] = []; var pipeline: [Stage] = []; var dashboard = ""; var repo = "" }
 
 // Own clone of the wf-state branch, outside protected folders (Desktop/Documents).
 let repo = NSString(string: "~/.devflow/wf-state").expandingTildeInPath
@@ -104,6 +104,7 @@ func loadSnapshot() -> Snapshot {
             snap.prompts = ((o["prompts"] as? [[String: Any]]) ?? []).map { Prompt(label: str($0["label"]), text: str($0["text"])) }
             snap.pipeline = ((o["pipeline"] as? [[String: Any]]) ?? []).map { Stage(stage: str($0["stage"]), state: str($0["state"]), detail: str($0["detail"]), url: str($0["url"])) }
             let d = str(o["dashboardUrl"]); if !d.isEmpty { snap.dashboard = d }
+            let rp = str(o["repo"]); if !rp.isEmpty { snap.repo = rp }
         }
     }
     snap.cards.sort { $0.at > $1.at }
@@ -476,6 +477,19 @@ final class WidgetView: NSView {
         }
         y += 34
 
+        if let bad = snap.pipeline.first(where: { $0.state == "fail" }) {
+            let bh: CGFloat = 26
+            if draw {
+                color("blocked").withAlphaComponent(0.18).setFill()
+                NSBezierPath(roundedRect: NSRect(x: pad - 4, y: y, width: w - 2 * pad + 8, height: bh), xRadius: 8, yRadius: 8).fill()
+                hits.append(Hit(rect: NSRect(x: pad - 4, y: y, width: w - 2 * pad + 8, height: bh), action: {
+                    if let u = URL(string: bad.url), !bad.url.isEmpty { NSWorkspace.shared.open(u) } else { self.tab = 3; self.onChange() }
+                }))
+            }
+            text("\u{25CF} \(bad.stage) failed \u{00B7} \(bad.detail)", pad + 4, y + 6, 11.5, true, 0.95, draw, c: color("blocked"))
+            y += bh + 8
+        }
+
         if tab == 0 {
             if snap.cards.isEmpty {
                 if draw { text(note.isEmpty ? "No task yet" : note, pad, y, 12, false, 0.7, true) }
@@ -633,7 +647,8 @@ final class WidgetView: NSView {
                 let ex = "Explain git branch \(nm) to me: what it contains compared with main (commits, changed files), why it exists (linked Linear issue / wf task), the status of its tasks, and whether it is merged, deployed or still open. Read-only, change nothing."
                 let del = "I want to delete git branch \(nm). Do NOT delete anything yet. First check and report: (1) commits not in main, (2) whether its work is merged and deployed (CI and deploy status), (3) open PRs and linked Linear issue, (4) anything unique that would be lost, (5) whether it is safe to delete. Then ask me to confirm explicitly. Only after my yes delete the local and remote branch, never with force."
                 let sh = b.subject.isEmpty ? 0 : wrapped(b.subject, 0, 0, w - 2 * pad - 24, 11, 0.6, false)
-                let cardH = 10 + 18 + sh + 6 + 26 + 8
+                let ghRow: CGFloat = snap.repo.isEmpty ? 0 : 28
+                let cardH = 10 + 18 + sh + 6 + 26 + ghRow + 8
                 let bc = branchColor(b)
                 if draw {
                     ov(0.07).setFill()
@@ -651,6 +666,10 @@ final class WidgetView: NSView {
                 let swp = "Switch this chat to git branch \(nm): commit or stash anything uncommitted first, then `git switch \(nm)`, run `node scripts/wf.mjs status` and continue the task on this branch. Do not push."
                 let sw = pill(copied == "sw:" + nm ? "Copied \u{2713} paste in chat" : "Switch here", pad + 8 + bw + 6, cy, active: copied == "sw:" + nm, draw) { self.copyText(swp, "sw:" + nm) }
                 pill(copied == "del:" + nm ? "Copied \u{2713} paste in chat" : "Delete\u{2026}", pad + 8 + bw + sw + 12, cy, active: copied == "del:" + nm, draw) { self.copyText(del, "del:" + nm) }
+                if !snap.repo.isEmpty {
+                    let ghu = "https://github.com/\(snap.repo)/tree/\(nm)"
+                    pill("Open on GitHub \u{2197}", pad + 8, cy + 28, active: false, draw) { if let u = URL(string: ghu) { NSWorkspace.shared.open(u) } }
+                }
                 y += cardH + 10
             }
             for c in (tab == 1 ? Array(snap.cards.dropFirst()) : []) {
