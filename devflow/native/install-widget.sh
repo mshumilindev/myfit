@@ -12,6 +12,7 @@ if [ ! -d "$STATE/.git" ]; then
   git clone --quiet --depth 1 --single-branch --branch wf-state "https://github.com/$REPO" "$STATE" || echo "warning: clone of wf-state failed (no GitHub access yet?)"
 fi
 swiftc -O "$SRC" -o "$APP/Contents/MacOS/ProgressWidget"
+[ -n "${CLAUDE_PROJECT_DIR:-}" ] && echo "$CLAUDE_PROJECT_DIR" > "$HOME/.devflow/project-dir"
 mkdir -p "$HOME/.devflow/widget"
 shasum -a 256 "$SRC" | cut -d' ' -f1 > "$HOME/.devflow/widget/installed-version"
 cat > "$APP/Contents/Info.plist" <<'PL'
