@@ -58,6 +58,45 @@ func load() -> Snapshot {
     return snap
 }
 
+
+// ---- Self-update: the wf-state branch carries widget/ProgressWidget.swift and widget/VERSION (sha256).
+let widgetDir = NSString(string: "~/.devflow/widget").expandingTildeInPath
+var failedVersion = ""
+var lastUpdateCheck = Date.distantPast
+
+func runTool(_ path: String, _ args: [String]) -> Int32 {
+    let p = Process()
+    p.executableURL = URL(fileURLWithPath: path)
+    p.arguments = args
+    p.standardOutput = Pipe()
+    p.standardError = Pipe()
+    do { try p.run() } catch { return -1 }
+    p.waitUntilExit()
+    return p.terminationStatus
+}
+
+func checkForUpdate() {
+    if Date().timeIntervalSince(lastUpdateCheck) < 120 { return }
+    lastUpdateCheck = Date()
+    let latest = git(["show", "FETCH_HEAD:widget/VERSION"]).trimmingCharacters(in: .whitespacesAndNewlines)
+    let installed = ((try? String(contentsOfFile: widgetDir + "/installed-version", encoding: .utf8)) ?? "")
+        .trimmingCharacters(in: .whitespacesAndNewlines)
+    if latest.isEmpty || latest == installed || latest == failedVersion { return }
+    let source = git(["show", "FETCH_HEAD:widget/ProgressWidget.swift"])
+    if source.isEmpty { return }
+    try? FileManager.default.createDirectory(atPath: widgetDir, withIntermediateDirectories: true)
+    let srcPath = widgetDir + "/ProgressWidget.swift"
+    let binNew = widgetDir + "/ProgressWidget.new"
+    do { try source.write(toFile: srcPath, atomically: true, encoding: .utf8) } catch { return }
+    try? FileManager.default.removeItem(atPath: binNew)
+    guard runTool("/usr/bin/swiftc", ["-O", srcPath, "-o", binNew]) == 0,
+          let exe = Bundle.main.executablePath else { failedVersion = latest; return }
+    try? FileManager.default.removeItem(atPath: exe)
+    do { try FileManager.default.moveItem(atPath: binNew, toPath: exe) } catch { failedVersion = latest; return }
+    try? (latest + "\n").write(toFile: widgetDir + "/installed-version", atomically: true, encoding: .utf8)
+    exit(0) // launchd (KeepAlive) starts the new build
+}
+
 func color(_ s: String) -> NSColor {
     switch s {
     case "done": return NSColor(calibratedRed: 0.25, green: 0.74, blue: 0.47, alpha: 1)
@@ -360,6 +399,7 @@ final class App: NSObject {
     func refresh() {
         DispatchQueue.global().async {
             let s = load()
+            checkForUpdate()
             DispatchQueue.main.async {
                 self.view.snap = s
                 self.view.note = s.cards.isEmpty ? "No data (git fetch failed?)" : ""

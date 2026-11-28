@@ -12,6 +12,8 @@ if [ ! -d "$STATE/.git" ]; then
   git clone --quiet --depth 1 --single-branch --branch wf-state "https://github.com/$REPO" "$STATE" || echo "warning: clone of wf-state failed (no GitHub access yet?)"
 fi
 swiftc -O "$SRC" -o "$APP/Contents/MacOS/ProgressWidget"
+mkdir -p "$HOME/.devflow/widget"
+shasum -a 256 "$SRC" | cut -d' ' -f1 > "$HOME/.devflow/widget/installed-version"
 cat > "$APP/Contents/Info.plist" <<'PL'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

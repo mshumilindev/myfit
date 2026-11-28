@@ -7,6 +7,7 @@
  * running publisher goes again after minIntervalMs, so a burst of wf events becomes one or two pushes.
  */
 import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -51,6 +52,19 @@ function push(snapshot) {
   if (parent) git(['read-tree', parent], { env });
   const blob = git(['hash-object', '-w', '--stdin'], { input: `${JSON.stringify(snapshot)}\n` });
   git(['update-index', '--add', '--cacheinfo', `100644,${blob},${path}`], { env });
+  // The native widget updates itself from this branch: source + content hash as the version.
+  const widgetSrc = join(ROOT, 'devflow', 'native', 'ProgressWidget.swift');
+  if (existsSync(widgetSrc)) {
+    const body = readFileSync(widgetSrc);
+    const srcBlob = git(['hash-object', '-w', '--stdin'], { input: body.toString('utf8') });
+    const verBlob = git(['hash-object', '-w', '--stdin'], {
+      input: `${createHash('sha256').update(body).digest('hex')}\n`,
+    });
+    git(['update-index', '--add', '--cacheinfo', `100644,${srcBlob},widget/ProgressWidget.swift`], {
+      env,
+    });
+    git(['update-index', '--add', '--cacheinfo', `100644,${verBlob},widget/VERSION`], { env });
+  }
   const tree = git(['write-tree'], { env });
   const message = `wf-state ${snapshot.tasks[0]?.task ?? 'idle'} ${snapshot.tasks[0]?.pct ?? 0}%`;
   const commit = git(['commit-tree', tree, ...(parent ? ['-p', parent] : []), '-m', message], {
