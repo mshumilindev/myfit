@@ -58,6 +58,7 @@ export default tseslint.config(
       'functions/src/**/*.ts',
       'scripts/**/*.mjs',
       'dev-dashboard/server/**/*.mjs',
+      'devflow/**/*.mjs',
       'client/scripts/**/*.mjs',
     ],
     languageOptions: {
