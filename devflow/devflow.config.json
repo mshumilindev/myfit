@@ -1,0 +1,10 @@
+{
+  "$comment": "The only place that knows about the host project. Everything else in devflow/ reads this and nothing else.",
+  "taskPattern": "^SPO-\\d{1,5}$",
+  "stateDir": ".claude/state",
+  "mirrorDir": "dev-dashboard/.mirror",
+  "wfCli": "scripts/wf.mjs",
+  "barCli": "scripts/wf-bar.mjs",
+  "docsDirs": ["docs/specs", "docs/plans"],
+  "dashboardPort": 5174
+}
