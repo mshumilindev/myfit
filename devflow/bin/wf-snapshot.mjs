@@ -147,6 +147,30 @@ export function stageOf(i) {
   return 'Development';
 }
 
+/** Linear status per task id, cached in the state dir (`linear-status.json`); missing file means "unknown". */
+export function linearCache(root) {
+  try {
+    return JSON.parse(
+      readFileSync(join(root, CONFIG.stateDir ?? '.claude/state', 'linear-status.json'), 'utf8'),
+    );
+  } catch {
+    return {};
+  }
+}
+
+/** Decides dev / stale from Linear first (the source of truth for "still in development"), then from commit age. */
+export function classifyBranch(b, linear, now = Date.now()) {
+  const id = new RegExp(CONFIG.taskPattern.replace(/^\^|\$$/g, ''), 'i').exec(
+    `${b.name} ${b.subject}`,
+  )?.[0];
+  const hit = id ? linear[id.toUpperCase()] : null;
+  if (!hit) return { ...b, kind: kindByAge(b.date, now) };
+  const closed = hit.type === 'completed' || hit.type === 'canceled';
+  const active = hit.type === 'started';
+  const kind = closed ? 'stale' : active ? 'dev' : kindByAge(b.date, now);
+  return { ...b, kind, subject: `[${hit.status}] ${b.subject}` };
+}
+
 /** A work branch with no commits for a week is not "in development": it is an old branch to review and delete. */
 export function kindByAge(date, now = Date.now()) {
   const t = Date.parse(date);
@@ -312,15 +336,18 @@ export function buildSnapshot({
   const wf = raw ? JSON.parse(raw) : {};
   const events = parseJournal(readFirst(root, 'wf-events.jsonl'));
   const pace = paceOf(events, now);
+  const cur0 = git(root, ['rev-parse', '--abbrev-ref', 'HEAD']) || 'main';
   const tasks = [];
   if (wf.task) tasks.push(summarize(wf.task.id, wf.items ?? [], true, pace, now, events));
   for (const p of wf.parked ?? []) {
     const t = summarize(p.task.id, p.items ?? [], false, pace, now, events);
     if (t.pct < 100) tasks.push(t);
   }
-  const branches = withRemoteBranches(root, branchesOf(root));
-  const cur = git(root, ['rev-parse', '--abbrev-ref', 'HEAD']) || 'main';
-  for (const t of tasks) t.branch = cur;
+  const linear = linearCache(root);
+  const branches = withRemoteBranches(root, branchesOf(root)).map((b) =>
+    b.kind === 'cpd' || b.name === cur0 ? b : classifyBranch(b, linear),
+  );
+  for (const t of tasks) t.branch = cur0;
   let dashboardUrl = '';
   try {
     dashboardUrl =

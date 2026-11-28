@@ -57,3 +57,32 @@ describe('promptsOf', () => {
     expect(out[2].text).toBe('cpd');
   });
 });
+
+describe('classifyBranch', () => {
+  const now = Date.parse('2026-11-28T00:00:00Z');
+  const fresh = '2026-11-27T00:00:00Z';
+  const old = '2026-10-01T00:00:00Z';
+  const linear = {
+    'SPO-1': { status: 'In Progress', type: 'started' },
+    'SPO-2': { status: 'Deployed to prod', type: 'completed' },
+    'SPO-3': { status: 'Backlog', type: 'backlog' },
+  };
+  it('Linear closed wins over a fresh commit, started wins over an old one', async () => {
+    const { classifyBranch } = await import('../devflow/bin/wf-snapshot.mjs');
+    expect(classifyBranch({ name: 'spo-2-x', subject: '', date: fresh }, linear, now).kind).toBe(
+      'stale',
+    );
+    expect(classifyBranch({ name: 'spo-1-x', subject: '', date: old }, linear, now).kind).toBe(
+      'dev',
+    );
+  });
+  it('backlog and unknown tasks fall back to commit age and carry the Linear status', async () => {
+    const { classifyBranch } = await import('../devflow/bin/wf-snapshot.mjs');
+    const b = classifyBranch({ name: 'spo-3-x', subject: 's', date: fresh }, linear, now);
+    expect(b.kind).toBe('dev');
+    expect(b.subject).toBe('[Backlog] s');
+    expect(classifyBranch({ name: 'no-task', subject: '', date: old }, linear, now).kind).toBe(
+      'stale',
+    );
+  });
+});
