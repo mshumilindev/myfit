@@ -278,7 +278,10 @@ final class WidgetView: NSView {
                                 p.lineWidth = 1.5; p.stroke()
                             }
                             squares.append((r.insetBy(dx: -1.5, dy: -1.5), it))
-                            hits.append(Hit(rect: r.insetBy(dx: -1.5, dy: -1.5)) { self.selected = (c.task, it.id); self.onChange() })
+                            hits.append(Hit(rect: r.insetBy(dx: -1.5, dy: -1.5)) {
+                                if let cur = self.selected, cur.0 == c.task, cur.1 == it.id { self.selected = nil } else { self.selected = (c.task, it.id) }
+                                self.onChange()
+                            })
                         }
                         bx += sq + gap
                     }
@@ -299,6 +302,7 @@ final class WidgetView: NSView {
                     color(it.status).setFill()
                     NSBezierPath(ovalIn: NSRect(x: pad + 10, y: box + 13, width: 8, height: 8)).fill()
                     text("\(it.id) \u{00B7} \(statusName(it.status))", pad + 24, box + 10, 12, true, 1, true, c: color(it.status))
+                    pill("\u{2715}", 0, box + 6, active: false, right: w - pad - 6, true) { self.selected = nil; self.onChange() }
                     _ = wrapped(it.text, pad + 10, box + 30, tw, 11.5, 0.95, true)
                     _ = wrapped(explain(it), pad + 10, box + 30 + h1 + 6, tw, 11, 0.7, true)
                     if canFinish {
