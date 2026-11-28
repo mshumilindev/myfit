@@ -1,0 +1,6 @@
+{
+  "name": "wf-progress-band",
+  "version": "0.1.0",
+  "description": "Whole-task wf progress bar above the prompt, live, colour-coded.",
+  "types": "./types/index.d.ts"
+}
