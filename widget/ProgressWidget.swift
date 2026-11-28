@@ -5,7 +5,7 @@ struct Card { let task: String; let pct: Int; let done: Int; let total: Int; let
 struct Branch { let name: String; let kind: String; let ahead: Int; let subject: String; let date: String }
 struct Stage { let stage: String; let state: String; let detail: String; let url: String }
 struct Prompt { let label: String; let text: String }
-struct Snapshot { var cards: [Card] = []; var branches: [Branch] = []; var prompts: [Prompt] = []; var pipeline: [Stage] = []; var dashboard = ""; var repo = "" }
+struct Snapshot { var cards: [Card] = []; var branches: [Branch] = []; var prompts: [Prompt] = []; var pipeline: [Stage] = []; var dashboard = "" }
 
 // Own clone of the wf-state branch, outside protected folders (Desktop/Documents).
 let repo = NSString(string: "~/.devflow/wf-state").expandingTildeInPath
@@ -104,7 +104,6 @@ func loadSnapshot() -> Snapshot {
             snap.prompts = ((o["prompts"] as? [[String: Any]]) ?? []).map { Prompt(label: str($0["label"]), text: str($0["text"])) }
             snap.pipeline = ((o["pipeline"] as? [[String: Any]]) ?? []).map { Stage(stage: str($0["stage"]), state: str($0["state"]), detail: str($0["detail"]), url: str($0["url"])) }
             let d = str(o["dashboardUrl"]); if !d.isEmpty { snap.dashboard = d }
-            let rp = str(o["repo"]); if !rp.isEmpty { snap.repo = rp }
         }
     }
     snap.cards.sort { $0.at > $1.at }
@@ -162,7 +161,7 @@ func checkForUpdate() {
     let installed = ((try? String(contentsOfFile: widgetDir + "/installed-version", encoding: .utf8)) ?? "")
         .trimmingCharacters(in: .whitespacesAndNewlines)
     runningVersion = String(installed.prefix(7))
-    if latest.isEmpty { updateStatus = "update check failed (no data) \u{00B7} run devflow doctor"; return }
+    if latest.isEmpty { updateStatus = "update check failed (no data)"; return }
     if latest == installed { updateStatus = "up to date"; return }
     if latest == failedVersion { return }
     updateStatus = "updating to \(latest.prefix(7))\u{2026}"
@@ -477,19 +476,6 @@ final class WidgetView: NSView {
         }
         y += 34
 
-        if let bad = snap.pipeline.first(where: { $0.state == "fail" }) {
-            let bh: CGFloat = 26
-            if draw {
-                color("blocked").withAlphaComponent(0.18).setFill()
-                NSBezierPath(roundedRect: NSRect(x: pad - 4, y: y, width: w - 2 * pad + 8, height: bh), xRadius: 8, yRadius: 8).fill()
-                hits.append(Hit(rect: NSRect(x: pad - 4, y: y, width: w - 2 * pad + 8, height: bh), action: {
-                    if let u = URL(string: bad.url), !bad.url.isEmpty { NSWorkspace.shared.open(u) } else { self.tab = 3; self.onChange() }
-                }))
-            }
-            text("\u{25CF} \(bad.stage) failed \u{00B7} \(bad.detail)", pad + 4, y + 6, 11.5, true, 0.95, draw, c: color("blocked"))
-            y += bh + 8
-        }
-
         if tab == 0 {
             if snap.cards.isEmpty {
                 if draw { text(note.isEmpty ? "No task yet" : note, pad, y, 12, false, 0.7, true) }
@@ -558,15 +544,14 @@ final class WidgetView: NSView {
                     _ = wrapped(explain(it), pad + 10, box + 30 + h1 + 6, tw, 11, 0.7, true)
                     if canFinish {
                         let py = box + 30 + h1 + 6 + h2 + 8
-                        let others: [Item] = c.items.filter { $0.id != it.id && $0.status != "done" }
-                        let names: [String] = others.map { "\($0.id) (\($0.text))" }
-                        let rest: String = names.joined(separator: "; ")
-                        let why: String = it.why.isEmpty ? "" : ", " + it.why
-                        let head: String = "\(c.task): finish this task completely. Start with \(it.id) (\(it.text)), state: \(statusName(it.status))\(why)."
-                        let tail: String = rest.isEmpty ? "" : " Then every other open item: \(rest)."
-                        let prompt: String = head + tail + " Reopen skipped items that are still needed, prove each with wf done --evidence, add anything new to wf, and do not stop or ask until the task is 100% done."
-                        let label: String = it.status == "skip" || it.status == "skipped" ? "Reopen and finish \u{2192} Claude" : "Finish \u{2192} Claude"
-                        _ = pill(copied == "ex:one" ? "Copied \u{2713} paste in chat" : label, pad + 10, py, active: copied == "ex:one", true) { self.copyText(prompt, "ex:one"); activateClaude() }
+                        let one = "\(c.task): continue and finish \(it.id) (\(it.text)) now. State: \(statusName(it.status))\(it.why.isEmpty ? "" : ", " + it.why). Do the work, prove it with wf done --evidence, do not stop or ask until it is 100% done."
+                        let stg = it.stage.isEmpty ? "Development" : it.stage
+                        let open = c.items.filter { $0.status != "done" && ($0.stage.isEmpty ? "Development" : $0.stage) == stg }
+                        let names: [String] = open.map { "\($0.id) (\($0.text))" }
+                        let list: String = names.joined(separator: "; ")
+                        let grp = "\(c.task): continue and finish every non-green item in \(stg): \(list). Work through them one by one, prove each with wf done --evidence, add anything new to wf, and do not stop or ask until they are all done."
+                        let w1 = pill(copied == "ex:one" ? "Copied \u{2713} paste in chat" : "Finish this \u{2192} Claude", pad + 10, py, active: copied == "ex:one", true) { self.copyText(one, "ex:one"); activateClaude() }
+                        _ = pill(copied == "ex:grp" ? "Copied \u{2713} paste in chat" : "Finish all in \(stg)", pad + 10 + w1 + 6, py, active: copied == "ex:grp", true) { self.copyText(grp, "ex:grp"); activateClaude() }
                     }
                 }
                 y = inner + 10
@@ -647,8 +632,7 @@ final class WidgetView: NSView {
                 let ex = "Explain git branch \(nm) to me: what it contains compared with main (commits, changed files), why it exists (linked Linear issue / wf task), the status of its tasks, and whether it is merged, deployed or still open. Read-only, change nothing."
                 let del = "I want to delete git branch \(nm). Do NOT delete anything yet. First check and report: (1) commits not in main, (2) whether its work is merged and deployed (CI and deploy status), (3) open PRs and linked Linear issue, (4) anything unique that would be lost, (5) whether it is safe to delete. Then ask me to confirm explicitly. Only after my yes delete the local and remote branch, never with force."
                 let sh = b.subject.isEmpty ? 0 : wrapped(b.subject, 0, 0, w - 2 * pad - 24, 11, 0.6, false)
-                let ghRow: CGFloat = snap.repo.isEmpty ? 0 : 28
-                let cardH = 10 + 18 + sh + 6 + 26 + ghRow + 8
+                let cardH = 10 + 18 + sh + 6 + 26 + 8
                 let bc = branchColor(b)
                 if draw {
                     ov(0.07).setFill()
@@ -666,10 +650,6 @@ final class WidgetView: NSView {
                 let swp = "Switch this chat to git branch \(nm): commit or stash anything uncommitted first, then `git switch \(nm)`, run `node scripts/wf.mjs status` and continue the task on this branch. Do not push."
                 let sw = pill(copied == "sw:" + nm ? "Copied \u{2713} paste in chat" : "Switch here", pad + 8 + bw + 6, cy, active: copied == "sw:" + nm, draw) { self.copyText(swp, "sw:" + nm) }
                 pill(copied == "del:" + nm ? "Copied \u{2713} paste in chat" : "Delete\u{2026}", pad + 8 + bw + sw + 12, cy, active: copied == "del:" + nm, draw) { self.copyText(del, "del:" + nm) }
-                if !snap.repo.isEmpty {
-                    let ghu = "https://github.com/\(snap.repo)/tree/\(nm)"
-                    pill("Open on GitHub \u{2197}", pad + 8, cy + 28, active: false, draw) { if let u = URL(string: ghu) { NSWorkspace.shared.open(u) } }
-                }
                 y += cardH + 10
             }
             for c in (tab == 1 ? Array(snap.cards.dropFirst()) : []) {
@@ -885,13 +865,7 @@ final class App: NSObject {
         let name = (app?.localizedName ?? "").lowercased()
         let isClaude = id.contains("claude") || id.contains("anthropic") || name.contains("claude")
         let isSelf = app?.processIdentifier == ProcessInfo.processInfo.processIdentifier
-        // With no Claude app running at all the widget is gone, even if it was the last thing the user touched.
-        let claudeRunning: Bool = NSWorkspace.shared.runningApplications.contains { (a: NSRunningApplication) -> Bool in
-            let rid: String = (a.bundleIdentifier ?? "").lowercased()
-            let rname: String = (a.localizedName ?? "").lowercased()
-            return rid.contains("anthropic") || rid.contains("claude") || rname == "claude"
-        }
-        if claudeRunning && (isClaude || isSelf) { panel.orderFrontRegardless() } else { panel.orderOut(nil) }
+        if isClaude || isSelf { panel.orderFrontRegardless() } else { panel.orderOut(nil) }
     }
 
     func place() {
