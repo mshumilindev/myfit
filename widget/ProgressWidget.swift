@@ -283,6 +283,7 @@ final class WidgetView: NSView {
     var progress: CGFloat = -1
     var copied = ""
     var showAll = false
+    var flipped = Set<String>()
     var showPrompts = false
     var scrollY: CGFloat = 0
     var contentHeight: CGFloat = 0
@@ -501,7 +502,19 @@ final class WidgetView: NSView {
                 pill(showAll ? "Less" : "More", 0, y, active: showAll, right: w - pad, draw) { self.showAll.toggle(); self.scrollY = 0; self.onChange() }
                 y += 30
                 if showAll {
-                    for it in c0.items {
+                    var order: [String] = []
+                    for it in c0.items where !order.contains(it.stage) { order.append(it.stage) }
+                    for st in order {
+                        let grp = c0.items.filter { $0.stage == st }
+                        let doneN = grp.filter { $0.status == "done" }.count
+                        let open = (doneN < grp.count) != flipped.contains(st)
+                        pill("\(open ? "\u{25BE}" : "\u{25B8}") \(st.isEmpty ? "Other" : st)  \(doneN)/\(grp.count)", pad, y, active: open, draw) {
+                            if self.flipped.contains(st) { self.flipped.remove(st) } else { self.flipped.insert(st) }
+                            self.onChange()
+                        }
+                        y += 30
+                        if !open { continue }
+                    for it in grp {
                         if draw {
                             color(it.status).setFill()
                             NSBezierPath(roundedRect: NSRect(x: pad, y: y + 3, width: 8, height: 8), xRadius: 2, yRadius: 2).fill()
@@ -518,6 +531,7 @@ final class WidgetView: NSView {
                         let why = it.status == "done" ? it.evidence : it.why
                         if !why.isEmpty { y += wrapped(why, pad + 16, y, w - 2 * pad - 16, 10.5, 0.55, draw) + 2 }
                         y += 6
+                    }
                     }
                 }
             }
