@@ -283,6 +283,7 @@ final class WidgetView: NSView {
     var note = ""
     var tab = 0
     var cardIdx = 0
+    var followed = ""
     var hovering = false
     var pinned = false
     var collapsed: Bool { !(hovering || pinned) }
@@ -571,7 +572,9 @@ final class WidgetView: NSView {
                 if !b.subject.isEmpty { _ = wrapped(b.subject, pad + 8, cy, w - 2 * pad - 24, 11, 0.6, draw); cy += sh }
                 cy += 6
                 let bw = pill(copied == "ex:" + nm ? "Copied \u{2713} paste in chat" : "Explain in chat", pad + 8, cy, active: copied == "ex:" + nm, draw) { self.copyText(ex, "ex:" + nm) }
-                pill(copied == "del:" + nm ? "Copied \u{2713} paste in chat" : "Delete\u{2026}", pad + 8 + bw + 6, cy, active: copied == "del:" + nm, draw) { self.copyText(del, "del:" + nm) }
+                let swp = "Switch this chat to git branch \(nm): commit or stash anything uncommitted first, then `git switch \(nm)`, run `node scripts/wf.mjs status` and continue the task on this branch. Do not push."
+                let sw = pill(copied == "sw:" + nm ? "Copied \u{2713} paste in chat" : "Switch here", pad + 8 + bw + 6, cy, active: copied == "sw:" + nm, draw) { self.copyText(swp, "sw:" + nm) }
+                pill(copied == "del:" + nm ? "Copied \u{2713} paste in chat" : "Delete\u{2026}", pad + 8 + bw + sw + 12, cy, active: copied == "del:" + nm, draw) { self.copyText(del, "del:" + nm) }
                 y += cardH + 10
             }
             for c in (tab == 1 ? Array(snap.cards.dropFirst()) : []) {
@@ -810,6 +813,12 @@ final class App: NSObject {
             let s = loadSnapshot()
             checkForUpdate()
             DispatchQueue.main.async {
+                if let newest = s.cards.first, newest.source != self.view.followed {
+                    // Another chat became the active one: follow it (card, details box, tabs reset).
+                    let first = self.view.followed.isEmpty
+                    self.view.followed = newest.source
+                    if !first { self.view.cardIdx = 0; self.view.selected = nil; self.view.tab = 0 }
+                }
                 self.view.snap = s
                 self.view.note = s.cards.isEmpty ? "No data (git fetch failed?)" : ""
                 self.place()
