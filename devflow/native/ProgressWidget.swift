@@ -1,9 +1,9 @@
 import Cocoa
 
-struct Item { let id: String; let text: String; let status: String; let why: String; let evidence: String }
+struct Item { let id: String; let text: String; let status: String; let why: String; let evidence: String; let stage: String }
 struct Card { let task: String; let pct: Int; let done: Int; let total: Int; let eta: String; let now: String; let items: [Item]; let at: Double; let source: String }
 struct Branch { let name: String; let kind: String; let ahead: Int; let subject: String }
-struct Stage { let stage: String; let state: String; let detail: String }
+struct Stage { let stage: String; let state: String; let detail: String; let url: String }
 struct Prompt { let label: String; let text: String }
 struct Snapshot { var cards: [Card] = []; var branches: [Branch] = []; var prompts: [Prompt] = []; var pipeline: [Stage] = []; var dashboard = "" }
 
@@ -40,7 +40,7 @@ func loadSnapshot() -> Snapshot {
         let src = str(o["source"])
         for t in (o["tasks"] as? [[String: Any]]) ?? [] {
             let items = ((t["blocks"] as? [[String: Any]]) ?? []).map {
-                Item(id: str($0["id"]), text: str($0["text"]), status: str($0["status"]), why: str($0["why"]), evidence: str($0["evidence"]))
+                Item(id: str($0["id"]), text: str($0["text"]), status: str($0["status"]), why: str($0["why"]), evidence: str($0["evidence"]), stage: str($0["stage"]))
             }
             snap.cards.append(Card(task: str(t["task"]), pct: num(t["pct"]), done: num(t["done"]), total: num(t["total"]),
                                    eta: str(t["eta"]), now: str(t["now"]), items: items, at: at, source: src))
@@ -52,7 +52,7 @@ func loadSnapshot() -> Snapshot {
         if at >= newest {
             newest = at
             snap.prompts = ((o["prompts"] as? [[String: Any]]) ?? []).map { Prompt(label: str($0["label"]), text: str($0["text"])) }
-            snap.pipeline = ((o["pipeline"] as? [[String: Any]]) ?? []).map { Stage(stage: str($0["stage"]), state: str($0["state"]), detail: str($0["detail"])) }
+            snap.pipeline = ((o["pipeline"] as? [[String: Any]]) ?? []).map { Stage(stage: str($0["stage"]), state: str($0["state"]), detail: str($0["detail"]), url: str($0["url"])) }
             let d = str(o["dashboardUrl"]); if !d.isEmpty { snap.dashboard = d }
         }
     }
@@ -224,24 +224,35 @@ final class WidgetView: NSView {
                 text("\(c.task)  \(c.pct)%  \(c.done)/\(c.total)", pad, y, 13, true, 0.95, draw)
                 text(c.eta, 0, y + 1, 11, false, 0.6, draw, right: w - pad)
                 y += 22
-                var bx = pad
-                for it in c.items {
-                    if bx + sq > w - pad { bx = pad; y += sq + gap }
-                    let r = NSRect(x: bx, y: y, width: sq, height: sq)
-                    if draw {
-                        color(it.status).setFill()
-                        NSBezierPath(roundedRect: r, xRadius: 2, yRadius: 2).fill()
-                        if let s = selected, s.0 == c.task, s.1 == it.id {
-                            NSColor.white.setStroke()
-                            let p = NSBezierPath(roundedRect: r.insetBy(dx: -1.5, dy: -1.5), xRadius: 3, yRadius: 3)
-                            p.lineWidth = 1.5; p.stroke()
+                let order = ["Spike", "Design", "Risk", "Plan", "Development", "Tests", "CI", "Deploy test", "Deploy prod", "Legal"]
+                var groups = order.filter { g in c.items.contains { ($0.stage.isEmpty ? "Development" : $0.stage) == g } }
+                for it in c.items { let g = it.stage.isEmpty ? "Development" : it.stage; if !groups.contains(g) { groups.append(g) } }
+                for g in groups {
+                    let its = c.items.filter { ($0.stage.isEmpty ? "Development" : $0.stage) == g }
+                    let gd = its.filter { $0.status == "done" }.count
+                    text(g, pad, y, 10.5, true, 0.6, draw)
+                    text("\(gd)/\(its.count)", 0, y, 10.5, false, 0.5, draw, right: w - pad)
+                    y += 16
+                    var bx = pad
+                    for it in its {
+                        if bx + sq > w - pad { bx = pad; y += sq + gap }
+                        let r = NSRect(x: bx, y: y, width: sq, height: sq)
+                        if draw {
+                            color(it.status).setFill()
+                            NSBezierPath(roundedRect: r, xRadius: 2, yRadius: 2).fill()
+                            if let s = selected, s.0 == c.task, s.1 == it.id {
+                                NSColor.white.setStroke()
+                                let p = NSBezierPath(roundedRect: r.insetBy(dx: -1.5, dy: -1.5), xRadius: 3, yRadius: 3)
+                                p.lineWidth = 1.5; p.stroke()
+                            }
+                            squares.append((r.insetBy(dx: -1.5, dy: -1.5), it))
+                            hits.append(Hit(rect: r.insetBy(dx: -1.5, dy: -1.5)) { self.selected = (c.task, it.id); self.onChange() })
                         }
-                        squares.append((r.insetBy(dx: -1.5, dy: -1.5), it))
-                        hits.append(Hit(rect: r.insetBy(dx: -1.5, dy: -1.5)) { self.selected = (c.task, it.id); self.onChange() })
+                        bx += sq + gap
                     }
-                    bx += sq + gap
+                    y += sq + gap + 6
                 }
-                y += sq + gap + 8
+                y += 2
             }
             if let s = selected, let c = snap.cards.first(where: { $0.task == s.0 }), let it = c.items.first(where: { $0.id == s.1 }) {
                 let box = y
@@ -343,6 +354,13 @@ final class WidgetView: NSView {
                 stages.append((st.stage, m, st.detail))
             }
             for (name, st, detail) in stages {
+                let rowTop = y
+                let target: () -> Void = {
+                    if name == "Development" { self.tab = 0; self.onChange() }
+                    else if name == "Waiting for cpd" { self.tab = 2; self.onChange() }
+                    else if let u = self.snap.pipeline.first(where: { $0.stage == name })?.url, let url = URL(string: u), !u.isEmpty { NSWorkspace.shared.open(url) }
+                }
+                if draw { hits.append(Hit(rect: NSRect(x: pad - 4, y: rowTop - 4, width: w - 2 * pad + 8, height: 40), action: target)) }
                 text("\u{25CF}", pad, y, 14, true, 1, draw, c: color(st))
                 text(name, pad + 20, y + 1, 12, true, 0.95, draw)
                 text(statusName(st), 0, y + 1, 11, true, 0.9, draw, right: w - pad, c: color(st))

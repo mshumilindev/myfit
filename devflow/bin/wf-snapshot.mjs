@@ -112,6 +112,7 @@ function summarize(task, items, active, pace, now, events) {
           ? `Waiting on: ${i.needs ?? '?'}${i.reason ? ` · ${i.reason}` : ''}`
           : (i.reason ?? ''),
       evidence: i.evidence ?? '',
+      stage: stageOf(i),
     })),
   };
 }
@@ -126,6 +127,25 @@ const git = (root, args) => {
     return '';
   }
 };
+
+/** Work category of an item: explicit `stage`, else guessed from its text (so every task can be grouped). */
+export function stageOf(i) {
+  if (i.stage) return String(i.stage);
+  const t = `${i.text ?? ''}`.toLowerCase();
+  const rules = [
+    ['Deploy prod', /\bprod\b|production|release/],
+    ['Deploy test', /deploy|\bcpd\b|hosting/],
+    ['CI', /\bci\b|pipeline|workflow|lighthouse|semgrep|bundle budget/],
+    ['Spike', /spike|research/],
+    ['Design', /design|mockup|canvas|\bui\b|widget|dashboard screen/],
+    ['Risk', /risk|regression/],
+    ['Plan', /\bplan\b|spec\b/],
+    ['Tests', /\btests?\b|verify|verifier|calibrat|coverage|mutation/],
+    ['Legal', /legal|consent|policy|privacy/],
+  ];
+  for (const [name, re] of rules) if (re.test(t)) return name;
+  return 'Development';
+}
 
 /** Local branches that matter: ready-for-cpd/* (waiting for cpd), current/other work branches, and unpushed commits on main. */
 export function branchesOf(root) {
@@ -224,7 +244,12 @@ export function pipelineOf(root) {
       : 'no runs';
   const ci = gh([`repos/${repo}/actions/workflows/ci.yml/runs?per_page=1&branch=main`])
     ?.workflow_runs?.[0];
-  stages.push({ stage: 'CI (main)', state: state(ci), detail: detail(ci) });
+  stages.push({
+    stage: 'CI (main)',
+    state: state(ci),
+    detail: detail(ci),
+    url: ci?.html_url ?? '',
+  });
   const runs =
     gh([`repos/${repo}/actions/workflows/deploy-hosting.yml/runs?per_page=6`])?.workflow_runs ?? [];
   for (const target of ['test', 'prod']) {
@@ -236,7 +261,12 @@ export function pipelineOf(root) {
         break;
       }
     }
-    stages.push({ stage: `Deploy ${target}`, state: state(found), detail: detail(found) });
+    stages.push({
+      stage: `Deploy ${target}`,
+      state: state(found),
+      detail: detail(found),
+      url: found?.html_url ?? '',
+    });
   }
   return stages;
 }
