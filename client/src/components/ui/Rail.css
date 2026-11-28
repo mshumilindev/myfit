@@ -124,9 +124,10 @@
 .rail--overflow .rail-item {
   flex: none;
 }
-/* The rail's tooltips reach into the content column: keep the rail above it in every app
-   (a flex item honours z-index without being positioned; the sticky Nutrition rail too). */
-.rail.rail--overflow {
+/* The rail's tooltips reach into the content column: keep every rail above it in every app,
+   not only the overflow variant (a flex item honours z-index without being positioned; the
+   sticky Nutrition rail too). Without it a card in the column painted over the tooltip. */
+.rail {
   z-index: var(--z-39);
 }
 .rail-more {

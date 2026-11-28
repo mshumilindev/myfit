@@ -4,8 +4,7 @@ import { EmptyState } from '../components/ui/EmptyState';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Field } from '../components/ui/Field';
 import { SearchField } from '../components/ui/SearchField';
-import { Button, IconButton, LinkButton } from '../components/ui/Button';
-import { currentDevConsoleHref } from '../devConsole';
+import { Button, IconButton } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { ListRow } from '../components/ui/GroupedList';
 import { Segmented } from '../components/ui/Segmented';
@@ -14,7 +13,7 @@ import { callFn, getUsername } from '../api';
 import { offlineHydrate, offlineLoad, offlinePeekNow } from '../offline/offlineCache';
 import { fmtDayMonth, fmtTonnes, fmtSessionClock, useT } from '../i18n';
 import { fullPersonName } from '../name';
-import { Dialog, Icon, Sheet, useIsDesktop } from '../ui';
+import { Dialog, Icon, Sheet } from '../ui';
 import { UserAvatar } from '../components/Avatar';
 import { PersonFields } from './AdminPersonFields';
 import { NewPersonDialog, LinkDialog, ChangeEmailDialog } from './AdminInviteDialogs';
@@ -29,8 +28,6 @@ const DAY = 24 * 60 * 60 * 1000;
 
 export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => void }) {
   const { t, locale } = useT();
-  const isDesktop = useIsDesktop();
-  const devConsole = isDesktop ? currentDevConsoleHref() : null;
   // this session's copy paints at once; after a restart the sealed snapshot lands a moment later (see the effect)
   const [people, setPeople] = useState<Person[]>(
     () => offlinePeekNow<Person[]>('adminPeople')?.data ?? [],
@@ -183,11 +180,6 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
           <div className="sub">{t.adminSummary(members, trainers.length, pending)}</div>
         </div>
         <div className="ul-flex ug-8 ua-center">
-          {devConsole && (
-            <LinkButton variant="secondary" href={devConsole} target="_blank" rel="noreferrer">
-              <Icon name="gear" /> {t.adminDevConsole}
-            </LinkButton>
-          )}
           <Button variant="primary" onClick={() => setCreating('member')}>
             <Icon name="plus" /> {t.adminNewMember}
           </Button>

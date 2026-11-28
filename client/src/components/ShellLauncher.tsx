@@ -16,6 +16,7 @@ import { IconTile } from './ui/IconTile';
 import { SUITE_ICON, SUITE_TONE } from './suite/suiteTone';
 import { toneClass, type Tone } from './ui/tones';
 import { Icon, Sheet } from '../ui';
+import { currentDevConsoleHref } from '../devConsole';
 import { consistencyStreak, type StoreState } from '../store';
 import { setHash } from '../route';
 import { getRole } from '../api';
@@ -137,6 +138,10 @@ export function ShellLauncher({
   // Coach dashboard entry: trainer or admin, flag on (coach/access.ts). Hidden otherwise.
   const coachEnabled = useCoachAccess();
   const peopleEnabled = canUsePeople(getRole());
+  // Dev Console (SPO-639): a separate loopback dev server, so a tile only on a local dev build, on desktop, for an admin.
+  // Read once per open (the sheet is transient); jsdom has no matchMedia, so its absence reads as not desktop.
+  const isDesktop = window.matchMedia?.('(min-width: 720px)').matches ?? false;
+  const devHref = isDesktop && role === 'admin' ? currentDevConsoleHref() : null;
   const sessionsWeek = store.workouts.filter(
     (w) => w.finishedAt !== null && w.startedAt >= now - 7 * DAY,
   ).length;
@@ -203,6 +208,24 @@ export function ShellLauncher({
         )}
       </Fragment>
     ),
+    dev: (
+      <Fragment key="dev">
+        {devHref && (
+          <AppTile
+            tone="people"
+            icon="gear"
+            name={t.adminDevConsole}
+            sub={t.shellDevDesc}
+            current={false}
+            onSelect={() => {
+              onClose();
+              window.open(devHref, '_blank', 'noreferrer');
+            }}
+            currentLabel={t.shellCurrent}
+          />
+        )}
+      </Fragment>
+    ),
     coach: (
       <Fragment key="coach">
         {(coachEnabled || current === 'coach') && (
@@ -237,7 +260,10 @@ export function ShellLauncher({
   };
   // The app the person lands on goes first (addons/defaultApp.ts); the rest keep their order.
   const first = defaultApp(getRole());
-  const order = [first, ...['gym', 'apex', 'roster', 'coach', 'learn'].filter((k) => k !== first)];
+  const order = [
+    first,
+    ...['gym', 'apex', 'roster', 'coach', 'dev', 'learn'].filter((k) => k !== first),
+  ];
 
   return (
     <Sheet

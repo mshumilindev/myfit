@@ -4208,6 +4208,7 @@ export const lt: Strings = {
   shellNutritionDesc: 'Pamaitink treniruotes.',
   shellLearn: 'Mokymasis',
   shellLearnDesc: 'Vaizdo pamokos.',
+  shellDevDesc: 'Darbo eiga ir kūrėjo skydelis.',
   shellMoreApps: 'Daugiau programėlių',
   learnBannerKicker: 'Mokymasis',
   learnBannerTitleStart: 'Išmokite naudotis Spotter',

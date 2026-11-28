@@ -4167,6 +4167,7 @@ export const et: Strings = {
   shellNutritionDesc: 'Toida oma treeningut.',
   shellLearn: 'Õppimine',
   shellLearnDesc: 'Õppevideod.',
+  shellDevDesc: 'Töövoog ja arendaja töölaud.',
   shellMoreApps: 'Rohkem rakendusi',
   learnBannerKicker: 'Õppimine',
   learnBannerTitleStart: 'Õpi Spotterit kasutama',
