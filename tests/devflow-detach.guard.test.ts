@@ -18,6 +18,7 @@ const BASELINE: Record<string, number> = {
   'core/wf-stop.mjs': 4,
   'core/wf-views.mjs': 1,
   'bin/dash-close.mjs': 2,
+  'bin/devflow.mjs': 4,
   'bin/journal-hook.mjs': 6,
   'bin/wf-bar.mjs': 3,
   'bin/wf-context-hook.mjs': 3,
