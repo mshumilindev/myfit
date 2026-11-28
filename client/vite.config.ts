@@ -231,7 +231,11 @@ export default defineConfig({
   // Pre-bundle at server start, not on first visit: `body-muscles` is only reached through lazy Coach/Programs
   // chunks, and a dependency discovered late re-optimises the cache while open tabs still hold the old hash
   // (the stale `504 Outdated Optimize Dep` that left lazy screens blank).
-  optimizeDeps: { include: ['body-muscles'] },
+  // Scan only the app entry. Vite's default crawls every `*.html` under the client root (ignoring just node_modules and
+  // build.outDir), so lab builds, harnesses and exports left there (design-lab/, .chronic-real/, ...) each became an
+  // esbuild scan entry: the dev server never finished its start-up scan and esbuild grew to tens of GB. Lazy chunks are
+  // still found from index.html.
+  optimizeDeps: { include: ['body-muscles'], entries: ['index.html'] },
   server: {
     port: 5173,
   },
