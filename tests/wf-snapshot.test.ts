@@ -34,3 +34,26 @@ describe('wf snapshot pace and ETA', () => {
     expect(etaOf([{ id: 'D', status: 'done' }], pace, now)).toBeNull();
   });
 });
+
+describe('promptsOf', () => {
+  it('builds copy-ready prompts for open, blocked and cpd work', async () => {
+    const { promptsOf } = await import('../devflow/bin/wf-snapshot.mjs');
+    const task = {
+      task: 'SPO-1',
+      active: true,
+      blocks: [
+        { id: 'A.1', text: 'one', status: 'todo', why: '' },
+        { id: 'A.2', text: 'two', status: 'blocked', why: 'Waiting on: access' },
+        { id: 'A.3', text: 'three', status: 'done', why: '' },
+      ],
+    };
+    const out = promptsOf([task], [{ name: 'main', kind: 'cpd', ahead: 2, subject: '' }]);
+    expect(out.map((p: { label: string }) => p.label)).toEqual([
+      'Finish 1 open in SPO-1',
+      'Unblock A.2',
+      'cpd',
+    ]);
+    expect(out[0].text).toContain('A.1');
+    expect(out[2].text).toBe('cpd');
+  });
+});

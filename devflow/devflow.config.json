@@ -14,5 +14,6 @@
     "branch": "wf-state",
     "dir": "wf",
     "minIntervalMs": 3000
-  }
+  },
+  "dashboardUrl": "https://claude.ai/artifact/EHNnG2BKNipz7UmuWkz7jT"
 }

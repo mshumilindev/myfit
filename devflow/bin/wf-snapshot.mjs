@@ -5,6 +5,7 @@
  * Always English; paths come from devflow.config.json.
  */
 import { readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
@@ -110,8 +111,70 @@ function summarize(task, items, active, pace, now, events) {
         i.status === 'blocked'
           ? `Waiting on: ${i.needs ?? '?'}${i.reason ? ` · ${i.reason}` : ''}`
           : (i.reason ?? ''),
+      evidence: i.evidence ?? '',
     })),
   };
+}
+
+const git = (root, args) => {
+  try {
+    return execFileSync('git', ['-C', root, ...args], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+  } catch {
+    return '';
+  }
+};
+
+/** Local branches that matter: ready-for-cpd/* (waiting for cpd), current/other work branches, and unpushed commits on main. */
+export function branchesOf(root) {
+  const out = [];
+  const cur = git(root, ['rev-parse', '--abbrev-ref', 'HEAD']);
+  const lines = git(root, [
+    'for-each-ref',
+    '--format=%(refname:short)\t%(contents:subject)',
+    'refs/heads',
+  ]).split('\n');
+  for (const line of lines) {
+    const [name, subject = ''] = line.split('\t');
+    if (!name) continue;
+    const ahead = Number(git(root, ['rev-list', '--count', `origin/main..${name}`])) || 0;
+    if (name === 'main') {
+      if (ahead > 0)
+        out.push({
+          name: 'main',
+          kind: 'cpd',
+          ahead,
+          subject: 'unpushed commits, waiting for cpd',
+        });
+      continue;
+    }
+    if (name.startsWith('ready-for-cpd/')) out.push({ name, kind: 'cpd', ahead, subject });
+    else if (ahead > 0 || name === cur) out.push({ name, kind: 'dev', ahead, subject });
+  }
+  return out;
+}
+
+/** Copy-ready prompts that hand the agent exactly what is left. */
+export function promptsOf(tasks, branches = []) {
+  const out = [];
+  const t = tasks.find((x) => x.active) ?? tasks[0];
+  if (t) {
+    const open = t.blocks.filter((b) => b.status === 'todo' || b.status === 'doing');
+    if (open.length)
+      out.push({
+        label: `Finish ${open.length} open in ${t.task}`,
+        text: `Continue ${t.task}: finish all remaining wf items (${open.map((b) => b.id).join(', ')}). Close each only with wf done --evidence. Do not stop or ask until they are done.`,
+      });
+    for (const b of t.blocks.filter((x) => x.status === 'blocked'))
+      out.push({
+        label: `Unblock ${b.id}`,
+        text: `${t.task}: ${b.id} (${b.text}) is blocked. ${b.why}. Find a way around it yourself; if it truly needs me, tell me the one thing to do.`,
+      });
+  }
+  if (branches.some((b) => b.kind === 'cpd')) out.push({ label: 'cpd', text: 'cpd' });
+  return out;
 }
 
 export function buildSnapshot({
@@ -129,7 +192,23 @@ export function buildSnapshot({
     const t = summarize(p.task.id, p.items ?? [], false, pace, now, events);
     if (t.pct < 100) tasks.push(t);
   }
-  return { source: label, updatedAt: now, tasks };
+  const branches = branchesOf(root);
+  let dashboardUrl = '';
+  try {
+    dashboardUrl =
+      JSON.parse(readFileSync(join(root, 'devflow', 'devflow.config.json'), 'utf8')).dashboardUrl ??
+      '';
+  } catch {
+    /* config is optional */
+  }
+  return {
+    source: label,
+    updatedAt: now,
+    tasks,
+    branches,
+    prompts: promptsOf(tasks, branches),
+    dashboardUrl,
+  };
 }
 
 if (process.argv[1] && basename(process.argv[1]) === 'wf-snapshot.mjs') {
