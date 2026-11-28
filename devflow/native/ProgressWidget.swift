@@ -224,7 +224,8 @@ final class WidgetView: NSView {
     func copyText(_ s: String, _ label: String) {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(s, forType: .string)
-        if label.hasPrefix("ex:") || label.hasPrefix("del:") { copied = label } else { toast = "Copied: " + label }
+        copied = label
+        toast = "Copied to clipboard \u{2014} paste into Claude with \u{2318}V"
         onChange()
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) { self.toast = ""; self.copied = ""; self.onChange() }
     }
@@ -436,10 +437,6 @@ final class WidgetView: NSView {
                 y += 30
             }
         }
-        if !toast.isEmpty {
-            if draw { text(toast, pad, y, 11, true, 0.9, true, c: color("done")) }
-            y += 20
-        }
         text("v\(runningVersion) \u{00B7} \(updateStatus)", pad, y + 4, 9.5, false, 0.5, draw)
         pill(darkTheme ? "\u{2600} Day" : "\u{263E} Night", 0, y, active: false, right: w - pad, draw) {
             darkTheme.toggle()
@@ -471,6 +468,12 @@ final class WidgetView: NSView {
         path.stroke()
         NSGraphicsContext.current?.cgContext.translateBy(x: 0, y: -scrollY)
         contentHeight = render(bounds.width, true)
+        if !toast.isEmpty {
+            let r = NSRect(x: 14, y: scrollY + 8, width: bounds.width - 28, height: 30)
+            accent().setFill()
+            NSBezierPath(roundedRect: r, xRadius: 8, yRadius: 8).fill()
+            text(toast, 24, scrollY + 15, 12, true, 1, true, c: NSColor.white)
+        }
         if hoverHit != .zero {
             ov(0.13).setFill()
             NSBezierPath(roundedRect: hoverHit, xRadius: 6, yRadius: 6).fill()
