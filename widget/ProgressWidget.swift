@@ -147,6 +147,7 @@ final class WidgetView: NSView {
     var selected: (String, String)? = nil   // task id, item id
     var toast = ""
     var showAll = false
+    var showPrompts = false
     var scrollY: CGFloat = 0
     var contentHeight: CGFloat = 0
     var hits: [Hit] = []
@@ -261,17 +262,21 @@ final class WidgetView: NSView {
             }
             let ps = snap.prompts
             if !ps.isEmpty || selected != nil {
-                text("Prompts to copy", pad, y, 11, true, 0.55, draw)
-                y += 20
                 var list = ps
                 if let s = selected, let c = snap.cards.first(where: { $0.task == s.0 }), let it = c.items.first(where: { $0.id == s.1 }), it.status != "done" {
                     list.insert(Prompt(label: "Close \(it.id)", text: "\(c.task): close \(it.id) (\(it.text)). Current state: \(statusName(it.status))\(it.why.isEmpty ? "" : ", " + it.why). Finish it, prove it with wf done --evidence, and continue until nothing is left."), at: 0)
                 }
-                for p in list.prefix(5) {
-                    let label = p.label.count > 38 ? String(p.label.prefix(37)) + "\u{2026}" : p.label
-                    text(label, pad, y + 3, 11.5, false, 0.9, draw)
-                    pill("Copy", 0, y, active: false, right: w - pad, draw) { self.copyText(p.text, p.label) }
-                    y += 28
+                let head = (showPrompts ? "\u{25BE} " : "\u{25B8} ") + "Prompts to copy (\(min(list.count, 5)))"
+                let hw = text(head, pad, y, 11, true, 0.7, draw)
+                if draw { hits.append(Hit(rect: NSRect(x: pad - 4, y: y - 4, width: hw + 8, height: 22)) { self.showPrompts.toggle(); self.onChange() }) }
+                y += 22
+                if showPrompts {
+                    for p in list.prefix(5) {
+                        let label = p.label.count > 38 ? String(p.label.prefix(37)) + "\u{2026}" : p.label
+                        text(label, pad, y + 3, 11.5, false, 0.9, draw)
+                        pill("Copy", 0, y, active: false, right: w - pad, draw) { self.copyText(p.text, p.label) }
+                        y += 28
+                    }
                 }
             }
             if let c0 = snap.cards.first {
