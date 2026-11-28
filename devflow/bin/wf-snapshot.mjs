@@ -156,6 +156,91 @@ export function branchesOf(root) {
   return out;
 }
 
+/** Branches pushed to GitHub (any chat), merged with the local ones. Best effort via gh. */
+export function withRemoteBranches(root, local) {
+  const out = [...local];
+  try {
+    const remote = git(root, ['config', '--get', 'remote.origin.url']);
+    const m = /github\.com[:/]([^/]+\/[^/.]+)/.exec(remote);
+    if (!m) return out;
+    const api = (path) =>
+      JSON.parse(
+        execFileSync('gh', ['api', path], {
+          cwd: root,
+          encoding: 'utf8',
+          timeout: 15000,
+          stdio: ['ignore', 'pipe', 'ignore'],
+        }),
+      );
+    for (const b of api(`repos/${m[1]}/branches?per_page=100`)) {
+      if (
+        b.name === 'main' ||
+        b.name === 'wf-state' ||
+        b.name.startsWith('dependabot/') ||
+        out.some((x) => x.name === b.name)
+      )
+        continue;
+      const c = api(`repos/${m[1]}/compare/main...${encodeURIComponent(b.name)}`);
+      if (!c.ahead_by) continue;
+      out.push({
+        name: b.name,
+        kind: b.name.startsWith('ready-for-cpd/') ? 'cpd' : 'dev',
+        ahead: c.ahead_by,
+        subject: `${c.commits?.at(-1)?.commit?.message?.split('\n')[0] ?? ''} (on GitHub)`,
+      });
+    }
+  } catch {
+    /* gh unavailable: local branches only */
+  }
+  return out;
+}
+
+/** Pipeline stages from GitHub Actions (best effort; empty when gh is unavailable). */
+export function pipelineOf(root) {
+  const stages = [];
+  const gh = (args) => {
+    try {
+      return JSON.parse(
+        execFileSync('gh', ['api', ...args], {
+          cwd: root,
+          encoding: 'utf8',
+          timeout: 15000,
+          stdio: ['ignore', 'pipe', 'ignore'],
+        }),
+      );
+    } catch {
+      return null;
+    }
+  };
+  const remote = git(root, ['config', '--get', 'remote.origin.url']);
+  const m = /github\.com[:/]([^/]+\/[^/.]+)/.exec(remote);
+  if (!m) return stages;
+  const repo = m[1];
+  const state = (r) =>
+    !r ? 'none' : r.status !== 'completed' ? 'running' : r.conclusion === 'success' ? 'ok' : 'fail';
+  const detail = (r) =>
+    r
+      ? `${r.head_sha.slice(0, 7)} \u00b7 ${r.updated_at.slice(0, 16).replace('T', ' ')}`
+      : 'no runs';
+  const ci = gh([`repos/${repo}/actions/workflows/ci.yml/runs?per_page=1&branch=main`])
+    ?.workflow_runs?.[0];
+  stages.push({ stage: 'CI (main)', state: state(ci), detail: detail(ci) });
+  const runs =
+    gh([`repos/${repo}/actions/workflows/deploy-hosting.yml/runs?per_page=6`])?.workflow_runs ?? [];
+  for (const target of ['test', 'prod']) {
+    let found = null;
+    for (const r of runs) {
+      const jobs = gh([`repos/${repo}/actions/runs/${r.id}/jobs`])?.jobs ?? [];
+      if (jobs.some((j) => j.name.toLowerCase().includes(target))) {
+        found = r;
+        break;
+      }
+    }
+    stages.push({ stage: `Deploy ${target}`, state: state(found), detail: detail(found) });
+  }
+  return stages;
+}
+
 /** Copy-ready prompts that hand the agent exactly what is left. */
 export function promptsOf(tasks, branches = []) {
   const out = [];
@@ -192,7 +277,7 @@ export function buildSnapshot({
     const t = summarize(p.task.id, p.items ?? [], false, pace, now, events);
     if (t.pct < 100) tasks.push(t);
   }
-  const branches = branchesOf(root);
+  const branches = withRemoteBranches(root, branchesOf(root));
   let dashboardUrl = '';
   try {
     dashboardUrl =
@@ -207,6 +292,7 @@ export function buildSnapshot({
     tasks,
     branches,
     prompts: promptsOf(tasks, branches),
+    pipeline: pipelineOf(root),
     dashboardUrl,
   };
 }

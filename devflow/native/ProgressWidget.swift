@@ -3,8 +3,9 @@ import Cocoa
 struct Item { let id: String; let text: String; let status: String; let why: String; let evidence: String }
 struct Card { let task: String; let pct: Int; let done: Int; let total: Int; let eta: String; let now: String; let items: [Item]; let at: Double; let source: String }
 struct Branch { let name: String; let kind: String; let ahead: Int; let subject: String }
+struct Stage { let stage: String; let state: String; let detail: String }
 struct Prompt { let label: String; let text: String }
-struct Snapshot { var cards: [Card] = []; var branches: [Branch] = []; var prompts: [Prompt] = []; var dashboard = "" }
+struct Snapshot { var cards: [Card] = []; var branches: [Branch] = []; var prompts: [Prompt] = []; var pipeline: [Stage] = []; var dashboard = "" }
 
 // Own clone of the wf-state branch, outside protected folders (Desktop/Documents).
 let repo = NSString(string: "~/.devflow/wf-state").expandingTildeInPath
@@ -51,6 +52,7 @@ func loadSnapshot() -> Snapshot {
         if at >= newest {
             newest = at
             snap.prompts = ((o["prompts"] as? [[String: Any]]) ?? []).map { Prompt(label: str($0["label"]), text: str($0["text"])) }
+            snap.pipeline = ((o["pipeline"] as? [[String: Any]]) ?? []).map { Stage(stage: str($0["stage"]), state: str($0["state"]), detail: str($0["detail"])) }
             let d = str(o["dashboardUrl"]); if !d.isEmpty { snap.dashboard = d }
         }
     }
@@ -190,7 +192,8 @@ final class WidgetView: NSView {
         var x = pad
         x += pill("Tasks", x, y, active: tab == 0, draw) { self.tab = 0; self.onChange() } + 6
         x += pill("In dev (\(devN))", x, y, active: tab == 1, draw) { self.tab = 1; self.onChange() } + 6
-        _ = pill("cpd (\(cpdN))", x, y, active: tab == 2, draw) { self.tab = 2; self.onChange() }
+        x += pill("cpd (\(cpdN))", x, y, active: tab == 2, draw) { self.tab = 2; self.onChange() } + 6
+        _ = pill("Pipeline", x, y, active: tab == 3, draw) { self.tab = 3; self.onChange() }
         let dash = snap.dashboard
         pill("Dashboard \u{2197}", 0, y, active: false, right: w - pad, draw) {
             if let u = URL(string: dash), !dash.isEmpty { NSWorkspace.shared.open(u) }
@@ -303,6 +306,24 @@ final class WidgetView: NSView {
                 y += 26
             }
             if rows.isEmpty && snap.cards.count < 2 { text("No other work in progress", pad, y, 12, false, 0.6, draw); y += 24 }
+        } else if tab == 3 {
+            var stages: [(String, String, String)] = []
+            let devDone = snap.cards.first.map { $0.done == $0.total } ?? false
+            stages.append(("Development", devDone ? "done" : "doing", snap.cards.first.map { "\($0.task) \u{00B7} \($0.done)/\($0.total)" } ?? ""))
+            let cpdN2 = snap.branches.filter { $0.kind == "cpd" }.count
+            stages.append(("Waiting for cpd", cpdN2 > 0 ? "doing" : "done", cpdN2 > 0 ? "\(cpdN2) branch(es) not pushed" : "nothing queued"))
+            for st in snap.pipeline {
+                let m = ["ok": "done", "running": "doing", "fail": "blocked"][st.state] ?? "todo"
+                stages.append((st.stage, m, st.detail))
+            }
+            for (name, st, detail) in stages {
+                text("\u{25CF}", pad, y, 14, true, 1, draw, c: color(st))
+                text(name, pad + 20, y + 1, 12, true, 0.95, draw)
+                text(statusName(st), 0, y + 1, 11, true, 0.9, draw, right: w - pad, c: color(st))
+                y += 18
+                if !detail.isEmpty { text(detail, pad + 20, y, 10.5, false, 0.55, draw); y += 16 }
+                y += 8
+            }
         } else {
             let rows = snap.branches.filter { $0.kind == "cpd" }
             for b in rows {
