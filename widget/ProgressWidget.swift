@@ -1,8 +1,8 @@
 import Cocoa
 
-// devflow-widget-rev: 47
+// devflow-widget-rev: 48
 // Monotonic build number. Publishers and the self-updater never move to a lower one (stops another checkout rolling the widget back).
-let widgetRev = 47
+let widgetRev = 48
 func revOf(_ src: String) -> Int {
     guard let r = src.range(of: "devflow-widget-rev: ") else { return 0 }
     return Int(src[r.upperBound...].prefix(while: { $0.isNumber })) ?? 0
@@ -529,7 +529,7 @@ final class WidgetView: NSView {
                 for it in c.items { let g = it.stage.isEmpty ? "Development" : it.stage; if !groups.contains(g) { groups.append(g) } }
                 for g in groups {
                     let its = c.items.filter { ($0.stage.isEmpty ? "Development" : $0.stage) == g }
-                    let gd = its.filter { $0.status == "done" }.count
+                    let gd = its.filter { $0.status == "done" && !$0.stale }.count
                     text(g, pad, y, 10.5, true, 0.6, draw)
                     text("\(gd)/\(its.count)", 0, y, 10.5, false, 0.5, draw, right: w - pad)
                     y += 16
@@ -609,8 +609,10 @@ final class WidgetView: NSView {
             }
             if let c0 = cur {
                 y += 4
-                let n = { (k: String) in c0.items.filter { $0.status == k }.count }
+                let n = { (k: String) in c0.items.filter { $0.status == k && !(k == "done" && $0.stale) }.count }
+                let rerunN = c0.items.filter { $0.status == "done" && $0.stale }.count
                 var parts = ["\(n("done")) done"]
+                if rerunN > 0 { parts.append("\(rerunN) to re-run") }
                 if n("doing") > 0 { parts.append("\(n("doing")) in progress") }
                 if n("blocked") > 0 { parts.append("\(n("blocked")) blocked") }
                 if n("skipped") > 0 { parts.append("\(n("skipped")) skipped") }
@@ -623,7 +625,7 @@ final class WidgetView: NSView {
                     for it in c0.items where !order.contains(it.stage) { order.append(it.stage) }
                     for st in order {
                         let grp = c0.items.filter { $0.stage == st }
-                        let doneN = grp.filter { $0.status == "done" }.count
+                        let doneN = grp.filter { $0.status == "done" && !$0.stale }.count
                         let isOpen = (doneN < grp.count) != toggledStages.contains(st)
                         let arrow = isOpen ? "\u{25BE}" : "\u{25B8}"
                         let stName = st.isEmpty ? "Other" : st
