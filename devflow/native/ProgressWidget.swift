@@ -131,8 +131,9 @@ final class App: NSObject {
                         styleMask: [.borderless, .nonactivatingPanel],
                         backing: .buffered, defer: false)
         super.init()
-        panel.level = .floating
-        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
+        panel.level = .statusBar
+        panel.isFloatingPanel = true
+        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary, .ignoresCycle]
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.hasShadow = true
@@ -142,9 +143,12 @@ final class App: NSObject {
         NSWorkspace.shared.notificationCenter.addObserver(
             self, selector: #selector(frontChanged),
             name: NSWorkspace.didActivateApplicationNotification, object: nil)
+        NSWorkspace.shared.notificationCenter.addObserver(
+            self, selector: #selector(frontChanged),
+            name: NSWorkspace.activeSpaceDidChangeNotification, object: nil)
         frontChanged()
         refresh()
-        Timer.scheduledTimer(withTimeInterval: 4, repeats: true) { _ in self.refresh() }
+        Timer.scheduledTimer(withTimeInterval: 4, repeats: true) { _ in self.refresh(); self.frontChanged() }
     }
 
     @objc func frontChanged() {
