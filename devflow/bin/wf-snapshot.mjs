@@ -1,24 +1,25 @@
 #!/usr/bin/env node
 /**
- * Writes one JSON document describing the live wf state (tasks, blocks, pace, ETA).
- * Feeds the Progress panel: `node devflow/bin/wf-snapshot.mjs > snapshot.json`.
+ * Builds one JSON document describing the live wf state: tasks, blocks, ETA range, last events.
+ * `node devflow/bin/wf-snapshot.mjs > snapshot.json` feeds the Progress panel and the wf-state publisher.
  * Always English; paths come from devflow.config.json.
  */
 import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 
-const CONFIG = JSON.parse(
-  readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'devflow.config.json'), 'utf8'),
-);
-const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
-const WINDOW_MS = 45 * 60 * 1000;
+const HERE = dirname(fileURLToPath(import.meta.url));
+const CONFIG = JSON.parse(readFileSync(join(HERE, '..', 'devflow.config.json'), 'utf8'));
+const WINDOW_MS = 60 * 60 * 1000;
+const MIN_SAMPLES = 3;
+// A gap longer than this is idle time (waiting for the owner, a deploy), not working pace.
+const MAX_GAP_MIN = 15;
 
-function firstRead(names) {
+function readFirst(root, name) {
   for (const dir of [CONFIG.stateDir, CONFIG.mirrorDir]) {
     try {
-      return readFileSync(join(ROOT, dir, names), 'utf8');
+      return readFileSync(join(root, dir, name), 'utf8');
     } catch {
       /* next location */
     }
@@ -26,33 +27,68 @@ function firstRead(names) {
   return null;
 }
 
-function paceOf(journal, now) {
-  const stamps = [];
-  for (const line of (journal ?? '').split('\n')) {
-    try {
-      const ev = JSON.parse(line);
-      if (ev.type === 'done' && typeof ev.ts === 'number' && now - ev.ts <= WINDOW_MS)
-        stamps.push(ev.ts);
-    } catch {
-      /* damaged line */
-    }
+const parseJournal = (text) =>
+  (text ?? '')
+    .split('\n')
+    .map((line) => {
+      try {
+        return JSON.parse(line);
+      } catch {
+        return null;
+      }
+    })
+    .filter((e) => e && typeof e.ts === 'number');
+
+const quantile = (sorted, q) => sorted[Math.min(sorted.length - 1, Math.floor(q * sorted.length))];
+
+/** Minutes per finished item from the gaps between consecutive `done` events in the last hour. */
+export function paceOf(events, now) {
+  const stamps = events
+    .filter((e) => e.type === 'done' && now - e.ts <= WINDOW_MS)
+    .map((e) => e.ts)
+    .sort((a, b) => a - b);
+  const gaps = [];
+  for (let i = 1; i < stamps.length; i += 1) {
+    const gap = (stamps[i] - stamps[i - 1]) / 60000;
+    if (gap <= MAX_GAP_MIN) gaps.push(gap);
   }
-  if (stamps.length < 2) return 0;
-  return stamps.length / Math.max((now - Math.min(...stamps)) / 60000, 1);
+  if (gaps.length < MIN_SAMPLES) return null;
+  const sorted = gaps.sort((a, b) => a - b);
+  return {
+    samples: gaps.length,
+    median: quantile(sorted, 0.5),
+    low: quantile(sorted, 0.25),
+    high: quantile(sorted, 0.75),
+    lastDoneAt: stamps[stamps.length - 1],
+  };
 }
 
-function etaOf(open, pace) {
-  if (open === 0) return null;
-  if (pace <= 0) return 'Est. n/a (not enough finished items yet)';
-  const m = Math.max(1, Math.round(open / pace));
-  return `≈ ${m >= 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m} min`} left`;
+const fmt = (m) =>
+  m >= 60
+    ? `${Math.floor(m / 60)} h ${Math.round(m % 60)} min`
+    : `${Math.max(1, Math.round(m))} min`;
+
+/** Remaining time for the items the agent can still finish (todo + doing); blocked ones are named, not counted. */
+export function etaOf(items, pace, now) {
+  const workable = items.filter((i) => i.status === 'todo' || i.status === 'doing').length;
+  const blocked = items.filter((i) => i.status === 'blocked').length;
+  if (workable === 0 && blocked === 0) return null;
+  if (workable === 0) return `Waiting on ${blocked} blocked`;
+  if (!pace) return 'Est. n/a (needs 3+ finished items in the last hour)';
+  const sinceLast = Math.max(0, (now - pace.lastDoneAt) / 60000);
+  const lo = Math.max(1, workable * pace.low - sinceLast);
+  const hi = Math.max(lo, workable * pace.high - sinceLast);
+  const range = Math.round(lo) === Math.round(hi) ? `≈ ${fmt(lo)}` : `≈ ${fmt(lo)}–${fmt(hi)}`;
+  return `${range} left${blocked ? ` · ${blocked} blocked` : ''}`;
 }
 
-function summarize(task, items, active, pace) {
+function summarize(task, items, active, pace, now, events) {
   const n = (s) => items.filter((i) => i.status === s).length;
   const done = n('done');
-  const open = n('todo') + n('doing') + n('blocked');
   const cur = items.find((i) => i.status === 'doing');
+  const since = cur
+    ? ([...events].reverse().find((e) => e.type === 'doing' && e.item === cur.id)?.ts ?? null)
+    : null;
   return {
     task,
     active,
@@ -64,7 +100,8 @@ function summarize(task, items, active, pace) {
     skipped: n('skipped'),
     todo: n('todo'),
     now: cur ? `${cur.id} ${cur.text ?? ''}`.trim() : null,
-    eta: etaOf(open, pace),
+    nowSince: since,
+    eta: etaOf(items, pace, now),
     blocks: items.map((i) => ({
       id: i.id,
       text: i.text ?? '',
@@ -77,13 +114,24 @@ function summarize(task, items, active, pace) {
   };
 }
 
-const raw = firstRead('wf.json');
-const wf = raw ? JSON.parse(raw) : {};
-const pace = paceOf(firstRead('wf-events.jsonl'), Date.now());
-const tasks = [];
-if (wf.task) tasks.push(summarize(wf.task.id, wf.items ?? [], true, pace));
-for (const p of wf.parked ?? []) {
-  const t = summarize(p.task.id, p.items ?? [], false, pace);
-  if (t.pct < 100) tasks.push(t);
+export function buildSnapshot({
+  root = process.env.CLAUDE_PROJECT_DIR ?? process.cwd(),
+  now = Date.now(),
+  label = basename(root),
+} = {}) {
+  const raw = readFirst(root, 'wf.json');
+  const wf = raw ? JSON.parse(raw) : {};
+  const events = parseJournal(readFirst(root, 'wf-events.jsonl'));
+  const pace = paceOf(events, now);
+  const tasks = [];
+  if (wf.task) tasks.push(summarize(wf.task.id, wf.items ?? [], true, pace, now, events));
+  for (const p of wf.parked ?? []) {
+    const t = summarize(p.task.id, p.items ?? [], false, pace, now, events);
+    if (t.pct < 100) tasks.push(t);
+  }
+  return { source: label, updatedAt: now, tasks };
 }
-process.stdout.write(`${JSON.stringify({ tasks, updatedAt: Date.now() })}\n`);
+
+if (process.argv[1] && basename(process.argv[1]) === 'wf-snapshot.mjs') {
+  process.stdout.write(`${JSON.stringify(buildSnapshot())}\n`);
+}

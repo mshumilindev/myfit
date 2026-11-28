@@ -1,5 +1,6 @@
 <title>Progress</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<script type="application/json" id="claude-artifacts-manifest">{"permissions":["overlay","menu-bar","full-access"]}</script>
 <style>
 /* Layout: one calm column; one card per task, the block strip is the hero. */
 :root{--bg:#f4f5f7;--surface:#ffffff;--fg:#1b1e24;--mut:#5d6675;--line:#dde1e7;--done:#1f8a55;--doing:#2a63d6;--blocked:#c93a33;--skipped:#b87d0c;--todo:#c3c9d2;--font:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"JetBrains Mono",ui-monospace,Menlo,monospace}
@@ -31,12 +32,25 @@ h1{margin:0;font-size:18px;font-weight:600;letter-spacing:-.01em}
 .now{font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .now b{color:var(--doing);font-weight:600}
 .empty{text-align:center;color:var(--mut);padding:32px 16px}
+
+.tools{display:flex;gap:8px;align-items:center}
+.btn{font:inherit;font-size:12px;color:var(--fg);background:transparent;border:1px solid var(--line);border-radius:8px;padding:4px 10px;cursor:pointer}
+.btn:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+body.overlay{padding:8px;background:var(--bg)}
+body.overlay main{gap:8px}
+body.overlay header{-webkit-app-region:drag;app-region:drag;cursor:grab}
+body.overlay .tools,body.overlay .btn{-webkit-app-region:no-drag;app-region:no-drag}
+body.overlay h1{font-size:13px}
+body.overlay .card{padding:10px;gap:8px;border-radius:10px}
+body.overlay .pct{font-size:20px}
+body.overlay .chips{display:none}
+body.overlay .b{width:12px;height:12px}
 #tip{position:fixed;z-index:20;max-width:320px;background:var(--fg);color:var(--bg);border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.4;pointer-events:none;display:none}
 #tip b{display:block;font-family:var(--mono);margin-bottom:2px}
 #tip .why{margin-top:4px;opacity:.85}
 </style>
 <main>
-<header><h1>Progress</h1><div class="live" id="live"><span class="dot"></span><span id="liveText">Connecting…</span></div></header>
+<header><h1>Progress</h1><div class="tools"><div class="live" id="live"><span class="dot"></span><span id="liveText">Connecting…</span></div><button class="btn" id="floatBtn" type="button" hidden></button></div></header>
 <div id="root"><div class="card empty">No task yet</div></div>
 </main>
 <div id="tip" role="tooltip"></div>
@@ -68,6 +82,7 @@ h1{margin:0;font-size:18px;font-weight:600;letter-spacing:-.01em}
       var c=el('section','card'+(t.active?'':' parked'));
       var top=el('div','top');
       top.appendChild(el('span','tid',t.task));
+      if(t.label)top.appendChild(el('span','sub',t.label));
       top.appendChild(el('span','pct',t.pct+'%'));
       top.appendChild(el('span','sub',t.done+'/'+t.total+' done'));
       if(t.eta)top.appendChild(el('span','eta',t.eta));
@@ -108,11 +123,91 @@ h1{margin:0;font-size:18px;font-weight:600;letter-spacing:-.01em}
   }
   setInterval(tick,1000);
   window.addEventListener('scroll',hideTip,{passive:true});
+
+  var desk=null,floating=false;
+  function trayUpdate(d){
+    if(!desk||!desk.tray||!floating)return;
+    var t=(d&&d.tasks&&d.tasks[0])||null;
+    desk.tray.set({title:t?(t.pct+'% '+t.done+'/'+t.total):'No task',toolTip:t?t.task:'wf'}).catch(function(){});
+  }
+  function goFloat(){
+    desk.permissions.request(['overlay','menu-bar','full-access']).then(function(){
+      return desk.window.setOptions({frame:false,alwaysOnTop:true,resizable:true,width:380,height:300,minWidth:260,minHeight:120});
+    }).then(function(){
+      document.body.classList.add('overlay');floating=true;
+      return desk.window.place({anchor:'bottom_right',margin:16,width:380,height:300});
+    }).then(function(){
+      var b=document.getElementById('floatBtn');b.textContent='Normal window';b.onclick=function(){location.reload()};
+      trayUpdate(lastData);
+      pollLocal();setInterval(pollLocal,3000);pollGit();setInterval(pollGit,4000);
+    }).catch(function(e){liveText.textContent='Float refused: '+((e&&e.message)||'unavailable').slice(0,60)});
+  }
+
+  var cloud=null,locals={},gits={};
+  var ROOTS=['~/Desktop/Work/training/gym-tracker','~/Desktop/Work/training/gym-tracker-devflow'];
+  var WIN=45*60000;
+  function paceOf(journal,now){var st=[];(journal||'').split('\n').forEach(function(l){try{var e=JSON.parse(l);if(e.type==='done'&&typeof e.ts==='number'&&now-e.ts<=WIN)st.push(e.ts)}catch(x){}});if(st.length<2)return 0;return st.length/Math.max((now-Math.min.apply(null,st))/60000,1)}
+  function etaOf(open,pace){if(!open)return null;if(pace<=0)return 'Est. n/a (not enough finished items yet)';var m=Math.max(1,Math.round(open/pace));return '\u2248 '+(m>=60?Math.floor(m/60)+' h '+(m%60)+' min':m+' min')+' left'}
+  function summarize(task,items,active,pace,label){
+    var n=function(k){return items.filter(function(i){return i.status===k}).length};
+    var done=n('done'),open=n('todo')+n('doing')+n('blocked'),cur=items.filter(function(i){return i.status==='doing'})[0];
+    return {task:task,label:label,active:active,pct:Math.round(done/Math.max(1,items.length)*100),done:done,total:items.length,doing:n('doing'),blocked:n('blocked'),skipped:n('skipped'),todo:n('todo'),now:cur?(cur.id+' '+(cur.text||'')).trim():null,eta:etaOf(open,pace),
+      blocks:items.map(function(i){return {id:i.id,text:i.text||'',status:i.status,why:i.status==='blocked'?('Waiting on: '+(i.needs||'?')+(i.reason?' \u00b7 '+i.reason:'')):(i.reason||'')}})};
+  }
+  function fromWf(wf,pace,label){var out=[];if(wf.task)out.push(summarize(wf.task.id,wf.items||[],true,pace,label));(wf.parked||[]).forEach(function(p){var t=summarize(p.task.id,p.items||[],false,pace,label);if(t.pct<100)out.push(t)});return out}
+  function merge(){
+    var all=[];
+    if(cloud&&!Object.keys(gits).length)all.push({at:cloud.updatedAt,tasks:cloud.tasks});
+    Object.keys(gits).forEach(function(k){all.push(gits[k])});
+    Object.keys(locals).forEach(function(k){if(locals[k])all.push(locals[k])});
+    all.sort(function(a,b){return b.at-a.at});
+    var tasks=[];all.forEach(function(g){g.tasks.forEach(function(t){tasks.push(t)})});
+    lastData={tasks:tasks};render(lastData);trayUpdate(lastData);
+    last=all.length?all[0].at:last;if(last){live.className='live ok';tick()}
+  }
+
+  var GIT_REPO='~/Desktop/Work/training/gym-tracker';
+  function pollGit(){
+    if(!desk||!desk.childProcess)return;
+    var cmd="cd "+GIT_REPO+" && /usr/bin/git fetch -q origin wf-state && for f in $(/usr/bin/git ls-tree --name-only FETCH_HEAD wf/); do /usr/bin/git show FETCH_HEAD:$f; done";
+    desk.childProcess.exec(cmd,{timeout:20000}).then(function(r){
+      var seen={};
+      (r.stdout||'').split('\n').forEach(function(line){
+        if(!line.trim())return;
+        try{var d=JSON.parse(line);var k=d.source||'cloud';seen[k]=1;
+          gits[k]={at:d.updatedAt||0,tasks:(d.tasks||[]).map(function(t){t.label=d.source||'cloud';return t})}}catch(x){}
+      });
+      Object.keys(gits).forEach(function(k){if(!seen[k])delete gits[k]});
+      merge();
+    }).catch(function(){});
+  }
+  function pollLocal(){
+    if(!desk||!desk.fs)return;
+    ROOTS.forEach(function(root){
+      var label=root.split('/').pop();
+      var tries=['/.claude/state/wf.json','/.devflow/mirror/wf.json'];
+      (function next(i){
+        if(i>=tries.length){locals[root]=null;merge();return}
+        desk.fs.readFile(root+tries[i],'utf8').then(function(txt){
+          return Promise.all([desk.fs.stat(root+tries[i]),desk.fs.readFile(root+tries[i].replace('wf.json','wf-events.jsonl'),'utf8').catch(function(){return ''})]).then(function(r){
+            var wf=JSON.parse(txt);var at=(r[0]&&r[0].mtimeMs)||Date.now();
+            locals[root]={at:at,tasks:fromWf(wf,paceOf(r[1],Date.now()),label)};merge();
+          });
+        }).catch(function(){next(i+1)});
+      })(0);
+    });
+  }
+  var lastData=null;
+  claude.use('desktop').then(function(d){
+    var b=document.getElementById('floatBtn');
+    if(d&&d.window&&d.permissions){desk=d;b.hidden=false;b.textContent='Float on top';b.onclick=goFloat;return}
+    if(d&&d.install){d.install.state().then(function(st){if(st==='available'){b.hidden=false;b.textContent='Install as app';b.onclick=function(){d.install.request().catch(function(){})}}}).catch(function(){})}
+  }).catch(function(){});
   claude.use('db').then(function(db){
     if(!db){liveText.textContent='Live data unavailable';return}
     db.doc('wf/state').onSnapshot(function(snap){
-      if(!snap.exists){render(null);liveText.textContent='Waiting for first update';return}
-      var d=snap.data();render(d);last=d.updatedAt||Date.now();live.className='live ok';tick();
+      if(!snap.exists){cloud=null;merge();liveText.textContent='Waiting for first update';return}
+      var d=snap.data();cloud={updatedAt:d.updatedAt||Date.now(),tasks:(d.tasks||[]).map(function(t){t.label='cloud';return t})};live.className='live ok';merge();
     },function(){live.className='live';liveText.textContent='Disconnected'});
   });
 })();

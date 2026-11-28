@@ -30,7 +30,9 @@ import {
   unlinkSync,
   writeFileSync,
 } from 'node:fs';
-import { basename, join, resolve } from 'node:path';
+import { spawn } from 'node:child_process';
+import { basename, dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   emptyState,
   isValidState,
@@ -230,8 +232,24 @@ export function run(
   }
 }
 
+/** After a state change, hand the snapshot to the publisher in the background (never blocks, never fails `wf`). */
+function publishInBackground(cmd) {
+  if (process.env.WF_PUBLISH === '0' || process.env.WF_STATE_DIR) return;
+  if (['status', 'report', undefined].includes(cmd)) return;
+  try {
+    const here = dirname(fileURLToPath(import.meta.url));
+    spawn(process.execPath, [join(here, 'wf-publish.mjs')], {
+      detached: true,
+      stdio: 'ignore',
+    }).unref();
+  } catch {
+    /* publishing is best effort */
+  }
+}
+
 if (process.argv[1] && basename(process.argv[1]) === 'wf.mjs') {
   const { code, out } = run(process.argv.slice(2));
+  if (code === 0) publishInBackground(process.argv[2]);
   (code === 0 ? console.log : console.error)(out);
   process.exit(code);
 }

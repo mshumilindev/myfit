@@ -9,5 +9,10 @@
   "dashboardPort": 5174,
   "repo": "mshumilindev/myfit",
   "rulesDir": ".claude/rules",
-  "dashRoot": "devflow/dashboard"
+  "dashRoot": "devflow/dashboard",
+  "publish": {
+    "branch": "wf-state",
+    "dir": "wf",
+    "minIntervalMs": 3000
+  }
 }
