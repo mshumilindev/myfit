@@ -114,6 +114,15 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ \"$(uname)\" = Darwin ] && open -g -a Progress >/dev/null 2>&1 || true",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
