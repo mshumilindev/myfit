@@ -207,6 +207,9 @@ final class WidgetView: NSView {
     var note = ""
     var tab = 0
     var cardIdx = 0
+    var hovering = false
+    var pinned = false
+    var collapsed: Bool { !(hovering || pinned) }
     var cur: Card? { snap.cards.isEmpty ? nil : snap.cards[min(cardIdx, snap.cards.count - 1)] }
     var selected: (String, String)? = nil   // task id, item id
     var toast = ""
@@ -269,6 +272,21 @@ final class WidgetView: NSView {
         if draw { hits = []; squares = [] }
         let pad: CGFloat = 14, sq: CGFloat = 10, gap: CGFloat = 3
         var y: CGFloat = 12
+        if collapsed {
+            if let c = cur {
+                let blocked = c.items.filter { $0.status == "blocked" }.count
+                text("\(c.task)  \(c.pct)%", pad, 10, 13, true, 0.95, draw)
+                text(blocked > 0 ? "\(c.done)/\(c.total) \u{00B7} \(blocked) blocked" : "\(c.done)/\(c.total)", 0, 12, 11, blocked > 0, 0.8, draw, right: w - pad, c: blocked > 0 ? color("blocked") : nil)
+                if draw {
+                    let bar = NSRect(x: pad, y: 34, width: w - 2 * pad, height: 5)
+                    ov(0.14).setFill()
+                    NSBezierPath(roundedRect: bar, xRadius: 2.5, yRadius: 2.5).fill()
+                    color("done").setFill()
+                    NSBezierPath(roundedRect: NSRect(x: pad, y: 34, width: max(5, (w - 2 * pad) * CGFloat(c.pct) / 100), height: 5), xRadius: 2.5, yRadius: 2.5).fill()
+                }
+            } else if draw { text("No task yet", pad, 14, 12, false, 0.7, true) }
+            return 52
+        }
         let devN = snap.branches.filter { $0.kind == "dev" }.count + max(0, snap.cards.count - 1)
         let cpdN = snap.branches.filter { $0.kind == "cpd" }.count
         let oldN = snap.branches.filter { $0.kind == "stale" }.count
@@ -492,11 +510,12 @@ final class WidgetView: NSView {
             }
         }
         text("v\(runningVersion) \u{00B7} \(updateStatus)", pad, y + 4, 9.5, false, 0.5, draw)
-        pill(darkTheme ? "\u{2600} Day" : "\u{263E} Night", 0, y, active: false, right: w - pad, draw) {
+        let dw = pill(darkTheme ? "\u{2600} Day" : "\u{263E} Night", 0, y, active: false, right: w - pad, draw) {
             darkTheme.toggle()
             UserDefaults.standard.set(darkTheme, forKey: "devflow.dark")
             self.onChange()
         }
+        pill(pinned ? "Unpin" : "Pin open", 0, y, active: pinned, right: w - pad - dw - 6, draw) { self.pinned.toggle(); self.onChange() }
         y += 26
         return y + 8
     }
@@ -574,7 +593,15 @@ final class WidgetView: NSView {
         }
     }
 
+    override func mouseEntered(with event: NSEvent) {
+        if !hovering { hovering = true; onChange() }
+    }
+
     override func mouseExited(with event: NSEvent) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            if let f = self.window?.frame, f.contains(NSEvent.mouseLocation) { return }
+            if self.hovering { self.hovering = false; self.onChange() }
+        }
         if hover != nil || hoverHit != .zero { hover = nil; hoverHit = .zero; NSCursor.arrow.set(); needsDisplay = true }
     }
 }
@@ -620,11 +647,12 @@ final class App: NSObject {
     func place() {
         guard let s = NSScreen.main else { return }
         let f = s.visibleFrame
-        let total = view.render(width, false)
+        let curW: CGFloat = view.collapsed ? 250 : width
+        let total = view.render(curW, false)
         view.contentHeight = total
         let h = min(total, f.height - 40)
         view.scrollY = min(view.scrollY, max(0, total - h))
-        panel.setFrame(NSRect(x: f.maxX - width - 16, y: f.minY + 16, width: width, height: h), display: true)
+        panel.setFrame(NSRect(x: f.maxX - curW - 16, y: f.minY + 16, width: curW, height: h), display: true)
         view.needsDisplay = true
     }
 
