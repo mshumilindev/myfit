@@ -7,7 +7,7 @@
 export const KINDS = ['ac', 'step', 'extra'];
 /** Why an item may wait for the owner. No generic "decision": the owner's rule is that Claude decides and goes on. */
 export const NEEDS = ['design', 'cpd', 'access', 'legal', 'irreversible'];
-const EVENT_TYPES = ['start', 'add', 'doing', 'done', 'block', 'unblock', 'heartbeat'];
+const EVENT_TYPES = ['start', 'add', 'doing', 'done', 'block', 'unblock', 'skip', 'heartbeat'];
 /** Heartbeats in a row without a new `done` before status asks to change approach (never to stop). */
 /** Ids are identifiers only, so the journal can never hold free text or personal data. */
 export const ID_RE = /^[A-Za-z0-9._-]{1,40}$/;
@@ -27,11 +27,13 @@ export function validateEvent(event) {
   if (event.type === 'block' && !NEEDS.includes(event.needs))
     throw new Error('block needs a valid category');
   if (
-    ['add', 'doing', 'done', 'block', 'unblock'].includes(event.type) &&
+    ['add', 'doing', 'done', 'block', 'unblock', 'skip'].includes(event.type) &&
     !ID_RE.test(event.item ?? '')
   ) {
     throw new Error(`${event.type} needs an item id (A-Z a-z 0-9 . _ -, up to 40 chars)`);
   }
+  if (event.type === 'skip' && !String(event.reason ?? '').trim())
+    throw new Error('skip needs a reason (shown to the owner on hover)');
   if (event.type === 'start' && !ID_RE.test(event.task ?? '')) {
     throw new Error('start needs a task id (A-Z a-z 0-9 . _ -, up to 40 chars)');
   }
@@ -53,7 +55,7 @@ function assertFrom(item, allowed, type) {
   }
 }
 
-const STATUSES = ['todo', 'doing', 'done', 'blocked'];
+const STATUSES = ['todo', 'doing', 'done', 'blocked', 'skipped'];
 
 /** Shape check for a state loaded from disk (deep: every item must be well formed). */
 export function isValidState(state) {
@@ -121,6 +123,14 @@ export function reduce(state, event) {
       item.status = 'blocked';
       item.needs = event.needs;
       item.reason = event.reason ?? '';
+      return next;
+    }
+    case 'skip': {
+      const item = findItem(next, event.item);
+      assertFrom(item, ['todo', 'doing', 'blocked'], event.type);
+      item.status = 'skipped';
+      item.reason = event.reason;
+      delete item.needs;
       return next;
     }
     case 'unblock': {

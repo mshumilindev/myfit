@@ -61,6 +61,14 @@ describe('wf-core', () => {
     expect(s.items[1].status).toBe('todo');
   });
 
+  it('skip needs a reason, keeps it, and is not counted as done', () => {
+    const s = withItems();
+    expect(() => reduce(s, { type: 'skip', ts: T, item: 'a' })).toThrow(/reason/);
+    const k = reduce(s, { type: 'skip', ts: T, item: 'a', reason: 'out of scope' });
+    expect(k.items[0]).toMatchObject({ status: 'skipped', reason: 'out of scope' });
+    expect(progress(k).done).toBe(0);
+  });
+
   it('rejects unknown items, duplicates and bad categories', () => {
     expect(() => reduce(withItems(), { type: 'doing', ts: T, item: 'zzz' })).toThrow(
       /unknown item/,

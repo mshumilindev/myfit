@@ -19,7 +19,7 @@ const TASK_CORE = CONFIG.taskPattern.replace(/^\^|\$$/g, '');
 
 export const SNAPSHOT_V = 1;
 const TASK_RE = new RegExp(CONFIG.taskPattern);
-const STATUSES = ['todo', 'doing', 'done', 'blocked'];
+const STATUSES = ['todo', 'doing', 'done', 'blocked', 'skipped'];
 const PROTECTED = /^(main|master|HEAD|origin|develop|release\/.*)$/;
 
 /** `ready-for-cpd/SPO-639` | `SPO-639-foo` | `feature/SPO-639` -> `SPO-639`, else null. */

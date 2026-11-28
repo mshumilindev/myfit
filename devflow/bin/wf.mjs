@@ -6,6 +6,7 @@
  *   node scripts/wf.mjs add <item> [--kind ac|step|extra] [--text "…"] [--verify]
  *   node scripts/wf.mjs doing <item>
  *   node scripts/wf.mjs done <item> --evidence "<command|file|link>" [--verdict verify.json]
+ *   node scripts/wf.mjs skip <item> --reason "why it was skipped"   (shown on hover in the band)
  *   node scripts/wf.mjs block <item> --needs design|cpd|access|legal|irreversible [--reason "…"]
  *   node scripts/wf.mjs unblock <item>
  *   node scripts/wf.mjs heartbeat
@@ -140,6 +141,13 @@ export function buildEvent(cmd, { positional, flags }, now = Date.now()) {
         needs: flags.needs,
         reason: typeof flags.reason === 'string' ? flags.reason : '',
       };
+    case 'skip':
+      return {
+        type: 'skip',
+        ts: now,
+        item: first,
+        reason: typeof flags.reason === 'string' ? flags.reason : '',
+      };
     case 'heartbeat':
       return { type: 'heartbeat', ts: now };
     default:
@@ -167,7 +175,7 @@ function apply(dir, event, args) {
     return { code: 2, out: 'wf: немає активної задачі (wf start <id>)' };
   }
   if (event.type === 'start' && !args.flags.force && state.task) {
-    const open = state.items.filter((i) => i.status !== 'done').length;
+    const open = state.items.filter((i) => i.status !== 'done' && i.status !== 'skipped').length;
     if (open > 0) {
       throw new Error(
         `задача ${state.task.id} має ${open} незакритих пунктів; start --force замінить її`,
