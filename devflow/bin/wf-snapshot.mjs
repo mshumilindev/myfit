@@ -83,7 +83,29 @@ export function etaOf(items, pace, now) {
   return `${range} left${blocked ? ` · ${blocked} blocked` : ''}`;
 }
 
+/** Stages that only prove older work: anything done there before a later `add` no longer covers the whole task. */
+const DOWNSTREAM = new Set(['Tests', 'CI', 'Deploy test', 'Deploy prod']);
+
+/** Ids of downstream items that were finished before new (non-downstream) items were added. */
+export function staleIds(items, events) {
+  const stageById = new Map(items.map((i) => [i.id, stageOf(i)]));
+  const lastAdd = Math.max(
+    0,
+    ...events
+      .filter((e) => e.type === 'add' && !DOWNSTREAM.has(stageById.get(e.item) ?? ''))
+      .map((e) => e.ts ?? 0),
+  );
+  const out = new Set();
+  for (const i of items) {
+    if (i.status !== 'done' || !DOWNSTREAM.has(stageOf(i))) continue;
+    const doneTs = [...events].reverse().find((e) => e.type === 'done' && e.item === i.id)?.ts;
+    if (doneTs !== undefined && doneTs < lastAdd) out.add(i.id);
+  }
+  return out;
+}
+
 function summarize(task, items, active, pace, now, events) {
+  const stale = staleIds(items, events);
   const n = (s) => items.filter((i) => i.status === s).length;
   const done = n('done');
   const cur = items.find((i) => i.status === 'doing');
@@ -113,6 +135,7 @@ function summarize(task, items, active, pace, now, events) {
           : (i.reason ?? ''),
       evidence: i.evidence ?? '',
       stage: stageOf(i),
+      stale: stale.has(i.id),
     })),
   };
 }

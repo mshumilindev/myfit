@@ -86,3 +86,21 @@ describe('classifyBranch', () => {
     );
   });
 });
+
+describe('staleIds', () => {
+  it('marks downstream items done before a later add, not the ones done after it', async () => {
+    const { staleIds } = await import('../devflow/bin/wf-snapshot.mjs');
+    const items = [
+      { id: 'D1', text: 'build', status: 'done' },
+      { id: 'T1', text: 'tests green', status: 'done' },
+      { id: 'C1', text: 'ci run', status: 'done' },
+      { id: 'N1', text: 'new work', status: 'todo' },
+    ];
+    const ev = [
+      { type: 'done', item: 'T1', ts: 10 },
+      { type: 'add', item: 'N1', ts: 20 },
+      { type: 'done', item: 'C1', ts: 30 },
+    ];
+    expect([...staleIds(items, ev)]).toEqual(['T1']);
+  });
+});

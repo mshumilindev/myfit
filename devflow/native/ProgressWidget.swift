@@ -1,6 +1,6 @@
 import Cocoa
 
-struct Item { let id: String; let text: String; let status: String; let why: String; let evidence: String; let stage: String }
+struct Item { let id: String; let text: String; let status: String; let why: String; let evidence: String; let stage: String; let stale: Bool }
 struct Card { let task: String; let pct: Int; let done: Int; let total: Int; let eta: String; let now: String; let items: [Item]; let at: Double; let source: String; let branch: String }
 struct Branch { let name: String; let kind: String; let ahead: Int; let subject: String; let date: String }
 struct Stage { let stage: String; let state: String; let detail: String; let url: String }
@@ -27,6 +27,34 @@ func git(_ args: [String]) -> String {
 func str(_ v: Any?) -> String { (v as? String) ?? "" }
 func num(_ v: Any?) -> Int { (v as? NSNumber)?.intValue ?? 0 }
 
+// Live branch list straight from GitHub (light fetch: commits only, no file contents), so branches created
+// outside the cloud session show up without waiting for a published snapshot.
+var lastLive = Date.distantPast
+var liveCache: [Branch]? = nil
+func liveBranches(force: Bool) -> [Branch]? {
+    if !force && Date().timeIntervalSince(lastLive) < 15 { return liveCache }
+    lastLive = Date()
+    _ = git(["fetch", "-q", "--no-tags", "--filter=blob:none", "origin", "+refs/heads/*:refs/remotes/origin/*"])
+    let rows = git(["for-each-ref", "--format=%(refname:short)|%(committerdate:iso-strict)|%(subject)", "refs/remotes/origin"]).split(separator: "\n")
+    if rows.isEmpty { return liveCache }
+    var out: [Branch] = []
+    let week: TimeInterval = 7 * 86400
+    let iso = ISO8601DateFormatter()
+    for r in rows {
+        let f = r.split(separator: "|", maxSplits: 2, omittingEmptySubsequences: false).map(String.init)
+        guard f.count == 3, f[0].hasPrefix("origin/") else { continue }
+        let name = String(f[0].dropFirst(7))
+        if name == "HEAD" || name == "wf-state" || name == "main" || name.hasPrefix("dependabot/") { continue }
+        let ahead = Int(git(["rev-list", "--count", "origin/main..origin/" + name]).trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+        let when = iso.date(from: f[1]) ?? .distantPast
+        let kind = name.hasPrefix("ready-for-cpd/") ? "cpd" : (ahead > 0 && Date().timeIntervalSince(when) <= week ? "dev" : "stale")
+        out.append(Branch(name: name, kind: kind, ahead: ahead, subject: f[2], date: String(f[1].prefix(10))))
+    }
+    liveCache = out
+    return out
+}
+
+var forceLive = false
 func loadSnapshot() -> Snapshot {
     _ = git(["fetch", "-q", "origin", "wf-state"])
     let names = git(["ls-tree", "--name-only", "FETCH_HEAD", "wf/"]).split(separator: "\n")
@@ -40,7 +68,7 @@ func loadSnapshot() -> Snapshot {
         let src = str(o["source"])
         for t in (o["tasks"] as? [[String: Any]]) ?? [] {
             let items = ((t["blocks"] as? [[String: Any]]) ?? []).map {
-                Item(id: str($0["id"]), text: str($0["text"]), status: str($0["status"]), why: str($0["why"]), evidence: str($0["evidence"]), stage: str($0["stage"]))
+                Item(id: str($0["id"]), text: str($0["text"]), status: str($0["status"]), why: str($0["why"]), evidence: str($0["evidence"]), stage: str($0["stage"]), stale: ($0["stale"] as? Bool) ?? false)
             }
             snap.cards.append(Card(task: str(t["task"]), pct: num(t["pct"]), done: num(t["done"]), total: num(t["total"]),
                                    eta: str(t["eta"]), now: str(t["now"]), items: items, at: at, source: src, branch: str(t["branch"])))
@@ -57,6 +85,13 @@ func loadSnapshot() -> Snapshot {
         }
     }
     snap.cards.sort { $0.at > $1.at }
+    if let live = liveBranches(force: forceLive) {
+        forceLive = false
+        let liveNames = Set(live.map { $0.name })
+        // A stale snapshot row whose branch no longer exists on GitHub was deleted: drop it.
+        snap.branches.removeAll { $0.kind == "stale" && !liveNames.contains($0.name) }
+        for b in live where !snap.branches.contains(where: { $0.name == b.name }) { snap.branches.append(b) }
+    }
     return snap
 }
 
@@ -266,9 +301,14 @@ func statusName(_ s: String) -> String {
     default: return "To do"
     }
 }
+func colorOf(_ i: Item) -> NSColor { i.stale ? NSColor(calibratedRed: 0.50, green: 0.64, blue: 0.56, alpha: 0.75) : color(i.status) }
+func statusLabel(_ i: Item) -> String { i.stale ? "Done \u{00B7} outdated" : statusName(i.status) }
+
 func explain(_ i: Item) -> String {
     switch i.status {
-    case "done": return i.evidence.isEmpty ? "Finished." : "Proof: " + i.evidence
+    case "done":
+        let proof = i.evidence.isEmpty ? "Finished." : "Proof: " + i.evidence
+        return i.stale ? "Outdated: new tasks were added after this was done, so it covered older work only. Run it again before trusting it. " + proof : proof
     case "doing": return "Being worked on right now."
     case "blocked": return i.why.isEmpty ? "Blocked." : i.why
     case "skipped": return i.why.isEmpty ? "Skipped on purpose." : "Skipped: " + i.why
@@ -432,7 +472,7 @@ final class WidgetView: NSView {
                         if bx + sq > w - pad { bx = pad; y += sq + gap }
                         let r = NSRect(x: bx, y: y, width: sq, height: sq)
                         if draw {
-                            color(it.status).setFill()
+                            colorOf(it).setFill()
                             NSBezierPath(roundedRect: r, xRadius: 2, yRadius: 2).fill()
                             if let s = selected, s.0 == c.task, s.1 == it.id {
                                 ink().setStroke()
@@ -461,9 +501,9 @@ final class WidgetView: NSView {
                 if draw {
                     ov(0.07).setFill()
                     NSBezierPath(roundedRect: NSRect(x: pad, y: box, width: w - 2 * pad, height: inner - box), xRadius: 8, yRadius: 8).fill()
-                    color(it.status).setFill()
+                    colorOf(it).setFill()
                     NSBezierPath(ovalIn: NSRect(x: pad + 10, y: box + 13, width: 8, height: 8)).fill()
-                    text("\(it.id) \u{00B7} \(statusName(it.status))", pad + 24, box + 10, 12, true, 1, true, c: color(it.status))
+                    text("\(it.id) \u{00B7} \(statusLabel(it))", pad + 24, box + 10, 12, true, 1, true, c: colorOf(it))
                     pill("\u{2715}", 0, box + 6, active: false, right: w - pad - 6, true) { self.selected = nil; self.onChange() }
                     _ = wrapped(it.text, pad + 10, box + 30, tw, 11.5, 0.95, true)
                     _ = wrapped(explain(it), pad + 10, box + 30 + h1 + 6, tw, 11, 0.7, true)
@@ -528,11 +568,11 @@ final class WidgetView: NSView {
                         if !isOpen { continue }
                     for it in grp {
                         if draw {
-                            color(it.status).setFill()
+                            colorOf(it).setFill()
                             NSBezierPath(roundedRect: NSRect(x: pad, y: y + 3, width: 8, height: 8), xRadius: 2, yRadius: 2).fill()
                         }
-                        let line = "\(it.id) \u{00B7} \(statusName(it.status))"
-                        text(line, pad + 16, y, 11, true, 0.95, draw, c: color(it.status))
+                        let line = "\(it.id) \u{00B7} \(statusLabel(it))"
+                        text(line, pad + 16, y, 11, true, 0.95, draw, c: colorOf(it))
                         let tw = text(line, 0, 0, 11, true, 1, false)
                         let maxW = w - 2 * pad - 16 - tw - 10
                         var t = it.text
@@ -709,7 +749,7 @@ final class WidgetView: NSView {
             tipBg().setFill()
             let bp = NSBezierPath(roundedRect: box, xRadius: 8, yRadius: 8); bp.fill()
             accent().withAlphaComponent(0.6).setStroke(); bp.stroke()
-            text("\(it.id) \u{00B7} \(statusName(it.status))", bx + 10, by + 8, 11.5, true, 1, true, c: color(it.status))
+            text("\(it.id) \u{00B7} \(statusLabel(it))", bx + 10, by + 8, 11.5, true, 1, true, c: colorOf(it))
             _ = wrapped(it.text, bx + 10, by + 28, tw - 20, 11, 0.95, true)
             _ = wrapped(why, bx + 10, by + 28 + h1 + 4, tw - 20, 10.5, 0.7, true)
         }
@@ -738,7 +778,10 @@ final class WidgetView: NSView {
         }
     }
 
+    var onRefresh: () -> Void = {}
     override func mouseEntered(with event: NSEvent) {
+        forceLive = true
+        onRefresh()
         if !hovering { hovering = true; onChange() }
     }
 
@@ -772,6 +815,7 @@ final class App: NSObject {
         panel.isMovableByWindowBackground = false
         panel.contentView = view
         view.onChange = { [weak self] in self?.place() }
+        view.onRefresh = { [weak self] in self?.refresh() }
         for name in [NSWorkspace.didActivateApplicationNotification, NSWorkspace.activeSpaceDidChangeNotification] {
             NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(frontChanged), name: name, object: nil)
         }
@@ -808,7 +852,10 @@ final class App: NSObject {
         view.needsDisplay = true
     }
 
+    var refreshing = false
     func refresh() {
+        if refreshing { return }
+        refreshing = true
         DispatchQueue.global().async {
             let s = loadSnapshot()
             checkForUpdate()
@@ -821,6 +868,7 @@ final class App: NSObject {
                 }
                 self.view.snap = s
                 self.view.note = s.cards.isEmpty ? "No data (git fetch failed?)" : ""
+                self.refreshing = false
                 self.place()
             }
         }
