@@ -507,13 +507,15 @@ final class WidgetView: NSView {
                     for st in order {
                         let grp = c0.items.filter { $0.stage == st }
                         let doneN = grp.filter { $0.status == "done" }.count
-                        let open = (doneN < grp.count) != flipped.contains(st)
-                        pill("\(open ? "\u{25BE}" : "\u{25B8}") \(st.isEmpty ? "Other" : st)  \(doneN)/\(grp.count)", pad, y, active: open, draw) {
+                        let isOpen = (doneN < grp.count) != flipped.contains(st)
+                        let arrow = isOpen ? "\u{25BE}" : "\u{25B8}"
+                        let stName = st.isEmpty ? "Other" : st
+                        pill("\(arrow) \(stName)  \(doneN)/\(grp.count)", pad, y, active: isOpen, draw) {
                             if self.flipped.contains(st) { self.flipped.remove(st) } else { self.flipped.insert(st) }
                             self.onChange()
                         }
                         y += 30
-                        if !open { continue }
+                        if !isOpen { continue }
                     for it in grp {
                         if draw {
                             color(it.status).setFill()
