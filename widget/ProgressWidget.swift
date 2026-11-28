@@ -544,15 +544,14 @@ final class WidgetView: NSView {
                     _ = wrapped(explain(it), pad + 10, box + 30 + h1 + 6, tw, 11, 0.7, true)
                     if canFinish {
                         let py = box + 30 + h1 + 6 + h2 + 8
-                        let others: [Item] = c.items.filter { $0.id != it.id && $0.status != "done" }
-                        let names: [String] = others.map { "\($0.id) (\($0.text))" }
-                        let rest: String = names.joined(separator: "; ")
-                        let why: String = it.why.isEmpty ? "" : ", " + it.why
-                        let head: String = "\(c.task): finish this task completely. Start with \(it.id) (\(it.text)), state: \(statusName(it.status))\(why)."
-                        let tail: String = rest.isEmpty ? "" : " Then every other open item: \(rest)."
-                        let prompt: String = head + tail + " Reopen skipped items that are still needed, prove each with wf done --evidence, add anything new to wf, and do not stop or ask until the task is 100% done."
-                        let label: String = it.status == "skip" || it.status == "skipped" ? "Reopen and finish \u{2192} Claude" : "Finish \u{2192} Claude"
-                        _ = pill(copied == "ex:one" ? "Copied \u{2713} paste in chat" : label, pad + 10, py, active: copied == "ex:one", true) { self.copyText(prompt, "ex:one"); activateClaude() }
+                        let one = "\(c.task): continue and finish \(it.id) (\(it.text)) now. State: \(statusName(it.status))\(it.why.isEmpty ? "" : ", " + it.why). Do the work, prove it with wf done --evidence, do not stop or ask until it is 100% done."
+                        let stg = it.stage.isEmpty ? "Development" : it.stage
+                        let open = c.items.filter { $0.status != "done" && ($0.stage.isEmpty ? "Development" : $0.stage) == stg }
+                        let names: [String] = open.map { "\($0.id) (\($0.text))" }
+                        let list: String = names.joined(separator: "; ")
+                        let grp = "\(c.task): continue and finish every non-green item in \(stg): \(list). Work through them one by one, prove each with wf done --evidence, add anything new to wf, and do not stop or ask until they are all done."
+                        let w1 = pill(copied == "ex:one" ? "Copied \u{2713} paste in chat" : "Finish this \u{2192} Claude", pad + 10, py, active: copied == "ex:one", true) { self.copyText(one, "ex:one"); activateClaude() }
+                        _ = pill(copied == "ex:grp" ? "Copied \u{2713} paste in chat" : "Finish all in \(stg)", pad + 10 + w1 + 6, py, active: copied == "ex:grp", true) { self.copyText(grp, "ex:grp"); activateClaude() }
                     }
                 }
                 y = inner + 10
@@ -866,13 +865,7 @@ final class App: NSObject {
         let name = (app?.localizedName ?? "").lowercased()
         let isClaude = id.contains("claude") || id.contains("anthropic") || name.contains("claude")
         let isSelf = app?.processIdentifier == ProcessInfo.processInfo.processIdentifier
-        // With no Claude app running at all the widget is gone, even if it was the last thing the user touched.
-        let claudeRunning: Bool = NSWorkspace.shared.runningApplications.contains { (a: NSRunningApplication) -> Bool in
-            let rid: String = (a.bundleIdentifier ?? "").lowercased()
-            let rname: String = (a.localizedName ?? "").lowercased()
-            return rid.contains("anthropic") || rid.contains("claude") || rname == "claude"
-        }
-        if claudeRunning && (isClaude || isSelf) { panel.orderFrontRegardless() } else { panel.orderOut(nil) }
+        if isClaude || isSelf { panel.orderFrontRegardless() } else { panel.orderOut(nil) }
     }
 
     func place() {
