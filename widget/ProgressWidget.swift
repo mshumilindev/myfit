@@ -139,6 +139,9 @@ final class WidgetView: NSView {
     var scrollY: CGFloat = 0
     var contentHeight: CGFloat = 0
     var hits: [Hit] = []
+    var squares: [(NSRect, Item)] = []
+    var hover: Item? = nil
+    var hoverRect = NSRect.zero
     var onChange: () -> Void = {}
     override var isFlipped: Bool { true }
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
@@ -184,7 +187,7 @@ final class WidgetView: NSView {
     }
 
     func render(_ w: CGFloat, _ draw: Bool) -> CGFloat {
-        if draw { hits = [] }
+        if draw { hits = []; squares = [] }
         let pad: CGFloat = 14, sq: CGFloat = 10, gap: CGFloat = 3
         var y: CGFloat = 12
         let devN = snap.branches.filter { $0.kind == "dev" }.count + max(0, snap.cards.count - 1)
@@ -221,6 +224,7 @@ final class WidgetView: NSView {
                             let p = NSBezierPath(roundedRect: r.insetBy(dx: -1.5, dy: -1.5), xRadius: 3, yRadius: 3)
                             p.lineWidth = 1.5; p.stroke()
                         }
+                        squares.append((r.insetBy(dx: -1.5, dy: -1.5), it))
                         hits.append(Hit(rect: r.insetBy(dx: -1.5, dy: -1.5)) { self.selected = (c.task, it.id); self.onChange() })
                     }
                     bx += sq + gap
@@ -366,6 +370,44 @@ final class WidgetView: NSView {
         path.stroke()
         NSGraphicsContext.current?.cgContext.translateBy(x: 0, y: -scrollY)
         contentHeight = render(bounds.width, true)
+        if let it = hover {
+            var why = explain(it); if why.count > 240 { why = String(why.prefix(240)) + "\u{2026}" }
+            let tw: CGFloat = 280
+            let h1 = wrapped(it.text, 0, 0, tw - 20, 11, 0.95, false)
+            let h2 = wrapped(why, 0, 0, tw - 20, 10.5, 0.7, false)
+            let hh = 34 + h1 + 4 + h2 + 10
+            let bx = min(max(8, hoverRect.midX - tw / 2), bounds.width - tw - 8)
+            var by = hoverRect.maxY + 6
+            if by + hh > contentHeight + 4 && hoverRect.minY - hh - 6 > 0 { by = hoverRect.minY - hh - 6 }
+            let box = NSRect(x: bx, y: by, width: tw, height: hh)
+            NSColor(calibratedWhite: 0.16, alpha: 1).setFill()
+            let bp = NSBezierPath(roundedRect: box, xRadius: 8, yRadius: 8); bp.fill()
+            NSColor(calibratedWhite: 1, alpha: 0.2).setStroke(); bp.stroke()
+            text("\(it.id) \u{00B7} \(statusName(it.status))", bx + 10, by + 8, 11.5, true, 1, true, c: color(it.status))
+            _ = wrapped(it.text, bx + 10, by + 28, tw - 20, 11, 0.95, true)
+            _ = wrapped(why, bx + 10, by + 28 + h1 + 4, tw - 20, 10.5, 0.7, true)
+        }
+    }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        for a in trackingAreas { removeTrackingArea(a) }
+        addTrackingArea(NSTrackingArea(rect: bounds, options: [.activeAlways, .mouseMoved, .mouseEnteredAndExited, .inVisibleRect], owner: self, userInfo: nil))
+    }
+
+    override func mouseMoved(with event: NSEvent) {
+        var p = convert(event.locationInWindow, from: nil)
+        p.y += scrollY
+        let found = squares.first { $0.0.contains(p) }
+        if found?.1.id != hover?.id || (found == nil) != (hover == nil) {
+            hover = found?.1
+            hoverRect = found?.0 ?? .zero
+            needsDisplay = true
+        }
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        if hover != nil { hover = nil; needsDisplay = true }
     }
 }
 
