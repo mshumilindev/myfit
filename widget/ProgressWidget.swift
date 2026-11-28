@@ -1,7 +1,7 @@
 import Cocoa
 
 struct Item { let id: String; let text: String; let status: String; let why: String; let evidence: String; let stage: String; let stale: Bool }
-struct Card { let task: String; let pct: Int; let done: Int; let total: Int; let eta: String; let now: String; let items: [Item]; let at: Double; let source: String; let branch: String }
+struct Card { let task: String; let pct: Int; let done: Int; let total: Int; let eta: String; let now: String; let items: [Item]; let at: Double; let source: String; let branch: String; var title = "" }
 struct Branch { let name: String; let kind: String; let ahead: Int; let subject: String; let date: String }
 struct Stage { let stage: String; let state: String; let detail: String; let url: String }
 struct Prompt { let label: String; let text: String }
@@ -93,7 +93,7 @@ func loadSnapshot() -> Snapshot {
                 Item(id: str($0["id"]), text: str($0["text"]), status: str($0["status"]), why: str($0["why"]), evidence: str($0["evidence"]), stage: str($0["stage"]), stale: ($0["stale"] as? Bool) ?? false)
             }
             snap.cards.append(Card(task: str(t["task"]), pct: num(t["pct"]), done: num(t["done"]), total: num(t["total"]),
-                                   eta: str(t["eta"]), now: str(t["now"]), items: items, at: at, source: src, branch: str(t["branch"])))
+                                   eta: str(t["eta"]), now: str(t["now"]), items: items, at: at, source: src, branch: str(t["branch"]), title: str(t["title"])))
         }
         for b in (o["branches"] as? [[String: Any]]) ?? [] {
             let br = Branch(name: str(b["name"]), kind: str(b["kind"]), ahead: num(b["ahead"]), subject: str(b["subject"]), date: str(b["date"]))
@@ -402,6 +402,7 @@ final class WidgetView: NSView {
         return ceil(r.height)
     }
     @discardableResult
+    func pillWidth(_ label: String) -> CGFloat { text(label, 0, 0, 11, true, 1, false) + 18 }
     func pill(_ label: String, _ x: CGFloat, _ y: CGFloat, active: Bool, right: CGFloat? = nil, _ draw: Bool, _ action: @escaping () -> Void) -> CGFloat {
         let w = text(label, 0, 0, 11, active, 1, false) + 18
         let px = right != nil ? right! - w : x
@@ -497,9 +498,11 @@ final class WidgetView: NSView {
             }
             if snap.cards.count > 1 {
                 var cx = pad
-                for (i, cd) in snap.cards.prefix(4).enumerated() {
-                    let b = cd.branch.isEmpty ? "" : " \u{00B7} " + (cd.branch.count > 14 ? String(cd.branch.prefix(13)) + "\u{2026}" : cd.branch)
-                    cx += pill("\(cd.task)\(b) \(cd.pct)%", cx, y, active: i == min(cardIdx, snap.cards.count - 1), draw) { self.cardIdx = i; self.selected = nil; self.onChange() } + 6
+                for (i, cd) in snap.cards.enumerated() {
+                    let lbl = "\(cd.task) \(cd.pct)%"
+                    let pw = pillWidth(lbl)
+                    if cx + pw > w - pad && cx > pad { cx = pad; y += 32 }
+                    cx += pill(lbl, cx, y, active: i == min(cardIdx, snap.cards.count - 1), draw) { self.cardIdx = i; self.selected = nil; self.onChange() } + 6
                 }
                 y += 32
             }
@@ -507,6 +510,8 @@ final class WidgetView: NSView {
                 text("\(c.task)  \(c.pct)%  \(c.done)/\(c.total)", pad, y, 13, true, 0.95, draw)
                 text(c.eta, 0, y + 1, 11, false, 0.6, draw, right: w - pad)
                 y += 22
+                let sub = [c.branch, c.title].filter { !$0.isEmpty }.joined(separator: " \u{00B7} ")
+                if !sub.isEmpty { y += wrapped(sub, pad, y, w - 2 * pad, 11, 0.6, draw) + 6 }
                 let order = ["Spike", "Design", "Risk", "Plan", "Development", "Tests", "CI", "Deploy test", "Deploy prod", "Legal"]
                 var groups = order.filter { g in c.items.contains { ($0.stage.isEmpty ? "Development" : $0.stage) == g } }
                 for it in c.items { let g = it.stage.isEmpty ? "Development" : it.stage; if !groups.contains(g) { groups.append(g) } }
