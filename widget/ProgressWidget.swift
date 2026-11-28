@@ -2,7 +2,7 @@ import Cocoa
 
 struct Item { let id: String; let text: String; let status: String; let why: String; let evidence: String; let stage: String }
 struct Card { let task: String; let pct: Int; let done: Int; let total: Int; let eta: String; let now: String; let items: [Item]; let at: Double; let source: String }
-struct Branch { let name: String; let kind: String; let ahead: Int; let subject: String }
+struct Branch { let name: String; let kind: String; let ahead: Int; let subject: String; let date: String }
 struct Stage { let stage: String; let state: String; let detail: String; let url: String }
 struct Prompt { let label: String; let text: String }
 struct Snapshot { var cards: [Card] = []; var branches: [Branch] = []; var prompts: [Prompt] = []; var pipeline: [Stage] = []; var dashboard = "" }
@@ -46,7 +46,7 @@ func loadSnapshot() -> Snapshot {
                                    eta: str(t["eta"]), now: str(t["now"]), items: items, at: at, source: src))
         }
         for b in (o["branches"] as? [[String: Any]]) ?? [] {
-            let br = Branch(name: str(b["name"]), kind: str(b["kind"]), ahead: num(b["ahead"]), subject: str(b["subject"]))
+            let br = Branch(name: str(b["name"]), kind: str(b["kind"]), ahead: num(b["ahead"]), subject: str(b["subject"]), date: str(b["date"]))
             if !snap.branches.contains(where: { $0.name == br.name && $0.kind == br.kind }) { snap.branches.append(br) }
         }
         if at >= newest {
@@ -119,6 +119,22 @@ func color(_ s: String) -> NSColor {
     default: return NSColor(calibratedWhite: 0.38, alpha: 1)
     }
 }
+func branchDays(_ b: Branch) -> Int {
+    let f = ISO8601DateFormatter()
+    guard let d = f.date(from: b.date) else { return -1 }
+    return max(0, Int(Date().timeIntervalSince(d) / 86400))
+}
+// fresh (<= 3 days) blue, idle (<= 14) yellow, stale red, unknown gray
+func branchColor(_ b: Branch) -> NSColor {
+    let d = branchDays(b)
+    if d < 0 { return color("todo") }
+    return d <= 3 ? color("doing") : (d <= 14 ? color("skipped") : color("blocked"))
+}
+func branchAge(_ b: Branch) -> String {
+    let d = branchDays(b)
+    return d < 0 ? "" : (d == 0 ? "today" : "\(d)d ago")
+}
+
 func statusName(_ s: String) -> String {
     switch s {
     case "done": return "Done"
@@ -146,6 +162,7 @@ final class WidgetView: NSView {
     var tab = 0
     var selected: (String, String)? = nil   // task id, item id
     var toast = ""
+    var copied = ""
     var showAll = false
     var showPrompts = false
     var scrollY: CGFloat = 0
@@ -194,9 +211,9 @@ final class WidgetView: NSView {
     func copyText(_ s: String, _ label: String) {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(s, forType: .string)
-        toast = "Copied: " + label
+        if label.hasPrefix("ex:") || label.hasPrefix("del:") { copied = label } else { toast = "Copied: " + label }
         onChange()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { self.toast = ""; self.onChange() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { self.toast = ""; self.copied = ""; self.onChange() }
     }
 
     func render(_ w: CGFloat, _ draw: Bool) -> CGFloat {
@@ -326,17 +343,27 @@ final class WidgetView: NSView {
         } else if tab == 1 {
             let rows = snap.branches.filter { $0.kind == "dev" }
             for b in rows {
-                text(b.name, pad, y, 12, true, 0.95, draw)
-                text(b.ahead > 0 ? "\(b.ahead) ahead" : "current", 0, y + 1, 11, false, 0.6, draw, right: w - pad)
-                y += 18
-                if !b.subject.isEmpty { y += wrapped(b.subject, pad, y, w - 2 * pad, 11, 0.6, draw) }
-                y += 4
                 let nm = b.name
                 let ex = "Explain git branch \(nm) to me: what it contains compared with main (commits, changed files), why it exists (linked Linear issue / wf task), the status of its tasks, and whether it is merged, deployed or still open. Read-only, change nothing."
                 let del = "I want to delete git branch \(nm). Do NOT delete anything yet. First check and report: (1) commits not in main, (2) whether its work is merged and deployed (CI and deploy status), (3) open PRs and linked Linear issue, (4) anything unique that would be lost, (5) whether it is safe to delete. Then ask me to confirm explicitly. Only after my yes delete the local and remote branch, never with force."
-                let bw = pill("Explain in chat", pad, y, active: false, draw) { self.copyText(ex, "Explain prompt copied") }
-                _ = pill("Delete\u{2026}", pad + bw + 6, y, active: false, draw) { self.copyText(del, "Delete prompt copied") }
-                y += 34
+                let sh = b.subject.isEmpty ? 0 : wrapped(b.subject, 0, 0, w - 2 * pad - 24, 11, 0.6, false)
+                let cardH = 10 + 18 + sh + 6 + 26 + 8
+                let bc = branchColor(b)
+                if draw {
+                    NSColor(calibratedWhite: 1, alpha: 0.055).setFill()
+                    NSBezierPath(roundedRect: NSRect(x: pad - 4, y: y, width: w - 2 * pad + 8, height: cardH), xRadius: 10, yRadius: 10).fill()
+                    bc.setFill()
+                    NSBezierPath(roundedRect: NSRect(x: pad - 4, y: y + 8, width: 3, height: cardH - 16), xRadius: 1.5, yRadius: 1.5).fill()
+                }
+                var cy = y + 10
+                text(b.name, pad + 8, cy, 12, true, 0.95, draw)
+                text("\(b.ahead) ahead \u{00B7} \(branchAge(b))", 0, cy + 1, 11, true, 0.9, draw, right: w - pad - 4, c: bc)
+                cy += 18
+                if !b.subject.isEmpty { _ = wrapped(b.subject, pad + 8, cy, w - 2 * pad - 24, 11, 0.6, draw); cy += sh }
+                cy += 6
+                let bw = pill(copied == "ex:" + nm ? "Copied \u{2713} paste in chat" : "Explain in chat", pad + 8, cy, active: copied == "ex:" + nm, draw) { self.copyText(ex, "ex:" + nm) }
+                pill(copied == "del:" + nm ? "Copied \u{2713} paste in chat" : "Delete\u{2026}", pad + 8 + bw + 6, cy, active: copied == "del:" + nm, draw) { self.copyText(del, "del:" + nm) }
+                y += cardH + 10
             }
             for c in snap.cards.dropFirst() {
                 text("\(c.task) \u{00B7} \(c.source)", pad, y, 12, true, 0.95, draw)
@@ -373,7 +400,7 @@ final class WidgetView: NSView {
             let rows = snap.branches.filter { $0.kind == "cpd" }
             for b in rows {
                 text(b.name, pad, y, 12, true, 0.95, draw)
-                text("\(b.ahead) commit\(b.ahead == 1 ? "" : "s")", 0, y + 1, 11, false, 0.6, draw, right: w - pad)
+                text("\(b.ahead) commit\(b.ahead == 1 ? "" : "s") \u{00B7} \(branchAge(b))", 0, y + 1, 11, true, 0.9, draw, right: w - pad, c: branchColor(b))
                 y += 18
                 if !b.subject.isEmpty { y += wrapped(b.subject, pad, y, w - 2 * pad, 11, 0.6, draw) }
                 y += 10
