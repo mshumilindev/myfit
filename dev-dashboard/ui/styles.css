@@ -865,3 +865,80 @@ a:hover {
 .md-back {
   margin-bottom: 8px;
 }
+
+/* Chapter bar (Overview): segments sized by item count, fill = done share, hover/focus lists the section's items */
+.chap-bar {
+  display: flex;
+  gap: 3px;
+  height: 14px;
+  margin: 6px 0 8px;
+}
+.chap {
+  position: relative;
+  min-width: 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: default;
+  outline: none;
+}
+.chap:hover,
+.chap:focus-visible {
+  background: rgba(255, 255, 255, 0.18);
+}
+.chap-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: #5fbf9a;
+}
+.chap.is-doing {
+  box-shadow: 0 0 0 1px #7b8cff;
+}
+.chap.is-blocked {
+  box-shadow: 0 0 0 1px #e5a04b;
+}
+.chap-lbl {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chap-tip {
+  display: none;
+  position: absolute;
+  z-index: 5;
+  top: 22px;
+  left: 0;
+  width: max-content;
+  max-width: 360px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #1b1e24;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.chap-tip.end {
+  left: auto;
+  right: 0;
+}
+.chap:hover .chap-tip,
+.chap:focus-visible .chap-tip {
+  display: block;
+}
+.chap-tt {
+  font-weight: 650;
+  margin-bottom: 4px;
+}
+.chap-it {
+  white-space: normal;
+  opacity: 0.85;
+}
+.chap-it.s-done {
+  opacity: 0.6;
+}
+.chap-it.s-doing {
+  color: #9aa6ff;
+}
+.chap-it.s-blocked {
+  color: #e5a04b;
+}

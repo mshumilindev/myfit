@@ -93,3 +93,4 @@ desktop/release/
 
 # локальні секрети й налаштування Claude (ключ LINEAR_API_KEY тощо), не комітити
 .claude/settings.local.json
+dev-dashboard/.mirror/

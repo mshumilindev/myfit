@@ -240,13 +240,19 @@ export function rulesOf(root) {
 
 /** @param {string} root @param {string} [stateDir] @returns {any} */
 function readWf(root, stateDir) {
-  try {
-    return JSON.parse(
-      readFileSync(join(stateDir ?? join(root, '.claude/state'), 'wf.json'), 'utf8'),
-    );
-  } catch {
-    return null;
+  // The cloud session mirrors its wf.json to dev-dashboard/.mirror (the remote tools cannot write under .claude), so
+  // this machine shows the plan live; a real local state wins when both exist.
+  for (const dir of [
+    stateDir ?? join(root, '.claude/state'),
+    join(root, 'dev-dashboard/.mirror'),
+  ]) {
+    try {
+      return JSON.parse(readFileSync(join(dir, 'wf.json'), 'utf8'));
+    } catch {
+      /* try the next source */
+    }
   }
+  return null;
 }
 
 /**

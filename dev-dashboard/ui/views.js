@@ -120,6 +120,53 @@ export function overall(snap, select) {
 
 const needsPill = (n) => h('span', { class: 'pill p' }, n);
 
+/** Chapters of the plan, like a video timeline: items group by the id prefix (`A.1`, `A.2` -> `A`), a segment's width is
+ *  its item count, its fill is the done share, and hovering (or focusing) a segment lists what is inside. */
+function chapters(t) {
+  if (!t.items.length) return note('No plan items on this machine yet.');
+  const groups = new Map();
+  for (const it of t.items) {
+    const key = String(it.id).split('.')[0];
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(it);
+  }
+  const mark = { done: '✓', doing: '▶', blocked: '■', todo: '○' };
+  const bar = h(
+    'div',
+    { class: 'chap-bar' },
+    [...groups].map(([key, items], idx, all) => {
+      const done = items.filter((i) => i.status === 'done').length;
+      const doing = items.some((i) => i.status === 'doing');
+      const blocked = items.some((i) => i.status === 'blocked');
+      const pct = Math.round((done / items.length) * 100);
+      const tip = h(
+        'div',
+        { class: `chap-tip${idx > all.length / 2 ? ' end' : ''}`, role: 'tooltip' },
+        h('div', { class: 'chap-tt' }, `${key} · ${done}/${items.length} done`),
+        items.map((i) =>
+          h(
+            'div',
+            { class: `chap-it s-${i.status}` },
+            `${mark[i.status] ?? '·'} ${i.id}  ${i.text}`,
+          ),
+        ),
+      );
+      return h(
+        'div',
+        {
+          class: `chap${doing ? ' is-doing' : ''}${blocked ? ' is-blocked' : ''}`,
+          style: `flex:${items.length} 1 0`,
+          tabindex: '0',
+          'aria-label': `${key}: ${done} of ${items.length} done`,
+        },
+        h('div', { class: 'chap-fill', style: `width:${pct}%` }),
+        tip,
+      );
+    }),
+  );
+  return h('div', null, bar, h('div', { class: 'chap-lbl t-m' }, [...groups.keys()].join('  ·  ')));
+}
+
 function overview(t) {
   return [
     h(
@@ -131,6 +178,7 @@ function overview(t) {
       kpi('Waiting for me', String(t.plan.blocked), 'blocked items'),
       kpi('Sessions', String(t.capture.sessions), 'recorded'),
     ),
+    card('Progress by section', `${t.plan.done}/${t.plan.total}`, chapters(t)),
     card(
       'Waiting for the owner',
       `${t.blocked.length}`,

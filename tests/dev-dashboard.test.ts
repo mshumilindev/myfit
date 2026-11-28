@@ -401,6 +401,27 @@ describe('doc viewer and designs (SPO-639)', () => {
   });
 });
 
+describe('wf mirror (SPO-639)', () => {
+  it('reads the mirrored wf.json when the machine has no local state', async () => {
+    // @ts-expect-error plain ESM without types
+    const { collect } = await import('../dev-dashboard/server/collector.mjs');
+    const root = join(work, 'mirror');
+    mkdirSync(join(root, 'dev-dashboard/.mirror'), { recursive: true });
+    writeFileSync(
+      join(root, 'dev-dashboard/.mirror/wf.json'),
+      JSON.stringify({
+        task: { id: 'SPO-9' },
+        items: [
+          { id: 'A.1', text: 'x', kind: 'step', status: 'done' },
+          { id: 'A.2', text: 'y', kind: 'step', status: 'doing' },
+        ],
+      }),
+    );
+    const snap = collect({ root, stateDir: join(root, 'none'), git: () => '', now: 1 });
+    expect(snap.tasks[0].plan).toMatchObject({ total: 2, done: 1, doing: 1, pct: 50 });
+  });
+});
+
 describe('CI and release data (W31)', () => {
   it('maps gh runs, and a missing or broken gh gives an empty list, never an error', async () => {
     // @ts-expect-error plain ESM without types
