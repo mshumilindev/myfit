@@ -110,6 +110,13 @@ func checkForUpdate() {
     exit(0) // launchd (KeepAlive) starts the new build
 }
 
+var darkTheme: Bool = (UserDefaults.standard.object(forKey: "devflow.dark") as? Bool) ?? true
+func ink() -> NSColor { darkTheme ? NSColor.white : NSColor(calibratedRed: 0.15, green: 0.12, blue: 0.22, alpha: 1) }
+func ov(_ a: CGFloat) -> NSColor { ink().withAlphaComponent(a) }
+func panelBg() -> NSColor { darkTheme ? NSColor(calibratedRed: 0.10, green: 0.04, blue: 0.22, alpha: 0.98) : NSColor(calibratedRed: 1.0, green: 0.98, blue: 0.94, alpha: 0.98) }
+func accent() -> NSColor { darkTheme ? NSColor(calibratedRed: 0.66, green: 0.42, blue: 1.0, alpha: 1) : NSColor(calibratedRed: 0.90, green: 0.58, blue: 0.10, alpha: 1) }
+func tipBg() -> NSColor { darkTheme ? NSColor(calibratedRed: 0.20, green: 0.11, blue: 0.38, alpha: 1) : NSColor.white }
+
 func color(_ s: String) -> NSColor {
     switch s {
     case "done": return NSColor(calibratedRed: 0.25, green: 0.74, blue: 0.47, alpha: 1)
@@ -184,7 +191,7 @@ final class WidgetView: NSView {
 
     func font(_ size: CGFloat, _ bold: Bool = false) -> NSFont { NSFont.systemFont(ofSize: size, weight: bold ? .semibold : .regular) }
     func attrs(_ size: CGFloat, _ bold: Bool, _ alpha: CGFloat, _ c: NSColor? = nil) -> [NSAttributedString.Key: Any] {
-        [.font: font(size, bold), .foregroundColor: (c ?? NSColor.white).withAlphaComponent(alpha)]
+        [.font: font(size, bold), .foregroundColor: (c ?? ink()).withAlphaComponent(alpha)]
     }
     @discardableResult
     func text(_ s: String, _ x: CGFloat, _ y: CGFloat, _ size: CGFloat, _ bold: Bool, _ alpha: CGFloat, _ draw: Bool, right: CGFloat? = nil, c: NSColor? = nil) -> CGFloat {
@@ -207,7 +214,7 @@ final class WidgetView: NSView {
         let px = right != nil ? right! - w : x
         let r = NSRect(x: px, y: y, width: w, height: 22)
         if draw {
-            (active ? NSColor(calibratedWhite: 1, alpha: 0.18) : NSColor(calibratedWhite: 1, alpha: 0.07)).setFill()
+            (active ? ov(0.18) : ov(0.08)).setFill()
             NSBezierPath(roundedRect: r, xRadius: 11, yRadius: 11).fill()
             text(label, px + 9, y + 4, 11, active, active ? 1 : 0.75, true)
             hits.append(Hit(rect: r, action: action))
@@ -265,7 +272,7 @@ final class WidgetView: NSView {
                             color(it.status).setFill()
                             NSBezierPath(roundedRect: r, xRadius: 2, yRadius: 2).fill()
                             if let s = selected, s.0 == c.task, s.1 == it.id {
-                                NSColor.white.setStroke()
+                                ink().setStroke()
                                 let p = NSBezierPath(roundedRect: r.insetBy(dx: -1.5, dy: -1.5), xRadius: 3, yRadius: 3)
                                 p.lineWidth = 1.5; p.stroke()
                             }
@@ -286,7 +293,7 @@ final class WidgetView: NSView {
                 let canFinish = it.status != "done"
                 let inner = box + 30 + h1 + 6 + h2 + 12 + (canFinish ? 32 : 0)
                 if draw {
-                    NSColor(calibratedWhite: 1, alpha: 0.06).setFill()
+                    ov(0.07).setFill()
                     NSBezierPath(roundedRect: NSRect(x: pad, y: box, width: w - 2 * pad, height: inner - box), xRadius: 8, yRadius: 8).fill()
                     color(it.status).setFill()
                     NSBezierPath(ovalIn: NSRect(x: pad + 10, y: box + 13, width: 8, height: 8)).fill()
@@ -298,7 +305,9 @@ final class WidgetView: NSView {
                         let one = "\(c.task): continue and finish \(it.id) (\(it.text)) now. State: \(statusName(it.status))\(it.why.isEmpty ? "" : ", " + it.why). Do the work, prove it with wf done --evidence, do not stop or ask until it is 100% done."
                         let stg = it.stage.isEmpty ? "Development" : it.stage
                         let open = c.items.filter { $0.status != "done" && ($0.stage.isEmpty ? "Development" : $0.stage) == stg }
-                        let grp = "\(c.task): continue and finish every non-green item in \(stg): " + open.map { "\($0.id) (\($0.text))" }.joined(separator: "; ") + ". Work through them one by one, prove each with wf done --evidence, add anything new to wf, and do not stop or ask until they are all done."
+                        let names: [String] = open.map { "\($0.id) (\($0.text))" }
+                        let list: String = names.joined(separator: "; ")
+                        let grp = "\(c.task): continue and finish every non-green item in \(stg): \(list). Work through them one by one, prove each with wf done --evidence, add anything new to wf, and do not stop or ask until they are all done."
                         let w1 = pill(copied == "ex:one" ? "Copied \u{2713} paste in chat" : "Finish this \u{2192} Claude", pad + 10, py, active: copied == "ex:one", true) { self.copyText(one, "ex:one"); activateClaude() }
                         _ = pill(copied == "ex:grp" ? "Copied \u{2713} paste in chat" : "Finish all in \(stg)", pad + 10 + w1 + 6, py, active: copied == "ex:grp", true) { self.copyText(grp, "ex:grp"); activateClaude() }
                     }
@@ -366,7 +375,7 @@ final class WidgetView: NSView {
                 let cardH = 10 + 18 + sh + 6 + 26 + 8
                 let bc = branchColor(b)
                 if draw {
-                    NSColor(calibratedWhite: 1, alpha: 0.055).setFill()
+                    ov(0.07).setFill()
                     NSBezierPath(roundedRect: NSRect(x: pad - 4, y: y, width: w - 2 * pad + 8, height: cardH), xRadius: 10, yRadius: 10).fill()
                     bc.setFill()
                     NSBezierPath(roundedRect: NSRect(x: pad - 4, y: y + 8, width: 3, height: cardH - 16), xRadius: 1.5, yRadius: 1.5).fill()
@@ -431,8 +440,13 @@ final class WidgetView: NSView {
             if draw { text(toast, pad, y, 11, true, 0.9, true, c: color("done")) }
             y += 20
         }
-        text("v\(runningVersion) \u{00B7} \(updateStatus)", pad, y + 2, 9.5, false, 0.4, draw)
-        y += 16
+        text("v\(runningVersion) \u{00B7} \(updateStatus)", pad, y + 4, 9.5, false, 0.5, draw)
+        pill(darkTheme ? "\u{2600} Day" : "\u{263E} Night", 0, y, active: false, right: w - pad, draw) {
+            darkTheme.toggle()
+            UserDefaults.standard.set(darkTheme, forKey: "devflow.dark")
+            self.onChange()
+        }
+        y += 26
         return y + 8
     }
 
@@ -450,14 +464,15 @@ final class WidgetView: NSView {
 
     override func draw(_ dirtyRect: NSRect) {
         let path = NSBezierPath(roundedRect: bounds.insetBy(dx: 0.5, dy: 0.5), xRadius: 14, yRadius: 14)
-        NSColor(calibratedWhite: 0.08, alpha: 0.97).setFill()
+        panelBg().setFill()
         path.fill()
-        NSColor(calibratedWhite: 1, alpha: 0.12).setStroke()
+        accent().withAlphaComponent(0.9).setStroke()
+        path.lineWidth = 2
         path.stroke()
         NSGraphicsContext.current?.cgContext.translateBy(x: 0, y: -scrollY)
         contentHeight = render(bounds.width, true)
         if hoverHit != .zero {
-            NSColor(calibratedWhite: 1, alpha: 0.13).setFill()
+            ov(0.13).setFill()
             NSBezierPath(roundedRect: hoverHit, xRadius: 6, yRadius: 6).fill()
         }
         if let it = hover {
@@ -470,9 +485,9 @@ final class WidgetView: NSView {
             var by = hoverRect.maxY + 6
             if by + hh > contentHeight + 4 && hoverRect.minY - hh - 6 > 0 { by = hoverRect.minY - hh - 6 }
             let box = NSRect(x: bx, y: by, width: tw, height: hh)
-            NSColor(calibratedWhite: 0.16, alpha: 1).setFill()
+            tipBg().setFill()
             let bp = NSBezierPath(roundedRect: box, xRadius: 8, yRadius: 8); bp.fill()
-            NSColor(calibratedWhite: 1, alpha: 0.2).setStroke(); bp.stroke()
+            accent().withAlphaComponent(0.6).setStroke(); bp.stroke()
             text("\(it.id) \u{00B7} \(statusName(it.status))", bx + 10, by + 8, 11.5, true, 1, true, c: color(it.status))
             _ = wrapped(it.text, bx + 10, by + 28, tw - 20, 11, 0.95, true)
             _ = wrapped(why, bx + 10, by + 28 + h1 + 4, tw - 20, 10.5, 0.7, true)
