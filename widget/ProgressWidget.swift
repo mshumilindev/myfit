@@ -134,7 +134,7 @@ final class WidgetView: NSView {
     var selected: (String, String)? = nil   // task id, item id
     var toast = ""
     var showAll = false
-    var scroll: CGFloat = 0
+    var scrollY: CGFloat = 0
     var contentHeight: CGFloat = 0
     var hits: [Hit] = []
     var onChange: () -> Void = {}
@@ -173,7 +173,7 @@ final class WidgetView: NSView {
         }
         return w
     }
-    func copy(_ s: String, _ label: String) {
+    func copyText(_ s: String, _ label: String) {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(s, forType: .string)
         toast = "Copied: " + label
@@ -252,7 +252,7 @@ final class WidgetView: NSView {
                 for p in list.prefix(5) {
                     let label = p.label.count > 38 ? String(p.label.prefix(37)) + "\u{2026}" : p.label
                     text(label, pad, y + 3, 11.5, false, 0.9, draw)
-                    pill("Copy", 0, y, active: false, right: w - pad, draw) { self.copy(p.text, p.label) }
+                    pill("Copy", 0, y, active: false, right: w - pad, draw) { self.copyText(p.text, p.label) }
                     y += 28
                 }
             }
@@ -265,7 +265,7 @@ final class WidgetView: NSView {
                 if n("skipped") > 0 { parts.append("\(n("skipped")) skipped") }
                 if n("todo") > 0 { parts.append("\(n("todo")) to do") }
                 text(parts.joined(separator: " \u{00B7} "), pad, y + 3, 11.5, true, 0.85, draw)
-                pill(showAll ? "Less" : "More", 0, y, active: showAll, right: w - pad, draw) { self.showAll.toggle(); self.scroll = 0; self.onChange() }
+                pill(showAll ? "Less" : "More", 0, y, active: showAll, right: w - pad, draw) { self.showAll.toggle(); self.scrollY = 0; self.onChange() }
                 y += 30
                 if showAll {
                     for it in c0.items {
@@ -314,7 +314,7 @@ final class WidgetView: NSView {
             }
             if rows.isEmpty { text("Nothing waiting for cpd", pad, y, 12, false, 0.6, draw); y += 24 }
             else {
-                pill("Copy \u{201C}cpd\u{201D}", pad, y, active: false, draw) { self.copy("cpd", "cpd") }
+                pill("Copy \u{201C}cpd\u{201D}", pad, y, active: false, draw) { self.copyText("cpd", "cpd") }
                 y += 30
             }
         }
@@ -327,13 +327,13 @@ final class WidgetView: NSView {
 
     override func scrollWheel(with event: NSEvent) {
         let maxScroll = max(0, contentHeight - bounds.height)
-        scroll = min(max(0, scroll - event.scrollingDeltaY), maxScroll)
+        scrollY = min(max(0, scrollY - event.scrollingDeltaY), maxScroll)
         needsDisplay = true
     }
 
     override func mouseDown(with event: NSEvent) {
         var p = convert(event.locationInWindow, from: nil)
-        p.y += scroll
+        p.y += scrollY
         for h in hits.reversed() where h.rect.contains(p) { h.action(); return }
     }
 
@@ -343,7 +343,7 @@ final class WidgetView: NSView {
         path.fill()
         NSColor(calibratedWhite: 1, alpha: 0.12).setStroke()
         path.stroke()
-        NSGraphicsContext.current?.cgContext.translateBy(x: 0, y: -scroll)
+        NSGraphicsContext.current?.cgContext.translateBy(x: 0, y: -scrollY)
         contentHeight = render(bounds.width, true)
     }
 }
@@ -391,7 +391,7 @@ final class App: NSObject {
         let total = view.render(width, false)
         view.contentHeight = total
         let h = min(total, f.height - 40)
-        view.scroll = min(view.scroll, max(0, total - h))
+        view.scrollY = min(view.scrollY, max(0, total - h))
         panel.setFrame(NSRect(x: f.maxX - width - 16, y: f.minY + 16, width: width, height: h), display: true)
         view.needsDisplay = true
     }
