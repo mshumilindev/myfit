@@ -153,11 +153,11 @@ export function branchesOf(root) {
   const cur = git(root, ['rev-parse', '--abbrev-ref', 'HEAD']);
   const lines = git(root, [
     'for-each-ref',
-    '--format=%(refname:short)\t%(contents:subject)',
+    '--format=%(refname:short)\t%(contents:subject)\t%(committerdate:iso-strict)',
     'refs/heads',
   ]).split('\n');
   for (const line of lines) {
-    const [name, subject = ''] = line.split('\t');
+    const [name, subject = '', date = ''] = line.split('\t');
     if (!name) continue;
     const ahead = Number(git(root, ['rev-list', '--count', `origin/main..${name}`])) || 0;
     if (name === 'main') {
@@ -167,11 +167,12 @@ export function branchesOf(root) {
           kind: 'cpd',
           ahead,
           subject: 'unpushed commits, waiting for cpd',
+          date,
         });
       continue;
     }
-    if (name.startsWith('ready-for-cpd/')) out.push({ name, kind: 'cpd', ahead, subject });
-    else if (ahead > 0 || name === cur) out.push({ name, kind: 'dev', ahead, subject });
+    if (name.startsWith('ready-for-cpd/')) out.push({ name, kind: 'cpd', ahead, subject, date });
+    else if (ahead > 0 || name === cur) out.push({ name, kind: 'dev', ahead, subject, date });
   }
   return out;
 }
@@ -207,6 +208,7 @@ export function withRemoteBranches(root, local) {
         kind: b.name.startsWith('ready-for-cpd/') ? 'cpd' : 'dev',
         ahead: c.ahead_by,
         subject: `${c.commits?.at(-1)?.commit?.message?.split('\n')[0] ?? ''} (on GitHub)`,
+        date: c.commits?.at(-1)?.commit?.committer?.date ?? '',
       });
     }
   } catch {
